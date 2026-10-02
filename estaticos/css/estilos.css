@@ -1,82 +1,130 @@
 /* ==========================================================================
-   IndieCinema - Hoja de Estilos Principal (IC-42 / IC-43)
-   Diseño cinematográfico oscuro, elegante y responsivo.
+   IndieCinema — Identidad Visual y Sistema de Diseño (IC-44)
+   Paleta cinematográfica, escala tipográfica armónica y diseño responsive
+   desde celular (360 px) hasta escritorio ancho (1440 px), en CSS vanilla.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   Variables de diseño (Design Tokens) en :root
-   Definen colores semánticos, tipografías, radios de curvatura, sombras y animaciones.
+   1. VARIABLES DE DISEÑO (DESIGN TOKENS) EN :ROOT
+   Centralizan los valores de la identidad visual de la Entrega 1.
    -------------------------------------------------------------------------- */
 :root {
-  /* Fondo principal ultra oscuro (#0b0d14): evoca una sala de cine a oscuras y resalta el contenido */
+  /* ── 1.1 Paleta de Superficies y Fondos Cinematográficos ──────────────── */
+  /* Fondo principal (#0b0d14): negro noche profundo que evoca una sala de proyección a oscuras */
   --color-fondo: #0b0d14;
-  /* Superficie de tarjetas y barra superior (#131722): da profundidad visual separándose del fondo */
+  /* Fondo alternativo (#0f121c): tono sutilmente más claro para contraste por capas */
+  --color-fondo-alt: #0f121c;
+  /* Superficie base (#131722): carbón azulado para tarjetas, modales y barras de navegación */
   --color-superficie: #131722;
-  /* Superficie elevada (#1a2030): utilizada en inputs, dropdowns y elementos secundarios */
+  /* Superficie elevada (#1a2030): empleada en inputs, menús flotantes y cajas de contenido */
   --color-superficie-elevada: #1a2030;
-  /* Borde sutil blanco al 8% de opacidad: delimita tarjetas sin crear cortes visuales agresivos */
-  --color-superficie-borde: rgba(255, 255, 255, 0.08);
-  /* Color de hover tenue al 5% para items de navegación interactivos */
+  /* Superficie interactiva (#232b40): utilizada para estados activos y selecciones */
+  --color-superficie-interactiva: #232b40;
+  /* Fondo hover (#ffffff0d): blanco al 5% para realces tenues en elementos clicables */
   --color-superficie-hover: rgba(255, 255, 255, 0.05);
 
-  /* Color primario ámbar dorado (#f59e0b): característico de la estética de cine clásico y entradas */
+  /* ── 1.2 Paleta de Bordes y Divisores ─────────────────────────────────── */
+  /* Borde tenue (#ffffff14): blanco al 8% para delimitar contenedores sin generar cortes visuales duros */
+  --color-borde: rgba(255, 255, 255, 0.08);
+  /* Borde medio (#ffffff26): blanco al 15% para estados hover y separadores visibles */
+  --color-borde-medio: rgba(255, 255, 255, 0.15);
+  /* Borde fuerte (#ffffff40): blanco al 25% para inputs enfocados y tarjetas seleccionadas */
+  --color-borde-fuerte: rgba(255, 255, 255, 0.25);
+
+  /* ── 1.3 Colores de Marca y Acento de Roles (E1) ─────────────────────── */
+  /* Dorado ámbar (#f59e0b): color insignia de IndieCinema, entradas, claqueta y organizadores */
   --color-primario: #f59e0b;
-  /* Tono ámbar oscurecido (#d97706) para estado :hover y :active en botones principales */
+  /* Ámbar oscurecido (#d97706): tono de interacción para :hover y :active en botones primarios */
   --color-primario-hover: #d97706;
-  /* Resalte dorado al 15% para fondos de enlaces activos e insignias de organizador */
+  /* Dorado suave (#f59e0b26): ámbar al 15% para fondos de enlaces activos e insignias */
   --color-primario-suave: rgba(245, 158, 11, 0.15);
 
-  /* Color carmesí (#e11d48): acento visual cinematográfico y color distintivo de administradores */
+  /* Carmesí cine (#e11d48): color de butacas clásicas, marquesinas y nivel de Administrador */
   --color-acento: #e11d48;
-  /* Carmesí oscuro (#be123c) para hover de elementos de acento */
+  /* Carmesí oscuro (#be123c): hover de elementos de acento y acciones críticas */
   --color-acento-hover: #be123c;
-  /* Carmesí suave al 15% para fondos de insignias administrativas */
+  /* Carmesí suave (#e11d4826): fondo de insignias de rol de administrador */
   --color-acento-suave: rgba(225, 29, 72, 0.15);
 
-  /* Color índigo (#6366f1) para distinguir el rol de moderación */
+  /* Índigo celuloide (#6366f1): color distintivo del rol de Moderador y revisiones */
   --color-moderador: #6366f1;
-  /* Fondo suave índigo al 15% para insignias de moderador */
+  /* Índigo hover (#4f46e5): hover para controles de moderación */
+  --color-moderador-hover: #4f46e5;
+  /* Índigo suave (#6366f126): fondo de insignias de moderador */
   --color-moderador-suave: rgba(99, 102, 241, 0.15);
 
-  /* Color de texto principal casi blanco (#f8fafc) para garantizar máximo contraste (WCAG AAA) */
+  /* ── 1.4 Texto y Contraste de Lectura (WCAG 2.1 AAA) ──────────────────── */
+  /* Texto principal (#f8fafc): blanco tiza con brillo controlado para evitar fatiga ocular */
   --color-texto: #f8fafc;
-  /* Texto secundario gris claro (#94a3b8) para subtítulos, etiquetas y descripciones */
+  /* Texto secundario (#94a3b8): gris plateado para descripciones, metadatos y subtítulos */
   --color-texto-secundario: #94a3b8;
-  /* Texto atenuado (#64748b) para placeholders, iconos pasivos y pies de página */
+  /* Texto atenuado (#64748b): gris grafito para placeholders, iconos pasivos y pies de página */
   --color-texto-apagado: #64748b;
+  /* Texto inverso (#0b0d14): negro noche para lectura sobre botones con fondo primario dorado */
+  --color-texto-inverso: #0b0d14;
 
-  /* Colores funcionales de estado */
+  /* ── 1.5 Colores de Estado del Sistema ────────────────────────────────── */
+  /* Éxito (#10b981): verde esmeralda para operaciones exitosas y cupos disponibles */
   --color-exito: #10b981;
+  /* Advertencia (#f59e0b): ámbar para alertas de expiración y advertencias de moderación */
   --color-advertencia: #f59e0b;
+  /* Error (#ef4444): rojo vibrante para errores de validación, páginas 404/500 y cancelaciones */
   --color-error: #ef4444;
 
-  /* Tipografías: Outfit para títulos cinematográficos de fuerte impacto; Inter para lectura fluida */
+  /* ── 1.6 Familias Tipográficas ────────────────────────────────────────── */
+  /* Outfit: tipografía moderna sans-serif con fuerte personalidad para títulos y branding */
   --fuente-titulos: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Inter: estándar de legibilidad optimizado para pantallas, cuerpo de texto y controles */
   --fuente-cuerpo: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Monospace: para trazas técnicas de error, tokens CSRF y bloques de depuración */
+  --fuente-codigo: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
 
-  /* Escala de radios de curvatura */
-  --radio-sm: 6px;
-  --radio-md: 10px;
-  --radio-lg: 16px;
-  --radio-completo: 9999px;
+  /* ── 1.7 Escala Tipográfica Fluida ────────────────────────────────────── */
+  --texto-xs: 0.75rem;    /* 12px: badges, leyendas y microtexto */
+  --texto-sm: 0.875rem;   /* 14px: inputs, botones chicos y navegación */
+  --texto-base: 1rem;     /* 16px: texto normal de párrafos */
+  --texto-md: 1.125rem;   /* 18px: subtítulos pequeños y resúmenes */
+  --texto-lg: 1.25rem;    /* 20px: encabezados h4 y títulos de tarjetas */
+  --texto-xl: 1.5rem;     /* 24px: encabezados h3 */
+  --texto-2xl: 1.875rem;  /* 30px: encabezados h2 */
+  --texto-3xl: 2.25rem;   /* 36px: encabezados h1 */
 
-  /* Sombras para simular capas de iluminación cinematográfica */
+  /* ── 1.8 Escala Modular de Espaciado ─────────────────────────────────── */
+  --espacio-1: 0.25rem;  /* 4px */
+  --espacio-2: 0.5rem;   /* 8px */
+  --espacio-3: 0.75rem;  /* 12px */
+  --espacio-4: 1rem;     /* 16px */
+  --espacio-5: 1.25rem;  /* 20px */
+  --espacio-6: 1.5rem;   /* 24px */
+  --espacio-8: 2rem;     /* 32px */
+  --espacio-10: 2.5rem;  /* 40px */
+  --espacio-12: 3rem;    /* 48px */
+
+  /* ── 1.9 Radios de Curvatura (Border Radius) ─────────────────────────── */
+  --radio-sm: 6px;       /* Botones pequeños y badges */
+  --radio-md: 10px;      /* Botones estándar y cajas de input */
+  --radio-lg: 16px;      /* Tarjetas, modales y menú flotante */
+  --radio-completo: 9999px; /* Botones tipo píldora, inputs de búsqueda y avatares */
+
+  /* ── 1.10 Sombras e Iluminación Cinematográfica ──────────────────────── */
   --sombra-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
   --sombra-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --sombra-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
   --sombra-flotante: 0 14px 35px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
 
-  /* Ancho máximo de página alineado con los wireframes para monitores estándar y anchos */
+  /* ── 1.11 Layout y Ancho Máximo ───────────────────────────────────────── */
+  /* Ancho máximo en escritorio ancho (1440 px), dejando márgenes confortables a los costados */
   --ancho-maximo: 1240px;
-  /* Curva de aceleración cúbica para transiciones suaves y naturales */
+  /* Transición estándar para estados interactivos */
   --transicion-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* --------------------------------------------------------------------------
-   Reseteo y estilos base de normalización
+   2. RESETEO MODERNO Y CONTROL ANTI-OVERFLOW
+   Evita desbordes horizontales accidentales en cualquier tamaño de pantalla.
    -------------------------------------------------------------------------- */
 
-/* Aplica box-sizing: border-box y elimina márgenes/rellenos por defecto en todos los elementos */
+/* Aplica box-sizing: border-box y remueve márgenes iniciales en todos los selectores */
 *,
 *::before,
 *::after {
@@ -85,38 +133,62 @@
   padding: 0;
 }
 
-/* Configura tamaño base de fuente, scroll suave y esquema oscuro nativo del navegador */
+/* Configura tamaño base de fuente, scroll suave y previene scroll horizontal en el root */
 html {
   font-size: 16px;
   scroll-behavior: smooth;
   color-scheme: dark;
+  /* Asegura que el documento nunca desborde el ancho de la ventana */
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
-/* Estilos aplicados al cuerpo de la aplicación: estructura flexbox vertical para footer adherido */
+/* Cuerpo de la aplicación con estructura flexbox vertical */
 body.cuerpo-app {
-  /* Ocupa al menos el 100% de la altura visible del viewport */
+  /* Ocupa al menos toda la altura de la ventana para que el footer no quede flotando */
   min-height: 100vh;
-  /* Dispone los elementos en columna flex para que el main se expanda empujando al footer */
+  /* Disposición flex vertical para sticky footer */
   display: flex;
   flex-direction: column;
-  /* Fondo oscuro unificado */
   background-color: var(--color-fondo);
-  /* Color de texto por defecto */
   color: var(--color-texto);
-  /* Tipografía legible para el cuerpo */
   font-family: var(--fuente-cuerpo);
-  font-size: 1rem;
+  font-size: var(--texto-base);
   line-height: 1.6;
-  /* Suavizado subpixel para renderizado nítido de fuentes en macOS/Linux y WebKit */
+  /* Ancho estricto sin desborde horizontal */
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  /* Renderizado de tipografías nítido */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Imágenes y elementos multimedia responsivos: nunca superan el ancho de su contenedor */
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Inputs, botones y textareas heredan tipografía del documento */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  max-width: 100%;
+}
+
 /* --------------------------------------------------------------------------
-   Accesibilidad (Screen Readers)
+   3. ACCESIBILIDAD Y UTILIDADES
    -------------------------------------------------------------------------- */
 
-/* Oculta visualmente un elemento pero lo mantiene accesible para lectores de pantalla */
+/* Oculta un elemento visualmente pero lo mantiene audible para lectores de pantalla */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -129,131 +201,156 @@ body.cuerpo-app {
   border-width: 0;
 }
 
+/* Enlace accesible para saltar directo al contenido principal */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  background: var(--color-primario);
+  color: var(--color-texto-inverso);
+  padding: var(--espacio-2) var(--espacio-4);
+  border-radius: var(--radio-sm);
+  font-weight: 700;
+  z-index: 999;
+  transition: top var(--transicion-base);
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
 /* --------------------------------------------------------------------------
-   Tipografía y enlaces
+   4. TIPOGRAFÍA Y JERARQUÍA VISUAL
    -------------------------------------------------------------------------- */
 
-/* Títulos con tipografía Outfit y peso bold */
+/* Títulos con fuente Outfit */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--fuente-titulos);
   color: var(--color-texto);
   font-weight: 700;
   line-height: 1.25;
+  /* Quiebre de palabras para evitar desbordes en títulos extensos en pantallas de 360 px */
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-/* Escala jerárquica de encabezados */
-h1 { font-size: 2.25rem; margin-bottom: 1rem; }
-h2 { font-size: 1.75rem; margin-bottom: 0.85rem; }
-h3 { font-size: 1.35rem; margin-bottom: 0.75rem; }
+h1 { font-size: var(--texto-3xl); margin-bottom: var(--espacio-4); }
+h2 { font-size: var(--texto-2xl); margin-bottom: var(--espacio-3); }
+h3 { font-size: var(--texto-xl); margin-bottom: var(--espacio-3); }
+h4 { font-size: var(--texto-lg); margin-bottom: var(--espacio-2); }
 
-/* Párrafos con separación y color secundario para no fatigar la vista */
+/* Párrafos legibles con separación */
 p {
-  margin-bottom: 1rem;
+  margin-bottom: var(--espacio-4);
   color: var(--color-texto-secundario);
+  overflow-wrap: break-word;
 }
 
-/* Enlaces con color dorado primario y transición suave */
+/* Enlaces con color dorado y transición */
 a {
   color: var(--color-primario);
   text-decoration: none;
   transition: color var(--transicion-base);
 }
 
-/* Estado hover de enlaces */
 a:hover {
   color: var(--color-primario-hover);
 }
 
 /* --------------------------------------------------------------------------
-   Estructura y Contenedor
+   5. CONTENEDORES Y ESTRUCTURA DE PÁGINA
    -------------------------------------------------------------------------- */
 
-/* Contenedor centralizado para mantener consistencia de márgenes en toda la pantalla */
+/* Contenedor centralizado para 360 px y 1440 px */
 .contenedor {
   width: 100%;
   max-width: var(--ancho-maximo);
   margin-left: auto;
   margin-right: auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  /* Padding lateral adaptativo: 1rem en móviles, 1.5rem en escritorio */
+  padding-left: var(--espacio-4);
+  padding-right: var(--espacio-4);
 }
 
-/* Área de contenido principal: flex: 1 permite que ocupe todo el espacio disponible */
+/* Área de contenido que se expande empujando al footer */
 .contenido-principal {
   flex: 1;
-  padding: 2.5rem 1.5rem;
+  padding: var(--espacio-8) var(--espacio-4);
   max-width: var(--ancho-maximo);
   width: 100%;
   margin: 0 auto;
 }
 
 /* --------------------------------------------------------------------------
-   Encabezado (Header)
+   6. ENCABEZADO Y BARRA DE NAVEGACIÓN
    -------------------------------------------------------------------------- */
 
-/* Barra de cabecera fija arriba con efecto de desenfoque glassmorphism */
+/* Barra fija superior con efecto glassmorphism */
 .encabezado {
-  /* Mantiene la cabecera fija durante el scroll */
   position: sticky;
   top: 0;
-  /* Nivel z-index superior para flotar sobre el contenido de la página */
   z-index: 100;
-  /* Fondo semitransparente oscuro */
-  background-color: rgba(11, 13, 20, 0.9);
-  /* Filtro de desenfoque de fondo para efecto de vidrio esmerilado */
+  background-color: rgba(11, 13, 20, 0.92);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  /* Borde inferior muy sutil para separar la cabecera del cuerpo */
   border-bottom: 1px solid var(--color-superficie-borde);
-  padding: 0.75rem 0;
+  padding: var(--espacio-3) 0;
+  width: 100%;
 }
 
-/* Distribución flex horizontal del contenido de la cabecera */
+/* Disposición flex de los elementos del encabezado */
 .encabezado-contenedor {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.25rem;
+  gap: var(--espacio-4);
+  width: 100%;
 }
 
-/* Logotipo / Marca */
+/* Logo de la plataforma */
+.encabezado-marca {
+  flex-shrink: 0;
+}
+
 .encabezado-marca .marca-enlace {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--espacio-2);
   font-family: var(--fuente-titulos);
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: var(--color-texto);
   text-decoration: none;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
-/* Ícono de claqueta en el logo */
 .marca-icono {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   line-height: 1;
 }
 
-/* Resalte dorado en 'Cinema' */
 .marca-resaltado {
   color: var(--color-primario);
 }
 
 /* Buscador de cabecera */
 .encabezado-buscador {
-  /* Ancho flexible con base de 260px para no ocupar demasiado espacio en desktop */
-  flex: 0 1 260px;
+  flex: 0 1 280px;
+  min-width: 0;
 }
 
-/* Contenedor relativo para alojar el icono dentro del input */
+.buscador-form {
+  width: 100%;
+}
+
 .buscador-caja {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
-/* Icono de lupa posicionado a la izquierda */
 .buscador-icono {
   position: absolute;
   left: 0.75rem;
@@ -262,27 +359,22 @@ a:hover {
   pointer-events: none;
 }
 
-/* Campo de entrada estilizado */
 .buscador-input {
   width: 100%;
-  /* Padding izquierdo suficiente para que el texto no se superponga con la lupa */
-  padding: 0.45rem 0.85rem 0.45rem 2.2rem;
+  padding: var(--espacio-2) var(--espacio-3) var(--espacio-2) 2.2rem;
   background-color: var(--color-superficie-elevada);
   border: 1px solid var(--color-superficie-borde);
   border-radius: var(--radio-completo);
   color: var(--color-texto);
-  font-family: var(--fuente-cuerpo);
-  font-size: 0.875rem;
+  font-size: var(--texto-sm);
   outline: none;
   transition: all var(--transicion-base);
 }
 
-/* Color del texto de sugerencia del buscador */
 .buscador-input::placeholder {
   color: var(--color-texto-apagado);
 }
 
-/* Enfoque del buscador con resplandor dorado */
 .buscador-input:focus {
   border-color: var(--color-primario);
   background-color: var(--color-superficie);
@@ -290,59 +382,62 @@ a:hover {
 }
 
 /* Navegación principal */
+.navegacion-principal {
+  flex-shrink: 0;
+}
+
 .navegacion-principal .nav-lista {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--espacio-1);
   list-style: none;
 }
 
-/* Enlaces de la barra de navegación */
 .nav-enlace {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--espacio-1);
   color: var(--color-texto-secundario);
   font-weight: 500;
-  font-size: 0.925rem;
-  padding: 0.4rem 0.75rem;
+  font-size: var(--texto-sm);
+  padding: var(--espacio-2) var(--espacio-3);
   border-radius: var(--radio-sm);
   text-decoration: none;
+  white-space: nowrap;
   transition: all var(--transicion-base);
 }
 
-/* Hover de enlaces del menú */
 .nav-enlace:hover {
   color: var(--color-texto);
   background-color: var(--color-superficie-hover);
 }
 
-/* Estado activo del enlace actual */
 .nav-enlace.activo {
   color: var(--color-primario);
   background-color: var(--color-primario-suave);
 }
 
-/* Enlaces correspondientes a roles de usuario */
 .enlace-rol {
   font-weight: 600;
 }
 
 .enlace-rol .icono-rol {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 /* Acciones de usuario / Invitado */
 .encabezado-usuario {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: var(--espacio-3);
+  flex-shrink: 0;
 }
 
 .usuario-invitado {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--espacio-2);
+  white-space: nowrap;
 }
 
 .enlace-ingresar {
@@ -350,17 +445,19 @@ a:hover {
   color: var(--color-texto);
 }
 
-/* Menú desplegable del usuario (<details>) */
+/* --------------------------------------------------------------------------
+   7. MENÚ DESPLEGABLE DEL USUARIO (<details> / <summary>)
+   -------------------------------------------------------------------------- */
+
 .usuario-desplegable {
   position: relative;
 }
 
-/* Botón disparador del menú (<summary>) */
 .usuario-resumen {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.3rem 0.65rem 0.3rem 0.4rem;
+  gap: var(--espacio-2);
+  padding: 0.25rem 0.6rem 0.25rem 0.35rem;
   background-color: var(--color-superficie);
   border: 1px solid var(--color-superficie-borde);
   border-radius: var(--radio-completo);
@@ -370,32 +467,29 @@ a:hover {
   user-select: none;
 }
 
-/* Oculta la flecha por defecto de details en navegadores WebKit/Blink */
 .usuario-resumen::-webkit-details-marker {
   display: none;
 }
 
-/* Hover del disparador de usuario */
 .usuario-resumen:hover {
   background-color: var(--color-superficie-elevada);
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--color-borde-medio);
 }
 
-/* Avatar circular del usuario con inicial */
 .usuario-avatar {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: var(--radio-completo);
   background: linear-gradient(135deg, var(--color-primario), #b45309);
   color: #000;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-/* Datos de nombre y rol alineados */
 .usuario-info {
   display: flex;
   flex-direction: column;
@@ -403,77 +497,69 @@ a:hover {
   line-height: 1.15;
 }
 
-/* Truncado con elipsis del nombre de usuario si es extenso */
 .usuario-nombre {
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: var(--texto-sm);
   color: var(--color-texto);
-  max-width: 130px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Insignia visual con el rol del usuario */
 .usuario-rol {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 0.1rem 0.45rem;
+  padding: 0.1rem 0.4rem;
   border-radius: var(--radio-completo);
   background-color: var(--color-superficie-elevada);
   color: var(--color-texto-secundario);
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
 }
 
-/* Insignia para rol Organizador */
 .usuario-rol.rol-organizador {
   background-color: var(--color-primario-suave);
   color: var(--color-primario);
 }
 
-/* Insignia para rol Moderador */
 .usuario-rol.rol-moderador {
   background-color: var(--color-moderador-suave);
   color: #a5b4fc;
 }
 
-/* Insignia para rol Administrador */
 .usuario-rol.rol-administrador {
   background-color: var(--color-acento-suave);
   color: #fb7185;
 }
 
-/* Flecha animada de apertura */
 .desplegable-flecha {
   font-size: 0.65rem;
   color: var(--color-texto-apagado);
   transition: transform var(--transicion-base);
 }
 
-/* Rotación de la flecha cuando details está abierto */
 .usuario-desplegable[open] .desplegable-flecha {
   transform: rotate(180deg);
 }
 
-/* Contenedor del menú flotante */
+/* Menú flotante desplegado */
 .usuario-menu-flotante {
   position: absolute;
-  top: calc(100% + 0.6rem);
+  top: calc(100% + var(--espacio-2));
   right: 0;
-  width: 250px;
+  width: 260px;
+  max-width: calc(100vw - 2rem);
   background-color: var(--color-superficie);
   border: 1px solid var(--color-superficie-borde);
   border-radius: var(--radio-lg);
   box-shadow: var(--sombra-flotante);
-  padding: 0.5rem;
+  padding: var(--espacio-2);
   z-index: 200;
-  /* Microanimación de entrada al abrir */
-  animation: deslizarAbajo 0.15s ease-out;
+  animation: deslizarMenu 0.15s ease-out;
 }
 
-/* Fotogramas clave para la animación de apertura */
-@keyframes deslizarAbajo {
+@keyframes deslizarMenu {
   from {
     opacity: 0;
     transform: translateY(-6px);
@@ -484,48 +570,45 @@ a:hover {
   }
 }
 
-/* Encabezado del menú flotante */
 .menu-cabecera {
-  padding: 0.6rem 0.75rem;
+  padding: var(--espacio-2) var(--espacio-3);
 }
 
 .menu-usuario-nombre {
   display: block;
-  font-size: 0.95rem;
+  font-size: var(--texto-sm);
   color: var(--color-texto);
+  overflow-wrap: break-word;
 }
 
 .menu-usuario-rol {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--texto-xs);
   color: var(--color-texto-secundario);
   margin-top: 0.15rem;
 }
 
-/* Separador visual entre grupos de items */
 .menu-separador {
   height: 1px;
   background-color: var(--color-superficie-borde);
-  margin: 0.4rem 0;
+  margin: var(--espacio-2) 0;
 }
 
-/* Subtítulos de sección dentro del menú */
 .menu-seccion-titulo {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-texto-apagado);
-  padding: 0.35rem 0.75rem 0.15rem;
+  padding: var(--espacio-1) var(--espacio-3);
   font-weight: 700;
 }
 
-/* Item individual del menú */
 .menu-item {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  gap: var(--espacio-2);
+  padding: var(--espacio-2) var(--espacio-3);
+  font-size: var(--texto-sm);
   color: var(--color-texto-secundario);
   border-radius: var(--radio-sm);
   text-decoration: none;
@@ -537,9 +620,8 @@ a:hover {
   color: var(--color-texto);
 }
 
-/* Item destructivo de cerrar sesión */
 .menu-item-cerrar {
-  color: #f87171;
+  color: var(--color-error);
 }
 
 .menu-item-cerrar:hover {
@@ -551,49 +633,47 @@ a:hover {
   font-size: 0.95rem;
   width: 18px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 /* --------------------------------------------------------------------------
-   Botones
+   8. BOTONES Y CONTROLES INTERACTIVOS
    -------------------------------------------------------------------------- */
 
-/* Estilo base común a todos los botones */
 .boton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: var(--fuente-cuerpo);
   font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0.6rem 1.25rem;
+  font-size: var(--texto-sm);
+  padding: var(--espacio-2) var(--espacio-4);
   border-radius: var(--radio-md);
   border: 1px solid transparent;
   cursor: pointer;
   transition: all var(--transicion-base);
   text-decoration: none;
-  line-height: 1;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
-/* Variante pequeña para encabezados y acciones compactas */
 .boton-chico {
-  font-size: 0.85rem;
-  padding: 0.45rem 0.95rem;
+  font-size: var(--texto-xs);
+  padding: 0.4rem 0.85rem;
   border-radius: var(--radio-sm);
 }
 
-/* Botón primario dorado */
 .boton-primario {
   background-color: var(--color-primario);
-  color: #000;
+  color: var(--color-texto-inverso);
 }
 
 .boton-primario:hover {
   background-color: var(--color-primario-hover);
-  color: #000;
+  color: var(--color-texto-inverso);
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.35);
 }
 
-/* Botón secundario oscuro con borde tenue */
 .boton-secundario {
   background-color: var(--color-superficie-elevada);
   color: var(--color-texto);
@@ -606,18 +686,19 @@ a:hover {
 }
 
 /* --------------------------------------------------------------------------
-   Listas de Definición (Página de prueba del esqueleto y datos de ficha)
+   9. LISTA DE DEFINICIONES (PÁGINA ESQUELETO Y DATOS TÉCNICOS)
    -------------------------------------------------------------------------- */
 
 dl {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 0.75rem 1.5rem;
-  margin: 1.5rem 0;
+  gap: var(--espacio-3) var(--espacio-6);
+  margin: var(--espacio-6) 0;
   background-color: var(--color-superficie);
-  padding: 1.5rem;
+  padding: var(--espacio-6);
   border-radius: var(--radio-lg);
   border: 1px solid var(--color-superficie-borde);
+  width: 100%;
 }
 
 dt {
@@ -628,10 +709,12 @@ dt {
 dd {
   color: var(--color-texto);
   margin-left: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* --------------------------------------------------------------------------
-   Página de Error
+   10. TARJETA DE ERROR (404, 500, ETC.)
    -------------------------------------------------------------------------- */
 
 .seccion-error {
@@ -639,14 +722,15 @@ dd {
   justify-content: center;
   align-items: center;
   min-height: 55vh;
+  width: 100%;
 }
 
 .tarjeta-error {
   background-color: var(--color-superficie);
   border: 1px solid var(--color-superficie-borde);
   border-radius: var(--radio-lg);
-  padding: 3rem 2rem;
-  max-width: 600px;
+  padding: var(--espacio-10) var(--espacio-6);
+  max-width: 620px;
   width: 100%;
   text-align: center;
   box-shadow: var(--sombra-lg);
@@ -659,99 +743,102 @@ dd {
   font-weight: 800;
   color: var(--color-primario);
   line-height: 1;
-  margin-bottom: 1rem;
+  margin-bottom: var(--espacio-4);
 }
 
 .error-titulo {
-  font-size: 1.75rem;
-  margin-bottom: 0.75rem;
+  font-size: var(--texto-2xl);
+  margin-bottom: var(--espacio-3);
 }
 
 .error-descripcion {
-  font-size: 1.05rem;
+  font-size: var(--texto-base);
   color: var(--color-texto-secundario);
-  margin-bottom: 2rem;
+  margin-bottom: var(--espacio-8);
 }
 
 .error-acciones {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: var(--espacio-3);
   flex-wrap: wrap;
 }
 
 .error-detalles-desarrollo {
-  margin-top: 2rem;
+  margin-top: var(--espacio-8);
   text-align: left;
   border-top: 1px solid var(--color-superficie-borde);
-  padding-top: 1.5rem;
+  padding-top: var(--espacio-6);
+  width: 100%;
 }
 
 .error-detalles-titulo {
-  font-size: 1rem;
+  font-size: var(--texto-sm);
   color: var(--color-advertencia);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--espacio-2);
 }
 
 .error-detalles-codigo {
   background-color: #050608;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 1rem;
+  padding: var(--espacio-4);
   border-radius: var(--radio-md);
-  font-family: monospace;
-  font-size: 0.85rem;
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
   overflow-x: auto;
+  max-width: 100%;
   color: #f87171;
   white-space: pre-wrap;
-  word-break: break-word;
+  word-break: break-all;
 }
 
 /* --------------------------------------------------------------------------
-   Pie de página
+   11. PIE DE PÁGINA (FOOTER EN 4 COLUMNAS DE LOS WIREFRAMES)
    -------------------------------------------------------------------------- */
 
 .pie-pagina {
   background-color: var(--color-superficie);
   border-top: 1px solid var(--color-superficie-borde);
-  padding-top: 3.5rem;
+  padding-top: var(--espacio-12);
   margin-top: auto;
+  width: 100%;
 }
 
-/* Disposición de 4 columnas según wireframe del Home */
 .pie-contenedor {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 2.5rem;
-  margin-bottom: 2.5rem;
+  gap: var(--espacio-8);
+  margin-bottom: var(--espacio-10);
+  width: 100%;
 }
 
 .marca-pie {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--espacio-2);
   font-family: var(--fuente-titulos);
   font-size: 1.3rem;
   font-weight: 700;
-  margin-bottom: 0.85rem;
+  margin-bottom: var(--espacio-3);
 }
 
 .pie-lema {
-  font-size: 0.95rem;
+  font-size: var(--texto-sm);
   color: var(--color-texto);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--espacio-2);
   max-width: 340px;
 }
 
 .pie-sublema {
-  font-size: 0.85rem;
+  font-size: var(--texto-xs);
   color: var(--color-texto-apagado);
   max-width: 340px;
 }
 
 .pie-subtitulo {
-  font-size: 0.85rem;
+  font-size: var(--texto-xs);
   color: var(--color-texto);
-  margin-bottom: 1.15rem;
+  margin-bottom: var(--espacio-4);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 700;
@@ -762,12 +849,12 @@ dd {
 }
 
 .pie-enlaces li {
-  margin-bottom: 0.65rem;
+  margin-bottom: var(--espacio-2);
 }
 
 .pie-enlaces a {
   color: var(--color-texto-secundario);
-  font-size: 0.9rem;
+  font-size: var(--texto-sm);
   transition: color var(--transicion-base);
 }
 
@@ -777,8 +864,8 @@ dd {
 
 .pie-creditos {
   border-top: 1px solid rgba(255, 255, 255, 0.04);
-  padding: 1.25rem 0;
-  font-size: 0.85rem;
+  padding: var(--espacio-4) 0;
+  font-size: var(--texto-xs);
   color: var(--color-texto-apagado);
 }
 
@@ -787,29 +874,31 @@ dd {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--espacio-2);
 }
 
 .pie-tag-wireframe {
-  font-size: 0.8rem;
+  font-size: var(--texto-xs);
   color: var(--color-texto-apagado);
 }
 
 /* --------------------------------------------------------------------------
-   Responsividad (Media Queries)
+   12. DISEÑO RESPONSIVE ADAPTATIVO
+   Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
    -------------------------------------------------------------------------- */
 
-/* Adaptación para tablets y pantallas intermedias (hasta 1024px) */
+/* ── 12.1 Pantallas Intermedias y Tablets (hasta 1024 px) ──────────────── */
 @media (max-width: 1024px) {
   .encabezado-contenedor {
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: var(--espacio-3);
   }
 
-  /* El buscador pasa a ocupar una fila completa debajo de la marca */
+  /* El buscador ocupa el ancho completo en una fila intermedia */
   .encabezado-buscador {
     order: 3;
     flex: 1 1 100%;
+    width: 100%;
   }
 
   .navegacion-principal {
@@ -821,36 +910,161 @@ dd {
     margin-left: auto;
   }
 
+  /* El pie se reorganiza en 2 columnas */
   .pie-contenedor {
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    gap: var(--espacio-6);
   }
 }
 
-/* Adaptación para dispositivos móviles (hasta 768px) */
+/* ── 12.2 Dispositivos Móviles (hasta 768 px) ─────────────────────────── */
 @media (max-width: 768px) {
+  /* Reduce padding vertical de la cabecera */
+  .encabezado {
+    padding: var(--espacio-2) 0;
+  }
+
+  /* Fila 1: Logo y Usuario a los extremos */
+  .encabezado-marca {
+    order: 1;
+  }
+
+  .encabezado-usuario {
+    order: 2;
+    margin-left: auto;
+  }
+
+  /* Fila 2: Buscador a 100% de ancho */
+  .encabezado-buscador {
+    order: 3;
+    flex: 1 1 100%;
+    width: 100%;
+    margin-top: var(--espacio-1);
+  }
+
+  /* Fila 3: Navegación horizontal touch sin desbordar el viewport */
   .navegacion-principal {
     order: 4;
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Oculta la barra de scroll nativa para un aspecto más limpio */
+    scrollbar-width: none;
+  }
+
+  .navegacion-principal::-webkit-scrollbar {
+    display: none;
   }
 
   .nav-lista {
-    padding-bottom: 0.5rem;
-    white-space: nowrap;
+    padding: var(--espacio-1) 0;
+    gap: var(--espacio-1);
   }
 
+  /* Pasa el pie a 1 sola columna vertical */
   .pie-contenedor {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: var(--espacio-6);
   }
 
+  /* Las listas de definición pasan a una columna */
   dl {
     grid-template-columns: 1fr;
+    gap: var(--espacio-2);
+    padding: var(--espacio-4);
   }
 
-  /* En móviles se oculta el texto del nombre para no saturar la cabecera, conservando el avatar */
+  /* Oculta el texto del nombre en móviles muy angostos para dar espacio al avatar */
   .usuario-info {
     display: none;
+  }
+
+  /* Asegura que el menú flotante en móviles no sobrepase la pantalla */
+  .usuario-menu-flotante {
+    right: 0;
+    left: auto;
+    width: calc(100vw - 2rem);
+  }
+}
+
+/* ── 12.3 Celulares Angostos (360 px a 480 px) ────────────────────────── */
+@media (max-width: 480px) {
+  /* Contenedor con padding compacto a 360 px */
+  .contenedor {
+    padding-left: var(--espacio-3);
+    padding-right: var(--espacio-3);
+  }
+
+  .contenido-principal {
+    padding: var(--espacio-6) var(--espacio-3);
+  }
+
+  /* Reduce ligeramente el tamaño del logo para que conviva con los botones a 360 px */
+  .encabezado-marca .marca-enlace {
+    font-size: 1.15rem;
+    gap: var(--espacio-1);
+  }
+
+  .marca-icono {
+    font-size: 1.25rem;
+  }
+
+  /* Botones compactos en el encabezado de 360 px */
+  .usuario-invitado {
+    gap: var(--espacio-1);
+  }
+
+  .usuario-invitado .boton-chico {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  .usuario-invitado .nav-enlace {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  /* Acciones de la tarjeta de error apiladas en vertical a 360 px */
+  .error-acciones {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .error-acciones .boton {
+    width: 100%;
+  }
+
+  .tarjeta-error {
+    padding: var(--espacio-6) var(--espacio-3);
+  }
+
+  .error-insignia {
+    font-size: 2.75rem;
+  }
+
+  /* Créditos del pie apilados verticalmente sin desborde */
+  .pie-creditos-contenedor {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--espacio-2);
+  }
+}
+
+/* ── 12.4 Pantallas de Escritorio Ancho (1440 px o superior) ───────────── */
+@media (min-width: 1440px) {
+  /* Espaciado generoso y armónico en pantallas grandes */
+  .contenido-principal {
+    padding: var(--espacio-12) var(--espacio-4);
+  }
+
+  /* Tipografías de títulos con escala plena */
+  h1 {
+    font-size: 2.75rem;
+  }
+
+  /* Espaciado del footer */
+  .pie-pagina {
+    padding-top: var(--espacio-12);
   }
 }
