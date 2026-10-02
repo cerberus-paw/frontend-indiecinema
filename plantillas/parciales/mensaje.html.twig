@@ -14,11 +14,10 @@
 #}
 {# Define el tipo de alerta normalizado a partir de los valores recibidos o 'info' por defecto #}
 {% set tipo_alerta = tipo ?? 'info' %}
-{# Resuelve el contenido del mensaje admitiendo tanto la variable 'mensaje' como 'texto' #}
+{# Resuelve el contenido del mensaje admitiendo tanto la variable 'mensaje' como 'texto' para flexibilidad #}
 {% set cuerpo_mensaje = mensaje ?? (texto ?? null) %}
 {# Asocia el rol accesible 'alert' para errores o 'status' para otros mensajes informativos #}
 {% set rol_accesible = (tipo_alerta == 'error' or tipo_alerta == 'advertencia') ? 'alert' : 'status' %}
-
 {# Solo se renderiza el bloque de alerta si se proveyó un mensaje, título o lista de detalles #}
 {% if cuerpo_mensaje or titulo is defined or detalles is defined %}
   {# Contenedor principal de la alerta con clases de tipo y modificadores opcionales #}
@@ -45,7 +44,6 @@
       {% endif %}
     {# Cierre del envoltorio del icono #}
     </div>
-
     {# Contenedor del contenido textual de la alerta #}
     <div class="alerta-contenido">
       {# Si se especificó un título para la alerta, se renderiza con énfasis #}
@@ -54,14 +52,12 @@
         <strong class="alerta-titulo">{{ titulo }}</strong>
       {# Cierre del condicional de título #}
       {% endif %}
-
       {# Si hay un cuerpo de mensaje principal, se muestra en un párrafo accesible #}
       {% if cuerpo_mensaje %}
         {# Párrafo con la descripción del mensaje #}
         <p class="alerta-texto">{{ cuerpo_mensaje }}</p>
       {# Cierre del condicional de cuerpo del mensaje #}
       {% endif %}
-
       {# Si se recibió una lista de detalles (ej. múltiples errores de validación) #}
       {% if detalles is defined and detalles is iterable and detalles|length > 0 %}
         {# Lista no ordenada con viñetas para cada detalle recibido #}
@@ -78,12 +74,21 @@
       {% endif %}
     {# Cierre del contenedor de contenido #}
     </div>
-
     {# Si la alerta fue configurada como descartable por el usuario #}
     {% if descartable ?? false %}
-      {# Botón accesible para cerrar o descartar la alerta en pantalla #}
-      <button type="button" class="alerta-cerrar" aria-label="Cerrar notificación" onclick="this.closest('.alerta').remove();">
-        {# Carácter visual de cierre (multiplicación o cruz) #}
+      {# Botón interactivo para eliminar la alerta del DOM #}
+      <button
+        {# Declara el tipo button para evitar envíos involuntarios de formulario #}
+        type="button"
+        {# Clase con estilos para posicionamiento y hover #}
+        class="alerta-cerrar"
+        {# Etiqueta legible para tecnologías de asistencia #}
+        aria-label="Cerrar notificación"
+        {# Remueve la alerta contenedora al pulsar el botón #}
+        onclick="this.closest('.alerta').remove();"
+      {# Cierre de la etiqueta de apertura del botón #}
+      >
+        {# Carácter visual de cierre oculto a lectores de pantalla #}
         <span aria-hidden="true">&times;</span>
       {# Cierre del botón de descarte #}
       </button>

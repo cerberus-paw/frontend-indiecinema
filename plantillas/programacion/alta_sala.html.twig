@@ -5,15 +5,12 @@
 #}
 {# Hereda la estructura semántica global de la plantilla base #}
 {% extends 'base.html.twig' %}
-
-{# Define el título de la pestaña del navegador #}
+{# Define el título de la pestaña del navegador para la postulación de salas #}
 {% block titulo %}Solicitud para abrir una sala indie{% endblock %}
-
-{# Define el cuerpo de la vista en el bloque principal #}
+{# Inicia el bloque principal de contenido de la página #}
 {% block contenido %}
 {# Contenedor principal con límite de ancho para formularios extensos #}
 <div class="contenedor-formulario-amplio">
-
   {# Ruta de navegación secundaria (breadcrumbs) #}
   <nav class="navegacion-migas" aria-label="Migas de pan">
     {# Lista ordenada accesible de migas #}
@@ -32,7 +29,6 @@
     </ol>
   {# Cierre de la navegación de migas #}
   </nav>
-
   {# Encabezado principal del formulario con título y acción de guardado rápido #}
   <header class="encabezado-formulario-solicitud">
     {# Envoltorio textual del encabezado #}
@@ -46,10 +42,14 @@
       </p>
     {# Cierre del envoltorio textual #}
     </div>
-
     {# Acciones rápidas de la cabecera superior #}
     <div class="solicitud-acciones-cabecera">
       {# Botón secundario para guardar avance en borrador #}
+      {# Texto visible #}
+      {# Botón auxiliar sin submit #}
+      {# Apariencia secundaria #}
+      {# Tamaño equilibrado #}
+      {# Identificador para JavaScript #}
       {% include 'parciales/boton.html.twig' with {
         texto: 'Guardar borrador',
         tipo: 'button',
@@ -61,42 +61,56 @@
     </div>
   {# Cierre del encabezado de solicitud #}
   </header>
-
   {# Indicador visual de progreso de estados de la postulación (stepper) #}
   <section class="progreso-solicitud" aria-label="Estado de la solicitud">
     {# Lista con los pasos del ciclo de vida de admisión #}
     <ol class="lista-pasos-progreso">
       {# Paso 1: Postulación enviada #}
       <li class="paso-progreso paso-completado">
+        {# Símbolo de tilde verde para indicar paso cumplido #}
         <span class="paso-check" aria-hidden="true">✓</span>
+        {# Etiqueta legible del paso #}
         <span class="paso-etiqueta">Enviada</span>
+      {# Cierre del ítem de paso 1 #}
       </li>
       {# Paso 2: Documentación subida #}
       <li class="paso-progreso paso-completado">
+        {# Símbolo de tilde verde para indicar paso cumplido #}
         <span class="paso-check" aria-hidden="true">✓</span>
+        {# Etiqueta legible del paso #}
         <span class="paso-etiqueta">Documentación recibida</span>
+      {# Cierre del ítem de paso 2 #}
       </li>
       {# Paso 3: Revisión de moderadores #}
       <li class="paso-progreso paso-activo">
+        {# Icono de cronómetro para indicar etapa activa en curso #}
         <span class="paso-reloj" aria-hidden="true">⏱</span>
+        {# Etiqueta legible del paso activo #}
         <span class="paso-etiqueta">En revisión</span>
+      {# Cierre del ítem de paso 3 #}
       </li>
       {# Paso 4: Aprobación definitiva #}
       <li class="paso-progreso paso-pendiente">
+        {# Etiqueta legible del paso pendiente de aprobación #}
         <span class="paso-etiqueta">Aprobada</span>
+      {# Cierre del ítem de paso 4 #}
       </li>
     {# Cierre de la lista de pasos #}
     </ol>
     {# Placa informativa del estado actual devuelto por moderación #}
     <div class="estado-moderacion-badge">
+      {# Badge oscuro con texto destacado #}
       <span class="badge-alerta-negra">REQUIERE CORRECCIÓN</span>
+    {# Cierre del contenedor de badge #}
     </div>
   {# Cierre de la sección de progreso #}
   </section>
-
   {# Alerta de moderación con observaciones a corregir #}
   {% if observacion_moderador is defined or true %}
     {# Inclusión del parcial de mensaje con variante de advertencia #}
+    {# Estilo visual ámbar de precaución #}
+    {# Encabezado con fecha y hora del dictamen de moderación #}
+    {# Mensaje detallado redactado por el moderador asignado #}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'advertencia',
       titulo: 'La moderación te pidió corregir dos cosas (10 sep, 10:42)',
@@ -104,27 +118,32 @@
     } %}
   {# Cierre del condicional de alerta de moderación #}
   {% endif %}
-
   {# Formulario de alta de sala con soporte de subida de archivos multipart #}
   <form action="/programacion/salas/alta" method="POST" enctype="multipart/form-data" class="formulario-sala" novalidate>
-
     {# Campo de token de seguridad CSRF #}
     <input type="hidden" name="_csrf" value="{{ _csrf ?? (csrf ?? '') }}">
-
     {# ==================================================================== #}
     {# SECCIÓN 1: DATOS DEL ESPACIO                                         #}
     {# ==================================================================== #}
     <fieldset class="seccion-formulario">
       {# Título de la sección del formulario #}
       <legend class="seccion-leyenda">
+        {# Encabezado en negrita de la sección #}
         <span class="seccion-titulo">Datos del espacio</span>
+        {# Texto aclaratorio sobre la visibilidad pública de estos datos #}
         <span class="seccion-subtitulo">Lo que ve el público en la ficha de la sala.</span>
       {# Cierre de la leyenda #}
       </legend>
-
       {# Fila de dos columnas: Nombre y Tipo de espacio #}
       <div class="fila-campos-doble">
         {# Campo: Nombre de la sala indie #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Tipo texto #}
+        {# Persistencia de datos #}
+        {# Texto guía #}
+        {# Campo obligatorio #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'nombre_sala',
           etiqueta: 'Nombre de la sala',
@@ -134,8 +153,14 @@
           requerido: true,
           error: errores.nombre_sala ?? null
         } %}
-
         {# Campo: Tipo de espacio #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Menú desplegable #}
+        {# Valor seleccionado #}
+        {# Campo obligatorio #}
+        {# Opciones disponibles #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'tipo_espacio',
           etiqueta: 'Tipo de espacio',
@@ -153,8 +178,15 @@
         } %}
       {# Cierre de la fila de dos columnas #}
       </div>
-
       {# Campo: Descripción completa del espacio #}
+      {# Nombre del atributo HTTP #}
+      {# Etiqueta legible #}
+      {# Área de texto multilínea #}
+      {# Filas visibles #}
+      {# Persistencia de datos #}
+      {# Texto guía #}
+      {# Campo obligatorio #}
+      {# Error de validación #}
       {% include 'parciales/campo.html.twig' with {
         nombre: 'descripcion',
         etiqueta: 'Descripción',
@@ -165,10 +197,16 @@
         requerido: true,
         error: errores.descripcion ?? null
       } %}
-
       {# Fila de dos columnas: Dirección y Localidad #}
       <div class="fila-campos-doble">
         {# Campo: Dirección física #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Tipo texto #}
+        {# Persistencia de datos #}
+        {# Texto guía #}
+        {# Campo obligatorio #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'direccion',
           etiqueta: 'Dirección',
@@ -178,8 +216,14 @@
           requerido: true,
           error: errores.direccion ?? null
         } %}
-
         {# Campo: Localidad / Partido #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Menú desplegable #}
+        {# Valor seleccionado #}
+        {# Campo obligatorio #}
+        {# Opciones de ciudades de la zona #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'localidad',
           etiqueta: 'Localidad',
@@ -197,10 +241,16 @@
         } %}
       {# Cierre de la fila de dos columnas #}
       </div>
-
       {# Fila de dos columnas: Capacidad y Categoría #}
       <div class="fila-campos-doble">
         {# Campo: Capacidad declarada de espectadores #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Entrada numérica #}
+        {# Persistencia de datos #}
+        {# Texto guía #}
+        {# Campo obligatorio #}
+        {# Error de validación según el wireframe #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'capacidad',
           etiqueta: 'Capacidad declarada',
@@ -210,8 +260,15 @@
           requerido: true,
           error: errores.capacidad ?? 'No coincide con la capacidad del plano (64). Revisá el dato.'
         } %}
-
         {# Campo: Categoría solicitada #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Menú desplegable #}
+        {# Valor seleccionado #}
+        {# Texto aclaratorio #}
+        {# Opcional #}
+        {# Opciones de categorías de sala #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'categoria_solicitada',
           etiqueta: 'Categoría solicitada',
@@ -230,21 +287,28 @@
       </div>
     {# Cierre de la sección 1 #}
     </fieldset>
-
     {# ==================================================================== #}
     {# SECCIÓN 2: EQUIPAMIENTO Y COMODIDADES                               #}
     {# ==================================================================== #}
     <fieldset class="seccion-formulario">
       {# Título de la sección de equipamiento #}
       <legend class="seccion-leyenda">
+        {# Encabezado principal #}
         <span class="seccion-titulo">Equipamiento y comodidades</span>
+        {# Subtítulo explicativo #}
         <span class="seccion-subtitulo">Define la categoría de la sala y los filtros por los que te encuentran.</span>
       {# Cierre de la leyenda #}
       </legend>
-
       {# Fila de dos columnas: Pantalla y Proyector #}
       <div class="fila-campos-doble">
         {# Campo: Pantalla #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Tipo texto #}
+        {# Persistencia de datos #}
+        {# Texto guía #}
+        {# Campo obligatorio #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'pantalla',
           etiqueta: 'Pantalla',
@@ -254,8 +318,14 @@
           requerido: true,
           error: errores.pantalla ?? null
         } %}
-
         {# Campo: Proyector #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Tipo texto #}
+        {# Persistencia de datos #}
+        {# Texto guía #}
+        {# Campo obligatorio #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'proyector',
           etiqueta: 'Proyector',
@@ -267,10 +337,16 @@
         } %}
       {# Cierre de la fila de dos columnas #}
       </div>
-
       {# Fila de dos columnas: Sonido y Butacas #}
       <div class="fila-campos-doble">
         {# Campo: Sistema de sonido #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Tipo texto #}
+        {# Persistencia de datos #}
+        {# Texto guía #}
+        {# Campo obligatorio #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'sistema_sonido',
           etiqueta: 'Sistema de sonido',
@@ -280,8 +356,14 @@
           requerido: true,
           error: errores.sistema_sonido ?? null
         } %}
-
         {# Campo: Tipo de butacas #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Tipo texto #}
+        {# Persistencia de datos #}
+        {# Texto guía #}
+        {# Campo obligatorio #}
+        {# Error de validación según el wireframe #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'tipo_butacas',
           etiqueta: 'Tipo de butacas',
@@ -293,7 +375,6 @@
         } %}
       {# Cierre de la fila de dos columnas #}
       </div>
-
       {# Grupo de casillas de verificación de servicios disponibles #}
       <div class="grupo-servicios-sala">
         {# Etiqueta descriptiva del grupo de servicios #}
@@ -301,6 +382,10 @@
         {# Cuadrícula de casillas de verificación #}
         <div class="cuadricula-checkboxes-servicios">
           {# Servicio 1: Bar o cafetería #}
+          {# Nombre del checkbox #}
+          {# Tipo checkbox #}
+          {# Etiqueta visible #}
+          {# Valor seleccionado #}
           {% include 'parciales/campo.html.twig' with {
             nombre: 'servicio_bar',
             tipo: 'checkbox',
@@ -308,6 +393,10 @@
             valor: '1'
           } %}
           {# Servicio 2: Baños adaptados #}
+          {# Nombre del checkbox #}
+          {# Tipo checkbox #}
+          {# Etiqueta visible #}
+          {# Valor seleccionado #}
           {% include 'parciales/campo.html.twig' with {
             nombre: 'servicio_banos_adaptados',
             tipo: 'checkbox',
@@ -315,6 +404,10 @@
             valor: '1'
           } %}
           {# Servicio 3: Rampa de acceso #}
+          {# Nombre del checkbox #}
+          {# Tipo checkbox #}
+          {# Etiqueta visible #}
+          {# Valor seleccionado #}
           {% include 'parciales/campo.html.twig' with {
             nombre: 'servicio_rampa',
             tipo: 'checkbox',
@@ -322,6 +415,10 @@
             valor: '1'
           } %}
           {# Servicio 4: Estacionamiento #}
+          {# Nombre del checkbox #}
+          {# Tipo checkbox #}
+          {# Etiqueta visible #}
+          {# Valor deseleccionado #}
           {% include 'parciales/campo.html.twig' with {
             nombre: 'servicio_estacionamiento',
             tipo: 'checkbox',
@@ -329,6 +426,10 @@
             valor: '0'
           } %}
           {# Servicio 5: Aire acondicionado #}
+          {# Nombre del checkbox #}
+          {# Tipo checkbox #}
+          {# Etiqueta visible #}
+          {# Valor seleccionado #}
           {% include 'parciales/campo.html.twig' with {
             nombre: 'servicio_aire',
             tipo: 'checkbox',
@@ -336,6 +437,10 @@
             valor: '1'
           } %}
           {# Servicio 6: Butacas reclinables #}
+          {# Nombre del checkbox #}
+          {# Tipo checkbox #}
+          {# Etiqueta visible #}
+          {# Valor deseleccionado #}
           {% include 'parciales/campo.html.twig' with {
             nombre: 'servicio_reclinables',
             tipo: 'checkbox',
@@ -348,19 +453,25 @@
       </div>
     {# Cierre de la sección 2 #}
     </fieldset>
-
     {# ==================================================================== #}
     {# SECCIÓN 3: FOTOS Y VIDEO DEL ESPACIO                                #}
     {# ==================================================================== #}
     <fieldset class="seccion-formulario">
       {# Título de la sección de medios audiovisuales #}
       <legend class="seccion-leyenda">
+        {# Encabezado principal #}
         <span class="seccion-titulo">Fotos y video del espacio</span>
+        {# Subtítulo explicativo #}
         <span class="seccion-subtitulo">Al menos 3 fotos y un video corto recorriendo la sala.</span>
       {# Cierre de la leyenda #}
       </legend>
-
       {# Campo de subida de fotos del espacio #}
+      {# Nombre del atributo HTTP para el archivo #}
+      {# Etiqueta visible #}
+      {# Tipo subida de archivos #}
+      {# Aclaración sobre formatos admitidos #}
+      {# Opcional en reenvío #}
+      {# Error de validación #}
       {% include 'parciales/campo.html.twig' with {
         nombre: 'fotos_sala',
         etiqueta: 'Fotografías de la sala (mínimo 3)',
@@ -369,8 +480,15 @@
         requerido: false,
         error: errores.fotos_sala ?? null
       } %}
-
       {# Campo: Video del espacio por URL #}
+      {# Nombre del atributo HTTP #}
+      {# Etiqueta visible #}
+      {# Tipo texto #}
+      {# Persistencia de datos #}
+      {# Texto guía #}
+      {# Aclaración sobre plataformas soportadas #}
+      {# Campo obligatorio #}
+      {# Error de validación #}
       {% include 'parciales/campo.html.twig' with {
         nombre: 'video_url',
         etiqueta: 'Video del espacio (URL)',
@@ -383,19 +501,25 @@
       } %}
     {# Cierre de la sección 3 #}
     </fieldset>
-
     {# ==================================================================== #}
     {# SECCIÓN 4: DOCUMENTACIÓN OBLIGATORIA                                #}
     {# ==================================================================== #}
     <fieldset class="seccion-formulario">
       {# Título de la sección de documentos legales #}
       <legend class="seccion-leyenda">
+        {# Encabezado principal #}
         <span class="seccion-titulo">Documentación obligatoria</span>
+        {# Subtítulo explicativo #}
         <span class="seccion-subtitulo">La revisa la moderación. Al vencer un documento la sala se suspende automáticamente.</span>
       {# Cierre de la leyenda #}
       </legend>
-
       {# Campo 1: Póliza de seguro vigente #}
+      {# Nombre del atributo HTTP #}
+      {# Etiqueta legible #}
+      {# Tipo subida de archivo #}
+      {# Información del archivo adjunto actual #}
+      {# Opcional en reenvío #}
+      {# Error de validación #}
       {% include 'parciales/campo.html.twig' with {
         nombre: 'poliza_seguro',
         etiqueta: 'Póliza de seguro vigente',
@@ -404,8 +528,13 @@
         requerido: false,
         error: errores.poliza_seguro ?? null
       } %}
-
       {# Campo 2: Habilitación municipal #}
+      {# Nombre del atributo HTTP #}
+      {# Etiqueta legible #}
+      {# Tipo subida de archivo #}
+      {# Información del archivo adjunto actual #}
+      {# Opcional en reenvío #}
+      {# Error de validación #}
       {% include 'parciales/campo.html.twig' with {
         nombre: 'habilitacion_municipal',
         etiqueta: 'Habilitación municipal',
@@ -414,8 +543,13 @@
         requerido: false,
         error: errores.habilitacion_municipal ?? null
       } %}
-
       {# Campo 3: Plano del espacio con capacidad #}
+      {# Nombre del atributo HTTP #}
+      {# Etiqueta legible #}
+      {# Tipo subida de archivo #}
+      {# Información del archivo adjunto actual #}
+      {# Opcional en reenvío #}
+      {# Error de validación #}
       {% include 'parciales/campo.html.twig' with {
         nombre: 'plano_espacio',
         etiqueta: 'Plano del espacio con capacidad',
@@ -424,29 +558,37 @@
         requerido: false,
         error: errores.plano_espacio ?? null
       } %}
-
       {# Mensaje aclaratorio sobre la vigencia mínima de la documentación #}
+      {# Tipo advertencia ámbar #}
+      {# Texto legal aclaratorio sobre la suspensión automática por vencimiento #}
       {% include 'parciales/mensaje.html.twig' with {
         tipo: 'advertencia',
         mensaje: 'La documentación tiene que estar vigente al menos 90 días desde la fecha de envío. Cuando un documento vence, la sala no puede programar funciones nuevas hasta actualizarlo.'
       } %}
     {# Cierre de la sección 4 #}
     </fieldset>
-
     {# ==================================================================== #}
     {# SECCIÓN 5: PARÁMETROS DE LA SALA                                    #}
     {# ==================================================================== #}
     <fieldset class="seccion-formulario">
       {# Título de la sección de parámetros operativos #}
       <legend class="seccion-leyenda">
+        {# Encabezado principal #}
         <span class="seccion-titulo">Parámetros de la sala</span>
+        {# Subtítulo explicativo #}
         <span class="seccion-subtitulo">Podés cambiarlos después desde el panel del organizador.</span>
       {# Cierre de la leyenda #}
       </legend>
-
       {# Fila de dos columnas: Películas por función y Duración máxima #}
       <div class="fila-campos-doble">
         {# Campo: Películas por función #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Menú desplegable #}
+        {# Valor seleccionado #}
+        {# Campo obligatorio #}
+        {# Opciones de cantidad de películas #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'peliculas_por_funcion',
           etiqueta: 'Películas por función',
@@ -460,8 +602,14 @@
           ],
           error: errores.peliculas_por_funcion ?? null
         } %}
-
         {# Campo: Duración máxima de la función #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Menú desplegable #}
+        {# Valor seleccionado #}
+        {# Campo obligatorio #}
+        {# Opciones de duración máxima en minutos #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'duracion_maxima',
           etiqueta: 'Duración máxima de la función',
@@ -478,10 +626,16 @@
         } %}
       {# Cierre de la fila de dos columnas #}
       </div>
-
       {# Fila de dos columnas: Mínimo de asistentes y Tiempo entre funciones #}
       <div class="fila-campos-doble">
         {# Campo: Mínimo de asistentes para confirmar #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Entrada numérica #}
+        {# Persistencia de datos #}
+        {# Texto explicativo de la condición de negocio #}
+        {# Campo obligatorio #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'minimo_asistentes',
           etiqueta: 'Mínimo de asistentes para confirmar',
@@ -491,8 +645,14 @@
           requerido: true,
           error: errores.minimo_asistentes ?? null
         } %}
-
         {# Campo: Tiempo entre funciones para limpieza y ventilación #}
+        {# Nombre del atributo HTTP #}
+        {# Etiqueta legible #}
+        {# Menú desplegable #}
+        {# Valor seleccionado #}
+        {# Campo obligatorio #}
+        {# Opciones de tiempo entre funciones #}
+        {# Error de validación #}
         {% include 'parciales/campo.html.twig' with {
           nombre: 'tiempo_entre_funciones',
           etiqueta: 'Tiempo entre funciones',
@@ -510,19 +670,25 @@
       </div>
     {# Cierre de la sección 5 #}
     </fieldset>
-
     {# ==================================================================== #}
     {# SECCIÓN 6: TÉRMINOS Y CONDICIONES                                   #}
     {# ==================================================================== #}
     <fieldset class="seccion-formulario">
       {# Título de la sección de declaraciones y términos #}
       <legend class="seccion-leyenda">
+        {# Encabezado principal #}
         <span class="seccion-titulo">Términos y condiciones</span>
+        {# Subtítulo explicativo #}
         <span class="seccion-subtitulo">Se registra qué versión aceptaste y cuándo.</span>
       {# Cierre de la leyenda #}
       </legend>
-
       {# Checkbox 1: Habilitación y seguridad #}
+      {# Nombre del checkbox #}
+      {# Tipo checkbox #}
+      {# Texto de la declaración legal #}
+      {# Valor marcado #}
+      {# Obligatorio #}
+      {# Error de validación #}
       {% include 'parciales/campo.html.twig' with {
         nombre: 'acepta_habilitacion',
         tipo: 'checkbox',
@@ -531,8 +697,13 @@
         requerido: true,
         error: errores.acepta_habilitacion ?? null
       } %}
-
       {# Checkbox 2: Derechos de exhibición #}
+      {# Nombre del checkbox #}
+      {# Tipo checkbox #}
+      {# Texto del compromiso ético y legal #}
+      {# Valor marcado #}
+      {# Obligatorio #}
+      {# Error de validación #}
       {% include 'parciales/campo.html.twig' with {
         nombre: 'acepta_derechos',
         tipo: 'checkbox',
@@ -541,8 +712,13 @@
         requerido: true,
         error: errores.acepta_derechos ?? null
       } %}
-
       {# Checkbox 3: Términos generales de la plataforma #}
+      {# Nombre del checkbox #}
+      {# Tipo checkbox #}
+      {# Texto con versión y fecha de los términos de servicio #}
+      {# Valor deseleccionado para simular validación en el wireframe #}
+      {# Obligatorio #}
+      {# Error de validación #}
       {% include 'parciales/campo.html.twig' with {
         nombre: 'acepta_terminos',
         tipo: 'checkbox',
@@ -553,33 +729,36 @@
       } %}
     {# Cierre de la sección 6 #}
     </fieldset>
-
     {# Barra inferior de acciones del formulario de solicitud de sala #}
     <div class="solicitud-acciones-inferior">
       {# Botón primario de envío #}
+      {# Texto del botón de llamado a la acción #}
+      {# Envío del formulario al backend #}
+      {# Variante dorada destacada #}
+      {# Tamaño generoso #}
       {% include 'parciales/boton.html.twig' with {
         texto: 'Volver a enviar la solicitud',
         tipo: 'submit',
         variante: 'primario',
         tamano: 'grande'
       } %}
-
       {# Botón secundario para cancelar #}
+      {# Texto de cancelación #}
+      {# URL de retorno a mi cuenta #}
+      {# Variante secundaria de superficie #}
+      {# Tamaño equilibrado #}
       {% include 'parciales/boton.html.twig' with {
         texto: 'Cancelar solicitud',
         url: '/cuentas/mi-cuenta',
         variante: 'secundario',
         tamano: 'grande'
       } %}
-
       {# Texto de estado de guardado automático #}
       <span class="solicitud-estado-guardado">Última edición: hoy 11:05 · guardado automático</span>
     {# Cierre de las acciones inferiores #}
     </div>
-
   {# Cierre del formulario de sala #}
   </form>
-
 {# Cierre del contenedor de formulario amplio #}
 </div>
 {# Cierre del bloque de contenido #}
