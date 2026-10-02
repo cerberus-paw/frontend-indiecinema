@@ -1,5 +1,6 @@
 <header class="encabezado">
   <div class="contenedor encabezado-contenedor">
+    <!-- Marca / Logo -->
     <div class="encabezado-marca">
       <a href="/" class="marca-enlace" aria-label="IndieCinema Inicio">
         <span class="marca-icono" aria-hidden="true">🎬</span>
@@ -7,6 +8,18 @@
       </a>
     </div>
 
+    <!-- Buscador -->
+    <div class="encabezado-buscador">
+      <form class="buscador-form" action="/buscar" method="get" role="search">
+        <label for="campo-busqueda" class="sr-only">Buscar películas o salas</label>
+        <div class="buscador-caja">
+          <span class="buscador-icono" aria-hidden="true">🔍</span>
+          <input type="search" id="campo-busqueda" name="q" class="buscador-input" placeholder="Buscar películas, salas..." aria-label="Buscar películas, salas" value="{{ consulta_busqueda ?? '' }}">
+        </div>
+      </form>
+    </div>
+
+    <!-- Navegación principal -->
     <nav class="navegacion-principal" aria-label="Navegación principal">
       <ul class="nav-lista">
         <li>
@@ -15,32 +28,139 @@
         <li>
           <a href="/salas" class="nav-enlace{% if ruta_actual starts with '/salas' %} activo{% endif %}">Salas</a>
         </li>
+        <li>
+          <a href="/peliculas" class="nav-enlace{% if ruta_actual starts with '/peliculas' %} activo{% endif %}">Películas</a>
+        </li>
+        <li>
+          <a href="/como-funciona" class="nav-enlace{% if ruta_actual starts with '/como-funciona' %} activo{% endif %}">Cómo funciona</a>
+        </li>
+
+        {# Enlaces rápidos de roles en la barra de navegación #}
         {% if usuario and usuario.alcanza('organizador') %}
-          <li>
-            <a href="/organizador" class="nav-enlace{% if ruta_actual starts with '/organizador' %} activo{% endif %}">Organización</a>
+          <li class="nav-item-rol">
+            <a href="/organizador" class="nav-enlace enlace-rol{% if ruta_actual starts with '/organizador' %} activo{% endif %}" title="Panel de Organización">
+              <span class="icono-rol" aria-hidden="true">🎟️</span> Organización
+            </a>
+          </li>
+        {% endif %}
+        {% if usuario and usuario.alcanza('moderador') %}
+          <li class="nav-item-rol">
+            <a href="/moderacion" class="nav-enlace enlace-rol{% if ruta_actual starts with '/moderacion' %} activo{% endif %}" title="Panel de Moderación">
+              <span class="icono-rol" aria-hidden="true">🛡️</span> Moderación
+            </a>
           </li>
         {% endif %}
         {% if usuario and usuario.alcanza('administrador') %}
-          <li>
-            <a href="/admin" class="nav-enlace{% if ruta_actual starts with '/admin' %} activo{% endif %}">Administración</a>
+          <li class="nav-item-rol">
+            <a href="/admin" class="nav-enlace enlace-rol{% if ruta_actual starts with '/admin' %} activo{% endif %}" title="Panel de Administración">
+              <span class="icono-rol" aria-hidden="true">⚙️</span> Administración
+            </a>
           </li>
         {% endif %}
       </ul>
     </nav>
 
+    <!-- Sesión de usuario / Acciones -->
     <div class="encabezado-usuario">
       {% if usuario %}
-        <div class="perfil-resumen">
-          <div class="usuario-datos">
-            <span class="usuario-nombre">{{ usuario.nombre ?? 'Usuario' }}</span>
-            <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
+        <details class="usuario-desplegable" id="menu-usuario">
+          <summary class="usuario-resumen" aria-haspopup="menu" aria-label="Menú de usuario">
+            <span class="usuario-avatar" aria-hidden="true">
+              {{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}
+            </span>
+            <div class="usuario-info">
+              <span class="usuario-nombre">{{ usuario.nombre ?? 'Usuario' }}</span>
+              <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
+            </div>
+            <span class="desplegable-flecha" aria-hidden="true">▾</span>
+          </summary>
+
+          <div class="usuario-menu-flotante" role="menu">
+            <div class="menu-cabecera">
+              <strong class="menu-usuario-nombre">{{ usuario.nombre ?? 'Usuario' }}</strong>
+              <span class="menu-usuario-rol">Rol activo: {{ usuario.rol.value|capitalize }}</span>
+            </div>
+
+            <div class="menu-separador" role="separator"></div>
+
+            <div class="menu-seccion-titulo">Mi cuenta</div>
+            <a href="/cuenta/" class="menu-item" role="menuitem">
+              <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
+            </a>
+            <a href="/cuenta/reservas" class="menu-item" role="menuitem">
+              <span class="menu-icono" aria-hidden="true">🎫</span> Mis reservas
+            </a>
+            <a href="/cuenta/pagos" class="menu-item" role="menuitem">
+              <span class="menu-icono" aria-hidden="true">💳</span> Mis pagos
+            </a>
+            <a href="/cuenta/seguidos" class="menu-item" role="menuitem">
+              <span class="menu-icono" aria-hidden="true">⭐</span> Salas seguidas
+            </a>
+
+            {# Menú del rol organizador #}
+            {% if usuario.alcanza('organizador') %}
+              <div class="menu-separador" role="separator"></div>
+              <div class="menu-seccion-titulo">Panel del Organizador</div>
+              <a href="/organizador" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">📊</span> Resumen general
+              </a>
+              <a href="/organizador/salas" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🏛️</span> Mis salas (ABM)
+              </a>
+              <a href="/organizador/funciones" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🎬</span> Funciones (ABM)
+              </a>
+              <a href="/organizador/peliculas" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🎞️</span> Películas (ABM)
+              </a>
+            {% endif %}
+
+            {# Menú del rol moderador #}
+            {% if usuario.alcanza('moderador') %}
+              <div class="menu-separador" role="separator"></div>
+              <div class="menu-seccion-titulo">Panel de Moderación</div>
+              <a href="/moderacion" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🛡️</span> Bandeja de moderación
+              </a>
+              <a href="/moderacion/solicitudes" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">📋</span> Solicitudes de sala
+              </a>
+              <a href="/moderacion/denuncias" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">⚠️</span> Denuncias
+              </a>
+              <a href="/moderacion/catalogo" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🔍</span> Revisión de catálogo
+              </a>
+            {% endif %}
+
+            {# Menú del rol administrador #}
+            {% if usuario.alcanza('administrador') %}
+              <div class="menu-separador" role="separator"></div>
+              <div class="menu-seccion-titulo">Administración</div>
+              <a href="/admin" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">⚙️</span> Panel de administración
+              </a>
+              <a href="/admin/usuarios" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
+              </a>
+              <a href="/admin/parametros" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🔧</span> Parámetros del sistema
+              </a>
+              <a href="/admin/estadisticas" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">📈</span> Estadísticas del sitio
+              </a>
+            {% endif %}
+
+            <div class="menu-separador" role="separator"></div>
+            <a href="/cuenta/salir" class="menu-item menu-item-cerrar" role="menuitem">
+              <span class="menu-icono" aria-hidden="true">🚪</span> Cerrar sesión
+            </a>
           </div>
-          <a href="/cuenta/perfil" class="boton boton-secundario boton-chico">Mi Cuenta</a>
-        </div>
+        </details>
       {% else %}
         <div class="usuario-invitado">
-          <a href="/cuenta/ingresar" class="nav-enlace">Ingresar</a>
-          <a href="/cuenta/registro" class="boton boton-primario boton-chico">Registrarse</a>
+          <a href="/cuenta/ingresar" class="nav-enlace enlace-ingresar">Ingresar</a>
+          <a href="/cuenta/registro" class="boton boton-primario boton-chico">Crear cuenta</a>
         </div>
       {% endif %}
     </div>

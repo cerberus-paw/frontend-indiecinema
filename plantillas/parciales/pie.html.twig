@@ -1,36 +1,60 @@
 <footer class="pie-pagina">
   <div class="contenedor pie-contenedor">
-    <div class="pie-columna">
+    <!-- Marca y resumen -->
+    <div class="pie-columna pie-columna-marca">
       <div class="marca-pie">
         <span class="marca-icono" aria-hidden="true">🎬</span>
         <span class="marca-texto">Indie<span class="marca-resaltado">Cinema</span></span>
       </div>
-      <p class="pie-descripcion">
-        Espacio dedicado al cine independiente: catálogo, funciones autogestionadas y salas comunitarias.
+      <p class="pie-lema">
+        Proyecciones de cine independiente en salas indie, programadas por quienes las miran.
+      </p>
+      <p class="pie-sublema">
+        Votá qué se proyecta, acordá la fecha con el resto del público y reservá tu lugar en salas independientes de tu zona.
       </p>
     </div>
 
+    <!-- Columna Explorar -->
     <div class="pie-columna">
-      <h3 class="pie-subtitulo">Subsistemas</h3>
+      <h3 class="pie-subtitulo">Explorar</h3>
       <ul class="pie-enlaces">
-        <li><a href="/">Programación</a></li>
-        <li><a href="/cuenta/">Cuentas y Perfil</a></li>
-        <li><a href="/funcion/">Funciones</a></li>
+        <li><a href="/">Cartelera</a></li>
+        <li><a href="/salas">Salas indie</a></li>
+        <li><a href="/peliculas">Películas / Catálogo</a></li>
+        <li><a href="/peliculas/pedidos">Títulos más pedidos</a></li>
       </ul>
     </div>
 
+    <!-- Columna Participar -->
     <div class="pie-columna">
-      <h3 class="pie-subtitulo">Comunidad</h3>
+      <h3 class="pie-subtitulo">Participar</h3>
       <ul class="pie-enlaces">
-        <li><a href="/salas">Salas independientes</a></li>
-        <li><a href="/cuenta/registro">Sumarse al proyecto</a></li>
+        <li><a href="/como-funciona">Cómo funciona</a></li>
+        <li><a href="/cuenta/registro">Crear cuenta</a></li>
+        <li><a href="/salas/solicitar">Abrir una sala</a></li>
+        {% if usuario and usuario.alcanza('organizador') %}
+          <li><a href="/organizador">Panel de organizador</a></li>
+        {% endif %}
+        <li><a href="/cuenta/puntos">Programa de puntos</a></li>
+      </ul>
+    </div>
+
+    <!-- Columna Plataforma -->
+    <div class="pie-columna">
+      <h3 class="pie-subtitulo">Plataforma</h3>
+      <ul class="pie-enlaces">
+        <li><a href="/terminos">Términos y condiciones</a></li>
+        <li><a href="/normas">Normas de convivencia</a></li>
+        <li><a href="/denuncias">Denunciar contenido</a></li>
+        <li><a href="/contacto">Contacto</a></li>
       </ul>
     </div>
   </div>
 
   <div class="pie-creditos">
     <div class="contenedor pie-creditos-contenedor">
-      <p>&copy; 2026 IndieCinema · Cerberus (UNLu - PAW)</p>
+      <p>&copy; 2026 IndieCinema · Grupo Cerberus · UNLu (PAW)</p>
+      <p class="pie-tag-wireframe">Cine Independiente · Salas Indie · Programación Participativa</p>
     </div>
   </div>
 </footer>

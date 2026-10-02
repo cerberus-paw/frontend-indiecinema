@@ -48,4 +48,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return fetchOriginal(recurso, opciones);
   };
+
+  // Cerrar el menú desplegable de usuario al hacer click afuera o presionar Escape
+  const menuUsuario = document.getElementById('menu-usuario');
+  if (menuUsuario) {
+    document.addEventListener('click', (evento) => {
+      if (menuUsuario.open && !menuUsuario.contains(evento.target)) {
+        menuUsuario.removeAttribute('open');
+      }
+    });
+
+    document.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Escape' && menuUsuario.open) {
+        menuUsuario.removeAttribute('open');
+        menuUsuario.querySelector('summary')?.focus();
+      }
+    });
+  }
 });
