@@ -1,121 +1,128 @@
 /**
- * IndieCinema Frontend — Script Principal de la Aplicación (IC-42 / IC-43).
+ * IndieCinema Frontend — Script Principal de la Aplicación (IC-42 / IC-43 / IC-45).
  *
  * Responsabilidades:
- * 1. Protección contra ataques CSRF: inyección automática del token en formularios POST y peticiones fetch.
- * 2. Comportamiento interactivo accesible: cierre de menús desplegables por clic externo o tecla Escape.
+ * 1. Protección contra ataques CSRF: utilidad `enviar(url, opciones)` que adjunta
+ *    de manera segura el token `X-CSRF-Token` únicamente a peticiones mutables del mismo origen.
+ * 2. Comportamiento interactivo accesible: control del menú desplegable de usuario
+ *    (cierre al hacer clic fuera o al presionar la tecla Escape).
  */
 
-// Espera a que el árbol DOM esté completamente cargado para interactuar con los elementos de la página
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Obtiene el valor del token CSRF provisto en la etiqueta <meta name="csrf"> de la plantilla base.
+ *
+ * Dado que la cookie de sesión CSRF es HttpOnly por diseño de seguridad, el token
+ * se publica de forma segura a través del meta tag para el código cliente.
+ *
+ * @returns {string} El token CSRF o cadena vacía si no existe.
+ */
+function obtenerTokenCsrf() {
+  const meta = document.querySelector('meta[name="csrf"]');
+  return meta ? (meta.getAttribute('content') || '') : '';
+}
 
-  /**
-   * Extrae el valor del token CSRF almacenado en la cookie 'csrf'.
-   *
-   * El backend implementa protección CSRF mediante el patrón de doble envío de cookies (Double Submit Cookie).
-   * La cookie 'csrf' contiene un hash aleatorio de 64 caracteres generado por el núcleo en la primera petición.
-   *
-   * @returns {string} El token CSRF leído o cadena vacía si la cookie no existe.
-   */
-  function obtenerTokenCsrf() {
-    // Busca en document.cookie el par clave-valor correspondiente a 'csrf' usando una expresión regular
-    const coincidencia = document.cookie.match(/(?:^|;\s*)csrf=([^;]*)/);
-    // Si se encontró la cookie devuelve su valor decodificado; si no, devuelve una cadena vacía
-    return coincidencia ? decodeURIComponent(coincidencia[1]) : '';
+/**
+ * Determina si una URL o recurso pertenece al mismo origen que la aplicación actual (Same-Origin).
+ *
+ * @param {string|Request|URL} recurso - Destino de la petición HTTP.
+ * @returns {boolean} Verdadero si la petición se dirige al mismo origen.
+ */
+function esMismoOrigen(recurso) {
+  try {
+    const urlString = (typeof recurso === 'string')
+      ? recurso
+      : (recurso && recurso.url)
+        ? recurso.url
+        : String(recurso);
+
+    // Rutas relativas son siempre del mismo origen
+    if (urlString.startsWith('/') && !urlString.startsWith('//')) {
+      return true;
+    }
+    const urlObj = new URL(urlString, window.location.origin);
+    return urlObj.origin === window.location.origin;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Envoltorio seguro sobre `fetch` que adjunta la cabecera `X-CSRF-Token`
+ * únicamente en peticiones mutables (POST, PUT, DELETE, PATCH) dirigidas al mismo dominio.
+ *
+ * A diferencia de sobrescribir `window.fetch`, esta función:
+ * - Se encuentra disponible de inmediato (incluso para scripts ejecutados antes de DOMContentLoaded).
+ * - No filtra el token CSRF a dominios externos.
+ * - Evita duplicar cabeceras en caso de ser enviadas en minúsculas (evitando errores 403).
+ * - Respeta instancias de `Request` u objetos de opciones.
+ *
+ * @param {string|Request} recurso - URL o Request a consultar.
+ * @param {RequestInit} [opciones={}] - Opciones de configuración de fetch.
+ * @returns {Promise<Response>} Promesa de la respuesta HTTP.
+ */
+function enviar(recurso, opciones = {}) {
+  let metodo = 'GET';
+  if (opciones && opciones.method) {
+    metodo = opciones.method.toUpperCase();
+  } else if (recurso instanceof Request && recurso.method) {
+    metodo = recurso.method.toUpperCase();
   }
 
-  // Obtiene el token CSRF disponible en el cliente
-  const token = obtenerTokenCsrf();
+  const metodosMutables = ['POST', 'PUT', 'DELETE', 'PATCH'];
 
-  // Si existe un token CSRF válido, se asegura de que todos los formularios POST lo envíen automáticamente
-  if (token) {
-    // Selecciona todos los formularios que declaran método POST (insensible a mayúsculas/minúsculas)
-    document.querySelectorAll('form[method="post" i], form[method="POST"]').forEach((formulario) => {
-      // Verifica si el formulario ya cuenta con un campo _csrf explícito para no duplicarlo
-      if (!formulario.querySelector('input[name="_csrf"]')) {
-        // Crea un elemento input oculto en el DOM
-        const campoOculto = document.createElement('input');
-        // Define el tipo como 'hidden' para no afectar visualmente el diseño
-        campoOculto.type = 'hidden';
-        // Asigna el nombre '_csrf', que es el nombre exacto que busca ProteccionCsrf::verificar() en el backend
-        campoOculto.name = '_csrf';
-        // Asigna el valor del token extraído de la cookie
-        campoOculto.value = token;
-        // Agrega el campo al final del formulario antes de que pueda ser enviado
-        formulario.appendChild(campoOculto);
+  // Solo inyectar CSRF en peticiones mutables dirigidas a nuestro propio origen
+  if (metodosMutables.includes(metodo) && esMismoOrigen(recurso)) {
+    const token = obtenerTokenCsrf();
+    if (token) {
+      if (!opciones.headers) {
+        opciones.headers = {};
       }
-    });
-  }
 
-  // Guarda una referencia al método fetch nativo del navegador antes de sobreescribirlo
-  const fetchOriginal = window.fetch;
-
-  /**
-   * Sobrescribe window.fetch para adjuntar de manera transparente la cabecera 'X-CSRF-Token'.
-   *
-   * De este modo, cualquier llamada asíncrona (AJAX) realizada con fetch para operaciones que alteran estado
-   * (POST, PUT, DELETE, PATCH) pasa la validación CSRF del núcleo sin requerir código manual adicional.
-   */
-  window.fetch = function (recurso, opciones = {}) {
-    // Obtiene el método HTTP de la petición o asume 'GET' por defecto
-    const metodo = (opciones.method || 'GET').toUpperCase();
-
-    // Solo los métodos que no son de sólo lectura (como GET o HEAD) requieren verificación de token CSRF
-    if (metodo !== 'GET' && metodo !== 'HEAD') {
-      // Inicializa el objeto o mapa de cabeceras si no fue provisto
-      opciones.headers = opciones.headers || {};
-      // Obtiene el valor más actualizado del token CSRF
-      const tokenCsrf = obtenerTokenCsrf();
-
-      // Si existe un token CSRF, se inyecta según el formato en el que se hayan provisto las cabeceras
-      if (tokenCsrf) {
-        // Caso 1: Se pasó una instancia estándar de la clase Headers
-        if (opciones.headers instanceof Headers) {
-          // Verifica si no tiene la cabecera para no pisar una configuración deliberada
-          if (!opciones.headers.has('X-CSRF-Token')) {
-            opciones.headers.append('X-CSRF-Token', tokenCsrf);
-          }
-        // Caso 2: Se pasó un array de pares clave-valor tipo [['Header', 'Value']]
-        } else if (Array.isArray(opciones.headers)) {
-          // Comprueba si ya existe alguna entrada insensible a mayúsculas
-          if (!opciones.headers.some(([k]) => k.toLowerCase() === 'x-csrf-token')) {
-            opciones.headers.push(['X-CSRF-Token', tokenCsrf]);
-          }
-        // Caso 3: Se pasó un objeto literal tradicional tipo { 'Content-Type': 'application/json' }
-        } else {
-          // Asigna la propiedad si aún no estaba definida
-          if (!opciones.headers['X-CSRF-Token']) {
-            opciones.headers['X-CSRF-Token'] = tokenCsrf;
-          }
+      if (opciones.headers instanceof Headers) {
+        if (!opciones.headers.has('x-csrf-token') && !opciones.headers.has('X-CSRF-Token')) {
+          opciones.headers.set('X-CSRF-Token', token);
+        }
+      } else if (Array.isArray(opciones.headers)) {
+        const existe = opciones.headers.some(([k]) => k.toLowerCase() === 'x-csrf-token');
+        if (!existe) {
+          opciones.headers.push(['X-CSRF-Token', token]);
+        }
+      } else {
+        // Objeto plano
+        const tieneClave = Object.keys(opciones.headers).some(
+          (k) => k.toLowerCase() === 'x-csrf-token'
+        );
+        if (!tieneClave) {
+          opciones.headers['X-CSRF-Token'] = token;
         }
       }
     }
+  }
 
-    // Invoca el fetch nativo original con las cabeceras enriquecidas y devuelve la promesa resultante
-    return fetchOriginal(recurso, opciones);
-  };
+  return window.fetch(recurso, opciones);
+}
 
-  // Obtiene el elemento del menú desplegable del usuario autenticado
+// Expone la función utilitaria globalmente
+window.enviar = enviar;
+window.obtenerTokenCsrf = obtenerTokenCsrf;
+
+// Inicialización de interactividad accesible al cargar el DOM
+document.addEventListener('DOMContentLoaded', () => {
+  // Menú desplegable del usuario autenticado
   const menuUsuario = document.getElementById('menu-usuario');
 
-  // Si el menú existe en la página actual (es decir, hay un usuario con sesión activa)
   if (menuUsuario) {
-    // Escucha clics en todo el documento para cerrar el menú cuando el usuario hace clic afuera
+    // Cierra el menú al hacer clic en cualquier parte fuera de su contenedor
     document.addEventListener('click', (evento) => {
-      // Si el menú está abierto y el clic ocurrió fuera de sus límites
       if (menuUsuario.open && !menuUsuario.contains(evento.target)) {
-        // Remueve el atributo booleano 'open' del details para ocultar el menú flotante
         menuUsuario.removeAttribute('open');
       }
     });
 
-    // Escucha eventos de teclado para mejorar la accesibilidad (WCAG)
+    // Cierra el menú y devuelve el foco al presionar la tecla Escape (WCAG 2.1)
     document.addEventListener('keydown', (evento) => {
-      // Si se presiona la tecla Escape y el menú desplegable se encuentra abierto
       if (evento.key === 'Escape' && menuUsuario.open) {
-        // Cierra el menú desplegable
         menuUsuario.removeAttribute('open');
-        // Devuelve el foco del teclado al elemento summary para mantener una navegación accesible fluida
         menuUsuario.querySelector('summary')?.focus();
       }
     });

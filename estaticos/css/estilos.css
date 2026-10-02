@@ -9,35 +9,35 @@
    Centralizan los valores de la identidad visual de la Entrega 1.
    -------------------------------------------------------------------------- */
 :root {
-  /* ── 1.1 Paleta de Superficies y Fondos Cinematográficos ──────────────── */
-  /* Fondo principal (#0b0d14): negro noche profundo que evoca una sala de proyección a oscuras */
-  --color-fondo: #0b0d14;
-  /* Fondo alternativo (#0f121c): tono sutilmente más claro para contraste por capas */
-  --color-fondo-alt: #0f121c;
-  /* Superficie base (#131722): carbón azulado para tarjetas, modales y barras de navegación */
-  --color-superficie: #131722;
-  /* Superficie elevada (#1a2030): empleada en inputs, menús flotantes y cajas de contenido */
-  --color-superficie-elevada: #1a2030;
-  /* Superficie interactiva (#232b40): utilizada para estados activos y selecciones */
-  --color-superficie-interactiva: #232b40;
-  /* Fondo hover (#ffffff0d): blanco al 5% para realces tenues en elementos clicables */
-  --color-superficie-hover: rgba(255, 255, 255, 0.05);
+  /* ── 1.1 Paleta de Superficies y Fondos Cinematográficos (Identidad E1) ── */
+  /* Fondo principal (#17141C): Tinta oscura profunda */
+  --color-fondo: #17141C;
+  /* Fondo alternativo (#1e1a24): tono sutilmente más claro para contraste por capas */
+  --color-fondo-alt: #1e1a24;
+  /* Superficie base (#241f2c): para tarjetas, modales y barras de navegación */
+  --color-superficie: #241f2c;
+  /* Superficie elevada (#2d2737): empleada en inputs, menús flotantes y cajas de contenido */
+  --color-superficie-elevada: #2d2737;
+  /* Superficie interactiva (#383144): utilizada para estados activos y selecciones */
+  --color-superficie-interactiva: #383144;
+  /* Fondo hover: blanco al 6% para realces tenues en elementos clicables */
+  --color-superficie-hover: rgba(255, 255, 255, 0.06);
 
   /* ── 1.2 Paleta de Bordes y Divisores ─────────────────────────────────── */
-  /* Borde tenue (#ffffff14): blanco al 8% para delimitar contenedores sin generar cortes visuales duros */
-  --color-borde: rgba(255, 255, 255, 0.08);
-  /* Borde medio (#ffffff26): blanco al 15% para estados hover y separadores visibles */
-  --color-borde-medio: rgba(255, 255, 255, 0.15);
-  /* Borde fuerte (#ffffff40): blanco al 25% para inputs enfocados y tarjetas seleccionadas */
-  --color-borde-fuerte: rgba(255, 255, 255, 0.25);
+  /* Borde tenue: crema al 10% para delimitar contenedores sin generar cortes visuales duros */
+  --color-borde: rgba(251, 244, 231, 0.10);
+  /* Borde medio: crema al 18% para estados hover y separadores visibles */
+  --color-borde-medio: rgba(251, 244, 231, 0.18);
+  /* Borde fuerte: crema al 30% para inputs enfocados y tarjetas seleccionadas */
+  --color-borde-fuerte: rgba(251, 244, 231, 0.30);
 
   /* ── 1.3 Colores de Marca y Acento de Roles (E1) ─────────────────────── */
-  /* Dorado ámbar (#f59e0b): color insignia de IndieCinema, entradas, claqueta y organizadores */
-  --color-primario: #f59e0b;
-  /* Ámbar oscurecido (#d97706): tono de interacción para :hover y :active en botones primarios */
-  --color-primario-hover: #d97706;
-  /* Dorado suave (#f59e0b26): ámbar al 15% para fondos de enlaces activos e insignias */
-  --color-primario-suave: rgba(245, 158, 11, 0.15);
+  /* Ámbar (#F0A63B): color insignia de IndieCinema, entradas, claqueta y organizadores */
+  --color-primario: #F0A63B;
+  /* Ámbar oscurecido (#D8922C): tono de interacción para :hover y :active en botones primarios */
+  --color-primario-hover: #D8922C;
+  /* Ámbar suave: ámbar al 15% para fondos de enlaces activos e insignias */
+  --color-primario-suave: rgba(240, 166, 59, 0.15);
 
   /* Carmesí cine (#e11d48): color de butacas clásicas, marquesinas y nivel de Administrador */
   --color-acento: #e11d48;
@@ -54,28 +54,28 @@
   --color-moderador-suave: rgba(99, 102, 241, 0.15);
 
   /* ── 1.4 Texto y Contraste de Lectura (WCAG 2.1 AAA) ──────────────────── */
-  /* Texto principal (#f8fafc): blanco tiza con brillo controlado para evitar fatiga ocular */
-  --color-texto: #f8fafc;
-  /* Texto secundario (#94a3b8): gris plateado para descripciones, metadatos y subtítulos */
-  --color-texto-secundario: #94a3b8;
-  /* Texto atenuado (#64748b): gris grafito para placeholders, iconos pasivos y pies de página */
-  --color-texto-apagado: #64748b;
-  /* Texto inverso (#0b0d14): negro noche para lectura sobre botones con fondo primario dorado */
-  --color-texto-inverso: #0b0d14;
+  /* Texto principal (#FBF4E7): Crema sobre fondo oscuro */
+  --color-texto: #FBF4E7;
+  /* Texto secundario (#D4C9B8): crema suave para descripciones, metadatos y subtítulos */
+  --color-texto-secundario: #D4C9B8;
+  /* Texto atenuado (#8C8478): crema apagado para placeholders, iconos pasivos y pies de página */
+  --color-texto-apagado: #8C8478;
+  /* Texto inverso (#17141C): Tinta para lectura sobre botones con fondo primario ámbar */
+  --color-texto-inverso: #17141C;
 
   /* ── 1.5 Colores de Estado del Sistema ────────────────────────────────── */
   /* Éxito (#10b981): verde esmeralda para operaciones exitosas y cupos disponibles */
   --color-exito: #10b981;
-  /* Advertencia (#f59e0b): ámbar para alertas de expiración y advertencias de moderación */
-  --color-advertencia: #f59e0b;
+  /* Advertencia (#F0A63B): ámbar para alertas de expiración y advertencias de moderación */
+  --color-advertencia: #F0A63B;
   /* Error (#ef4444): rojo vibrante para errores de validación, páginas 404/500 y cancelaciones */
   --color-error: #ef4444;
 
   /* ── 1.6 Familias Tipográficas ────────────────────────────────────────── */
-  /* Outfit: tipografía moderna sans-serif con fuerte personalidad para títulos y branding */
-  --fuente-titulos: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  /* Inter: estándar de legibilidad optimizado para pantallas, cuerpo de texto y controles */
-  --fuente-cuerpo: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Fira Sans Condensed: tipografía oficial de IndieCinema para títulos y branding */
+  --fuente-titulos: 'Fira Sans Condensed', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Fira Sans Condensed: tipografía oficial para cuerpo de texto y controles */
+  --fuente-cuerpo: 'Fira Sans Condensed', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   /* Monospace: para trazas técnicas de error, tokens CSRF y bloques de depuración */
   --fuente-codigo: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
 
@@ -411,8 +411,8 @@ a:hover {
   top: 0;
   /* Capa de apilamiento para flotar sobre el contenido */
   z-index: 100;
-  /* Fondo semitransparente oscuro */
-  background-color: rgba(11, 13, 20, 0.92);
+  /* Fondo semitransparente oscuro tinta */
+  background-color: rgba(23, 20, 28, 0.92);
   /* Desenfoque de fondo para efecto cristal esmerilado */
   backdrop-filter: blur(14px);
   /* Compatibilidad con navegadores basados en WebKit */
@@ -467,6 +467,13 @@ a:hover {
   letter-spacing: -0.02em;
   /* Previene quiebres de línea en el nombre */
   white-space: nowrap;
+}
+
+/* Imagen del logotipo oficial vectorial en el encabezado */
+.marca-logo-img {
+  height: 38px;
+  width: auto;
+  display: block;
 }
 
 /* Ícono de claqueta en el logo */
@@ -953,6 +960,23 @@ a:hover {
   transition: all var(--transicion-base);
 }
 
+/* Soporte para botones como items de menú (ej: formularios de acción POST) */
+button.menu-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.form-menu-item {
+  margin: 0;
+  padding: 0;
+  display: block;
+  width: 100%;
+}
+
 /* Hover de item de menú */
 .menu-item:hover {
   /* Resalte de fondo */
@@ -1382,7 +1406,7 @@ dd {
   align-items: center;
   /* Separación entre icono y texto */
   gap: var(--espacio-2);
-  /* Tipografía Outfit */
+  /* Tipografía oficial */
   font-family: var(--fuente-titulos);
   /* Tamaño destacado */
   font-size: 1.3rem;
@@ -1390,6 +1414,13 @@ dd {
   font-weight: 700;
   /* Margen inferior */
   margin-bottom: var(--espacio-3);
+}
+
+/* Imagen del logotipo oficial vectorial en el pie */
+.marca-logo-pie-img {
+  height: 42px;
+  width: auto;
+  display: block;
 }
 
 /* Lema del pie */

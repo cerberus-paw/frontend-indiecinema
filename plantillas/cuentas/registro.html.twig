@@ -47,9 +47,9 @@
     {# Cierre del condicional de error general #}
     {% endif %}
     {# Formulario HTML con envío seguro por POST y novalidate para validación unificada #}
-    <form action="/cuentas/registro" method="POST" class="formulario-registro" novalidate>
+    <form action="/cuenta/registro" method="POST" class="formulario-registro" novalidate>
       {# Campo oculto para el token de protección contra ataques CSRF #}
-      <input type="hidden" name="_csrf" value="{{ _csrf ?? (csrf ?? '') }}">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
       {# Campo 1: Nombre completo o apodo público del usuario #}
       {# Parámetros: nombre ('nombre'), etiqueta legible, tipo text, persistencia de valor, placeholder guía, ayuda y validación requerida con su error #}
       {% include 'parciales/campo.html.twig' with {
@@ -125,8 +125,8 @@
       {# Texto con enlace hacia la pantalla de login #}
       <p class="autenticacion-enlace-texto">
         ¿Ya tenés una cuenta?
-        {# Enlace estilizado con el prefijo del subsistema cuentas #}
-        <a href="/cuentas/ingresar" class="enlace-destacado">Iniciar sesión</a>
+        {# Enlace estilizado con el prefijo canónico del subsistema cuenta #}
+        <a href="/cuenta/ingresar" class="enlace-destacado">Iniciar sesión</a>
       {# Cierre del párrafo #}
       </p>
     {# Cierre del pie de la tarjeta #}

@@ -1,7 +1,8 @@
 {#
-  Parcial de pie de página (IC-43)
-  Estructura el pie del sitio en 4 columnas alineadas con los wireframes de la Entrega 2:
-  Identidad del proyecto, enlaces de Exploración, Participación, Plataforma y créditos legales.
+  Parcial de pie de página (IC-43 / IC-44 / IC-45)
+  Estructura el pie del sitio alineado a la identidad visual oficial E1 y al backlog de la Entrega 3:
+  Identidad del proyecto con logotipo oficial, enlaces a Cartelera (/cartelera), Salas y Películas (/obras),
+  participación comunitaria y créditos legales.
 #}
 {# Resuelve de forma segura el usuario en sesión o null para evitar errores en modo estricto de Twig #}
 {% set usr = usuario ?? null %}
@@ -10,41 +11,37 @@
   {# Contenedor con ancho delimitado y padding horizontal para centrar el contenido #}
   <div class="contenedor pie-contenedor">
 
-    {# Columna 1: Marca, isotipo y lema descriptivo del proyecto IndieCinema #}
+    {# Columna 1: Marca, logotipo oficial y lema descriptivo del proyecto IndieCinema #}
     <div class="pie-columna pie-columna-marca">
-      {# Contenedor del isotipo y tipografía de la marca en el pie #}
+      {# Contenedor del logotipo oficial en el pie #}
       <div class="marca-pie">
-        {# Ícono decorativo de claqueta coherente con el encabezado #}
-        <span class="marca-icono" aria-hidden="true">🎬</span>
-        {# Texto de la marca con resalte en la palabra 'Cinema' #}
-        <span class="marca-texto">Indie<span class="marca-resaltado">Cinema</span></span>
+        {# Logotipo vectorial oficial de la identidad visual E1 #}
+        <img src="/estaticos/img/logo-horizontal-dark.svg" alt="IndieCinema" class="marca-logo-pie-img" width="112" height="48">
       {# Cierre del contenedor de marca #}
       </div>
-      {# Lema central extraído textualmente del wireframe del Home #}
+      {# Lema central extraído del concepto de la plataforma #}
       <p class="pie-lema">
         Proyecciones de cine independiente en salas indie, programadas por quienes las miran.
       </p>
-      {# Sublema explicativo que sintetiza el modelo colaborativo del proyecto #}
+      {# Sublema explicativo del modelo colaborativo #}
       <p class="pie-sublema">
         Votá qué se proyecta, acordá la fecha con el resto del público y reservá tu lugar en salas independientes de tu zona.
       </p>
     {# Cierre de la primera columna #}
     </div>
 
-    {# Columna 2: Enlaces de exploración y catálogo público #}
+    {# Columna 2: Enlaces de exploración y catálogo público del backlog E3 #}
     <div class="pie-columna">
-      {# Título de la columna en mayúsculas pequeñas para jerarquía visual #}
+      {# Título de la columna #}
       <h3 class="pie-subtitulo">Explorar</h3>
-      {# Lista de enlaces de exploración #}
+      {# Lista de enlaces activos de exploración #}
       <ul class="pie-enlaces">
-        {# Enlace a la cartelera de funciones activas en programación #}
-        <li><a href="/">Cartelera</a></li>
+        {# Enlace canónico a la cartelera de funciones activas #}
+        <li><a href="/cartelera">Cartelera</a></li>
         {# Enlace al directorio de salas indie registradas #}
         <li><a href="/salas">Salas indie</a></li>
-        {# Enlace al catálogo de películas postuladas #}
-        <li><a href="/peliculas">Películas / Catálogo</a></li>
-        {# Enlace al ranking de títulos con mayor cantidad de solicitudes populares #}
-        <li><a href="/peliculas/pedidos">Títulos más pedidos</a></li>
+        {# Enlace al catálogo de películas (obras) #}
+        <li><a href="/obras">Películas / Catálogo</a></li>
       {# Cierre de la lista de exploración #}
       </ul>
     {# Cierre de la segunda columna #}
@@ -54,42 +51,32 @@
     <div class="pie-columna">
       {# Título de la columna de participación #}
       <h3 class="pie-subtitulo">Participar</h3>
-      {# Lista de enlaces de participación #}
+      {# Lista de enlaces de participación disponibles #}
       <ul class="pie-enlaces">
-        {# Enlace a la guía paso a paso sobre cómo funciona la votación y reserva #}
+        {# Enlace a la guía explicativa #}
         <li><a href="/como-funciona">Cómo funciona</a></li>
-        {# Enlace directo para registrarse en el subsistema de cuentas #}
+        {# Enlace para registrarse en el subsistema de cuentas #}
         <li><a href="/cuenta/registro">Crear cuenta</a></li>
-        {# Enlace para postular un espacio físico propio como sala indie asociada #}
-        <li><a href="/salas/solicitar">Abrir una sala</a></li>
+        {# Acceso a mis reservas #}
+        <li><a href="/funcion/mis-reservas">Mis reservas</a></li>
         {# Si el usuario tiene rol organizador o superior, muestra acceso rápido a su panel #}
         {% if usr and usr.alcanza('organizador') %}
-          <li><a href="/organizador">Panel de organizador</a></li>
+          <li><a href="/organizador">Panel del Organizador</a></li>
+          <li><a href="/organizador/salas/nueva">Publicar una sala</a></li>
         {% endif %}
-        {# Enlace informativo al programa de fidelización y puntos por asistencia #}
-        <li><a href="/cuenta/puntos">Programa de puntos</a></li>
       {# Cierre de la lista de participación #}
       </ul>
     {# Cierre de la tercera columna #}
     </div>
 
-    {# Columna 4: Enlaces institucionales, términos legales y soporte #}
+    {# Columna 4: Información de plataforma institucional (E3) #}
     <div class="pie-columna">
-      {# Título de la columna institucional #}
-      <h3 class="pie-subtitulo">Plataforma</h3>
-      {# Lista de enlaces de plataforma #}
+      <h3 class="pie-subtitulo">Comunidad</h3>
       <ul class="pie-enlaces">
-        {# Enlace a los términos legales del servicio y uso de la plataforma #}
-        <li><a href="/terminos">Términos y condiciones</a></li>
-        {# Enlace a las reglas de comportamiento y respeto comunitario en salas #}
-        <li><a href="/normas">Normas de convivencia</a></li>
-        {# Enlace al canal de denuncias para moderación de contenido o infracciones #}
-        <li><a href="/denuncias">Denunciar contenido</a></li>
-        {# Enlace al formulario o datos de contacto con el equipo #}
-        <li><a href="/contacto">Contacto</a></li>
-      {# Cierre de la lista de plataforma #}
+        <li><a href="/como-funciona">Dinámica colaborativa</a></li>
+        <li><a href="/obras">Postular obras</a></li>
+        <li><a href="/cartelera">Próximas funciones</a></li>
       </ul>
-    {# Cierre de la cuarta columna #}
     </div>
   {# Cierre del contenedor principal del pie #}
   </div>

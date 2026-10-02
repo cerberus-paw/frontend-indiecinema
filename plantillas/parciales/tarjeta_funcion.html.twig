@@ -44,7 +44,7 @@
 {# Cierre del condicional de estados #}
 {% endif %}
 {# Resuelve la URL canónica de destino hacia el detalle de la función #}
-{% set url_detalle = funcion.url ?? ('/programacion/funciones/' ~ funcion_id) %}
+{% set url_detalle = funcion.url ?? ('/funcion/' ~ funcion_id) %}
 {# Resuelve la representación textual del precio de la función predeterminando 'A la gorra' si no se indicó #}
 {% set texto_precio = funcion.precio ?? 'A la gorra' %}
 {# Contenedor principal de la tarjeta con semántica de artículo independiente #}
