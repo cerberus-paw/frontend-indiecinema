@@ -80,36 +80,61 @@
   --fuente-codigo: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
 
   /* ── 1.7 Escala Tipográfica Fluida ────────────────────────────────────── */
-  --texto-xs: 0.75rem;    /* 12px: badges, leyendas y microtexto */
-  --texto-sm: 0.875rem;   /* 14px: inputs, botones chicos y navegación */
-  --texto-base: 1rem;     /* 16px: texto normal de párrafos */
-  --texto-md: 1.125rem;   /* 18px: subtítulos pequeños y resúmenes */
-  --texto-lg: 1.25rem;    /* 20px: encabezados h4 y títulos de tarjetas */
-  --texto-xl: 1.5rem;     /* 24px: encabezados h3 */
-  --texto-2xl: 1.875rem;  /* 30px: encabezados h2 */
-  --texto-3xl: 2.25rem;   /* 36px: encabezados h1 */
+  /* 12px: badges, leyendas y microtexto */
+  --texto-xs: 0.75rem;
+  /* 14px: inputs, botones chicos y navegación */
+  --texto-sm: 0.875rem;
+  /* 16px: texto normal de párrafos */
+  --texto-base: 1rem;
+  /* 18px: subtítulos pequeños y resúmenes */
+  --texto-md: 1.125rem;
+  /* 20px: encabezados h4 y títulos de tarjetas */
+  --texto-lg: 1.25rem;
+  /* 24px: encabezados h3 */
+  --texto-xl: 1.5rem;
+  /* 30px: encabezados h2 */
+  --texto-2xl: 1.875rem;
+  /* 36px: encabezados h1 */
+  --texto-3xl: 2.25rem;
 
   /* ── 1.8 Escala Modular de Espaciado ─────────────────────────────────── */
-  --espacio-1: 0.25rem;  /* 4px */
-  --espacio-2: 0.5rem;   /* 8px */
-  --espacio-3: 0.75rem;  /* 12px */
-  --espacio-4: 1rem;     /* 16px */
-  --espacio-5: 1.25rem;  /* 20px */
-  --espacio-6: 1.5rem;   /* 24px */
-  --espacio-8: 2rem;     /* 32px */
-  --espacio-10: 2.5rem;  /* 40px */
-  --espacio-12: 3rem;    /* 48px */
+  /* 4px: espaciado mínimo entre iconos y texto */
+  --espacio-1: 0.25rem;
+  /* 8px: margen entre elementos contiguos */
+  --espacio-2: 0.5rem;
+  /* 12px: padding interno de botones compactos */
+  --espacio-3: 0.75rem;
+  /* 16px: padding estándar de contenedores */
+  --espacio-4: 1rem;
+  /* 20px: separación entre grupos medianos */
+  --espacio-5: 1.25rem;
+  /* 24px: padding de tarjetas */
+  --espacio-6: 1.5rem;
+  /* 32px: margen entre secciones principales */
+  --espacio-8: 2rem;
+  /* 40px: espaciado amplio */
+  --espacio-10: 2.5rem;
+  /* 48px: separación del pie de página */
+  --espacio-12: 3rem;
 
   /* ── 1.9 Radios de Curvatura (Border Radius) ─────────────────────────── */
-  --radio-sm: 6px;       /* Botones pequeños y badges */
-  --radio-md: 10px;      /* Botones estándar y cajas de input */
-  --radio-lg: 16px;      /* Tarjetas, modales y menú flotante */
-  --radio-completo: 9999px; /* Botones tipo píldora, inputs de búsqueda y avatares */
+  /* 6px: botones pequeños y badges */
+  --radio-sm: 6px;
+  /* 10px: botones estándar y cajas de input */
+  --radio-md: 10px;
+  /* 16px: tarjetas, modales y menú flotante */
+  --radio-lg: 16px;
+  /* 9999px: botones tipo píldora, inputs de búsqueda y avatares circulares */
+  --radio-completo: 9999px;
 
   /* ── 1.10 Sombras e Iluminación Cinematográfica ──────────────────────── */
+  /* Sombra sutil para elevaciones leves */
   --sombra-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  /* Sombra media para tarjetas estándar */
   --sombra-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  /* Sombra profunda para modales y tarjetas de error */
   --sombra-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+  /* Sombra difusa con aro luminoso para menús flotantes */
   --sombra-flotante: 0 14px 35px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
 
   /* ── 1.11 Layout y Ancho Máximo ───────────────────────────────────────── */
@@ -124,43 +149,59 @@
    Evita desbordes horizontales accidentales en cualquier tamaño de pantalla.
    -------------------------------------------------------------------------- */
 
-/* Aplica box-sizing: border-box y remueve márgenes iniciales en todos los selectores */
+/* Aplica el modelo de caja border-box universal para que paddings y bordes no expandan el ancho calculado */
 *,
 *::before,
 *::after {
+  /* Calcula anchos incluyendo bordes y relleno para evitar desbordes */
   box-sizing: border-box;
+  /* Elimina márgenes exteriores residuales del navegador */
   margin: 0;
+  /* Elimina rellenos interiores residuales del navegador */
   padding: 0;
 }
 
 /* Configura tamaño base de fuente, scroll suave y previene scroll horizontal en el root */
 html {
+  /* Define 16px como tamaño de texto raíz base */
   font-size: 16px;
+  /* Habilita desplazamiento suave en saltos de ancla */
   scroll-behavior: smooth;
+  /* Declara compatibilidad nativa con tema oscuro ante el navegador */
   color-scheme: dark;
-  /* Asegura que el documento nunca desborde el ancho de la ventana */
+  /* Impide que el elemento html exceda el 100% de la ventana */
   max-width: 100%;
+  /* Desactiva scroll horizontal en la raíz del documento */
   overflow-x: hidden;
 }
 
 /* Cuerpo de la aplicación con estructura flexbox vertical */
 body.cuerpo-app {
-  /* Ocupa al menos toda la altura de la ventana para que el footer no quede flotando */
+  /* Asegura que el body cubra al menos toda la altura de la pantalla */
   min-height: 100vh;
-  /* Disposición flex vertical para sticky footer */
+  /* Activa flexbox para apilar header, main y footer */
   display: flex;
+  /* Dispone los elementos en dirección vertical */
   flex-direction: column;
+  /* Fondo cinematográfico oscuro unificado */
   background-color: var(--color-fondo);
+  /* Color de texto principal claro */
   color: var(--color-texto);
+  /* Aplica la tipografía de lectura Inter */
   font-family: var(--fuente-cuerpo);
+  /* Aplica el tamaño base de fuente */
   font-size: var(--texto-base);
+  /* Interlineado cómodo de 1.6 para legibilidad */
   line-height: 1.6;
-  /* Ancho estricto sin desborde horizontal */
+  /* Fuerza el ancho total exacto de la pantalla */
   width: 100%;
+  /* Restringe el ancho máximo al 100% sin desbordes */
   max-width: 100%;
+  /* Bloquea barras de scroll horizontal involuntarias */
   overflow-x: hidden;
-  /* Renderizado de tipografías nítido */
+  /* Suavizado subpixel para renderizado en navegadores WebKit */
   -webkit-font-smoothing: antialiased;
+  /* Suavizado de tipografías en navegadores Firefox */
   -moz-osx-font-smoothing: grayscale;
 }
 
@@ -169,8 +210,11 @@ img,
 svg,
 video,
 canvas {
+  /* Impide que imágenes o gráficos SVG sobrepasen su contenedor padre */
   max-width: 100%;
+  /* Conserva la proporción de aspecto original */
   height: auto;
+  /* Elimina espacios en blanco inferiores de elementos inline */
   display: block;
 }
 
@@ -179,8 +223,11 @@ input,
 button,
 textarea,
 select {
+  /* Hereda la tipografía de la página en lugar de usar fuentes nativas del SO */
   font: inherit;
+  /* Hereda el color de texto del contenedor */
   color: inherit;
+  /* Impide que los controles excedan el ancho asignado */
   max-width: 100%;
 }
 
@@ -190,32 +237,53 @@ select {
 
 /* Oculta un elemento visualmente pero lo mantiene audible para lectores de pantalla */
 .sr-only {
+  /* Posiciona de forma absoluta para no alterar el flujo visual */
   position: absolute;
+  /* Reduce el ancho a 1 pixel */
   width: 1px;
+  /* Reduce el alto a 1 pixel */
   height: 1px;
+  /* Elimina relleno */
   padding: 0;
+  /* Margen negativo para colapsar */
   margin: -1px;
+  /* Oculta cualquier exceso */
   overflow: hidden;
+  /* Recorta el área visible */
   clip: rect(0, 0, 0, 0);
+  /* Evita que el texto envuelva líneas */
   white-space: nowrap;
+  /* Remueve bordes */
   border-width: 0;
 }
 
 /* Enlace accesible para saltar directo al contenido principal */
 .skip-link {
+  /* Oculta el enlace arriba fuera de pantalla hasta recibir foco */
   position: absolute;
+  /* Posición inicial invisible */
   top: -100px;
+  /* Separación del borde izquierdo */
   left: 1rem;
+  /* Fondo dorado visible */
   background: var(--color-primario);
+  /* Texto oscuro para contraste */
   color: var(--color-texto-inverso);
+  /* Relleno cómodo */
   padding: var(--espacio-2) var(--espacio-4);
+  /* Bordes redondeados */
   border-radius: var(--radio-sm);
+  /* Texto en negrita */
   font-weight: 700;
+  /* Prioridad de apilamiento */
   z-index: 999;
+  /* Transición fluida al aparecer */
   transition: top var(--transicion-base);
 }
 
+/* Al recibir foco por teclado muestra el enlace de salto */
 .skip-link:focus {
+  /* Desciende el enlace para hacerlo visible */
   top: 1rem;
 }
 
@@ -225,35 +293,75 @@ select {
 
 /* Títulos con fuente Outfit */
 h1, h2, h3, h4, h5, h6 {
+  /* Tipografía temática Outfit */
   font-family: var(--fuente-titulos);
+  /* Color blanco de alto impacto */
   color: var(--color-texto);
+  /* Peso seminegrita/negrita */
   font-weight: 700;
+  /* Altura de línea compacta para encabezados */
   line-height: 1.25;
-  /* Quiebre de palabras para evitar desbordes en títulos extensos en pantallas de 360 px */
+  /* Rompe palabras excesivamente largas evitando desbordes a 360 px */
   overflow-wrap: break-word;
+  /* Quiebre de seguridad adicional */
   word-break: break-word;
 }
 
-h1 { font-size: var(--texto-3xl); margin-bottom: var(--espacio-4); }
-h2 { font-size: var(--texto-2xl); margin-bottom: var(--espacio-3); }
-h3 { font-size: var(--texto-xl); margin-bottom: var(--espacio-3); }
-h4 { font-size: var(--texto-lg); margin-bottom: var(--espacio-2); }
+/* Encabezado nivel 1 */
+h1 {
+  /* Tamaño de fuente h1 */
+  font-size: var(--texto-3xl);
+  /* Separación inferior */
+  margin-bottom: var(--espacio-4);
+}
+
+/* Encabezado nivel 2 */
+h2 {
+  /* Tamaño de fuente h2 */
+  font-size: var(--texto-2xl);
+  /* Separación inferior */
+  margin-bottom: var(--espacio-3);
+}
+
+/* Encabezado nivel 3 */
+h3 {
+  /* Tamaño de fuente h3 */
+  font-size: var(--texto-xl);
+  /* Separación inferior */
+  margin-bottom: var(--espacio-3);
+}
+
+/* Encabezado nivel 4 */
+h4 {
+  /* Tamaño de fuente h4 */
+  font-size: var(--texto-lg);
+  /* Separación inferior */
+  margin-bottom: var(--espacio-2);
+}
 
 /* Párrafos legibles con separación */
 p {
+  /* Separación inferior entre párrafos */
   margin-bottom: var(--espacio-4);
+  /* Color secundario legible sin encandilar */
   color: var(--color-texto-secundario);
+  /* Previene desbordes por palabras largas */
   overflow-wrap: break-word;
 }
 
 /* Enlaces con color dorado y transición */
 a {
+  /* Color ámbar de enlace */
   color: var(--color-primario);
+  /* Quita subrayado por defecto */
   text-decoration: none;
+  /* Suaviza cambio de color en hover */
   transition: color var(--transicion-base);
 }
 
+/* Estado hover de enlaces */
 a:hover {
+  /* Tono más oscuro al interactuar */
   color: var(--color-primario-hover);
 }
 
@@ -263,21 +371,31 @@ a:hover {
 
 /* Contenedor centralizado para 360 px y 1440 px */
 .contenedor {
+  /* Ocupa el ancho completo disponible */
   width: 100%;
+  /* Limita al ancho máximo de diseño */
   max-width: var(--ancho-maximo);
+  /* Centrado horizontal automático */
   margin-left: auto;
+  /* Centrado horizontal automático */
   margin-right: auto;
-  /* Padding lateral adaptativo: 1rem en móviles, 1.5rem en escritorio */
+  /* Espacio de respiración lateral izquierdo */
   padding-left: var(--espacio-4);
+  /* Espacio de respiración lateral derecho */
   padding-right: var(--espacio-4);
 }
 
 /* Área de contenido que se expande empujando al footer */
 .contenido-principal {
+  /* Ocupa todo el espacio vertical sobrante */
   flex: 1;
+  /* Relleno superior e inferior amplio, lateral seguro */
   padding: var(--espacio-8) var(--espacio-4);
+  /* Respeta el ancho máximo central */
   max-width: var(--ancho-maximo);
+  /* Ancho completo */
   width: 100%;
+  /* Centrado automático en la pantalla */
   margin: 0 auto;
 }
 
@@ -287,161 +405,263 @@ a:hover {
 
 /* Barra fija superior con efecto glassmorphism */
 .encabezado {
+  /* Fijación superior adhesiva */
   position: sticky;
+  /* Pegado al borde superior del viewport */
   top: 0;
+  /* Capa de apilamiento para flotar sobre el contenido */
   z-index: 100;
+  /* Fondo semitransparente oscuro */
   background-color: rgba(11, 13, 20, 0.92);
+  /* Desenfoque de fondo para efecto cristal esmerilado */
   backdrop-filter: blur(14px);
+  /* Compatibilidad con navegadores basados en WebKit */
   -webkit-backdrop-filter: blur(14px);
+  /* Borde inferior tenue separador */
   border-bottom: 1px solid var(--color-superficie-borde);
+  /* Relleno vertical de la barra */
   padding: var(--espacio-3) 0;
+  /* Ancho horizontal completo */
   width: 100%;
 }
 
 /* Disposición flex de los elementos del encabezado */
 .encabezado-contenedor {
+  /* Dispone logo, buscador, menú y usuario en fila flexible */
   display: flex;
+  /* Alineación vertical centrada */
   align-items: center;
+  /* Separa los extremos hacia los laterales */
   justify-content: space-between;
+  /* Distancia entre componentes contiguos */
   gap: var(--espacio-4);
+  /* Ancho total del contenedor */
   width: 100%;
 }
 
 /* Logo de la plataforma */
 .encabezado-marca {
+  /* Evita que el logo se encoja ante falta de espacio */
   flex-shrink: 0;
 }
 
+/* Enlace contenedor del logo */
 .encabezado-marca .marca-enlace {
+  /* Dispone icono y texto en línea centrados */
   display: inline-flex;
+  /* Centrado vertical */
   align-items: center;
+  /* Separación entre icono y texto */
   gap: var(--espacio-2);
+  /* Tipografía distintiva de marca */
   font-family: var(--fuente-titulos);
+  /* Tamaño de fuente destacado */
   font-size: 1.35rem;
+  /* Grosor extra negrita */
   font-weight: 800;
+  /* Color blanco de texto */
   color: var(--color-texto);
+  /* Remueve subrayado */
   text-decoration: none;
+  /* Espaciado de letras ajustado */
   letter-spacing: -0.02em;
+  /* Previene quiebres de línea en el nombre */
   white-space: nowrap;
 }
 
+/* Ícono de claqueta en el logo */
 .marca-icono {
+  /* Tamaño del emoji o icono SVG */
   font-size: 1.4rem;
+  /* Altura de línea compacta */
   line-height: 1;
 }
 
+/* Resalte dorado en 'Cinema' */
 .marca-resaltado {
+  /* Color dorado de la identidad */
   color: var(--color-primario);
 }
 
 /* Buscador de cabecera */
 .encabezado-buscador {
+  /* Tamaño flexible con base inicial de 280px */
   flex: 0 1 280px;
+  /* Permite contraerse si el espacio disminuye */
   min-width: 0;
 }
 
+/* Formulario del buscador */
 .buscador-form {
+  /* Ancho completo del formulario */
   width: 100%;
 }
 
+/* Contenedor relativo del campo de búsqueda */
 .buscador-caja {
+  /* Posicionamiento relativo para anclar la lupa absoluta */
   position: relative;
+  /* Flexbox horizontal */
   display: flex;
+  /* Centrado vertical */
   align-items: center;
+  /* Ancho total */
   width: 100%;
 }
 
+/* Icono de lupa */
 .buscador-icono {
+  /* Posición absoluta interna */
   position: absolute;
+  /* Separación desde la izquierda */
   left: 0.75rem;
+  /* Tamaño del icono de lupa */
   font-size: 0.85rem;
+  /* Color atenuado */
   color: var(--color-texto-apagado);
+  /* Ignora eventos de ratón para permitir clic en el input */
   pointer-events: none;
 }
 
+/* Campo de texto de búsqueda */
 .buscador-input {
+  /* Ocupa el 100% de la caja */
   width: 100%;
+  /* Padding izquierdo suficiente para no chocar con la lupa */
   padding: var(--espacio-2) var(--espacio-3) var(--espacio-2) 2.2rem;
+  /* Fondo oscuro elevado */
   background-color: var(--color-superficie-elevada);
+  /* Borde tenue de delimitación */
   border: 1px solid var(--color-superficie-borde);
+  /* Forma redondeada tipo píldora */
   border-radius: var(--radio-completo);
+  /* Color del texto tipeado */
   color: var(--color-texto);
+  /* Tamaño de fuente adecuado */
   font-size: var(--texto-sm);
+  /* Elimina el contorno azul por defecto */
   outline: none;
+  /* Transición de colores y sombras */
   transition: all var(--transicion-base);
 }
 
+/* Placeholder del buscador */
 .buscador-input::placeholder {
+  /* Color tenue para el texto de sugerencia */
   color: var(--color-texto-apagado);
 }
 
+/* Enfoque del campo de búsqueda */
 .buscador-input:focus {
+  /* Borde dorado al hacer foco */
   border-color: var(--color-primario);
+  /* Fondo más oscuro */
   background-color: var(--color-superficie);
+  /* Resplandor ámbar suave alrededor */
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
-/* Navegación principal */
+/* Contenedor de la navegación principal */
 .navegacion-principal {
+  /* Evita deformaciones */
   flex-shrink: 0;
 }
 
+/* Lista de enlaces de navegación */
 .navegacion-principal .nav-lista {
+  /* Dispone items en fila horizontal */
   display: flex;
+  /* Alineación vertical */
   align-items: center;
+  /* Separación mínima entre enlaces */
   gap: var(--espacio-1);
+  /* Remueve viñetas de lista */
   list-style: none;
 }
 
+/* Enlace individual del menú */
 .nav-enlace {
+  /* Flexbox en línea */
   display: inline-flex;
+  /* Centrado vertical */
   align-items: center;
+  /* Separación interna con posibles iconos */
   gap: var(--espacio-1);
+  /* Color secundario legible */
   color: var(--color-texto-secundario);
+  /* Grosor medio */
   font-weight: 500;
+  /* Tamaño de fuente estándar para menús */
   font-size: var(--texto-sm);
+  /* Relleno táctil cómodo */
   padding: var(--espacio-2) var(--espacio-3);
+  /* Bordes suaves */
   border-radius: var(--radio-sm);
+  /* Sin subrayado */
   text-decoration: none;
+  /* Evita partir enlaces en dos líneas */
   white-space: nowrap;
+  /* Transición fluida */
   transition: all var(--transicion-base);
 }
 
+/* Hover sobre enlace de menú */
 .nav-enlace:hover {
+  /* Texto iluminado a blanco */
   color: var(--color-texto);
+  /* Fondo sutil resaltador */
   background-color: var(--color-superficie-hover);
 }
 
+/* Enlace de página activa */
 .nav-enlace.activo {
+  /* Color primario dorado */
   color: var(--color-primario);
+  /* Fondo dorado tenue */
   background-color: var(--color-primario-suave);
 }
 
+/* Enlace de accesos por rol en la barra */
 .enlace-rol {
+  /* Peso seminegrita */
   font-weight: 600;
 }
 
+/* Icono del rol */
 .enlace-rol .icono-rol {
+  /* Tamaño de icono proporcional */
   font-size: 0.85rem;
 }
 
 /* Acciones de usuario / Invitado */
 .encabezado-usuario {
+  /* Disposición flex */
   display: flex;
+  /* Centrado vertical */
   align-items: center;
+  /* Separación entre botones */
   gap: var(--espacio-3);
+  /* Evita que colapse */
   flex-shrink: 0;
 }
 
+/* Contenedor de visitante */
 .usuario-invitado {
+  /* Disposición flex horizontal */
   display: flex;
+  /* Centrado vertical */
   align-items: center;
+  /* Separación entre Ingresar y Crear cuenta */
   gap: var(--espacio-2);
+  /* Sin quiebres de línea */
   white-space: nowrap;
 }
 
+/* Enlace de Ingresar */
 .enlace-ingresar {
+  /* Peso negrita */
   font-weight: 600;
+  /* Color blanco directo */
   color: var(--color-texto);
 }
 
@@ -449,190 +669,321 @@ a:hover {
    7. MENÚ DESPLEGABLE DEL USUARIO (<details> / <summary>)
    -------------------------------------------------------------------------- */
 
+/* Contenedor relativo del dropdown */
 .usuario-desplegable {
+  /* Ancla el menú flotante absoluto */
   position: relative;
 }
 
+/* Disparador summary del menú */
 .usuario-resumen {
+  /* Disposición flex horizontal */
   display: flex;
+  /* Centrado vertical */
   align-items: center;
+  /* Separación entre avatar, texto y flecha */
   gap: var(--espacio-2);
+  /* Relleno compacto */
   padding: 0.25rem 0.6rem 0.25rem 0.35rem;
+  /* Fondo oscuro */
   background-color: var(--color-superficie);
+  /* Borde tenue */
   border: 1px solid var(--color-superficie-borde);
+  /* Forma redondeada tipo píldora */
   border-radius: var(--radio-completo);
+  /* Cursor de mano interactivo */
   cursor: pointer;
+  /* Oculta viñeta nativa de lista */
   list-style: none;
+  /* Transición */
   transition: all var(--transicion-base);
+  /* Impide selección accidental del texto al cliquear */
   user-select: none;
 }
 
+/* Oculta la flecha nativa de details en Safari/Chrome */
 .usuario-resumen::-webkit-details-marker {
+  /* Quita la flecha por defecto */
   display: none;
 }
 
+/* Hover del disparador */
 .usuario-resumen:hover {
+  /* Fondo más claro */
   background-color: var(--color-superficie-elevada);
+  /* Borde más brillante */
   border-color: var(--color-borde-medio);
 }
 
+/* Avatar circular del usuario */
 .usuario-avatar {
+  /* Ancho fijo de 30px */
   width: 30px;
+  /* Alto fijo de 30px */
   height: 30px;
+  /* Círculo perfecto */
   border-radius: var(--radio-completo);
+  /* Gradiente dorado hacia ocre */
   background: linear-gradient(135deg, var(--color-primario), #b45309);
+  /* Letra en negro para contraste */
   color: #000;
+  /* Negrita pesada */
   font-weight: 800;
+  /* Tamaño de la inicial */
   font-size: 0.85rem;
+  /* Flexbox para centrar inicial */
   display: flex;
+  /* Centrado horizontal */
   align-items: center;
+  /* Centrado vertical */
   justify-content: center;
+  /* Evita que se encoja */
   flex-shrink: 0;
 }
 
+/* Contenedor de nombre y rol */
 .usuario-info {
+  /* Apila nombre sobre rol */
   display: flex;
+  /* Dirección vertical */
   flex-direction: column;
+  /* Alinea a la izquierda */
   align-items: flex-start;
+  /* Interlineado ajustado */
   line-height: 1.15;
 }
 
+/* Nombre del usuario */
 .usuario-nombre {
+  /* Peso seminegrita */
   font-weight: 600;
+  /* Tamaño de fuente pequeño */
   font-size: var(--texto-sm);
+  /* Color blanco */
   color: var(--color-texto);
+  /* Ancho máximo para truncado */
   max-width: 120px;
+  /* Oculta texto que desborda */
   overflow: hidden;
+  /* Agrega puntos suspensivos */
   text-overflow: ellipsis;
+  /* Todo en una sola línea */
   white-space: nowrap;
 }
 
+/* Insignia visual con el nombre del rol */
 .usuario-rol {
+  /* Tamaño de microtexto */
   font-size: 0.65rem;
+  /* Todo en mayúsculas */
   text-transform: uppercase;
+  /* Espaciado entre caracteres */
   letter-spacing: 0.05em;
+  /* Padding de cápsula */
   padding: 0.1rem 0.4rem;
+  /* Borde redondeado */
   border-radius: var(--radio-completo);
+  /* Fondo neutro elevado */
   background-color: var(--color-superficie-elevada);
+  /* Color secundario */
   color: var(--color-texto-secundario);
+  /* Separación del nombre */
   margin-top: 0.1rem;
 }
 
+/* Color distintivo del rol Organizador */
 .usuario-rol.rol-organizador {
+  /* Fondo ámbar transparente */
   background-color: var(--color-primario-suave);
+  /* Texto ámbar dorado */
   color: var(--color-primario);
 }
 
+/* Color distintivo del rol Moderador */
 .usuario-rol.rol-moderador {
+  /* Fondo índigo transparente */
   background-color: var(--color-moderador-suave);
+  /* Texto lavanda */
   color: #a5b4fc;
 }
 
+/* Color distintivo del rol Administrador */
 .usuario-rol.rol-administrador {
+  /* Fondo carmesí transparente */
   background-color: var(--color-acento-suave);
+  /* Texto carmesí claro */
   color: #fb7185;
 }
 
+/* Flecha animada de apertura */
 .desplegable-flecha {
+  /* Tamaño diminuto */
   font-size: 0.65rem;
+  /* Color atenuado */
   color: var(--color-texto-apagado);
+  /* Animación suave de rotación */
   transition: transform var(--transicion-base);
 }
 
+/* Rotación de flecha cuando el menú está abierto */
 .usuario-desplegable[open] .desplegable-flecha {
+  /* Gira 180 grados indicando cierre */
   transform: rotate(180deg);
 }
 
 /* Menú flotante desplegado */
 .usuario-menu-flotante {
+  /* Posicionamiento absoluto respecto al dropdown */
   position: absolute;
+  /* Ubicado justo debajo del disparador con margen */
   top: calc(100% + var(--espacio-2));
+  /* Alineado a la derecha */
   right: 0;
+  /* Ancho cómodo de 260px */
   width: 260px;
+  /* No sobrepasa el ancho de la pantalla en móviles pequeños */
   max-width: calc(100vw - 2rem);
+  /* Fondo oscuro */
   background-color: var(--color-superficie);
+  /* Borde exterior sutil */
   border: 1px solid var(--color-superficie-borde);
+  /* Esquinas redondeadas */
   border-radius: var(--radio-lg);
+  /* Sombra flotante pronunciada */
   box-shadow: var(--sombra-flotante);
+  /* Relleno interno */
   padding: var(--espacio-2);
+  /* Alto z-index para no quedar tapado por otros elementos */
   z-index: 200;
+  /* Microanimación de entrada */
   animation: deslizarMenu 0.15s ease-out;
 }
 
+/* Fotogramas clave de la animación del menú */
 @keyframes deslizarMenu {
   from {
+    /* Inicio invisible */
     opacity: 0;
+    /* Ligeramente desplazado hacia arriba */
     transform: translateY(-6px);
   }
   to {
+    /* Completamente visible */
     opacity: 1;
+    /* Posición final exacta */
     transform: translateY(0);
   }
 }
 
+/* Cabecera interna del menú flotante */
 .menu-cabecera {
+  /* Relleno interno */
   padding: var(--espacio-2) var(--espacio-3);
 }
 
+/* Nombre de usuario dentro de la cabecera del menú */
 .menu-usuario-nombre {
+  /* Elemento en bloque */
   display: block;
+  /* Tamaño de fuente pequeño */
   font-size: var(--texto-sm);
+  /* Color blanco */
   color: var(--color-texto);
+  /* Previene desborde si el nombre es muy largo */
   overflow-wrap: break-word;
 }
 
+/* Rol del usuario dentro del menú */
 .menu-usuario-rol {
+  /* Elemento en bloque */
   display: block;
+  /* Tamaño de microtexto */
   font-size: var(--texto-xs);
+  /* Color secundario */
   color: var(--color-texto-secundario);
+  /* Separación superior */
   margin-top: 0.15rem;
 }
 
+/* Separador horizontal */
 .menu-separador {
+  /* Línea de 1px de grosor */
   height: 1px;
+  /* Color de borde tenue */
   background-color: var(--color-superficie-borde);
+  /* Margen vertical */
   margin: var(--espacio-2) 0;
 }
 
+/* Subtítulo de sección en el menú */
 .menu-seccion-titulo {
+  /* Tamaño de microtexto */
   font-size: 0.65rem;
+  /* En mayúsculas */
   text-transform: uppercase;
+  /* Espaciado entre letras */
   letter-spacing: 0.05em;
+  /* Color atenuado */
   color: var(--color-texto-apagado);
+  /* Relleno interno */
   padding: var(--espacio-1) var(--espacio-3);
+  /* Negrita */
   font-weight: 700;
 }
 
+/* Item de enlace del menú */
 .menu-item {
+  /* Flexbox horizontal */
   display: flex;
+  /* Centrado vertical */
   align-items: center;
+  /* Separación entre icono y texto */
   gap: var(--espacio-2);
+  /* Relleno cómodo para clic */
   padding: var(--espacio-2) var(--espacio-3);
+  /* Tamaño de fuente de enlace */
   font-size: var(--texto-sm);
+  /* Color secundario */
   color: var(--color-texto-secundario);
+  /* Esquinas redondeadas */
   border-radius: var(--radio-sm);
+  /* Sin subrayado */
   text-decoration: none;
+  /* Transición de hover */
   transition: all var(--transicion-base);
 }
 
+/* Hover de item de menú */
 .menu-item:hover {
+  /* Resalte de fondo */
   background-color: var(--color-superficie-hover);
+  /* Texto a blanco */
   color: var(--color-texto);
 }
 
+/* Opción de cerrar sesión */
 .menu-item-cerrar {
+  /* Color de advertencia o peligro */
   color: var(--color-error);
 }
 
+/* Hover de cerrar sesión */
 .menu-item-cerrar:hover {
+  /* Fondo rojizo tenue */
   background-color: rgba(239, 68, 68, 0.15);
+  /* Texto rojo más claro */
   color: #fca5a5;
 }
 
+/* Icono descriptivo dentro del menú */
 .menu-icono {
+  /* Tamaño de icono */
   font-size: 0.95rem;
+  /* Ancho fijo para alineación vertical recta */
   width: 18px;
+  /* Centrado de texto */
   text-align: center;
+  /* Evita que se deforme */
   flex-shrink: 0;
 }
 
@@ -640,48 +991,81 @@ a:hover {
    8. BOTONES Y CONTROLES INTERACTIVOS
    -------------------------------------------------------------------------- */
 
+/* Estilo base de botones */
 .boton {
+  /* Disposición flex en línea */
   display: inline-flex;
+  /* Centrado horizontal de contenido */
   align-items: center;
+  /* Centrado vertical de contenido */
   justify-content: center;
+  /* Tipografía Inter */
   font-family: var(--fuente-cuerpo);
+  /* Peso seminegrita */
   font-weight: 600;
+  /* Tamaño de texto de botón */
   font-size: var(--texto-sm);
+  /* Relleno cómodo */
   padding: var(--espacio-2) var(--espacio-4);
+  /* Esquinas redondeadas */
   border-radius: var(--radio-md);
+  /* Borde transparente por defecto */
   border: 1px solid transparent;
+  /* Cursor de mano */
   cursor: pointer;
+  /* Transiciones fluidas */
   transition: all var(--transicion-base);
+  /* Sin subrayado */
   text-decoration: none;
+  /* Interlineado compacto */
   line-height: 1.25;
+  /* Evita que el botón parta su texto en dos renglones */
   white-space: nowrap;
 }
 
+/* Variante de botón compacto */
 .boton-chico {
+  /* Tamaño de fuente más pequeño */
   font-size: var(--texto-xs);
+  /* Relleno compacto */
   padding: 0.4rem 0.85rem;
+  /* Radio más pequeño */
   border-radius: var(--radio-sm);
 }
 
+/* Botón primario dorado */
 .boton-primario {
+  /* Fondo ámbar dorado */
   background-color: var(--color-primario);
+  /* Texto negro para contraste absoluto */
   color: var(--color-texto-inverso);
 }
 
+/* Hover de botón primario */
 .boton-primario:hover {
+  /* Color ámbar más oscuro */
   background-color: var(--color-primario-hover);
+  /* Conserva texto negro */
   color: var(--color-texto-inverso);
+  /* Efecto de resplandor cinematográfico */
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.35);
 }
 
+/* Botón secundario */
 .boton-secundario {
+  /* Fondo grisáceo elevado */
   background-color: var(--color-superficie-elevada);
+  /* Texto blanco */
   color: var(--color-texto);
+  /* Borde tenue */
   border-color: var(--color-superficie-borde);
 }
 
+/* Hover de botón secundario */
 .boton-secundario:hover {
+  /* Resalte más claro */
   background-color: rgba(255, 255, 255, 0.1);
+  /* Texto blanco */
   color: var(--color-texto);
 }
 
@@ -689,27 +1073,45 @@ a:hover {
    9. LISTA DE DEFINICIONES (PÁGINA ESQUELETO Y DATOS TÉCNICOS)
    -------------------------------------------------------------------------- */
 
+/* Lista de descripción de datos (esqueleto de pruebas) */
 dl {
+  /* Cuadrícula CSS para disponer términos y definiciones */
   display: grid;
+  /* Término autoajustable, definición ocupa el resto */
   grid-template-columns: max-content 1fr;
+  /* Espaciado entre filas y columnas */
   gap: var(--espacio-3) var(--espacio-6);
+  /* Margen vertical */
   margin: var(--espacio-6) 0;
+  /* Fondo de tarjeta oscura */
   background-color: var(--color-superficie);
+  /* Relleno interior */
   padding: var(--espacio-6);
+  /* Bordes redondeados */
   border-radius: var(--radio-lg);
+  /* Borde delimitador sutil */
   border: 1px solid var(--color-superficie-borde);
+  /* Ancho total */
   width: 100%;
 }
 
+/* Término de la lista */
 dt {
+  /* Peso seminegrita */
   font-weight: 600;
+  /* Color secundario */
   color: var(--color-texto-secundario);
 }
 
+/* Definición del término */
 dd {
+  /* Color blanco de dato */
   color: var(--color-texto);
+  /* Remueve margen izquierdo del navegador */
   margin-left: 0;
+  /* Quiebre de palabras para evitar desborde en cadenas largas */
   overflow-wrap: break-word;
+  /* Quiebre de seguridad */
   word-break: break-word;
 }
 
@@ -717,78 +1119,135 @@ dd {
    10. TARJETA DE ERROR (404, 500, ETC.)
    -------------------------------------------------------------------------- */
 
+/* Sección contenedora del mensaje de error */
 .seccion-error {
+  /* Flexbox para centrado */
   display: flex;
+  /* Centrado horizontal */
   justify-content: center;
+  /* Centrado vertical */
   align-items: center;
+  /* Altura mínima del 55% de pantalla */
   min-height: 55vh;
+  /* Ancho total */
   width: 100%;
 }
 
+/* Tarjeta visual de error */
 .tarjeta-error {
+  /* Fondo oscuro */
   background-color: var(--color-superficie);
+  /* Borde tenue */
   border: 1px solid var(--color-superficie-borde);
+  /* Bordes redondeados */
   border-radius: var(--radio-lg);
+  /* Relleno generoso */
   padding: var(--espacio-10) var(--espacio-6);
+  /* Ancho máximo de tarjeta */
   max-width: 620px;
+  /* Ancho completo */
   width: 100%;
+  /* Alineación central de textos */
   text-align: center;
+  /* Sombra profunda */
   box-shadow: var(--sombra-lg);
 }
 
+/* Insignia con el número de código de estado (404, 500) */
 .error-insignia {
+  /* En bloque en línea */
   display: inline-block;
+  /* Tipografía Outfit */
   font-family: var(--fuente-titulos);
+  /* Tamaño de fuente gigante */
   font-size: 3.5rem;
+  /* Peso extra negrita */
   font-weight: 800;
+  /* Color dorado primario */
   color: var(--color-primario);
+  /* Interlineado ajustado */
   line-height: 1;
+  /* Margen inferior */
   margin-bottom: var(--espacio-4);
 }
 
+/* Título del error */
 .error-titulo {
+  /* Tamaño de fuente h2 */
   font-size: var(--texto-2xl);
+  /* Margen inferior */
   margin-bottom: var(--espacio-3);
 }
 
+/* Descripción del error */
 .error-descripcion {
+  /* Tamaño base */
   font-size: var(--texto-base);
+  /* Color secundario */
   color: var(--color-texto-secundario);
+  /* Separación antes de los botones */
   margin-bottom: var(--espacio-8);
 }
 
+/* Botones de acción del error */
 .error-acciones {
+  /* Disposición flex */
   display: flex;
+  /* Centrado horizontal */
   justify-content: center;
+  /* Separación entre botones */
   gap: var(--espacio-3);
+  /* Envuelve en múltiples renglones si falta espacio */
   flex-wrap: wrap;
 }
 
+/* Bloque para traza técnica en desarrollo */
 .error-detalles-desarrollo {
+  /* Separación superior */
   margin-top: var(--espacio-8);
+  /* Alineación de texto a la izquierda para código */
   text-align: left;
+  /* Línea divisoria superior */
   border-top: 1px solid var(--color-superficie-borde);
+  /* Relleno superior */
   padding-top: var(--espacio-6);
+  /* Ancho total */
   width: 100%;
 }
 
+/* Título de la traza de desarrollo */
 .error-detalles-titulo {
+  /* Tamaño pequeño */
   font-size: var(--texto-sm);
+  /* Color ámbar de advertencia */
   color: var(--color-advertencia);
+  /* Margen inferior */
   margin-bottom: var(--espacio-2);
 }
 
+/* Bloque preformateado de código */
 .error-detalles-codigo {
+  /* Fondo negro intenso */
   background-color: #050608;
+  /* Borde tenue */
   border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Relleno interno */
   padding: var(--espacio-4);
+  /* Esquinas redondeadas */
   border-radius: var(--radio-md);
+  /* Tipografía de código monoespaciada */
   font-family: var(--fuente-codigo);
+  /* Tamaño de fuente compacto */
   font-size: var(--texto-xs);
+  /* Habilita scroll horizontal sólo si fuera estrictamente indispensable */
   overflow-x: auto;
+  /* No sobrepasa el ancho de la tarjeta */
   max-width: 100%;
+  /* Color de texto rojizo para errores */
   color: #f87171;
+  /* Quiebra líneas automáticamente */
   white-space: pre-wrap;
+  /* Rompe palabras largas en cualquier punto */
   word-break: break-all;
 }
 
@@ -796,89 +1255,149 @@ dd {
    11. PIE DE PÁGINA (FOOTER EN 4 COLUMNAS DE LOS WIREFRAMES)
    -------------------------------------------------------------------------- */
 
+/* Estilos de la franja del footer */
 .pie-pagina {
+  /* Fondo oscuro */
   background-color: var(--color-superficie);
+  /* Borde superior delimitador */
   border-top: 1px solid var(--color-superficie-borde);
+  /* Separación superior amplia */
   padding-top: var(--espacio-12);
+  /* Se adhiere al fondo de la pantalla mediante margin-top: auto */
   margin-top: auto;
+  /* Ancho horizontal completo */
   width: 100%;
 }
 
+/* Cuadrícula de 4 columnas para el footer */
 .pie-contenedor {
+  /* Cuadrícula CSS */
   display: grid;
+  /* Columna 1 (marca) al doble de ancho que las otras tres columnas */
   grid-template-columns: 2fr 1fr 1fr 1fr;
+  /* Separación entre columnas */
   gap: var(--espacio-8);
+  /* Separación inferior antes de los créditos */
   margin-bottom: var(--espacio-10);
+  /* Ancho total */
   width: 100%;
 }
 
+/* Marca en el pie de página */
 .marca-pie {
+  /* Flexbox horizontal */
   display: flex;
+  /* Centrado vertical */
   align-items: center;
+  /* Separación entre icono y texto */
   gap: var(--espacio-2);
+  /* Tipografía Outfit */
   font-family: var(--fuente-titulos);
+  /* Tamaño destacado */
   font-size: 1.3rem;
+  /* Peso negrita */
   font-weight: 700;
+  /* Margen inferior */
   margin-bottom: var(--espacio-3);
 }
 
+/* Lema del pie */
 .pie-lema {
+  /* Tamaño de fuente de lectura */
   font-size: var(--texto-sm);
+  /* Color blanco de texto */
   color: var(--color-texto);
+  /* Margen inferior */
   margin-bottom: var(--espacio-2);
+  /* Ancho de lectura balanceado */
   max-width: 340px;
 }
 
+/* Sublema del pie */
 .pie-sublema {
+  /* Tamaño de fuente pequeño */
   font-size: var(--texto-xs);
+  /* Color apagado */
   color: var(--color-texto-apagado);
+  /* Ancho de lectura balanceado */
   max-width: 340px;
 }
 
+/* Subtítulo de columna del pie */
 .pie-subtitulo {
+  /* Tamaño de microtexto */
   font-size: var(--texto-xs);
+  /* Color blanco */
   color: var(--color-texto);
+  /* Margen inferior */
   margin-bottom: var(--espacio-4);
+  /* Mayúsculas */
   text-transform: uppercase;
+  /* Espaciado de letras */
   letter-spacing: 0.08em;
+  /* Peso negrita */
   font-weight: 700;
 }
 
+/* Lista de enlaces del pie */
 .pie-enlaces {
+  /* Remueve viñetas */
   list-style: none;
 }
 
+/* Elemento de lista de enlaces */
 .pie-enlaces li {
+  /* Separación inferior entre enlaces */
   margin-bottom: var(--espacio-2);
 }
 
+/* Enlace individual del pie */
 .pie-enlaces a {
+  /* Color secundario */
   color: var(--color-texto-secundario);
+  /* Tamaño pequeño */
   font-size: var(--texto-sm);
+  /* Transición fluida */
   transition: color var(--transicion-base);
 }
 
+/* Hover de enlace del pie */
 .pie-enlaces a:hover {
+  /* Color dorado primario */
   color: var(--color-primario);
 }
 
+/* Franja inferior de créditos */
 .pie-creditos {
+  /* Borde superior muy sutil */
   border-top: 1px solid rgba(255, 255, 255, 0.04);
+  /* Relleno vertical */
   padding: var(--espacio-4) 0;
+  /* Tamaño de microtexto */
   font-size: var(--texto-xs);
+  /* Color apagado */
   color: var(--color-texto-apagado);
 }
 
+/* Contenedor flexible de los créditos */
 .pie-creditos-contenedor {
+  /* Flexbox horizontal */
   display: flex;
+  /* Distribuye copyright a la izquierda y etiquetas a la derecha */
   justify-content: space-between;
+  /* Centrado vertical */
   align-items: center;
+  /* Permite que quiebre si no cabe en una línea */
   flex-wrap: wrap;
+  /* Separación */
   gap: var(--espacio-2);
 }
 
+/* Etiqueta institucional en los créditos */
 .pie-tag-wireframe {
+  /* Tamaño de microtexto */
   font-size: var(--texto-xs);
+  /* Color atenuado */
   color: var(--color-texto-apagado);
 }
 
@@ -889,30 +1408,43 @@ dd {
 
 /* ── 12.1 Pantallas Intermedias y Tablets (hasta 1024 px) ──────────────── */
 @media (max-width: 1024px) {
+  /* Permite envolver elementos de la cabecera en tablet */
   .encabezado-contenedor {
+    /* Quiebre de línea en elementos */
     flex-wrap: wrap;
+    /* Separación entre items */
     gap: var(--espacio-3);
   }
 
   /* El buscador ocupa el ancho completo en una fila intermedia */
   .encabezado-buscador {
+    /* Tercera posición en el orden visual */
     order: 3;
+    /* Ocupa el 100% de la fila */
     flex: 1 1 100%;
+    /* Ancho total */
     width: 100%;
   }
 
+  /* Navegación en fila superior */
   .navegacion-principal {
+    /* Segunda posición visual */
     order: 2;
   }
 
+  /* Usuario alineado a la derecha */
   .encabezado-usuario {
+    /* Segunda posición visual */
     order: 2;
+    /* Empuja hacia el extremo derecho */
     margin-left: auto;
   }
 
   /* El pie se reorganiza en 2 columnas */
   .pie-contenedor {
+    /* Dos columnas iguales */
     grid-template-columns: 1fr 1fr;
+    /* Separación entre columnas */
     gap: var(--espacio-6);
   }
 }
@@ -921,69 +1453,97 @@ dd {
 @media (max-width: 768px) {
   /* Reduce padding vertical de la cabecera */
   .encabezado {
+    /* Relleno compacto */
     padding: var(--espacio-2) 0;
   }
 
-  /* Fila 1: Logo y Usuario a los extremos */
+  /* Fila 1: Logo a la izquierda */
   .encabezado-marca {
+    /* Primera posición */
     order: 1;
   }
 
+  /* Fila 1: Usuario a la derecha */
   .encabezado-usuario {
+    /* Segunda posición */
     order: 2;
+    /* Empuja hacia la derecha */
     margin-left: auto;
   }
 
-  /* Fila 2: Buscador a 100% de ancho */
+  /* Fila 2: Buscador al 100% de ancho */
   .encabezado-buscador {
+    /* Tercera posición */
     order: 3;
+    /* Ancho completo */
     flex: 1 1 100%;
+    /* Ancho total */
     width: 100%;
+    /* Separación superior */
     margin-top: var(--espacio-1);
   }
 
   /* Fila 3: Navegación horizontal touch sin desbordar el viewport */
   .navegacion-principal {
+    /* Cuarta posición */
     order: 4;
+    /* Ancho completo */
     width: 100%;
+    /* Limita al ancho del contenedor */
     max-width: 100%;
+    /* Desplazamiento horizontal táctil */
     overflow-x: auto;
+    /* Desplazamiento nativo suave con inercia en iOS */
     -webkit-overflow-scrolling: touch;
-    /* Oculta la barra de scroll nativa para un aspecto más limpio */
+    /* Oculta la barra de scroll nativa para un aspecto más limpio en Firefox */
     scrollbar-width: none;
   }
 
+  /* Oculta la barra de scroll en navegadores basados en WebKit */
   .navegacion-principal::-webkit-scrollbar {
+    /* Desactiva scrollbar */
     display: none;
   }
 
+  /* Lista de navegación móvil */
   .nav-lista {
+    /* Relleno vertical */
     padding: var(--espacio-1) 0;
+    /* Separación entre botones */
     gap: var(--espacio-1);
   }
 
   /* Pasa el pie a 1 sola columna vertical */
   .pie-contenedor {
+    /* 1 columna única apilada */
     grid-template-columns: 1fr;
+    /* Separación vertical */
     gap: var(--espacio-6);
   }
 
   /* Las listas de definición pasan a una columna */
   dl {
+    /* 1 columna vertical */
     grid-template-columns: 1fr;
+    /* Separación entre término y dato */
     gap: var(--espacio-2);
+    /* Relleno compacto */
     padding: var(--espacio-4);
   }
 
-  /* Oculta el texto del nombre en móviles muy angostos para dar espacio al avatar */
+  /* Oculta el texto del nombre en móviles para dar espacio al avatar y botones */
   .usuario-info {
+    /* No muestra texto en cabecera móvil */
     display: none;
   }
 
   /* Asegura que el menú flotante en móviles no sobrepase la pantalla */
   .usuario-menu-flotante {
+    /* Anclado a la derecha */
     right: 0;
+    /* Sin anclaje a la izquierda */
     left: auto;
+    /* Ancho máximo ajustado al viewport móvil */
     width: calc(100vw - 2rem);
   }
 }
@@ -992,61 +1552,87 @@ dd {
 @media (max-width: 480px) {
   /* Contenedor con padding compacto a 360 px */
   .contenedor {
+    /* Relleno lateral estrecho */
     padding-left: var(--espacio-3);
+    /* Relleno lateral estrecho */
     padding-right: var(--espacio-3);
   }
 
+  /* Contenido principal compacto */
   .contenido-principal {
+    /* Relleno vertical y lateral ajustado */
     padding: var(--espacio-6) var(--espacio-3);
   }
 
   /* Reduce ligeramente el tamaño del logo para que conviva con los botones a 360 px */
   .encabezado-marca .marca-enlace {
+    /* Tamaño de fuente reducido */
     font-size: 1.15rem;
+    /* Separación mínima */
     gap: var(--espacio-1);
   }
 
+  /* Ícono del logo en móvil */
   .marca-icono {
+    /* Tamaño compacto */
     font-size: 1.25rem;
   }
 
   /* Botones compactos en el encabezado de 360 px */
   .usuario-invitado {
+    /* Separación mínima entre botones */
     gap: var(--espacio-1);
   }
 
+  /* Botón pequeño en cabecera */
   .usuario-invitado .boton-chico {
+    /* Relleno estrecho */
     padding: 0.35rem 0.65rem;
+    /* Tamaño de fuente de 12px */
     font-size: 0.75rem;
   }
 
+  /* Enlace de ingresar compacto */
   .usuario-invitado .nav-enlace {
+    /* Relleno estrecho */
     padding: 0.35rem 0.5rem;
+    /* Tamaño de 13px */
     font-size: 0.8rem;
   }
 
   /* Acciones de la tarjeta de error apiladas en vertical a 360 px */
   .error-acciones {
+    /* Dirección vertical de botones */
     flex-direction: column;
+    /* Ancho completo */
     width: 100%;
   }
 
+  /* Botones de error al 100% de ancho */
   .error-acciones .boton {
+    /* Ocupa el ancho total */
     width: 100%;
   }
 
+  /* Tarjeta de error compacta */
   .tarjeta-error {
+    /* Relleno interno adaptado a pantalla de 360px */
     padding: var(--espacio-6) var(--espacio-3);
   }
 
+  /* Código del error más pequeño */
   .error-insignia {
+    /* Tamaño reducido */
     font-size: 2.75rem;
   }
 
   /* Créditos del pie apilados verticalmente sin desborde */
   .pie-creditos-contenedor {
+    /* Disposición vertical */
     flex-direction: column;
+    /* Alineación izquierda */
     align-items: flex-start;
+    /* Separación */
     gap: var(--espacio-2);
   }
 }
@@ -1055,16 +1641,19 @@ dd {
 @media (min-width: 1440px) {
   /* Espaciado generoso y armónico en pantallas grandes */
   .contenido-principal {
+    /* Relleno vertical generoso en pantallas de 1440px */
     padding: var(--espacio-12) var(--espacio-4);
   }
 
   /* Tipografías de títulos con escala plena */
   h1 {
+    /* Tamaño h1 grande de 44px */
     font-size: 2.75rem;
   }
 
   /* Espaciado del footer */
   .pie-pagina {
+    /* Separación superior amplia */
     padding-top: var(--espacio-12);
   }
 }
