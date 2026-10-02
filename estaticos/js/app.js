@@ -74,12 +74,15 @@ function enviar(recurso, opciones = {}) {
   if (metodosMutables.includes(metodo) && esMismoOrigen(recurso)) {
     const token = obtenerTokenCsrf();
     if (token) {
-      if (!opciones.headers) {
+      if (recurso instanceof Request && !opciones.headers) {
+        opciones.headers = new Headers(recurso.headers);
+      } else if (!opciones.headers) {
         opciones.headers = {};
       }
 
       if (opciones.headers instanceof Headers) {
-        if (!opciones.headers.has('x-csrf-token') && !opciones.headers.has('X-CSRF-Token')) {
+        const existe = opciones.headers.has('x-csrf-token') || opciones.headers.has('X-CSRF-Token');
+        if (!existe) {
           opciones.headers.set('X-CSRF-Token', token);
         }
       } else if (Array.isArray(opciones.headers)) {

@@ -49,7 +49,7 @@
       <ul class="nav-lista">
         {# Enlace a Cartelera: ruta /cartelera #}
         <li>
-          <a href="/cartelera" class="nav-enlace{% if ruta == '/cartelera' %} activo{% endif %}">Cartelera</a>
+          <a href="/cartelera" class="nav-enlace{% if ruta == '/cartelera' or ruta starts with '/cartelera' %} activo{% endif %}">Cartelera</a>
         </li>
         {# Enlace a la sección de Salas indie registradas #}
         <li>
@@ -176,7 +176,7 @@
             {# Separador visual antes del botón de cierre de sesión #}
             <div class="menu-separador" role="separator"></div>
             {# Formulario POST con token CSRF para invalidar la sesión de forma segura contra ataques CSRF #}
-            <form action="/cuenta/salir" method="POST" class="form-menu-item">
+            <form action="/cuenta/salir" method="POST" class="form-menu-item form-cerrar-sesion">
               <input type="hidden" name="_csrf" value="{{ csrf }}">
               <button type="submit" class="menu-item menu-item-cerrar" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">🚪</span> Cerrar sesión

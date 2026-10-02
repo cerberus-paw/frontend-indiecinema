@@ -26,6 +26,8 @@
   /* ── 1.2 Paleta de Bordes y Divisores ─────────────────────────────────── */
   /* Borde tenue: crema al 10% para delimitar contenedores sin generar cortes visuales duros */
   --color-borde: rgba(251, 244, 231, 0.10);
+  /* Alias de compatibilidad para superficies y bordes interiores */
+  --color-superficie-borde: rgba(251, 244, 231, 0.10);
   /* Borde medio: crema al 18% para estados hover y separadores visibles */
   --color-borde-medio: rgba(251, 244, 231, 0.18);
   /* Borde fuerte: crema al 30% para inputs enfocados y tarjetas seleccionadas */
@@ -187,7 +189,7 @@ body.cuerpo-app {
   background-color: var(--color-fondo);
   /* Color de texto principal claro */
   color: var(--color-texto);
-  /* Aplica la tipografía de lectura Inter */
+  /* Aplica la tipografía oficial Fira Sans Condensed */
   font-family: var(--fuente-cuerpo);
   /* Aplica el tamaño base de fuente */
   font-size: var(--texto-base);
@@ -291,9 +293,9 @@ select {
    4. TIPOGRAFÍA Y JERARQUÍA VISUAL
    -------------------------------------------------------------------------- */
 
-/* Títulos con fuente Outfit */
+/* Títulos con tipografía oficial Fira Sans Condensed */
 h1, h2, h3, h4, h5, h6 {
-  /* Tipografía temática Outfit */
+  /* Tipografía temática Fira Sans Condensed */
   font-family: var(--fuente-titulos);
   /* Color blanco de alto impacto */
   color: var(--color-texto);
@@ -564,8 +566,8 @@ a:hover {
   border-color: var(--color-primario);
   /* Fondo más oscuro */
   background-color: var(--color-superficie);
-  /* Resplandor ámbar suave alrededor */
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+  /* Resplandor ámbar suave (#F0A63B) alrededor */
+  box-shadow: 0 0 0 3px rgba(240, 166, 59, 0.15);
 }
 
 /* Contenedor de la navegación principal */
@@ -970,7 +972,8 @@ button.menu-item {
   font-family: inherit;
 }
 
-.form-menu-item {
+.form-menu-item,
+.form-cerrar-sesion {
   margin: 0;
   padding: 0;
   display: block;
@@ -1023,7 +1026,7 @@ button.menu-item {
   align-items: center;
   /* Centrado vertical de contenido */
   justify-content: center;
-  /* Tipografía Inter */
+  /* Tipografía oficial Fira Sans Condensed */
   font-family: var(--fuente-cuerpo);
   /* Peso seminegrita */
   font-weight: 600;
@@ -1071,8 +1074,8 @@ button.menu-item {
   background-color: var(--color-primario-hover);
   /* Conserva texto negro */
   color: var(--color-texto-inverso);
-  /* Efecto de resplandor cinematográfico */
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.35);
+  /* Efecto de resplandor cinematográfico con ámbar oficial (#F0A63B) */
+  box-shadow: 0 0 16px rgba(240, 166, 59, 0.35);
 }
 
 /* Botón secundario */
@@ -1272,7 +1275,7 @@ dd {
 .error-insignia {
   /* En bloque en línea */
   display: inline-block;
-  /* Tipografía Outfit */
+  /* Tipografía oficial Fira Sans Condensed */
   font-family: var(--fuente-titulos);
   /* Tamaño de fuente gigante */
   font-size: 3.5rem;
@@ -1544,7 +1547,7 @@ dd {
 .campo-etiqueta {
   /* Disposición en bloque */
   display: block;
-  /* Tipografía Inter */
+  /* Tipografía oficial Fira Sans Condensed */
   font-family: var(--fuente-cuerpo);
   /* Peso seminegrita para lectura clara */
   font-weight: 600;
@@ -1911,10 +1914,10 @@ dd {
 
 /* Variante de advertencia */
 .alerta-advertencia {
-  /* Fondo ámbar oscuro translúcido */
-  background-color: rgba(245, 158, 11, 0.12);
+  /* Fondo ámbar oscuro translúcido (#F0A63B) */
+  background-color: rgba(240, 166, 59, 0.12);
   /* Borde ámbar */
-  border-color: rgba(245, 158, 11, 0.35);
+  border-color: rgba(240, 166, 59, 0.35);
   /* Color de texto */
   color: #fde68a;
 }
@@ -2168,7 +2171,7 @@ dd {
 
 /* Título de la obra o ciclo */
 .tarjeta-funcion-titulo {
-  /* Tipografía Outfit */
+  /* Tipografía oficial Fira Sans Condensed */
   font-family: var(--fuente-titulos);
   /* Tamaño de 18px */
   font-size: var(--texto-lg);
@@ -2425,7 +2428,7 @@ dd {
 
 /* Título de la solicitud */
 .solicitud-titulo {
-  /* Tipografía Outfit */
+  /* Tipografía oficial Fira Sans Condensed */
   font-family: var(--fuente-titulos);
   /* Tamaño */
   font-size: var(--texto-2xl);

@@ -192,3 +192,4 @@ Múltiples enlaces apuntan a rutas inexistentes o inconsistentes con los contrat
 
 ### Correcciones requeridas
 * Redactar descripciones claras y completas en Markdown para cada uno de los 4 Pull Requests en GitHub (`#1`, `#2`, `#4` y `#5`), siguiendo el formato y estándar utilizado en los PRs del backend (Contexto, Cambios introducidos, Criterios de aceptación verificados, Pruebas realizadas).
+  * **Documento generado:** Consultar [`DESCRIPCIONES_PRS.md`](DESCRIPCIONES_PRS.md) con las 4 descripciones listas para copiar en la interfaz de GitHub.

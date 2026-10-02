@@ -34,7 +34,9 @@ frontend-indiecinema/
     ├── js/
     │   └── app.js              # Manejo automático de tokens CSRF y utilidades interactivas
     └── img/
-        └── logo.svg            # Isotipo vectorial de IndieCinema
+        ├── icon.svg            # Isotipo e icono oficial de IndieCinema (favicon)
+        ├── logo-horizontal-dark.svg # Logotipo horizontal oficial sobre fondo oscuro
+        └── logo-stacked-dark.svg    # Logotipo apilado para portadas y cabeceras
 ```
 
 ---
@@ -73,21 +75,18 @@ Cada plantilla renderizada por el núcleo recibe automáticamente las siguientes
 El encabezado adapta sus opciones y enlaces según el estado de la sesión y el rol alcanzado:
 
 - **Sin sesión (Invitado):**
-  - Enlaces a Cartelera, Salas, Películas, Cómo funciona y Buscador.
+  - Enlaces a Cartelera (`/cartelera`), Salas (`/salas`), Películas (`/obras`), Cómo funciona (`/como-funciona`) y Buscador hacia catálogo.
   - Botones de acción: **Ingresar** (`/cuenta/ingresar`) y **Crear cuenta** (`/cuenta/registro`).
 - **Espectador:**
   - Acceso al menú de usuario con su nombre y avatar.
-  - Enlaces a **Mi cuenta** (`/cuenta/`), Mis reservas, Mis pagos y Salas seguidas.
-  - Botón de **Cerrar sesión** (`/cuenta/salir`).
+  - Enlaces a **Mi cuenta** (`/cuenta/`), **Mis reservas** (`/funcion/mis-reservas`) y **Salas seguidas** (`/cuenta/seguidos`).
+  - Botón seguro de **Cerrar sesión** por POST (`/cuenta/salir`) con token CSRF.
 - **Organizador (`usuario.alcanza('organizador')`):**
   - Todo lo de espectador más el menú y acceso directo a **Organización**:
-  - Resumen del organizador (`/organizador`), Mis salas ABM (`/organizador/salas`), Funciones ABM (`/organizador/funciones`) y Películas ABM (`/organizador/peliculas`).
-- **Moderador (`usuario.alcanza('moderador')`):**
-  - Todo lo de organizador más el menú y acceso directo a **Moderación**:
-  - Bandeja de solicitudes de salas (`/moderacion/solicitudes`), Denuncias (`/moderacion/denuncias`) y Revisión de catálogo (`/moderacion/catalogo`).
+  - Resumen del organizador (`/organizador`), Mis salas ABM (`/organizador/salas`), Mis funciones ABM (`/organizador/funciones`) y Películas ABM (`/organizador/peliculas`).
 - **Administrador (`usuario.alcanza('administrador')`):**
-  - Acceso completo a todas las secciones anteriores más **Administración**:
-  - Panel de administración (`/admin`), Usuarios y roles (`/admin/usuarios`), Parámetros del sistema (`/admin/parametros`) y Estadísticas globales (`/admin/estadisticas`).
+  - Acceso completo a las secciones del subsistema de cuentas:
+  - Panel de administración (`/cuenta/admin`) y Usuarios y roles (`/cuenta/admin/usuarios`).
 
 ---
 
@@ -190,5 +189,5 @@ Componente reutilizable para la Cartelera y el Home que reproduce exactamente lo
 ### 7.5 Pantallas completas que implementan los parciales
 
 - **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y términos, mensajes de error y botón principal.
-- **`plantillas/programacion/alta_sala.html.twig`** (y alias `plantillas/cuentas/solicitud_sala.html.twig`): Formulario completo de postulación de sala indie basado en el wireframe `solicitud-de-sala.png`, con datos del espacio, equipamiento, servicios, fotos/video, documentación obligatoria y términos.
+- **`plantillas/programacion/alta_sala.html.twig`**: Formulario de alta y edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía y parámetros de proyección (películas por función, duración de función e intervalo).
 
