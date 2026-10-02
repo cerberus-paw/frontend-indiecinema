@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}{% endblock %} · IndieCinema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/estaticos/css/estilos.css">
+  {% block estilos %}{% endblock %}
+</head>
+<body class="cuerpo-app">
+  {% include 'parciales/encabezado.html.twig' %}
+
+  <main id="contenido-principal" class="contenido-principal">
+    {% block contenido %}{% endblock %}
+  </main>
+
+  {% include 'parciales/pie.html.twig' %}
+
+  <script src="/estaticos/js/app.js" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

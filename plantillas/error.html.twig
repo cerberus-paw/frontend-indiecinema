@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Error {{ estado }}{% endblock %}
+
+{% block contenido %}
+<div class="contenedor seccion-error">
+  <div class="tarjeta-error">
+    <div class="error-insignia">{{ estado }}</div>
+    <h1 class="error-titulo">{{ mensaje }}</h1>
+    <p class="error-descripcion">
+      {% if estado == 404 %}
+        La página o el recurso solicitado no existe o fue movido.
+      {% elseif estado == 401 or estado == 403 %}
+        No contás con los permisos suficientes para acceder a este recurso.
+      {% else %}
+        Ocurrió un problema inesperado. Por favor, intentá nuevamente en unos instantes.
+      {% endif %}
+    </p>
+    <div class="error-acciones">
+      <a href="/" class="boton boton-primario">Volver a la cartelera</a>
+      <a href="/cuenta/" class="boton boton-secundario">Ir a mi cuenta</a>
+    </div>
+
+    {% if detalle %}
+      <div class="error-detalles-desarrollo">
+        <h2 class="error-detalles-titulo">Detalle técnico (entorno de desarrollo):</h2>
+        <pre class="error-detalles-codigo"><code>{{ detalle }}</code></pre>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

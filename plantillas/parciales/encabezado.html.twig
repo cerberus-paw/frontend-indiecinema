@@ -1,0 +1,48 @@
+<header class="encabezado">
+  <div class="contenedor encabezado-contenedor">
+    <div class="encabezado-marca">
+      <a href="/" class="marca-enlace" aria-label="IndieCinema Inicio">
+        <span class="marca-icono" aria-hidden="true">🎬</span>
+        <span class="marca-texto">Indie<span class="marca-resaltado">Cinema</span></span>
+      </a>
+    </div>
+
+    <nav class="navegacion-principal" aria-label="Navegación principal">
+      <ul class="nav-lista">
+        <li>
+          <a href="/" class="nav-enlace{% if ruta_actual == '/' %} activo{% endif %}">Cartelera</a>
+        </li>
+        <li>
+          <a href="/salas" class="nav-enlace{% if ruta_actual starts with '/salas' %} activo{% endif %}">Salas</a>
+        </li>
+        {% if usuario and usuario.alcanza('organizador') %}
+          <li>
+            <a href="/organizador" class="nav-enlace{% if ruta_actual starts with '/organizador' %} activo{% endif %}">Organización</a>
+          </li>
+        {% endif %}
+        {% if usuario and usuario.alcanza('administrador') %}
+          <li>
+            <a href="/admin" class="nav-enlace{% if ruta_actual starts with '/admin' %} activo{% endif %}">Administración</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+
+    <div class="encabezado-usuario">
+      {% if usuario %}
+        <div class="perfil-resumen">
+          <div class="usuario-datos">
+            <span class="usuario-nombre">{{ usuario.nombre ?? 'Usuario' }}</span>
+            <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
+          </div>
+          <a href="/cuenta/perfil" class="boton boton-secundario boton-chico">Mi Cuenta</a>
+        </div>
+      {% else %}
+        <div class="usuario-invitado">
+          <a href="/cuenta/ingresar" class="nav-enlace">Ingresar</a>
+          <a href="/cuenta/registro" class="boton boton-primario boton-chico">Registrarse</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</header>
