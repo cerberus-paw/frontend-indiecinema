@@ -1,0 +1,42 @@
+{#
+  Plantilla común de visualización de errores (IC-42 / IC-43 / IC-45).
+  Muestra el estado HTTP y el mensaje exacto generado por el ManejadorDeErrores del backend,
+  evitando textos fijos contradictorios y adaptando las acciones según el tipo de error.
+#}
+{% extends 'base.html.twig' %}
+
+{# Define el título de la pestaña del navegador indicando el código de estado HTTP recibido #}
+{% block titulo %}Error {{ estado }}{% endblock %}
+
+{# Define el contenido principal de la pantalla de error #}
+{% block contenido %}
+<div class="contenedor seccion-error">
+  <div class="tarjeta-error">
+    {# Insignia gráfica grande que destaca el código numérico de estado HTTP (ej. 401, 403, 404, 500) #}
+    <div class="error-insignia">{{ estado }}</div>
+    {# Título principal con el mensaje exacto provisto por el núcleo del sistema #}
+    <h1 class="error-titulo">{{ mensaje }}</h1>
+
+    {# Botones de acción rápida adaptados según el código de estado HTTP #}
+    <div class="error-acciones">
+      {% if estado == 401 %}
+        {# Para no autenticado, botón directo hacia el inicio de sesión del subsistema de cuentas #}
+        <a href="/cuenta/ingresar" class="boton boton-primario">Ingresar</a>
+        <a href="/cartelera" class="boton boton-secundario">Volver a la cartelera</a>
+      {% else %}
+        {# Para otros estados, enlace prioritario a la cartelera y enlace secundario a la cuenta #}
+        <a href="/cartelera" class="boton boton-primario">Volver a la cartelera</a>
+        <a href="/cuenta/" class="boton boton-secundario">Ir a mi cuenta</a>
+      {% endif %}
+    </div>
+
+    {# El detalle técnico solo lo envía el backend en entorno de desarrollo #}
+    {% if detalle %}
+      <div class="error-detalles-desarrollo">
+        <h2 class="error-detalles-titulo">Detalle técnico (entorno de desarrollo):</h2>
+        <pre class="error-detalles-codigo"><code>{{ detalle }}</code></pre>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

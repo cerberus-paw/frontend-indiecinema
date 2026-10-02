@@ -1,0 +1,56 @@
+{#
+  Plantilla base compartida de IndieCinema (IC-42 / IC-43).
+  Centraliza el esqueleto HTML, la inclusión de metadatos, los estilos principales,
+  los bloques obligatorios (titulo y contenido), el encabezado y el pie de página.
+#}
+{# Declara el tipo de documento como HTML5 estándar para asegurar compatibilidad en todos los navegadores #}
+<!doctype html>
+{# Establece el idioma del documento en español para accesibilidad, lectores de pantalla y SEO #}
+<html lang="es">
+{# Inicio del bloque de metadatos del documento #}
+<head>
+  {# Especifica la codificación de caracteres en UTF-8 para admitir acentos, eñes y caracteres especiales #}
+  <meta charset="utf-8">
+  {# Configura el viewport responsivo para adaptar el contenido al ancho de pantallas móviles y de escritorio #}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {# Token CSRF para consumo seguro desde JavaScript y funciones AJAX de cliente #}
+  <meta name="csrf" content="{{ csrf }}">
+  {# Define el título de la pestaña: el bloque 'titulo' lo completan las vistas y se añade el sufijo unificado #}
+  <title>{% block titulo %}{% endblock %} · IndieCinema</title>
+  {# Ícono de favoritos (favicon) oficial de IndieCinema en formato vectorial SVG #}
+  <link rel="icon" type="image/svg+xml" href="/estaticos/img/icon.svg">
+  {# Preconecta con el origen de Google Fonts para acelerar la resolución DNS y el handshake SSL #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  {# Preconecta de forma anónima con el CDN de fuentes de Google para optimizar la descarga de archivos woff2 #}
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  {# Carga la fuente tipográfica oficial Fira Sans Condensed de la identidad visual #}
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  {# Vincula la hoja de estilos principal servida directamente por Nginx en la ruta pública /estaticos/ #}
+  <link rel="stylesheet" href="/estaticos/css/estilos.css">
+  {# Bloque opcional para que vistas específicas agreguen hojas de estilo particulares si lo requieren #}
+  {% block estilos %}{% endblock %}
+{# Fin del bloque de metadatos #}
+</head>
+{# Aplica la clase 'cuerpo-app' al body para manejar la estructura flexbox que mantiene el footer pegado al fondo #}
+<body class="cuerpo-app">
+  {# Incluye el encabezado reutilizable con logo, buscador, enlaces públicos y menú según rol #}
+  {% include 'parciales/encabezado.html.twig' %}
+
+  {# Contenedor principal semántico que delimita el contenido propio de cada subsistema y pantalla #}
+  <main id="contenido-principal" class="contenido-principal">
+    {# Bloque obligatorio 'contenido': aquí se renderiza el cuerpo de cada plantilla hija (esqueleto, catálogo, etc.) #}
+    {% block contenido %}{% endblock %}
+  {# Cierre del elemento semántico main #}
+  </main>
+
+  {# Incluye el pie de página reutilizable con las columnas de exploración, participación y legales #}
+  {% include 'parciales/pie.html.twig' %}
+
+  {# Carga el script principal con atributo 'defer' para no bloquear el parseo del DOM, gestionando CSRF e interactividad #}
+  <script src="/estaticos/js/app.js" defer></script>
+  {# Bloque opcional para que vistas individuales incluyan scripts de JavaScript específicos #}
+  {% block scripts %}{% endblock %}
+{# Cierre del cuerpo del documento #}
+</body>
+{# Cierre del elemento raíz HTML #}
+</html>

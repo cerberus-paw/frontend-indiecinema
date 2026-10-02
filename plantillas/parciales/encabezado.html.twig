@@ -1,0 +1,206 @@
+{#
+  Parcial de encabezado (IC-43 / IC-44 / IC-45)
+  Contiene la barra de navegación superior fija, el logotipo vectorial oficial,
+  el buscador accesible hacia el catálogo de obras, la navegación pública
+  y el menú adaptativo de usuario con cierre de sesión seguro por POST.
+#}
+{# Resuelve de forma segura el usuario en sesión o null para evitar errores en modo estricto de Twig #}
+{% set usr = usuario ?? null %}
+{# Resuelve la ruta completa normalizada combinando el prefijo del subsistema y la ruta actual #}
+{% set ruta = (prefijo ?? '') ~ (ruta_actual ?? '') %}
+{# Elemento semántico header que representa la cabecera superior y fija de la página #}
+<header class="encabezado">
+  {# Contenedor con ancho máximo centrado para mantener alineación consistente con el resto de la interfaz #}
+  <div class="contenedor encabezado-contenedor">
+
+    {# Sección del logotipo oficial vectorial de IndieCinema #}
+    <div class="encabezado-marca">
+      {# Enlace hacia la portada principal con etiqueta accesible #}
+      <a href="/" class="marca-enlace" aria-label="IndieCinema Inicio">
+        {# Logotipo vectorial oficial de la identidad visual E1 (icono y tipografía integrada) #}
+        <img src="/estaticos/img/logo-horizontal-dark.svg" alt="IndieCinema" class="marca-logo-img" width="93" height="40">
+      {# Cierre del enlace del logo #}
+      </a>
+    {# Cierre de la sección de marca #}
+    </div>
+
+    {# Sección del buscador rápido de catálogo #}
+    <div class="encabezado-buscador">
+      {# Formulario de búsqueda accesible por GET hacia el catálogo de obras #}
+      <form class="buscador-form" action="/obras" method="get" role="search">
+        {# Etiqueta para lectores de pantalla oculta visualmente mediante la clase .sr-only por motivos estéticos #}
+        <label for="campo-busqueda" class="sr-only">Buscar películas en cartelera y catálogo</label>
+        {# Contenedor relativo que posiciona el icono de lupa dentro del campo de texto #}
+        <div class="buscador-caja">
+          {# Icono decorativo de lupa posicionado de forma absoluta dentro del input #}
+          <span class="buscador-icono" aria-hidden="true">🔍</span>
+          {# Campo de entrada de tipo search que permite autocompletado y borrado nativo #}
+          <input type="search" id="campo-busqueda" name="q" class="buscador-input" placeholder="Buscar películas..." aria-label="Buscar películas" value="{{ consulta_busqueda ?? '' }}">
+        {# Cierre de la caja del buscador #}
+        </div>
+      {# Cierre del formulario del buscador #}
+      </form>
+    {# Cierre de la sección del buscador #}
+    </div>
+
+    {# Navegación principal estructurada semánticamente con nav #}
+    <nav class="navegacion-principal" aria-label="Navegación principal">
+      {# Lista no ordenada de enlaces de navegación pública #}
+      <ul class="nav-lista">
+        {# Enlace a Cartelera: ruta /cartelera #}
+        <li>
+          <a href="/cartelera" class="nav-enlace{% if ruta == '/cartelera' or ruta starts with '/cartelera' %} activo{% endif %}">Cartelera</a>
+        </li>
+        {# Enlace a la sección de Salas indie registradas #}
+        <li>
+          <a href="/salas" class="nav-enlace{% if ruta starts with '/salas' %} activo{% endif %}">Salas</a>
+        </li>
+        {# Enlace al catálogo completo de películas (obras) #}
+        <li>
+          <a href="/obras" class="nav-enlace{% if ruta starts with '/obras' %} activo{% endif %}">Películas</a>
+        </li>
+        {# Enlace explicativo sobre la dinámica colaborativa de la plataforma #}
+        <li>
+          <a href="/como-funciona" class="nav-enlace{% if ruta starts with '/como-funciona' %} activo{% endif %}">Cómo funciona</a>
+        </li>
+
+        {# Verificación segura para rol Organizador #}
+        {% if usr and usr.alcanza('organizador') %}
+          {# Item visible para organizadores y superiores #}
+          <li class="nav-item-rol">
+            {# Acceso directo al panel de control de organización de salas y funciones #}
+            <a href="/organizador" class="nav-enlace enlace-rol{% if ruta starts with '/organizador' %} activo{% endif %}" title="Panel de Organización">
+              {# Ícono temático de ticket #}
+              <span class="icono-rol" aria-hidden="true">🎟️</span> Organización
+            </a>
+          </li>
+        {% endif %}
+
+        {# Verificación segura para rol Administrador: apuntando al subsistema de cuentas /cuenta/admin #}
+        {% if usr and usr.alcanza('administrador') %}
+          {# Item visible para administradores #}
+          <li class="nav-item-rol">
+            {# Acceso directo al panel de administración en el subsistema de cuentas #}
+            <a href="/cuenta/admin" class="nav-enlace enlace-rol{% if ruta starts with '/cuenta/admin' %} activo{% endif %}" title="Panel de Administración">
+              {# Ícono temático de engranaje #}
+              <span class="icono-rol" aria-hidden="true">⚙️</span> Administración
+            </a>
+          </li>
+        {% endif %}
+      {# Cierre de la lista de navegación principal #}
+      </ul>
+    {# Cierre del elemento nav #}
+    </nav>
+
+    {# Bloque de sesión: muestra el menú del usuario autenticado o los botones de acceso para invitados #}
+    <div class="encabezado-usuario">
+      {# Si existe un usuario en sesión, se renderiza su tarjeta y menú desplegable #}
+      {% if usr %}
+        {# Se utiliza la etiqueta HTML5 nativa 'details' para accesibilidad y funcionamiento sin JS #}
+        <details class="usuario-desplegable" id="menu-usuario">
+          {# Elemento summary interactivo que sirve como disparador accesible del menú desplegable #}
+          <summary class="usuario-resumen" aria-haspopup="menu" aria-label="Menú de usuario">
+            {# Avatar circular generado dinámicamente con la primera letra del nombre #}
+            <span class="usuario-avatar" aria-hidden="true">
+              {{ usr.nombre ? usr.nombre|slice(0, 1)|upper : 'U' }}
+            </span>
+            {# Contenedor con los datos textuales de la sesión #}
+            <div class="usuario-info">
+              {# Muestra el nombre público del usuario #}
+              <span class="usuario-nombre">{{ usr.nombre ?? 'Usuario' }}</span>
+              {# Insignia visual con el rol #}
+              <span class="usuario-rol rol-{{ usr.rol.value }}">{{ usr.rol.value }}</span>
+            {# Cierre de información del usuario #}
+            </div>
+            {# Flecha indicadora de apertura #}
+            <span class="desplegable-flecha" aria-hidden="true">▾</span>
+          {# Cierre de summary #}
+          </summary>
+
+          {# Menú flotante con lista completa de acciones disponibles para el usuario #}
+          <div class="usuario-menu-flotante" role="menu">
+            {# Encabezado informativo del menú #}
+            <div class="menu-cabecera">
+              <strong class="menu-usuario-nombre">{{ usr.nombre ?? 'Usuario' }}</strong>
+              <span class="menu-usuario-rol">Rol activo: {{ usr.rol.value|capitalize }}</span>
+            </div>
+
+            {# Línea divisoria visual #}
+            <div class="menu-separador" role="separator"></div>
+
+            {# Título de la sección de Mi Cuenta #}
+            <div class="menu-seccion-titulo">Mi cuenta</div>
+            {# Enlace al panel principal de cuenta #}
+            <a href="/cuenta/" class="menu-item" role="menuitem">
+              <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
+            </a>
+            {# Enlace a mis reservas dentro de funciones #}
+            <a href="/funcion/mis-reservas" class="menu-item" role="menuitem">
+              <span class="menu-icono" aria-hidden="true">🎫</span> Mis reservas
+            </a>
+            {# Enlace a las salas seguidas por el espectador #}
+            <a href="/cuenta/seguidos" class="menu-item" role="menuitem">
+              <span class="menu-icono" aria-hidden="true">⭐</span> Salas seguidas
+            </a>
+
+            {# Sección condicional de opciones para el rol de Organizador #}
+            {% if usr.alcanza('organizador') %}
+              <div class="menu-separador" role="separator"></div>
+              <div class="menu-seccion-titulo">Panel del Organizador</div>
+              <a href="/organizador" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">📊</span> Resumen general
+              </a>
+              <a href="/organizador/salas" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🏛️</span> Mis salas (ABM)
+              </a>
+              <a href="/organizador/funciones" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🎬</span> Mis funciones (ABM)
+              </a>
+              <a href="/organizador/peliculas" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🎞️</span> Películas (ABM)
+              </a>
+            {% endif %}
+
+            {# Sección condicional de opciones para el rol de Administrador en el subsistema de cuentas #}
+            {% if usr.alcanza('administrador') %}
+              <div class="menu-separador" role="separator"></div>
+              <div class="menu-seccion-titulo">Administración</div>
+              <a href="/cuenta/admin" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">⚙️</span> Panel de administración
+              </a>
+              <a href="/cuenta/admin/usuarios" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
+              </a>
+            {% endif %}
+
+            {# Separador visual antes del botón de cierre de sesión #}
+            <div class="menu-separador" role="separator"></div>
+            {# Formulario POST con token CSRF para invalidar la sesión de forma segura contra ataques CSRF #}
+            <form action="/cuenta/salir" method="POST" class="form-menu-item form-cerrar-sesion">
+              <input type="hidden" name="_csrf" value="{{ csrf }}">
+              <button type="submit" class="menu-item menu-item-cerrar" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🚪</span> Cerrar sesión
+              </button>
+            </form>
+          {# Cierre del menú flotante #}
+          </div>
+        {# Cierre del componente details #}
+        </details>
+      {# Rama alternativa: cuando no hay ningún usuario autenticado en la sesión #}
+      {% else %}
+        {# Contenedor de botones de ingreso y registro para visitantes #}
+        <div class="usuario-invitado">
+          {# Enlace hacia el formulario de inicio de sesión de cuentas #}
+          <a href="/cuenta/ingresar" class="nav-enlace enlace-ingresar">Ingresar</a>
+          {# Botón de acción destacada para registrarse en el subsistema de cuentas #}
+          <a href="/cuenta/registro" class="boton boton-primario boton-chico">Crear cuenta</a>
+        {# Cierre del contenedor de visitante #}
+        </div>
+      {# Cierre del condicional principal de usuario #}
+      {% endif %}
+    {# Cierre de la sección de usuario #}
+    </div>
+  {# Cierre del contenedor del encabezado #}
+  </div>
+{# Cierre de la cabecera semántica #}
+</header>

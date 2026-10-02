@@ -1,0 +1,6 @@
+{
+    "name": "cerberus-paw/frontend-indiecinema",
+    "description": "Plantillas Twig y recursos estáticos de IndieCinema para los subsistemas.",
+    "type": "library",
+    "license": "proprietary"
+}

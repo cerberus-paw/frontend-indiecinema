@@ -1,0 +1,27 @@
+Identidad visual — IndieCinema (Grupo Cerberus, TP Integrador PAW)
+====================================================================
+
+Paleta
+  Tinta   #17141C  (fondo oscuro / texto principal)
+  Ámbar   #F0A63B  (color de acento — marca, triángulo "play", perforaciones)
+  Crema   #FBF4E7  (texto/logo sobre fondo oscuro)
+
+Tipografía
+  "indie"   -> Fira Sans Compressed Light
+  "CINEMA"  -> Fira Sans Compressed ExtraBold
+  (fuente libre, ya presente en el sistema; para el sitio se puede
+  usar el equivalente de Google Fonts "Fira Sans Condensed").
+
+Concepto
+  Círculo tipo "rollo de película" con perforaciones (sprocket holes)
+  alrededor de un botón de "play", representando la proyección
+  participativa de cortos y películas en salas indie.
+
+Archivos
+  icon.svg / icon*.png        -> marca sola (ícono de app / favicon)
+  logo-horizontal(-dark).*    -> isotipo horizontal (header del sitio)
+  logo-stacked(-dark).*       -> isotipo apilado (portada, redes, merch)
+
+  Los .svg son la fuente editable; los .png están exportados en alta
+  resolución con fondo transparente (versión clara) u fondo tinta
+  sólido (versión oscura).

@@ -1,0 +1,139 @@
+{#
+  Plantilla de registro de usuario (IC-45).
+  Implementa la pantalla de creación de cuenta para el subsistema cuentas,
+  utilizando los parciales reutilizables: campo.html.twig, mensaje.html.twig y boton.html.twig.
+#}
+{# Hereda la estructura global y los metadatos de la plantilla base compartida #}
+{% extends 'base.html.twig' %}
+{# Define el título de la pestaña del navegador para la pantalla de registro de cuenta #}
+{% block titulo %}Crear cuenta{% endblock %}
+{# Define el bloque principal de contenido que se renderiza dentro del elemento main #}
+{% block contenido %}
+{# Contenedor centrado y responsivo con ancho delimitado para formularios de autenticación #}
+<div class="contenedor-autenticacion">
+  {# Tarjeta visual con fondo oscuro elevado, bordes tenues y sombra para enmarcar el formulario #}
+  <div class="tarjeta-autenticacion">
+    {# Encabezado visual del formulario con título y texto descriptivo introductorio #}
+    <header class="autenticacion-cabecera">
+      {# Título principal h1 para jerarquía semántica, accesibilidad y SEO #}
+      <h1 class="autenticacion-titulo">Crear cuenta</h1>
+      {# Bajada descriptiva que resume los beneficios de registrarse en la plataforma #}
+      <p class="autenticacion-subtitulo">
+        Unite a IndieCinema para votar títulos, reservar entradas en salas independientes y proponer ciclos.
+      {# Cierre del párrafo descriptivo #}
+      </p>
+    {# Cierre de la cabecera de autenticación #}
+    </header>
+    {# Renderiza mensaje de éxito si el controlador lo envió tras crear el usuario #}
+    {% if mensaje_exito is defined or exito is defined %}
+      {# Inclusión del parcial de mensaje configurado con variante de éxito #}
+      {# Parámetros: tipo 'exito' (estilo esmeralda), titulo '¡Cuenta creada!', mensaje recibido del backend #}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'exito',
+        titulo: '¡Cuenta creada!',
+        mensaje: mensaje_exito ?? exito
+      } %}
+    {# Cierre del condicional de mensaje de éxito #}
+    {% endif %}
+    {# Renderiza mensaje de error general si falló la operación o expiró el token #}
+    {% if error_general is defined or mensaje_error is defined %}
+      {# Inclusión del parcial de mensaje configurado con variante de error #}
+      {# Parámetros: tipo 'error' (estilo rojo alerta), titulo del fallo y motivo descriptivo del error #}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'error',
+        titulo: 'No se pudo completar el registro',
+        mensaje: error_general ?? mensaje_error
+      } %}
+    {# Cierre del condicional de error general #}
+    {% endif %}
+    {# Formulario HTML con envío seguro por POST y novalidate para validación unificada #}
+    <form action="/cuenta/registro" method="POST" class="formulario-registro" novalidate>
+      {# Campo oculto para el token de protección contra ataques CSRF #}
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      {# Campo 1: Nombre completo o apodo público del usuario #}
+      {# Parámetros: nombre ('nombre'), etiqueta legible, tipo text, persistencia de valor, placeholder guía, ayuda y validación requerida con su error #}
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'nombre',
+        etiqueta: 'Nombre completo o apodo',
+        tipo: 'text',
+        valor: valores.nombre ?? '',
+        placeholder: 'Ej: Mariana Rossi',
+        ayuda: 'Será visible en tus votos y reservas.',
+        requerido: true,
+        error: errores.nombre ?? null
+      } %}
+      {# Campo 2: Dirección de correo electrónico #}
+      {# Parámetros: nombre ('email'), etiqueta legible, tipo email para teclado móvil, valor previo, placeholder, ayuda explicativa, obligatorio y error si ya existe #}
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'email',
+        etiqueta: 'Correo electrónico',
+        tipo: 'email',
+        valor: valores.email ?? '',
+        placeholder: 'nombre@ejemplo.com',
+        ayuda: 'Te enviaremos los comprobantes de reserva.',
+        requerido: true,
+        error: errores.email ?? null
+      } %}
+      {# Campo 3: Contraseña segura del usuario #}
+      {# Parámetros: nombre ('password'), etiqueta 'Contraseña', tipo password con caracteres ocultos, placeholder, ayuda de longitud/complejidad, obligatorio y mensaje de error #}
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'password',
+        etiqueta: 'Contraseña',
+        tipo: 'password',
+        placeholder: 'Mínimo 8 caracteres',
+        ayuda: 'Al menos 8 caracteres con letras y números.',
+        requerido: true,
+        error: errores.password ?? null
+      } %}
+      {# Campo 4: Confirmación de contraseña #}
+      {# Parámetros: nombre ('password_confirmacion'), etiqueta 'Confirmar contraseña', tipo password, placeholder repetidor, obligatorio y error de no coincidencia #}
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'password_confirmacion',
+        etiqueta: 'Confirmar contraseña',
+        tipo: 'password',
+        placeholder: 'Repetí la contraseña',
+        requerido: true,
+        error: errores.password_confirmacion ?? null
+      } %}
+      {# Campo 5: Casilla de verificación de aceptación de términos y condiciones #}
+      {# Parámetros: nombre ('terminos'), tipo checkbox interactivo, etiqueta legal adyacente, valor '1', obligatorio y error si no fue marcado #}
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'terminos',
+        tipo: 'checkbox',
+        etiqueta: 'Acepto los términos del servicio y las normas de convivencia de IndieCinema.',
+        valor: '1',
+        requerido: true,
+        error: errores.terminos ?? null
+      } %}
+      {# Contenedor de acciones del formulario con espaciado superior #}
+      <div class="formulario-acciones">
+        {# Inclusión del parcial de botón con acción submit #}
+        {# Parámetros: texto 'Crear cuenta', tipo submit para disparar el formulario, variante primaria dorada, tamaño grande y ancho completo de bloque #}
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Crear cuenta',
+          tipo: 'submit',
+          variante: 'primario',
+          tamano: 'grande',
+          bloque: true
+        } %}
+      {# Cierre del contenedor de acciones #}
+      </div>
+    {# Cierre del formulario #}
+    </form>
+    {# Pie de la tarjeta con enlace hacia el formulario de inicio de sesión existente #}
+    <footer class="autenticacion-pie">
+      {# Texto con enlace hacia la pantalla de login #}
+      <p class="autenticacion-enlace-texto">
+        ¿Ya tenés una cuenta?
+        {# Enlace estilizado con el prefijo canónico del subsistema cuenta #}
+        <a href="/cuenta/ingresar" class="enlace-destacado">Iniciar sesión</a>
+      {# Cierre del párrafo #}
+      </p>
+    {# Cierre del pie de la tarjeta #}
+    </footer>
+  {# Cierre de la tarjeta de autenticación #}
+  </div>
+{# Cierre del contenedor de autenticación #}
+</div>
+{# Cierre del bloque de contenido #}
+{% endblock %}

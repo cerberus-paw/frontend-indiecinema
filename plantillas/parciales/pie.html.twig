@@ -1,0 +1,97 @@
+{#
+  Parcial de pie de página (IC-43 / IC-44 / IC-45)
+  Estructura el pie del sitio alineado a la identidad visual oficial E1 y al backlog de la Entrega 3:
+  Identidad del proyecto con logotipo oficial, enlaces a Cartelera (/cartelera), Salas y Películas (/obras),
+  participación comunitaria y créditos legales.
+#}
+{# Resuelve de forma segura el usuario en sesión o null para evitar errores en modo estricto de Twig #}
+{% set usr = usuario ?? null %}
+{# Elemento semántico footer que engloba el pie de página de la aplicación #}
+<footer class="pie-pagina">
+  {# Contenedor con ancho delimitado y padding horizontal para centrar el contenido #}
+  <div class="contenedor pie-contenedor">
+
+    {# Columna 1: Marca, logotipo oficial y lema descriptivo del proyecto IndieCinema #}
+    <div class="pie-columna pie-columna-marca">
+      {# Contenedor del logotipo oficial en el pie #}
+      <div class="marca-pie">
+        {# Logotipo vectorial oficial de la identidad visual E1 #}
+        <img src="/estaticos/img/logo-horizontal-dark.svg" alt="IndieCinema" class="marca-logo-pie-img" width="112" height="48">
+      {# Cierre del contenedor de marca #}
+      </div>
+      {# Lema central extraído del concepto de la plataforma #}
+      <p class="pie-lema">
+        Proyecciones de cine independiente en salas indie, programadas por quienes las miran.
+      </p>
+      {# Sublema explicativo del modelo colaborativo #}
+      <p class="pie-sublema">
+        Votá qué se proyecta, acordá la fecha con el resto del público y reservá tu lugar en salas independientes de tu zona.
+      </p>
+    {# Cierre de la primera columna #}
+    </div>
+
+    {# Columna 2: Enlaces de exploración y catálogo público del backlog E3 #}
+    <div class="pie-columna">
+      {# Título de la columna #}
+      <h3 class="pie-subtitulo">Explorar</h3>
+      {# Lista de enlaces activos de exploración #}
+      <ul class="pie-enlaces">
+        {# Enlace canónico a la cartelera de funciones activas #}
+        <li><a href="/cartelera">Cartelera</a></li>
+        {# Enlace al directorio de salas indie registradas #}
+        <li><a href="/salas">Salas indie</a></li>
+        {# Enlace al catálogo de películas (obras) #}
+        <li><a href="/obras">Películas / Catálogo</a></li>
+      {# Cierre de la lista de exploración #}
+      </ul>
+    {# Cierre de la segunda columna #}
+    </div>
+
+    {# Columna 3: Enlaces de participación comunitaria y gestión #}
+    <div class="pie-columna">
+      {# Título de la columna de participación #}
+      <h3 class="pie-subtitulo">Participar</h3>
+      {# Lista de enlaces de participación disponibles #}
+      <ul class="pie-enlaces">
+        {# Enlace a la guía explicativa #}
+        <li><a href="/como-funciona">Cómo funciona</a></li>
+        {# Enlace para registrarse en el subsistema de cuentas #}
+        <li><a href="/cuenta/registro">Crear cuenta</a></li>
+        {# Acceso a mis reservas #}
+        <li><a href="/funcion/mis-reservas">Mis reservas</a></li>
+        {# Si el usuario tiene rol organizador o superior, muestra acceso rápido a su panel #}
+        {% if usr and usr.alcanza('organizador') %}
+          <li><a href="/organizador">Panel del Organizador</a></li>
+          <li><a href="/organizador/salas/nueva">Publicar una sala</a></li>
+        {% endif %}
+      {# Cierre de la lista de participación #}
+      </ul>
+    {# Cierre de la tercera columna #}
+    </div>
+
+    {# Columna 4: Información de plataforma institucional (E3) #}
+    <div class="pie-columna">
+      <h3 class="pie-subtitulo">Comunidad</h3>
+      <ul class="pie-enlaces">
+        <li><a href="/como-funciona">Dinámica colaborativa</a></li>
+        <li><a href="/obras">Postular obras</a></li>
+        <li><a href="/cartelera">Próximas funciones</a></li>
+      </ul>
+    </div>
+  {# Cierre del contenedor principal del pie #}
+  </div>
+
+  {# Franja inferior de derechos reservados y mención institucional #}
+  <div class="pie-creditos">
+    {# Contenedor con distribución horizontal flexible #}
+    <div class="contenedor pie-creditos-contenedor">
+      {# Texto legal de copyright con autoría de Grupo Cerberus y la Universidad Nacional de Luján #}
+      <p>&copy; 2026 IndieCinema · Grupo Cerberus · UNLu (PAW)</p>
+      {# Subtítulo descriptivo extraído del encabezado y footer de los wireframes #}
+      <p class="pie-tag-wireframe">Cine Independiente · Salas Indie · Programación Participativa</p>
+    {# Cierre del contenedor de créditos #}
+    </div>
+  {# Cierre de la franja de créditos #}
+  </div>
+{# Cierre del elemento semántico footer #}
+</footer>
