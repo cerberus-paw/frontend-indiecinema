@@ -1,55 +1,82 @@
 /* ==========================================================================
-   IndieCinema - Hoja de Estilos Principal
+   IndieCinema - Hoja de Estilos Principal (IC-42 / IC-43)
    Diseño cinematográfico oscuro, elegante y responsivo.
    ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   Variables de diseño (Design Tokens) en :root
+   Definen colores semánticos, tipografías, radios de curvatura, sombras y animaciones.
+   -------------------------------------------------------------------------- */
 :root {
+  /* Fondo principal ultra oscuro (#0b0d14): evoca una sala de cine a oscuras y resalta el contenido */
   --color-fondo: #0b0d14;
+  /* Superficie de tarjetas y barra superior (#131722): da profundidad visual separándose del fondo */
   --color-superficie: #131722;
+  /* Superficie elevada (#1a2030): utilizada en inputs, dropdowns y elementos secundarios */
   --color-superficie-elevada: #1a2030;
+  /* Borde sutil blanco al 8% de opacidad: delimita tarjetas sin crear cortes visuales agresivos */
   --color-superficie-borde: rgba(255, 255, 255, 0.08);
+  /* Color de hover tenue al 5% para items de navegación interactivos */
   --color-superficie-hover: rgba(255, 255, 255, 0.05);
 
+  /* Color primario ámbar dorado (#f59e0b): característico de la estética de cine clásico y entradas */
   --color-primario: #f59e0b;
+  /* Tono ámbar oscurecido (#d97706) para estado :hover y :active en botones principales */
   --color-primario-hover: #d97706;
+  /* Resalte dorado al 15% para fondos de enlaces activos e insignias de organizador */
   --color-primario-suave: rgba(245, 158, 11, 0.15);
 
+  /* Color carmesí (#e11d48): acento visual cinematográfico y color distintivo de administradores */
   --color-acento: #e11d48;
+  /* Carmesí oscuro (#be123c) para hover de elementos de acento */
   --color-acento-hover: #be123c;
+  /* Carmesí suave al 15% para fondos de insignias administrativas */
   --color-acento-suave: rgba(225, 29, 72, 0.15);
 
+  /* Color índigo (#6366f1) para distinguir el rol de moderación */
   --color-moderador: #6366f1;
+  /* Fondo suave índigo al 15% para insignias de moderador */
   --color-moderador-suave: rgba(99, 102, 241, 0.15);
 
+  /* Color de texto principal casi blanco (#f8fafc) para garantizar máximo contraste (WCAG AAA) */
   --color-texto: #f8fafc;
+  /* Texto secundario gris claro (#94a3b8) para subtítulos, etiquetas y descripciones */
   --color-texto-secundario: #94a3b8;
+  /* Texto atenuado (#64748b) para placeholders, iconos pasivos y pies de página */
   --color-texto-apagado: #64748b;
 
+  /* Colores funcionales de estado */
   --color-exito: #10b981;
   --color-advertencia: #f59e0b;
   --color-error: #ef4444;
 
+  /* Tipografías: Outfit para títulos cinematográficos de fuerte impacto; Inter para lectura fluida */
   --fuente-titulos: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --fuente-cuerpo: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
+  /* Escala de radios de curvatura */
   --radio-sm: 6px;
   --radio-md: 10px;
   --radio-lg: 16px;
   --radio-completo: 9999px;
 
+  /* Sombras para simular capas de iluminación cinematográfica */
   --sombra-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
   --sombra-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --sombra-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
   --sombra-flotante: 0 14px 35px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
 
+  /* Ancho máximo de página alineado con los wireframes para monitores estándar y anchos */
   --ancho-maximo: 1240px;
+  /* Curva de aceleración cúbica para transiciones suaves y naturales */
   --transicion-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* --------------------------------------------------------------------------
-   Reseteo y estilos base
+   Reseteo y estilos base de normalización
    -------------------------------------------------------------------------- */
 
+/* Aplica box-sizing: border-box y elimina márgenes/rellenos por defecto en todos los elementos */
 *,
 *::before,
 *::after {
@@ -58,29 +85,38 @@
   padding: 0;
 }
 
+/* Configura tamaño base de fuente, scroll suave y esquema oscuro nativo del navegador */
 html {
   font-size: 16px;
   scroll-behavior: smooth;
   color-scheme: dark;
 }
 
+/* Estilos aplicados al cuerpo de la aplicación: estructura flexbox vertical para footer adherido */
 body.cuerpo-app {
+  /* Ocupa al menos el 100% de la altura visible del viewport */
   min-height: 100vh;
+  /* Dispone los elementos en columna flex para que el main se expanda empujando al footer */
   display: flex;
   flex-direction: column;
+  /* Fondo oscuro unificado */
   background-color: var(--color-fondo);
+  /* Color de texto por defecto */
   color: var(--color-texto);
+  /* Tipografía legible para el cuerpo */
   font-family: var(--fuente-cuerpo);
   font-size: 1rem;
   line-height: 1.6;
+  /* Suavizado subpixel para renderizado nítido de fuentes en macOS/Linux y WebKit */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* --------------------------------------------------------------------------
-   Accesibilidad
+   Accesibilidad (Screen Readers)
    -------------------------------------------------------------------------- */
 
+/* Oculta visualmente un elemento pero lo mantiene accesible para lectores de pantalla */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -97,6 +133,7 @@ body.cuerpo-app {
    Tipografía y enlaces
    -------------------------------------------------------------------------- */
 
+/* Títulos con tipografía Outfit y peso bold */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--fuente-titulos);
   color: var(--color-texto);
@@ -104,21 +141,25 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.25;
 }
 
+/* Escala jerárquica de encabezados */
 h1 { font-size: 2.25rem; margin-bottom: 1rem; }
 h2 { font-size: 1.75rem; margin-bottom: 0.85rem; }
 h3 { font-size: 1.35rem; margin-bottom: 0.75rem; }
 
+/* Párrafos con separación y color secundario para no fatigar la vista */
 p {
   margin-bottom: 1rem;
   color: var(--color-texto-secundario);
 }
 
+/* Enlaces con color dorado primario y transición suave */
 a {
   color: var(--color-primario);
   text-decoration: none;
   transition: color var(--transicion-base);
 }
 
+/* Estado hover de enlaces */
 a:hover {
   color: var(--color-primario-hover);
 }
@@ -127,6 +168,7 @@ a:hover {
    Estructura y Contenedor
    -------------------------------------------------------------------------- */
 
+/* Contenedor centralizado para mantener consistencia de márgenes en toda la pantalla */
 .contenedor {
   width: 100%;
   max-width: var(--ancho-maximo);
@@ -136,6 +178,7 @@ a:hover {
   padding-right: 1.5rem;
 }
 
+/* Área de contenido principal: flex: 1 permite que ocupe todo el espacio disponible */
 .contenido-principal {
   flex: 1;
   padding: 2.5rem 1.5rem;
@@ -145,20 +188,27 @@ a:hover {
 }
 
 /* --------------------------------------------------------------------------
-   Encabezado
+   Encabezado (Header)
    -------------------------------------------------------------------------- */
 
+/* Barra de cabecera fija arriba con efecto de desenfoque glassmorphism */
 .encabezado {
+  /* Mantiene la cabecera fija durante el scroll */
   position: sticky;
   top: 0;
+  /* Nivel z-index superior para flotar sobre el contenido de la página */
   z-index: 100;
+  /* Fondo semitransparente oscuro */
   background-color: rgba(11, 13, 20, 0.9);
+  /* Filtro de desenfoque de fondo para efecto de vidrio esmerilado */
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+  /* Borde inferior muy sutil para separar la cabecera del cuerpo */
   border-bottom: 1px solid var(--color-superficie-borde);
   padding: 0.75rem 0;
 }
 
+/* Distribución flex horizontal del contenido de la cabecera */
 .encabezado-contenedor {
   display: flex;
   align-items: center;
@@ -166,7 +216,7 @@ a:hover {
   gap: 1.25rem;
 }
 
-/* Marca / Logo */
+/* Logotipo / Marca */
 .encabezado-marca .marca-enlace {
   display: inline-flex;
   align-items: center;
@@ -179,26 +229,31 @@ a:hover {
   letter-spacing: -0.02em;
 }
 
+/* Ícono de claqueta en el logo */
 .marca-icono {
   font-size: 1.5rem;
   line-height: 1;
 }
 
+/* Resalte dorado en 'Cinema' */
 .marca-resaltado {
   color: var(--color-primario);
 }
 
-/* Buscador */
+/* Buscador de cabecera */
 .encabezado-buscador {
+  /* Ancho flexible con base de 260px para no ocupar demasiado espacio en desktop */
   flex: 0 1 260px;
 }
 
+/* Contenedor relativo para alojar el icono dentro del input */
 .buscador-caja {
   position: relative;
   display: flex;
   align-items: center;
 }
 
+/* Icono de lupa posicionado a la izquierda */
 .buscador-icono {
   position: absolute;
   left: 0.75rem;
@@ -207,8 +262,10 @@ a:hover {
   pointer-events: none;
 }
 
+/* Campo de entrada estilizado */
 .buscador-input {
   width: 100%;
+  /* Padding izquierdo suficiente para que el texto no se superponga con la lupa */
   padding: 0.45rem 0.85rem 0.45rem 2.2rem;
   background-color: var(--color-superficie-elevada);
   border: 1px solid var(--color-superficie-borde);
@@ -220,10 +277,12 @@ a:hover {
   transition: all var(--transicion-base);
 }
 
+/* Color del texto de sugerencia del buscador */
 .buscador-input::placeholder {
   color: var(--color-texto-apagado);
 }
 
+/* Enfoque del buscador con resplandor dorado */
 .buscador-input:focus {
   border-color: var(--color-primario);
   background-color: var(--color-superficie);
@@ -238,6 +297,7 @@ a:hover {
   list-style: none;
 }
 
+/* Enlaces de la barra de navegación */
 .nav-enlace {
   display: inline-flex;
   align-items: center;
@@ -251,16 +311,19 @@ a:hover {
   transition: all var(--transicion-base);
 }
 
+/* Hover de enlaces del menú */
 .nav-enlace:hover {
   color: var(--color-texto);
   background-color: var(--color-superficie-hover);
 }
 
+/* Estado activo del enlace actual */
 .nav-enlace.activo {
   color: var(--color-primario);
   background-color: var(--color-primario-suave);
 }
 
+/* Enlaces correspondientes a roles de usuario */
 .enlace-rol {
   font-weight: 600;
 }
@@ -287,11 +350,12 @@ a:hover {
   color: var(--color-texto);
 }
 
-/* Menú desplegable del usuario */
+/* Menú desplegable del usuario (<details>) */
 .usuario-desplegable {
   position: relative;
 }
 
+/* Botón disparador del menú (<summary>) */
 .usuario-resumen {
   display: flex;
   align-items: center;
@@ -306,15 +370,18 @@ a:hover {
   user-select: none;
 }
 
+/* Oculta la flecha por defecto de details en navegadores WebKit/Blink */
 .usuario-resumen::-webkit-details-marker {
   display: none;
 }
 
+/* Hover del disparador de usuario */
 .usuario-resumen:hover {
   background-color: var(--color-superficie-elevada);
   border-color: rgba(255, 255, 255, 0.15);
 }
 
+/* Avatar circular del usuario con inicial */
 .usuario-avatar {
   width: 32px;
   height: 32px;
@@ -328,6 +395,7 @@ a:hover {
   justify-content: center;
 }
 
+/* Datos de nombre y rol alineados */
 .usuario-info {
   display: flex;
   flex-direction: column;
@@ -335,6 +403,7 @@ a:hover {
   line-height: 1.15;
 }
 
+/* Truncado con elipsis del nombre de usuario si es extenso */
 .usuario-nombre {
   font-weight: 600;
   font-size: 0.875rem;
@@ -345,6 +414,7 @@ a:hover {
   white-space: nowrap;
 }
 
+/* Insignia visual con el rol del usuario */
 .usuario-rol {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -356,32 +426,37 @@ a:hover {
   margin-top: 0.15rem;
 }
 
+/* Insignia para rol Organizador */
 .usuario-rol.rol-organizador {
   background-color: var(--color-primario-suave);
   color: var(--color-primario);
 }
 
+/* Insignia para rol Moderador */
 .usuario-rol.rol-moderador {
   background-color: var(--color-moderador-suave);
   color: #a5b4fc;
 }
 
+/* Insignia para rol Administrador */
 .usuario-rol.rol-administrador {
   background-color: var(--color-acento-suave);
   color: #fb7185;
 }
 
+/* Flecha animada de apertura */
 .desplegable-flecha {
   font-size: 0.65rem;
   color: var(--color-texto-apagado);
   transition: transform var(--transicion-base);
 }
 
+/* Rotación de la flecha cuando details está abierto */
 .usuario-desplegable[open] .desplegable-flecha {
   transform: rotate(180deg);
 }
 
-/* Contenido del menú flotante */
+/* Contenedor del menú flotante */
 .usuario-menu-flotante {
   position: absolute;
   top: calc(100% + 0.6rem);
@@ -393,9 +468,11 @@ a:hover {
   box-shadow: var(--sombra-flotante);
   padding: 0.5rem;
   z-index: 200;
+  /* Microanimación de entrada al abrir */
   animation: deslizarAbajo 0.15s ease-out;
 }
 
+/* Fotogramas clave para la animación de apertura */
 @keyframes deslizarAbajo {
   from {
     opacity: 0;
@@ -407,6 +484,7 @@ a:hover {
   }
 }
 
+/* Encabezado del menú flotante */
 .menu-cabecera {
   padding: 0.6rem 0.75rem;
 }
@@ -424,12 +502,14 @@ a:hover {
   margin-top: 0.15rem;
 }
 
+/* Separador visual entre grupos de items */
 .menu-separador {
   height: 1px;
   background-color: var(--color-superficie-borde);
   margin: 0.4rem 0;
 }
 
+/* Subtítulos de sección dentro del menú */
 .menu-seccion-titulo {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -439,6 +519,7 @@ a:hover {
   font-weight: 700;
 }
 
+/* Item individual del menú */
 .menu-item {
   display: flex;
   align-items: center;
@@ -456,6 +537,7 @@ a:hover {
   color: var(--color-texto);
 }
 
+/* Item destructivo de cerrar sesión */
 .menu-item-cerrar {
   color: #f87171;
 }
@@ -475,6 +557,7 @@ a:hover {
    Botones
    -------------------------------------------------------------------------- */
 
+/* Estilo base común a todos los botones */
 .boton {
   display: inline-flex;
   align-items: center;
@@ -491,12 +574,14 @@ a:hover {
   line-height: 1;
 }
 
+/* Variante pequeña para encabezados y acciones compactas */
 .boton-chico {
   font-size: 0.85rem;
   padding: 0.45rem 0.95rem;
   border-radius: var(--radio-sm);
 }
 
+/* Botón primario dorado */
 .boton-primario {
   background-color: var(--color-primario);
   color: #000;
@@ -508,6 +593,7 @@ a:hover {
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.35);
 }
 
+/* Botón secundario oscuro con borde tenue */
 .boton-secundario {
   background-color: var(--color-superficie-elevada);
   color: var(--color-texto);
@@ -631,6 +717,7 @@ dd {
   margin-top: auto;
 }
 
+/* Disposición de 4 columnas según wireframe del Home */
 .pie-contenedor {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
@@ -709,15 +796,17 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
-   Responsividad
+   Responsividad (Media Queries)
    -------------------------------------------------------------------------- */
 
+/* Adaptación para tablets y pantallas intermedias (hasta 1024px) */
 @media (max-width: 1024px) {
   .encabezado-contenedor {
     flex-wrap: wrap;
     gap: 1rem;
   }
 
+  /* El buscador pasa a ocupar una fila completa debajo de la marca */
   .encabezado-buscador {
     order: 3;
     flex: 1 1 100%;
@@ -738,6 +827,7 @@ dd {
   }
 }
 
+/* Adaptación para dispositivos móviles (hasta 768px) */
 @media (max-width: 768px) {
   .navegacion-principal {
     order: 4;
@@ -759,6 +849,7 @@ dd {
     grid-template-columns: 1fr;
   }
 
+  /* En móviles se oculta el texto del nombre para no saturar la cabecera, conservando el avatar */
   .usuario-info {
     display: none;
   }

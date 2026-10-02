@@ -1,168 +1,265 @@
+{#
+  Parcial de encabezado (IC-43)
+  Contiene la barra de navegación superior fija, el logotipo, el buscador de películas y salas,
+  la navegación pública de los wireframes, y el menú adaptativo según el rol de la sesión.
+#}
+{# Elemento semántico header que representa la cabecera superior y fija de la página #}
 <header class="encabezado">
+  {# Contenedor con ancho máximo centrado para mantener alineación consistente con el resto de la interfaz #}
   <div class="contenedor encabezado-contenedor">
-    <!-- Marca / Logo -->
+
+    {# Sección del logotipo y nombre de la marca IndieCinema #}
     <div class="encabezado-marca">
+      {# Enlace hacia la portada principal (subdominio raíz o catálogo de programación) con etiqueta accesible #}
       <a href="/" class="marca-enlace" aria-label="IndieCinema Inicio">
+        {# Ícono representativo de claqueta/cine oculto a lectores de pantalla porque el texto adyacente es descriptivo #}
         <span class="marca-icono" aria-hidden="true">🎬</span>
+        {# Texto de la marca con distinción de color en 'Cinema' para reforzar la identidad visual #}
         <span class="marca-texto">Indie<span class="marca-resaltado">Cinema</span></span>
+      {# Cierre del enlace del logo #}
       </a>
+    {# Cierre de la sección de marca #}
     </div>
 
-    <!-- Buscador -->
+    {# Sección del buscador rápido de contenidos especificado en los wireframes #}
     <div class="encabezado-buscador">
+      {# Formulario de búsqueda accesible por GET hacia la ruta de búsqueda de programación #}
       <form class="buscador-form" action="/buscar" method="get" role="search">
+        {# Etiqueta para lectores de pantalla oculta visualmente mediante la clase .sr-only por motivos estéticos #}
         <label for="campo-busqueda" class="sr-only">Buscar películas o salas</label>
+        {# Contenedor relativo que posiciona el icono de lupa dentro del campo de texto #}
         <div class="buscador-caja">
+          {# Icono decorativo de lupa posicionado de forma absoluta dentro del input #}
           <span class="buscador-icono" aria-hidden="true">🔍</span>
+          {# Campo de entrada de tipo search que permite autocompletado y borrado nativo #}
           <input type="search" id="campo-busqueda" name="q" class="buscador-input" placeholder="Buscar películas, salas..." aria-label="Buscar películas, salas" value="{{ consulta_busqueda ?? '' }}">
+        {# Cierre de la caja del buscador #}
         </div>
+      {# Cierre del formulario del buscador #}
       </form>
+    {# Cierre de la sección del buscador #}
     </div>
 
-    <!-- Navegación principal -->
+    {# Navegación principal estructurada semánticamente con nav #}
     <nav class="navegacion-principal" aria-label="Navegación principal">
+      {# Lista no ordenada de enlaces de navegación pública #}
       <ul class="nav-lista">
+        {# Enlace a Cartelera: se marca con la clase activo si ruta_actual coincide con la raíz #}
         <li>
           <a href="/" class="nav-enlace{% if ruta_actual == '/' %} activo{% endif %}">Cartelera</a>
         </li>
+        {# Enlace a la sección de Salas indie registradas #}
         <li>
           <a href="/salas" class="nav-enlace{% if ruta_actual starts with '/salas' %} activo{% endif %}">Salas</a>
         </li>
+        {# Enlace al catálogo completo de Películas independientes #}
         <li>
           <a href="/peliculas" class="nav-enlace{% if ruta_actual starts with '/peliculas' %} activo{% endif %}">Películas</a>
         </li>
+        {# Enlace explicativo sobre la dinámica colaborativa de la plataforma #}
         <li>
           <a href="/como-funciona" class="nav-enlace{% if ruta_actual starts with '/como-funciona' %} activo{% endif %}">Cómo funciona</a>
         </li>
 
-        {# Enlaces rápidos de roles en la barra de navegación #}
+        {# Verificación segura: primero pregunta 'if usuario' para evitar fallos de Twig en desarrollo (strict_variables) #}
+        {# y luego evalúa 'usuario.alcanza' para determinar si el usuario tiene nivel suficiente de Organizador #}
         {% if usuario and usuario.alcanza('organizador') %}
+          {# Item visible solo para organizadores, moderadores y administradores #}
           <li class="nav-item-rol">
+            {# Acceso directo al panel de control de organización de salas y funciones #}
             <a href="/organizador" class="nav-enlace enlace-rol{% if ruta_actual starts with '/organizador' %} activo{% endif %}" title="Panel de Organización">
+              {# Ícono temático de ticket para identificar visualmente la sección de organización #}
               <span class="icono-rol" aria-hidden="true">🎟️</span> Organización
             </a>
           </li>
+        {# Cierre del condicional para rol organizador #}
         {% endif %}
+
+        {# Evalúa si el usuario activo posee rol de Moderador o superior (Administrador) #}
         {% if usuario and usuario.alcanza('moderador') %}
+          {# Item visible para personal con facultades de moderación #}
           <li class="nav-item-rol">
+            {# Acceso directo al panel de revisión de solicitudes de salas y denuncias de usuarios #}
             <a href="/moderacion" class="nav-enlace enlace-rol{% if ruta_actual starts with '/moderacion' %} activo{% endif %}" title="Panel de Moderación">
+              {# Ícono temático de escudo protector #}
               <span class="icono-rol" aria-hidden="true">🛡️</span> Moderación
             </a>
           </li>
+        {# Cierre del condicional para rol moderador #}
         {% endif %}
+
+        {# Evalúa si el usuario activo posee rol de Administrador (máximo nivel de acceso en el sistema) #}
         {% if usuario and usuario.alcanza('administrador') %}
+          {# Item visible exclusivamente para administradores de la plataforma #}
           <li class="nav-item-rol">
+            {# Acceso directo a la configuración global de parámetros, roles y estadísticas #}
             <a href="/admin" class="nav-enlace enlace-rol{% if ruta_actual starts with '/admin' %} activo{% endif %}" title="Panel de Administración">
+              {# Ícono temático de engranaje de configuración #}
               <span class="icono-rol" aria-hidden="true">⚙️</span> Administración
             </a>
           </li>
+        {# Cierre del condicional para rol administrador #}
         {% endif %}
+      {# Cierre de la lista de navegación principal #}
       </ul>
+    {# Cierre del elemento nav #}
     </nav>
 
-    <!-- Sesión de usuario / Acciones -->
+    {# Bloque de sesión: muestra el menú del usuario autenticado o los botones de acceso para invitados #}
     <div class="encabezado-usuario">
+      {# Si existe un usuario en sesión, se renderiza su tarjeta y menú desplegable #}
       {% if usuario %}
+        {# Se utiliza la etiqueta HTML5 nativa 'details' para que el menú funcione incluso si falla o no carga JavaScript #}
         <details class="usuario-desplegable" id="menu-usuario">
+          {# Elemento summary interactivo que sirve como disparador accesible del menú desplegable #}
           <summary class="usuario-resumen" aria-haspopup="menu" aria-label="Menú de usuario">
+            {# Avatar circular generado dinámicamente con la primera letra del nombre en mayúscula para identidad visual #}
             <span class="usuario-avatar" aria-hidden="true">
               {{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}
             </span>
+            {# Contenedor con los datos textuales de la sesión #}
             <div class="usuario-info">
+              {# Muestra el nombre público del usuario provisto por las cabeceras de nginx o 'Usuario' por defecto #}
               <span class="usuario-nombre">{{ usuario.nombre ?? 'Usuario' }}</span>
+              {# Insignia visual con el nombre del rol y una clase CSS específica para colorearlo adecuadamente #}
               <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
+            {# Cierre de información del usuario #}
             </div>
+            {# Flecha indicadora de apertura que gira con animación CSS cuando details tiene el atributo open #}
             <span class="desplegable-flecha" aria-hidden="true">▾</span>
+          {# Cierre de summary #}
           </summary>
 
+          {# Menú flotante con lista completa de acciones disponibles para el usuario según su perfil #}
           <div class="usuario-menu-flotante" role="menu">
+            {# Encabezado informativo del menú para confirmar el usuario y rol actual #}
             <div class="menu-cabecera">
               <strong class="menu-usuario-nombre">{{ usuario.nombre ?? 'Usuario' }}</strong>
               <span class="menu-usuario-rol">Rol activo: {{ usuario.rol.value|capitalize }}</span>
             </div>
 
+            {# Línea divisoria visual entre el encabezado y las opciones #}
             <div class="menu-separador" role="separator"></div>
 
+            {# Título de la sección de Mi Cuenta disponible para cualquier usuario registrado #}
             <div class="menu-seccion-titulo">Mi cuenta</div>
+            {# Enlace al panel principal de cuenta con el prefijo /cuenta/ del subsistema de cuentas #}
             <a href="/cuenta/" class="menu-item" role="menuitem">
               <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
             </a>
+            {# Enlace al historial de reservas y entradas emitidas #}
             <a href="/cuenta/reservas" class="menu-item" role="menuitem">
               <span class="menu-icono" aria-hidden="true">🎫</span> Mis reservas
             </a>
+            {# Enlace a los comprobantes y pagos efectuados vía Mercado Pago #}
             <a href="/cuenta/pagos" class="menu-item" role="menuitem">
               <span class="menu-icono" aria-hidden="true">💳</span> Mis pagos
             </a>
+            {# Enlace a las salas y organizadores seguidos por el espectador #}
             <a href="/cuenta/seguidos" class="menu-item" role="menuitem">
               <span class="menu-icono" aria-hidden="true">⭐</span> Salas seguidas
             </a>
 
-            {# Menú del rol organizador #}
+            {# Sección condicional de opciones para el rol de Organizador #}
             {% if usuario.alcanza('organizador') %}
+              {# Separador visual para agrupar las herramientas de organizador #}
               <div class="menu-separador" role="separator"></div>
+              {# Encabezado de la sección de organización #}
               <div class="menu-seccion-titulo">Panel del Organizador</div>
+              {# Acceso al resumen de funciones, votaciones y métricas del organizador #}
               <a href="/organizador" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">📊</span> Resumen general
               </a>
+              {# Acceso a la gestión de salas indie propias (alta, baja y modificación) #}
               <a href="/organizador/salas" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">🏛️</span> Mis salas (ABM)
               </a>
+              {# Acceso a la publicación de funciones y apertura de fechas o votaciones #}
               <a href="/organizador/funciones" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">🎬</span> Funciones (ABM)
+                <span class="menu-icono" aria-hidden="true">🎬</span> Mis funciones (ABM)
               </a>
+              {# Acceso a la postulación de películas al catálogo #}
               <a href="/organizador/peliculas" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">🎞️</span> Películas (ABM)
               </a>
+            {# Cierre de condicional organizador #}
             {% endif %}
 
-            {# Menú del rol moderador #}
+            {# Sección condicional de opciones para el rol de Moderador #}
             {% if usuario.alcanza('moderador') %}
+              {# Separador visual para agrupar las herramientas de moderación #}
               <div class="menu-separador" role="separator"></div>
+              {# Encabezado de la sección de moderación #}
               <div class="menu-seccion-titulo">Panel de Moderación</div>
+              {# Acceso a la bandeja unificada de moderación #}
               <a href="/moderacion" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">🛡️</span> Bandeja de moderación
               </a>
+              {# Acceso a la revisión de solicitudes de salas y su documentación adjunta #}
               <a href="/moderacion/solicitudes" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">📋</span> Solicitudes de sala
               </a>
+              {# Acceso al tratamiento de denuncias de usuarios o contenido inapropiado #}
               <a href="/moderacion/denuncias" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">⚠️</span> Denuncias
               </a>
+              {# Acceso a la auditoría y aprobación de películas cargadas al catálogo #}
               <a href="/moderacion/catalogo" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">🔍</span> Revisión de catálogo
               </a>
+            {# Cierre de condicional moderador #}
             {% endif %}
 
-            {# Menú del rol administrador #}
+            {# Sección condicional de opciones para el rol de Administrador #}
             {% if usuario.alcanza('administrador') %}
+              {# Separador visual para agrupar las herramientas de administración #}
               <div class="menu-separador" role="separator"></div>
+              {# Encabezado de la sección de administración global #}
               <div class="menu-seccion-titulo">Administración</div>
+              {# Acceso al panel central de administración #}
               <a href="/admin" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">⚙️</span> Panel de administración
               </a>
+              {# Acceso al listado de usuarios, asignación de roles y suspensiones #}
               <a href="/admin/usuarios" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
               </a>
+              {# Acceso a la modificación de comisiones, cupos y parámetros generales #}
               <a href="/admin/parametros" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">🔧</span> Parámetros del sistema
               </a>
+              {# Acceso a las estadísticas globales de recaudación, asistencia y salas #}
               <a href="/admin/estadisticas" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">📈</span> Estadísticas del sitio
               </a>
+            {# Cierre de condicional administrador #}
             {% endif %}
 
+            {# Separador visual antes del botón destructivo de cierre de sesión #}
             <div class="menu-separador" role="separator"></div>
+            {# Enlace para invalidar la cookie de sesión en el subsistema de cuentas #}
             <a href="/cuenta/salir" class="menu-item menu-item-cerrar" role="menuitem">
               <span class="menu-icono" aria-hidden="true">🚪</span> Cerrar sesión
             </a>
+          {# Cierre del menú flotante #}
           </div>
+        {# Cierre del componente details #}
         </details>
+      {# Rama alternativa: cuando no hay ningún usuario autenticado en la sesión #}
       {% else %}
+        {# Contenedor de botones de ingreso y registro para visitantes #}
         <div class="usuario-invitado">
+          {# Enlace simple hacia el formulario de inicio de sesión de cuentas #}
           <a href="/cuenta/ingresar" class="nav-enlace enlace-ingresar">Ingresar</a>
+          {# Botón de acción destacada (call to action) para crear una cuenta nueva #}
           <a href="/cuenta/registro" class="boton boton-primario boton-chico">Crear cuenta</a>
+        {# Cierre del contenedor de visitante #}
         </div>
+      {# Cierre del condicional principal de usuario #}
       {% endif %}
+    {# Cierre de la sección de usuario #}
     </div>
+  {# Cierre del contenedor del encabezado #}
   </div>
+{# Cierre de la cabecera semántica #}
 </header>

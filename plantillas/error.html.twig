@@ -1,32 +1,64 @@
+{#
+  Plantilla común de visualización de errores (IC-42 / IC-43).
+  Reemplaza la plantilla mínima de respaldo del núcleo mostrando una interfaz cinematográfica cuidada.
+  Extiende de base.html.twig para conservar el encabezado con la sesión del usuario y el pie.
+#}
+{# Extiende de la plantilla base común del frontend para mantener el layout unificado #}
 {% extends 'base.html.twig' %}
 
+{# Define el título de la pestaña del navegador indicando el código de estado HTTP recibido #}
 {% block titulo %}Error {{ estado }}{% endblock %}
 
+{# Define el contenido principal de la pantalla de error #}
 {% block contenido %}
+{# Contenedor centrado verticalmente con la clase de sección de error #}
 <div class="contenedor seccion-error">
+  {# Tarjeta con fondo oscuro elevado y borde sutil que enmarca el mensaje #}
   <div class="tarjeta-error">
+    {# Insignia gráfica grande que destaca el código numérico de estado HTTP (ej. 404, 500, 403) #}
     <div class="error-insignia">{{ estado }}</div>
+    {# Título principal con el mensaje exacto generado por el ManejadorDeErrores del backend #}
     <h1 class="error-titulo">{{ mensaje }}</h1>
+    {# Párrafo con texto contextual amigable para orientar al usuario según el código de error #}
     <p class="error-descripcion">
+      {# Para errores 404 de página o recurso no encontrado #}
       {% if estado == 404 %}
         La página o el recurso solicitado no existe o fue movido.
+      {# Para errores 401 o 403 de autenticación o falta de privilegios de rol #}
       {% elseif estado == 401 or estado == 403 %}
-        No contás con los permisos suficientes para acceder a este recurso.
+        No contás con los permisos suficientes para acceder a este recurso o tu sesión expiró.
+      {# Para cualquier otro error inesperado del servidor (500) #}
       {% else %}
         Ocurrió un problema inesperado. Por favor, intentá nuevamente en unos instantes.
+      {# Cierre del condicional descriptivo #}
       {% endif %}
+    {# Cierre del párrafo explicativo #}
     </p>
+    {# Botones de acción rápida para que el usuario pueda recuperarse y seguir navegando #}
     <div class="error-acciones">
+      {# Enlace para volver a la cartelera pública en la raíz #}
       <a href="/" class="boton boton-primario">Volver a la cartelera</a>
+      {# Enlace para dirigirse al panel del subsistema de cuentas #}
       <a href="/cuenta/" class="boton boton-secundario">Ir a mi cuenta</a>
+    {# Cierre de las acciones #}
     </div>
 
+    {# El detalle técnico solo lo envía el backend cuando la aplicación corre en entorno de desarrollo #}
+    {# En producción 'detalle' llega null para no filtrar rutas internas ni datos sensibles al usuario #}
     {% if detalle %}
+      {# Bloque visual delimitado para información técnica de depuración #}
       <div class="error-detalles-desarrollo">
+        {# Encabezado en color de advertencia avisando que este bloque solo existe en desarrollo #}
         <h2 class="error-detalles-titulo">Detalle técnico (entorno de desarrollo):</h2>
+        {# Caja preformateada para visualizar la traza de la excepción sin desbordar la pantalla #}
         <pre class="error-detalles-codigo"><code>{{ detalle }}</code></pre>
+      {# Cierre del bloque de desarrollo #}
       </div>
+    {# Cierre del condicional de detalle #}
     {% endif %}
+  {# Cierre de la tarjeta de error #}
   </div>
+{# Cierre del contenedor de la sección de error #}
 </div>
+{# Cierre del bloque de contenido #}
 {% endblock %}
