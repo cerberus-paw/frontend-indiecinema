@@ -1,0 +1,150 @@
+{#
+  Parcial de tarjeta de función de cine reutilizable (IC-45).
+  Se utiliza en la portada (Home), la Cartelera y catálogos de cada subsistema.
+  Muestra el afiche audiovisual, la insignia del estado (Programada, En votación, Acuerdo de fecha),
+  el precio de la entrada, el título, la sala indie, la localidad, la fecha o plazo y el botón de acción.
+
+  Parámetros recibidos:
+  - funcion: (objeto o array asociativo, obligatorio) Datos de la función:
+      - id: (int|string, obligatorio) Identificador de la función.
+      - titulo: (string, obligatorio) Título de la función, ciclo o película.
+      - afiche: (string, opcional) URL o ruta de la imagen del afiche.
+      - estado: (string, opcional, por defecto 'PROGRAMADA') 'PROGRAMADA' | 'EN_VOTACION' | 'ACUERDO_FECHA'.
+      - precio: (string|number, opcional) Valor de entrada (ej: '$3.500', 'Gratis', 'A la gorra').
+      - sala: (string, opcional) Nombre del espacio o sala indie donde se proyecta.
+      - localidad: (string, opcional) Ciudad o barrio de la sala (ej: 'Luján', 'Mercedes').
+      - fecha: (string, opcional) Fecha y hora confirmada (ej: 'Sáb 19 sep · 20:30').
+      - cierre_votacion: (string, opcional) Fecha límite cuando está en votación (ej: 'Cierra el 15 sep').
+      - franjas_propuestas: (string|int, opcional) Cantidad de opciones cuando está en acuerdo de fecha.
+      - url: (string, opcional) URL de detalle personalizada (por defecto '/programacion/funciones/{id}').
+  - clase: (string, opcional) Clases CSS adicionales para el contenedor de la tarjeta.
+#}
+{# Resuelve el identificador de la función #}
+{% set funcion_id = funcion.id ?? '0' %}
+{# Normaliza el estado en mayúsculas para simplificar comparaciones de insignias #}
+{% set estado_codigo = (funcion.estado ?? 'PROGRAMADA')|upper|replace({' ': '_', 'Ó': 'O'}) %}
+{# Resuelve la etiqueta legible del estado para el usuario #}
+{% if estado_codigo == 'EN_VOTACION' %}
+  {% set etiqueta_estado = 'EN VOTACIÓN' %}
+  {% set clase_insignia = 'insignia-votacion' %}
+{% elseif estado_codigo == 'ACUERDO_FECHA' or estado_codigo == 'ACUERDO_DE_FECHA' %}
+  {% set etiqueta_estado = 'ACUERDO DE FECHA' %}
+  {% set clase_insignia = 'insignia-acuerdo' %}
+{% else %}
+  {% set etiqueta_estado = 'PROGRAMADA' %}
+  {% set clase_insignia = 'insignia-programada' %}
+{% endif %}
+{# Resuelve la URL canónica de destino hacia el detalle de la función #}
+{% set url_detalle = funcion.url ?? ('/programacion/funciones/' ~ funcion_id) %}
+{# Resuelve la representación textual del precio de la función #}
+{% set texto_precio = funcion.precio ?? 'A la gorra' %}
+
+{# Contenedor principal de la tarjeta con semántica de artículo independiente #}
+<article class="tarjeta-funcion{% if clase is defined %} {{ clase }}{% endif %}">
+
+  {# Contenedor superior para el afiche gráfico de la obra #}
+  <div class="tarjeta-funcion-afiche">
+    {# Enlace que envuelve el afiche para permitir navegar al hacer clic en la imagen #}
+    <a href="{{ url_detalle }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">
+      {# Si la función cuenta con una imagen de afiche cargada #}
+      {% if funcion.afiche is defined and funcion.afiche %}
+        {# Imagen fotográfica del afiche con carga diferida #}
+        <img
+          src="{{ funcion.afiche }}"
+          alt="Afiche de {{ funcion.titulo }}"
+          class="tarjeta-funcion-imagen"
+          loading="lazy"
+        >
+      {# Si no se proporcionó imagen, se renderiza una ilustración de afiche con el estilo del wireframe #}
+      {% else %}
+        {# Contenedor de marcador visual con cuadrícula de afiche indie #}
+        <div class="tarjeta-funcion-afiche-placeholder">
+          {# Símbolo gráfico de bobina de celuloide #}
+          <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+          {# Texto indicativo que refleja el wireframe original #}
+          <span class="afiche-placeholder-texto">AFICHE</span>
+        {# Cierre del marcador visual #}
+        </div>
+      {# Cierre del condicional de imagen de afiche #}
+      {% endif %}
+    {# Cierre del enlace del afiche #}
+    </a>
+  {# Cierre del contenedor de afiche #}
+  </div>
+
+  {# Cuerpo textual de la tarjeta con metadatos y acciones #}
+  <div class="tarjeta-funcion-cuerpo">
+
+    {# Barra superior con la insignia de estado y el precio #}
+    <div class="tarjeta-funcion-cabecera">
+      {# Insignia de píldora que indica el estado del ciclo o función #}
+      <span class="insignia-estado {{ clase_insignia }}">{{ etiqueta_estado }}</span>
+      {# Valor monetario o modalidad de cobro de la entrada #}
+      <span class="tarjeta-funcion-precio">{{ texto_precio }}</span>
+    {# Cierre de la cabecera de la tarjeta #}
+    </div>
+
+    {# Título principal de la función enlazado a la pantalla de detalle #}
+    <h3 class="tarjeta-funcion-titulo">
+      {# Enlace accesible con el nombre completo de la obra o ciclo #}
+      <a href="{{ url_detalle }}" class="tarjeta-funcion-titulo-enlace">
+        {{ funcion.titulo }}
+      {# Cierre del enlace de título #}
+      </a>
+    {# Cierre del título h3 #}
+    </h3>
+
+    {# Lista de metadatos contextuales: sala, localidad, horarios #}
+    <div class="tarjeta-funcion-meta">
+      {# Fila de ubicación física de la sala indie #}
+      {% if funcion.sala is defined or funcion.localidad is defined %}
+        <p class="tarjeta-funcion-dato meta-ubicacion">
+          {# Icono representativo de geolocalización #}
+          <span class="meta-icono" aria-hidden="true">📍</span>
+          {# Nombre de la sala y localidad #}
+          <span class="meta-texto">{{ funcion.sala ?? 'Sala a confirmar' }}{% if funcion.localidad is defined %} · {{ funcion.localidad }}{% endif %}</span>
+        </p>
+      {# Cierre del condicional de sala #}
+      {% endif %}
+
+      {# Fila de información temporal: fecha confirmada, fecha límite de votación o franjas en negociación #}
+      <p class="tarjeta-funcion-dato meta-tiempo">
+        {# Icono representativo de calendario #}
+        <span class="meta-icono" aria-hidden="true">📅</span>
+        {# Muestra el texto correspondiente según el estado de la función #}
+        <span class="meta-texto">
+          {# Caso 1: En votación muestra el cierre de la votación #}
+          {% if estado_codigo == 'EN_VOTACION' and funcion.cierre_votacion is defined %}
+            {{ funcion.cierre_votacion }}
+          {# Caso 2: Acuerdo de fecha muestra las franjas propuestas #}
+          {% elseif (estado_codigo == 'ACUERDO_FECHA' or estado_codigo == 'ACUERDO_DE_FECHA') and funcion.franjas_propuestas is defined %}
+            {{ funcion.franjas_propuestas }}
+          {# Caso 3: Función programada con fecha y hora #}
+          {% else %}
+            {{ funcion.fecha ?? 'Próximamente' }}
+          {# Cierre del condicional de visualización temporal #}
+          {% endif %}
+        </span>
+      </p>
+    {# Cierre de los metadatos contextuales #}
+    </div>
+
+    {# Pie de la tarjeta con el botón de llamado a la acción #}
+    <div class="tarjeta-funcion-acciones">
+      {# Inclusión del botón reutilizable con variante secundaria de contorno #}
+      {% include 'parciales/boton.html.twig' with {
+        texto: 'Ver función',
+        url: url_detalle,
+        variante: 'secundario',
+        tamano: 'chico',
+        bloque: true,
+        clase: 'boton-tarjeta-funcion'
+      } %}
+    {# Cierre del contenedor de acciones #}
+    </div>
+
+  {# Cierre del cuerpo textual #}
+  </div>
+
+{# Cierre del artículo de tarjeta de función #}
+</article>

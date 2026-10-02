@@ -1,0 +1,132 @@
+{#
+  Parcial de campo de formulario reutilizable (IC-45).
+  Renderiza la etiqueta (label), el control (input, textarea o select), el texto de ayuda
+  y el mensaje de error de validación, con soporte para accesibilidad (aria-invalid, role="alert").
+
+  Parámetros recibidos:
+  - nombre: (string, obligatorio) Atributo name e id del campo.
+  - etiqueta: (string, opcional) Texto descriptivo de la etiqueta.
+  - tipo: (string, opcional, por defecto 'text') 'text', 'email', 'password', 'number', 'textarea', 'select', 'file', 'checkbox'.
+  - valor: (mixed, opcional) Valor actual del campo para persistencia tras errores.
+  - placeholder: (string, opcional) Texto de sugerencia dentro del campo.
+  - error: (string, opcional) Mensaje de error puntual para este campo.
+  - errores: (map/array, opcional) Diccionario de errores donde se consulta errores[nombre].
+  - ayuda: (string, opcional) Indicación o texto de ayuda debajo del control.
+  - requerido: (bool, opcional, por defecto false) Si es obligatorio (agrega required y asterisco visual).
+  - opciones: (array, opcional) Lista de opciones para 'select' (formato [{valor: 'x', etiqueta: 'Y'}] o diccionario clave: valor).
+  - filas: (int, opcional, por defecto 4) Cantidad de filas cuando tipo == 'textarea'.
+  - clase: (string, opcional) Clases CSS adicionales para el contenedor.
+#}
+{# Resuelve el mensaje de error puntual o desde la colección de errores para evitar duplicar condicionales #}
+{% set mensaje_error = error ?? (errores[nombre] ?? null) %}
+{# Asigna el tipo de campo predeterminado en 'text' si no se especificó otro #}
+{% set tipo_campo = tipo ?? 'text' %}
+{# Genera un ID único para asociar aria-describedby con el mensaje de error en lectores de pantalla #}
+{% set id_error = 'error-' ~ nombre %}
+{# Genera un ID para asociar aria-describedby con el texto de ayuda en lectores de pantalla #}
+{% set id_ayuda = 'ayuda-' ~ nombre %}
+
+{# Contenedor del grupo de campo con clase dinámica 'con-error' para resaltar bordes en rojo si falló la validación #}
+<div class="grupo-campo{% if mensaje_error %} con-error{% endif %}{% if clase is defined %} {{ clase }}{% endif %}">
+
+  {# Si se proveyó texto de etiqueta y el tipo no es checkbox simple (los checkboxes ubican su etiqueta al costado) #}
+  {% if etiqueta is defined and tipo_campo != 'checkbox' %}
+    {# Elemento label enlazado al control mediante el atributo 'for' #}
+    <label for="{{ nombre }}" class="campo-etiqueta">
+      {# Texto visible de la etiqueta #}
+      {{ etiqueta }}
+      {# Si el campo es obligatorio, muestra un asterisco dorado accesible #}
+      {% if requerido ?? false %}
+        <span class="campo-requerido" aria-hidden="true" title="Campo obligatorio">*</span>
+      {# Cierre del condicional de campo obligatorio #}
+      {% endif %}
+    {# Cierre de la etiqueta #}
+    </label>
+  {# Cierre del condicional de etiqueta #}
+  {% endif %}
+
+  {# Caso 1: Área de texto multilínea (textarea) #}
+  {% if tipo_campo == 'textarea' %}
+    <textarea
+      id="{{ nombre }}"
+      name="{{ nombre }}"
+      class="campo-control control-textarea{% if mensaje_error %} control-invalido{% endif %}"
+      rows="{{ filas ?? 4 }}"
+      {% if placeholder is defined %}placeholder="{{ placeholder }}"{% endif %}
+      {% if requerido ?? false %}required{% endif %}
+      {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% elseif ayuda is defined %}aria-describedby="{{ id_ayuda }}"{% endif %}
+    >{{ valor ?? '' }}</textarea>
+
+  {# Caso 2: Menú desplegable de selección (select) #}
+  {% elseif tipo_campo == 'select' %}
+    <div class="campo-select-envoltorio">
+      <select
+        id="{{ nombre }}"
+        name="{{ nombre }}"
+        class="campo-control control-select{% if mensaje_error %} control-invalido{% endif %}"
+        {% if requerido ?? false %}required{% endif %}
+        {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% elseif ayuda is defined %}aria-describedby="{{ id_ayuda }}"{% endif %}
+      >
+        {# Si hay un placeholder, se agrega como primera opción deshabilitada #}
+        {% if placeholder is defined %}
+          <option value="" {% if valor is not defined or valor == '' %}selected{% endif %} disabled>{{ placeholder }}</option>
+        {% endif %}
+        {# Itera sobre las opciones provistas #}
+        {% if opciones is defined %}
+          {% for clave_opcion, opcion in opciones %}
+            {# Admite tanto array asociativo ['clave' => 'Texto'] como lista de objetos [{valor: 'x', etiqueta: 'Texto'}] #}
+            {% set val_opcion = opcion.valor ?? clave_opcion %}
+            {% set txt_opcion = opcion.etiqueta ?? opcion %}
+            <option value="{{ val_opcion }}" {% if (valor is defined and valor == val_opcion) %}selected{% endif %}>
+              {{ txt_opcion }}
+            </option>
+          {% endfor %}
+        {% endif %}
+      </select>
+    </div>
+
+  {# Caso 3: Casilla de verificación individual (checkbox) #}
+  {% elseif tipo_campo == 'checkbox' %}
+    <label class="campo-checkbox-etiqueta">
+      <input
+        type="checkbox"
+        id="{{ nombre }}"
+        name="{{ nombre }}"
+        value="{{ valor ?? '1' }}"
+        class="campo-control-checkbox"
+        {% if valor is defined and (valor == true or valor == '1' or valor == 'on') %}checked{% endif %}
+        {% if requerido ?? false %}required{% endif %}
+        {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% endif %}
+      >
+      {# Texto adyacente a la casilla de verificación #}
+      <span class="checkbox-texto">{{ etiqueta ?? nombre }}</span>
+    </label>
+
+  {# Caso 4: Control estándar de entrada (text, email, password, number, file, date, etc.) #}
+  {% else %}
+    <div class="campo-input-caja">
+      <input
+        type="{{ tipo_campo }}"
+        id="{{ nombre }}"
+        name="{{ nombre }}"
+        class="campo-control control-input{% if mensaje_error %} control-invalido{% endif %}"
+        {% if valor is defined and tipo_campo != 'password' and tipo_campo != 'file' %}value="{{ valor }}"{% endif %}
+        {% if placeholder is defined %}placeholder="{{ placeholder }}"{% endif %}
+        {% if requerido ?? false %}required{% endif %}
+        {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% elseif ayuda is defined %}aria-describedby="{{ id_ayuda }}"{% endif %}
+      >
+    </div>
+  {% endif %}
+
+  {# Mensaje de error de validación visible solo si existió fallo en este campo #}
+  {% if mensaje_error %}
+    <span id="{{ id_error }}" class="campo-error" role="alert">
+      <span class="error-icono" aria-hidden="true">⚠️</span> {{ mensaje_error }}
+    </span>
+  {# Texto explicativo de ayuda inferior #}
+  {% elseif ayuda is defined %}
+    <span id="{{ id_ayuda }}" class="campo-ayuda">{{ ayuda }}</span>
+  {% endif %}
+
+{# Cierre del grupo de campo #}
+</div>

@@ -112,3 +112,83 @@ El encabezado adapta sus opciones y enlaces según el estado de la sesión y el 
    ```bash
    env ROL=organizador NOMBRE="Salvador Baez" php -S localhost:8080 herramientas/servidor-local.php
    ```
+
+---
+
+## 7. Parciales Twig Comunes (IC-45)
+
+Para evitar duplicar marcado HTML en los cinco subsistemas, el paquete provee componentes parciales Twig reutilizables en `plantillas/parciales/`:
+
+### 7.1 Campo de formulario con validación (`parciales/campo.html.twig`)
+
+Soporta controles de tipo `text`, `email`, `password`, `number`, `textarea`, `select`, `file` y `checkbox`. Incluye etiqueta `<label>`, asterisco de obligatoriedad, texto de ayuda y mensaje de error con accesibilidad (`aria-invalid="true"`, `aria-describedby` y `role="alert"`).
+
+```twig
+{% include 'parciales/campo.html.twig' with {
+  nombre: 'email',
+  etiqueta: 'Correo electrónico',
+  tipo: 'email',
+  valor: valores.email ?? '',
+  placeholder: 'usuario@ejemplo.com',
+  ayuda: 'Te enviaremos los comprobantes de reserva.',
+  requerido: true,
+  error: errores.email ?? null
+} %}
+```
+
+### 7.2 Mensajes y alertas (`parciales/mensaje.html.twig`)
+
+Permite renderizar avisos de tipo `exito`, `error`, `advertencia` e `info` con icono representativo, título opcional, cuerpo y lista detallada de errores.
+
+```twig
+{% include 'parciales/mensaje.html.twig' with {
+  tipo: 'exito',
+  titulo: '¡Operación exitosa!',
+  mensaje: 'La sala fue enviada a revisión de moderación.'
+} %}
+```
+
+### 7.3 Botones y controles (`parciales/boton.html.twig`)
+
+Renderiza elementos nativos `<button>` o enlaces hipertexto `<a>` con apariencia homogénea. Soporta variantes `primario`, `secundario`, `peligro` y `fantasma`, tamaños (`chico`, `mediano`, `grande`), iconos y estados deshabilitados.
+
+```twig
+{% include 'parciales/boton.html.twig' with {
+  texto: 'Crear cuenta',
+  tipo: 'submit',
+  variante: 'primario',
+  tamano: 'grande',
+  bloque: true
+} %}
+```
+
+### 7.4 Tarjeta de función de cine (`parciales/tarjeta_funcion.html.twig`)
+
+Componente reutilizable para la Cartelera y el Home que reproduce exactamente los wireframes oficiales. Incluye:
+- Afiche audiovisual (o marcador gráfico de celuloide si no hay imagen cargada).
+- Insignia de estado adaptativa (`PROGRAMADA`, `EN VOTACIÓN`, `ACUERDO DE FECHA`).
+- Precio de la función (`$3.500`, `Gratis`, `A la gorra`).
+- Nombre de la sala indie y localidad con icono de ubicación 📍.
+- Fecha/hora confirmada, plazo de votación o franjas horarias con icono de calendario 📅.
+- Botón de acción `Ver función` enlazado a la ficha de la función.
+
+```twig
+{% include 'parciales/tarjeta_funcion.html.twig' with {
+  funcion: {
+    id: 12,
+    titulo: 'Ciclo Nuevo Cine Argentino',
+    afiche: '/estaticos/imagenes/afiches/ciclo-argentino.webp',
+    estado: 'PROGRAMADA',
+    precio: '$3.500',
+    sala: 'Cineclub La Perla',
+    localidad: 'Luján',
+    fecha: 'Sáb 19 sep · 20:30'
+  }
+} %}
+```
+
+### 7.5 Pantallas completas que implementan los parciales
+
+- **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y términos, mensajes de error y botón principal.
+- **`plantillas/programacion/alta_sala.html.twig`** (y alias `plantillas/cuentas/solicitud_sala.html.twig`): Formulario completo de postulación de sala indie basado en el wireframe `solicitud-de-sala.png`, con datos del espacio, equipamiento, servicios, fotos/video, documentación obligatoria y términos.
+

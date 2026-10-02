@@ -1069,6 +1069,97 @@ a:hover {
   color: var(--color-texto);
 }
 
+/* Botón de tamaño grande para llamados principales */
+.boton-grande {
+  /* Tamaño de fuente intermedio destacado */
+  font-size: var(--texto-base);
+  /* Relleno vertical y horizontal generoso */
+  padding: 0.75rem 1.5rem;
+  /* Esquinas redondeadas medianas */
+  border-radius: var(--radio-md);
+}
+
+/* Botón con ancho completo */
+.boton-bloque {
+  /* Ocupa el 100% del contenedor padre */
+  width: 100%;
+}
+
+/* Botón variante peligro para eliminaciones y acciones críticas */
+.boton-peligro {
+  /* Fondo rojo oscuro de alerta */
+  background-color: var(--color-error);
+  /* Texto blanco de alto contraste */
+  color: #ffffff;
+  /* Borde transparente */
+  border-color: transparent;
+}
+
+/* Efecto hover de botón de peligro */
+.boton-peligro:hover {
+  /* Fondo rojo más intenso */
+  background-color: #dc2626;
+  /* Mantiene texto blanco */
+  color: #ffffff;
+  /* Sombra de resplandor rojizo */
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
+}
+
+/* Botón variante fantasma o contorno */
+.boton-fantasma {
+  /* Fondo completamente transparente */
+  background-color: transparent;
+  /* Texto claro estándar */
+  color: var(--color-texto);
+  /* Borde sutil del color de superficie */
+  border-color: var(--color-superficie-borde);
+}
+
+/* Efecto hover de botón fantasma */
+.boton-fantasma:hover {
+  /* Fondo sutil translúcido al posar cursor */
+  background-color: rgba(255, 255, 255, 0.06);
+  /* Color de texto brillante */
+  color: var(--color-texto-brillante);
+}
+
+/* Estilos de glifo o icono dentro del botón */
+.boton-icono {
+  /* Disposición flex en línea para alinear con el texto */
+  display: inline-flex;
+  /* Alineación centrada vertical */
+  align-items: center;
+  /* Tamaño de glifo proporcional */
+  font-size: 1.1em;
+  /* Sin interlineado que deforme la altura */
+  line-height: 1;
+}
+
+/* Margen del icono cuando antecede al texto */
+.boton-icono-antes {
+  /* Separación a la derecha del icono */
+  margin-right: var(--espacio-2);
+}
+
+/* Margen del icono cuando sucede al texto */
+.boton-icono-despues {
+  /* Separación a la izquierda del icono */
+  margin-left: var(--espacio-2);
+}
+
+/* Estado deshabilitado para botones */
+.boton:disabled,
+.boton.boton-deshabilitado {
+  /* Opacidad reducida para indicar inactividad */
+  opacity: 0.5;
+  /* Cursor bloqueado */
+  cursor: not-allowed;
+  /* Sin eventos de puntero para anclas */
+  pointer-events: none;
+  /* Sin sombra de resplandor */
+  box-shadow: none;
+}
+
 /* --------------------------------------------------------------------------
    9. LISTA DE DEFINICIONES (PÁGINA ESQUELETO Y DATOS TÉCNICOS)
    -------------------------------------------------------------------------- */
@@ -1402,6 +1493,1146 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
+   13. FORMULARIOS Y CONTROLES DE ENTRADA (IC-45)
+   Componentes para campo.html.twig con accesibilidad y estados de validación
+   -------------------------------------------------------------------------- */
+
+/* Contenedor envolvente de cada campo y su etiqueta/error */
+.grupo-campo {
+  /* Disposición vertical flex */
+  display: flex;
+  /* Dirección de columna */
+  flex-direction: column;
+  /* Separación interna inferior entre campos */
+  margin-bottom: var(--espacio-4);
+  /* Ancho total disponible */
+  width: 100%;
+}
+
+/* Etiqueta superior del campo */
+.campo-etiqueta {
+  /* Disposición en bloque */
+  display: block;
+  /* Tipografía Inter */
+  font-family: var(--fuente-cuerpo);
+  /* Peso seminegrita para lectura clara */
+  font-weight: 600;
+  /* Tamaño de fuente compacto */
+  font-size: var(--texto-sm);
+  /* Color de texto brillante para contraste */
+  color: var(--color-texto-brillante);
+  /* Margen inferior respecto al control */
+  margin-bottom: var(--espacio-1);
+}
+
+/* Asterisco de campo obligatorio */
+.campo-requerido {
+  /* Color ámbar dorado de acento */
+  color: var(--color-primario);
+  /* Margen izquierdo para separar del texto */
+  margin-left: 0.25rem;
+  /* Peso negrita */
+  font-weight: 700;
+}
+
+/* Control base compartido por input, select y textarea */
+.campo-control {
+  /* Ancho completo del grupo */
+  width: 100%;
+  /* Tipografía del cuerpo */
+  font-family: var(--fuente-cuerpo);
+  /* Tamaño de texto legible de 15px */
+  font-size: var(--texto-sm);
+  /* Color de texto claro */
+  color: var(--color-texto-brillante);
+  /* Fondo oscuro carbón */
+  background-color: var(--color-superficie-elevada);
+  /* Borde sutil neutro */
+  border: 1px solid var(--color-superficie-borde);
+  /* Esquinas redondeadas estándar */
+  border-radius: var(--radio-md);
+  /* Relleno interno cómodo */
+  padding: 0.65rem 0.85rem;
+  /* Transición fluida al enfocar */
+  transition: border-color var(--transicion-rapida), box-shadow var(--transicion-rapida), background-color var(--transicion-rapida);
+  /* Caja que incluye bordes y padding */
+  box-sizing: border-box;
+}
+
+/* Placeholder estilizado con tono atenuado */
+.campo-control::placeholder {
+  /* Color de texto atenuado para no competir con el contenido real */
+  color: var(--color-texto-atenuado);
+  /* Opacidad plena para compatibilidad con Firefox */
+  opacity: 1;
+}
+
+/* Estado de foco en los controles de formulario */
+.campo-control:focus {
+  /* Quita el contorno del navegador por defecto */
+  outline: none;
+  /* Borde dorado de acento */
+  border-color: var(--color-primario);
+  /* Sombra de resplandor dorado */
+  box-shadow: 0 0 0 3px var(--color-primario-suave);
+  /* Fondo ligeramente más claro */
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Área de texto multilínea */
+.control-textarea {
+  /* Redimensionamiento exclusivamente vertical para no romper el layout */
+  resize: vertical;
+  /* Altura mínima para escritura cómoda */
+  min-height: 90px;
+  /* Interlineado amplio para lectura */
+  line-height: 1.5;
+}
+
+/* Envoltorio decorativo para el elemento select con flecha personalizada */
+.campo-select-envoltorio {
+  /* Posición relativa para anclar la flecha SVG */
+  position: relative;
+  /* Ancho completo */
+  width: 100%;
+}
+
+/* Estilo específico para selects */
+.control-select {
+  /* Quita la apariencia nativa del sistema operativo */
+  appearance: none;
+  /* Elimina apariencia en navegadores WebKit */
+  -webkit-appearance: none;
+  /* Relleno derecho extra para no superponer texto con la flecha */
+  padding-right: 2.5rem;
+  /* Cursor interactivo de selección */
+  cursor: pointer;
+  /* Fondo con icono de flecha desplegable en SVG */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  /* No repetir el icono */
+  background-repeat: no-repeat;
+  /* Ubicación del icono a la derecha */
+  background-position: right 0.85rem center;
+  /* Tamaño del icono */
+  background-size: 14px 14px;
+}
+
+/* Opciones desplegadas dentro del select */
+.control-select option {
+  /* Fondo oscuro carbón para cada opción */
+  background-color: var(--color-superficie);
+  /* Color de texto claro */
+  color: var(--color-texto-brillante);
+  /* Relleno de opción */
+  padding: var(--espacio-2);
+}
+
+/* Control de casillas de verificación (checkbox) */
+.campo-checkbox-etiqueta {
+  /* Disposición flex en fila */
+  display: inline-flex;
+  /* Alineación al inicio vertical para etiquetas multilínea */
+  align-items: flex-start;
+  /* Separación horizontal entre casilla y texto */
+  gap: var(--espacio-2);
+  /* Cursor interactivo */
+  cursor: pointer;
+  /* Interlineado cómodo */
+  line-height: 1.4;
+  /* Tamaño de fuente estándar */
+  font-size: var(--texto-sm);
+  /* Color de texto legible */
+  color: var(--color-texto);
+}
+
+/* Entrada de checkbox */
+.campo-control-checkbox {
+  /* Margen superior sutil para nivelar con la primera línea de texto */
+  margin-top: 0.15rem;
+  /* Ancho de la casilla */
+  width: 1.15rem;
+  /* Altura de la casilla */
+  height: 1.15rem;
+  /* Color de acento nativo dorado */
+  accent-color: var(--color-primario);
+  /* Cursor interactivo */
+  cursor: pointer;
+  /* Evita que se encoja ante textos largos */
+  flex-shrink: 0;
+}
+
+/* Texto adyacente a la casilla de verificación */
+.checkbox-texto {
+  /* Permite que el texto se adapte al contenedor */
+  flex: 1;
+}
+
+/* Control en estado inválido (error de validación) */
+.control-invalido,
+.grupo-campo.con-error .campo-control {
+  /* Borde rojo de error */
+  border-color: var(--color-error);
+  /* Fondo con tinte rojizo sutil */
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+/* Foco sobre un control con error */
+.control-invalido:focus,
+.grupo-campo.con-error .campo-control:focus {
+  /* Sombra de foco roja */
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+  /* Borde rojo activo */
+  border-color: var(--color-error);
+}
+
+/* Mensaje de error visible debajo del control */
+.campo-error {
+  /* Disposición en bloque */
+  display: block;
+  /* Color rojo de advertencia */
+  color: var(--color-error);
+  /* Tamaño de texto pequeño y nítido */
+  font-size: var(--texto-xs);
+  /* Peso seminegrita para destacar */
+  font-weight: 500;
+  /* Margen superior respecto al input */
+  margin-top: 0.35rem;
+  /* Interlineado compacto */
+  line-height: 1.35;
+}
+
+/* Icono del mensaje de error */
+.error-icono {
+  /* Margen derecho */
+  margin-right: 0.25rem;
+}
+
+/* Texto de ayuda explicativa inferior */
+.campo-ayuda {
+  /* Disposición en bloque */
+  display: block;
+  /* Color atenuado */
+  color: var(--color-texto-atenuado);
+  /* Tamaño pequeño */
+  font-size: var(--texto-xs);
+  /* Margen superior */
+  margin-top: 0.35rem;
+  /* Interlineado cómodo */
+  line-height: 1.35;
+}
+
+/* --------------------------------------------------------------------------
+   14. MENSAJES Y ALERTAS REUTILIZABLES (IC-45)
+   Componentes para mensaje.html.twig: éxito, error, advertencia e info
+   -------------------------------------------------------------------------- */
+
+/* Contenedor principal de alertas */
+.alerta {
+  /* Disposición flex */
+  display: flex;
+  /* Alineación superior de icono y contenido */
+  align-items: flex-start;
+  /* Separación interna */
+  padding: var(--espacio-4);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-md);
+  /* Margen inferior entre bloques */
+  margin-bottom: var(--espacio-5);
+  /* Borde perimetral */
+  border: 1px solid transparent;
+  /* Separación entre icono, texto y cierre */
+  gap: var(--espacio-3);
+  /* Tipografía */
+  font-family: var(--fuente-cuerpo);
+  /* Tamaño de texto */
+  font-size: var(--texto-sm);
+  /* Transición */
+  transition: opacity var(--transicion-base);
+  /* Ancho completo */
+  width: 100%;
+  /* Caja que incluye bordes */
+  box-sizing: border-box;
+}
+
+/* Icono de la alerta */
+.alerta-icono {
+  /* Ancho fijo para simetría */
+  width: 1.5rem;
+  /* Altura fija */
+  height: 1.5rem;
+  /* Disposición flex */
+  display: flex;
+  /* Centrado horizontal */
+  align-items: center;
+  /* Centrado vertical */
+  justify-content: center;
+  /* No se encoge */
+  flex-shrink: 0;
+  /* Tamaño de glifo */
+  font-size: 1.1rem;
+}
+
+/* Contenedor del contenido textual de la alerta */
+.alerta-contenido {
+  /* Ocupa el espacio disponible */
+  flex: 1;
+  /* Permite saltos de línea ordenados */
+  min-width: 0;
+}
+
+/* Título de la alerta */
+.alerta-titulo {
+  /* Bloque */
+  display: block;
+  /* Peso negrita */
+  font-weight: 700;
+  /* Tamaño un poco mayor */
+  font-size: var(--texto-sm);
+  /* Margen inferior */
+  margin-bottom: 0.25rem;
+  /* Color brillante */
+  color: var(--color-texto-brillante);
+}
+
+/* Texto de la alerta */
+.alerta-texto {
+  /* Margen cero para párrafos internos */
+  margin: 0;
+  /* Interlineado de lectura */
+  line-height: 1.45;
+}
+
+/* Lista de detalles adicionales */
+.alerta-lista-detalles {
+  /* Margen superior */
+  margin-top: 0.35rem;
+  /* Margen inferior cero */
+  margin-bottom: 0;
+  /* Sangría a la izquierda */
+  padding-left: 1.25rem;
+  /* Interlineado cómodo */
+  line-height: 1.4;
+}
+
+/* Elemento individual de lista de detalles */
+.alerta-item-detalle {
+  /* Margen inferior sutil entre ítems */
+  margin-bottom: 0.2rem;
+}
+
+/* Botón para descartar la alerta */
+.alerta-cerrar {
+  /* Fondo transparente */
+  background: none;
+  /* Sin bordes */
+  border: none;
+  /* Color atenuado */
+  color: var(--color-texto-atenuado);
+  /* Cursor interactivo */
+  cursor: pointer;
+  /* Tamaño de la cruz */
+  font-size: 1.25rem;
+  /* Sin relleno */
+  padding: 0;
+  /* Sin interlineado que descentre */
+  line-height: 1;
+  /* Transición */
+  transition: color var(--transicion-rapida);
+}
+
+/* Hover del botón de cierre */
+.alerta-cerrar:hover {
+  /* Color blanco brillante */
+  color: var(--color-texto-brillante);
+}
+
+/* Variante de éxito */
+.alerta-exito {
+  /* Fondo esmeralda oscuro translúcido */
+  background-color: rgba(16, 185, 129, 0.12);
+  /* Borde esmeralda */
+  border-color: rgba(16, 185, 129, 0.35);
+  /* Color de texto */
+  color: #a7f3d0;
+}
+
+/* Icono de éxito */
+.alerta-exito .alerta-icono {
+  /* Color verde brillante */
+  color: var(--color-exito);
+}
+
+/* Variante de error */
+.alerta-error {
+  /* Fondo rojo oscuro translúcido */
+  background-color: rgba(239, 68, 68, 0.12);
+  /* Borde rojo */
+  border-color: rgba(239, 68, 68, 0.35);
+  /* Color de texto */
+  color: #fca5a5;
+}
+
+/* Icono de error */
+.alerta-error .alerta-icono {
+  /* Color rojo brillante */
+  color: var(--color-error);
+}
+
+/* Variante de advertencia */
+.alerta-advertencia {
+  /* Fondo ámbar oscuro translúcido */
+  background-color: rgba(245, 158, 11, 0.12);
+  /* Borde ámbar */
+  border-color: rgba(245, 158, 11, 0.35);
+  /* Color de texto */
+  color: #fde68a;
+}
+
+/* Icono de advertencia */
+.alerta-advertencia .alerta-icono {
+  /* Color dorado */
+  color: var(--color-primario);
+}
+
+/* Variante de información */
+.alerta-info {
+  /* Fondo azul oscuro translúcido */
+  background-color: rgba(59, 130, 246, 0.12);
+  /* Borde azul */
+  border-color: rgba(59, 130, 246, 0.35);
+  /* Color de texto */
+  color: #bfdbfe;
+}
+
+/* Icono de información */
+.alerta-info .alerta-icono {
+  /* Color azul claro */
+  color: #60a5fa;
+}
+
+/* --------------------------------------------------------------------------
+   15. TARJETA DE FUNCIÓN DE CINE Y CUADRÍCULA (IC-45)
+   Componentes para tarjeta_funcion.html.twig en Home y Cartelera
+   -------------------------------------------------------------------------- */
+
+/* Cuadrícula responsiva para listar tarjetas de funciones en Cartelera y Home */
+.cuadricula-funciones {
+  /* Cuadrícula CSS moderna */
+  display: grid;
+  /* Columnas automáticas responsivas de mínimo 280px */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  /* Espaciado uniforme entre tarjetas */
+  gap: var(--espacio-6);
+  /* Ancho completo */
+  width: 100%;
+}
+
+/* Contenedor del artículo de la tarjeta de función */
+.tarjeta-funcion {
+  /* Disposición flex en columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Fondo oscuro carbón */
+  background-color: var(--color-superficie);
+  /* Borde tenue de delimitación */
+  border: 1px solid var(--color-superficie-borde);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-lg);
+  /* Oculta desbordes para respetar el radio en la imagen */
+  overflow: hidden;
+  /* Sombra sutil de elevación */
+  box-shadow: var(--sombra-sm);
+  /* Transición suave para animación hover */
+  transition: transform var(--transicion-base), box-shadow var(--transicion-base), border-color var(--transicion-base);
+}
+
+/* Efecto hover sobre la tarjeta de función */
+.tarjeta-funcion:hover {
+  /* Elevación vertical de 4px */
+  transform: translateY(-4px);
+  /* Borde resaltado */
+  border-color: rgba(255, 255, 255, 0.25);
+  /* Sombra profunda */
+  box-shadow: var(--sombra-md);
+}
+
+/* Área superior del afiche */
+.tarjeta-funcion-afiche {
+  /* Posición relativa */
+  position: relative;
+  /* Ancho completo */
+  width: 100%;
+  /* Relación de aspecto 16:10 para afiches cinematográficos */
+  aspect-ratio: 16 / 10;
+  /* Fondo neutro oscuro para carga diferida */
+  background-color: var(--color-superficie-elevada);
+  /* Oculta desbordes */
+  overflow: hidden;
+}
+
+/* Enlace envolvente del afiche */
+.tarjeta-funcion-afiche-enlace {
+  /* Disposición en bloque */
+  display: block;
+  /* Ancho total */
+  width: 100%;
+  /* Altura total */
+  height: 100%;
+  /* Sin decoración */
+  text-decoration: none;
+}
+
+/* Imagen real del afiche */
+.tarjeta-funcion-imagen {
+  /* Ancho 100% */
+  width: 100%;
+  /* Altura 100% */
+  height: 100%;
+  /* Recorte armónico sin deformar */
+  object-fit: cover;
+  /* Centrado */
+  object-position: center;
+  /* Transición de zoom al posar ratón */
+  transition: transform var(--transicion-base);
+}
+
+/* Zoom suave en la imagen al hacer hover sobre la tarjeta */
+.tarjeta-funcion:hover .tarjeta-funcion-imagen {
+  /* Escala sutil del 104% */
+  transform: scale(1.04);
+}
+
+/* Placeholder visual del afiche que replica el wireframe */
+.tarjeta-funcion-afiche-placeholder {
+  /* Ancho y alto completos */
+  width: 100%;
+  /* Altura total */
+  height: 100%;
+  /* Fondo neutro degradado */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%);
+  /* Disposición flex */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Centrado vertical */
+  align-items: center;
+  /* Centrado horizontal */
+  justify-content: center;
+  /* Separación */
+  gap: var(--espacio-2);
+}
+
+/* Icono dentro del placeholder */
+.afiche-placeholder-icono {
+  /* Tamaño de icono */
+  font-size: 1.75rem;
+  /* Opacidad tenue */
+  opacity: 0.6;
+}
+
+/* Texto indicativo dentro del placeholder */
+.afiche-placeholder-texto {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño de texto */
+  font-size: var(--texto-xs);
+  /* Espaciado de letras */
+  letter-spacing: 0.15em;
+  /* Color atenuado */
+  color: var(--color-texto-atenuado);
+  /* Peso seminegrita */
+  font-weight: 600;
+}
+
+/* Cuerpo de la tarjeta con contenido textual */
+.tarjeta-funcion-cuerpo {
+  /* Disposición flex */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Relleno interno */
+  padding: var(--espacio-4);
+  /* Ocupa el espacio restante para nivelar alturas */
+  flex: 1;
+}
+
+/* Cabecera de la tarjeta con insignia y precio */
+.tarjeta-funcion-cabecera {
+  /* Disposición flex */
+  display: flex;
+  /* Alineación centrada */
+  align-items: center;
+  /* Distribución a los extremos */
+  justify-content: space-between;
+  /* Margen inferior */
+  margin-bottom: var(--espacio-2);
+  /* Separación */
+  gap: var(--espacio-2);
+}
+
+/* Insignia de estado base */
+.insignia-estado {
+  /* Disposición en línea */
+  display: inline-flex;
+  /* Centrado */
+  align-items: center;
+  /* Tipografía */
+  font-family: var(--fuente-cuerpo);
+  /* Texto extra chico */
+  font-size: 0.65rem;
+  /* Peso negrita */
+  font-weight: 700;
+  /* Mayúsculas */
+  text-transform: uppercase;
+  /* Espaciado entre letras */
+  letter-spacing: 0.05em;
+  /* Relleno compacto */
+  padding: 0.2rem 0.55rem;
+  /* Forma de píldora redondeada */
+  border-radius: var(--radio-full);
+}
+
+/* Insignia función programada */
+.insignia-programada {
+  /* Fondo negro carbón sólido */
+  background-color: #0b0d13;
+  /* Borde tenue */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Color blanco */
+  color: var(--color-texto-brillante);
+}
+
+/* Insignia función en votación */
+.insignia-votacion {
+  /* Fondo tenue */
+  background-color: rgba(255, 255, 255, 0.08);
+  /* Borde tenue */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Color texto claro */
+  color: var(--color-texto-brillante);
+}
+
+/* Insignia acuerdo de fecha */
+.insignia-acuerdo {
+  /* Fondo translúcido */
+  background-color: rgba(255, 255, 255, 0.08);
+  /* Borde tenue */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Color texto claro */
+  color: var(--color-texto-brillante);
+}
+
+/* Precio en la cabecera de la tarjeta */
+.tarjeta-funcion-precio {
+  /* Tipografía */
+  font-family: var(--fuente-cuerpo);
+  /* Tamaño */
+  font-size: var(--texto-sm);
+  /* Peso seminegrita */
+  font-weight: 600;
+  /* Color de texto brillante */
+  color: var(--color-texto-brillante);
+}
+
+/* Título de la obra o ciclo */
+.tarjeta-funcion-titulo {
+  /* Tipografía Outfit */
+  font-family: var(--fuente-titulos);
+  /* Tamaño de 18px */
+  font-size: var(--texto-lg);
+  /* Peso negrita */
+  font-weight: 700;
+  /* Margen inferior */
+  margin: 0 0 var(--espacio-3) 0;
+  /* Interlineado ajustado */
+  line-height: 1.3;
+}
+
+/* Enlace del título */
+.tarjeta-funcion-titulo-enlace {
+  /* Color brillante */
+  color: var(--color-texto-brillante);
+  /* Sin subrayado */
+  text-decoration: none;
+  /* Transición */
+  transition: color var(--transicion-rapida);
+}
+
+/* Hover en el enlace del título */
+.tarjeta-funcion-titulo-enlace:hover {
+  /* Color dorado */
+  color: var(--color-primario);
+}
+
+/* Bloque de metadatos de la tarjeta */
+.tarjeta-funcion-meta {
+  /* Margen inferior */
+  margin-bottom: var(--espacio-4);
+  /* Disposición flex */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación entre líneas */
+  gap: var(--espacio-1);
+}
+
+/* Fila de dato individual */
+.tarjeta-funcion-dato {
+  /* Margen cero */
+  margin: 0;
+  /* Disposición flex */
+  display: flex;
+  /* Alineación centrada */
+  align-items: center;
+  /* Separación de icono */
+  gap: 0.35rem;
+  /* Tamaño chico */
+  font-size: var(--texto-xs);
+  /* Color atenuado */
+  color: var(--color-texto-atenuado);
+}
+
+/* Icono del dato */
+.meta-icono {
+  /* Tamaño fijo */
+  font-size: 0.85rem;
+}
+
+/* Pie con botón de llamado a la acción */
+.tarjeta-funcion-acciones {
+  /* Empuja el botón al fondo si el cuerpo crece */
+  margin-top: auto;
+  /* Ancho completo */
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   16. DISEÑOS DE PANTALLA: AUTENTICACIÓN Y SOLICITUD DE SALA (IC-45)
+   Componentes para registro.html.twig y alta_sala.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Contenedor centrado para pantalla de registro */
+.contenedor-autenticacion {
+  /* Ancho completo */
+  width: 100%;
+  /* Límite máximo de ancho de 480px para formulario de registro */
+  max-width: 480px;
+  /* Centrado horizontal automático */
+  margin: var(--espacio-6) auto;
+  /* Relleno interno */
+  padding: 0 var(--espacio-4);
+  /* Caja que incluye padding */
+  box-sizing: border-box;
+}
+
+/* Tarjeta que envuelve el formulario de autenticación */
+.tarjeta-autenticacion {
+  /* Fondo carbón azulado */
+  background-color: var(--color-superficie);
+  /* Borde sutil */
+  border: 1px solid var(--color-superficie-borde);
+  /* Esquinas redondeadas amplias */
+  border-radius: var(--radio-lg);
+  /* Relleno generoso */
+  padding: var(--espacio-8) var(--espacio-6);
+  /* Sombra profunda */
+  box-shadow: var(--sombra-md);
+}
+
+/* Cabecera del formulario de autenticación */
+.autenticacion-cabecera {
+  /* Centrado de texto */
+  text-align: center;
+  /* Margen inferior */
+  margin-bottom: var(--espacio-6);
+}
+
+/* Título de la pantalla de autenticación */
+.autenticacion-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño destacado */
+  font-size: var(--texto-2xl);
+  /* Margen inferior */
+  margin-bottom: var(--espacio-2);
+  /* Color de texto brillante */
+  color: var(--color-texto-brillante);
+}
+
+/* Subtítulo explicativo */
+.autenticacion-subtitulo {
+  /* Color de texto atenuado */
+  color: var(--color-texto-atenuado);
+  /* Tamaño de fuente */
+  font-size: var(--texto-sm);
+  /* Margen cero */
+  margin: 0;
+  /* Interlineado */
+  line-height: 1.45;
+}
+
+/* Acciones del formulario */
+.formulario-acciones {
+  /* Margen superior amplio */
+  margin-top: var(--espacio-5);
+}
+
+/* Pie del formulario con enlaces */
+.autenticacion-pie {
+  /* Margen superior */
+  margin-top: var(--espacio-6);
+  /* Borde superior separador */
+  border-top: 1px solid var(--color-superficie-borde);
+  /* Relleno superior */
+  padding-top: var(--espacio-4);
+  /* Centrado de texto */
+  text-align: center;
+}
+
+/* Enlace destacado */
+.enlace-destacado {
+  /* Color ámbar dorado */
+  color: var(--color-primario);
+  /* Peso seminegrita */
+  font-weight: 600;
+  /* Sin subrayado */
+  text-decoration: none;
+}
+
+/* Hover en enlace destacado */
+.enlace-destacado:hover {
+  /* Subrayado al pasar cursor */
+  text-decoration: underline;
+}
+
+/* Contenedor amplio para formulario de solicitud de sala */
+.contenedor-formulario-amplio {
+  /* Ancho completo */
+  width: 100%;
+  /* Límite máximo de 960px como en el wireframe */
+  max-width: 960px;
+  /* Centrado horizontal */
+  margin: 0 auto;
+  /* Relleno lateral */
+  padding: 0 var(--espacio-4);
+  /* Caja con bordes y padding */
+  box-sizing: border-box;
+}
+
+/* Barra de navegación de migas de pan (breadcrumbs) */
+.navegacion-migas {
+  /* Margen inferior */
+  margin-bottom: var(--espacio-4);
+}
+
+/* Lista ordenada de migas */
+.lista-migas {
+  /* Disposición flex */
+  display: flex;
+  /* Alineación centrada */
+  align-items: center;
+  /* Quita viñetas de lista */
+  list-style: none;
+  /* Margen cero */
+  margin: 0;
+  /* Relleno cero */
+  padding: 0;
+  /* Separación */
+  gap: var(--espacio-2);
+  /* Tamaño de texto chico */
+  font-size: var(--texto-xs);
+  /* Color atenuado */
+  color: var(--color-texto-atenuado);
+  /* Envoltura para pantallas chicas */
+  flex-wrap: wrap;
+}
+
+/* Enlace de miga */
+.enlace-miga {
+  /* Color atenuado */
+  color: var(--color-texto-atenuado);
+  /* Sin subrayado */
+  text-decoration: none;
+}
+
+/* Hover de miga */
+.enlace-miga:hover {
+  /* Color blanco brillante */
+  color: var(--color-texto-brillante);
+}
+
+/* Separador entre migas */
+.separador-miga {
+  /* Color atenuado */
+  color: var(--color-texto-apagado);
+}
+
+/* Miga activa actual */
+.miga-activa {
+  /* Color blanco brillante */
+  color: var(--color-texto-brillante);
+  /* Peso seminegrita */
+  font-weight: 600;
+}
+
+/* Cabecera del formulario de solicitud */
+.encabezado-formulario-solicitud {
+  /* Disposición flex */
+  display: flex;
+  /* Alineación superior */
+  align-items: flex-start;
+  /* Separación a los extremos */
+  justify-content: space-between;
+  /* Margen inferior */
+  margin-bottom: var(--espacio-6);
+  /* Separación */
+  gap: var(--espacio-4);
+  /* Envoltura en pantallas chicas */
+  flex-wrap: wrap;
+}
+
+/* Título de la solicitud */
+.solicitud-titulo {
+  /* Tipografía Outfit */
+  font-family: var(--fuente-titulos);
+  /* Tamaño */
+  font-size: var(--texto-2xl);
+  /* Margen inferior */
+  margin: 0 0 var(--espacio-1) 0;
+}
+
+/* Bajada de la solicitud */
+.solicitud-bajada {
+  /* Margen cero */
+  margin: 0;
+  /* Color atenuado */
+  color: var(--color-texto-atenuado);
+  /* Tamaño chico */
+  font-size: var(--texto-sm);
+}
+
+/* Sección de progreso de la solicitud */
+.progreso-solicitud {
+  /* Disposición flex */
+  display: flex;
+  /* Alineación centrada */
+  align-items: center;
+  /* Distribución */
+  justify-content: space-between;
+  /* Fondo de tarjeta */
+  background-color: var(--color-superficie);
+  /* Borde tenue */
+  border: 1px solid var(--color-superficie-borde);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-md);
+  /* Relleno */
+  padding: var(--espacio-3) var(--espacio-5);
+  /* Margen inferior */
+  margin-bottom: var(--espacio-6);
+  /* Envoltura */
+  flex-wrap: wrap;
+  /* Separación */
+  gap: var(--espacio-3);
+}
+
+/* Lista de pasos de progreso */
+.lista-pasos-progreso {
+  /* Disposición flex */
+  display: flex;
+  /* Alineación centrada */
+  align-items: center;
+  /* Sin estilo de lista */
+  list-style: none;
+  /* Margen cero */
+  margin: 0;
+  /* Relleno cero */
+  padding: 0;
+  /* Separación entre pasos */
+  gap: var(--espacio-4);
+  /* Envoltura */
+  flex-wrap: wrap;
+}
+
+/* Paso individual */
+.paso-progreso {
+  /* Disposición flex */
+  display: inline-flex;
+  /* Alineación centrada */
+  align-items: center;
+  /* Separación */
+  gap: 0.35rem;
+  /* Tamaño de fuente chico */
+  font-size: var(--texto-xs);
+  /* Color atenuado por defecto */
+  color: var(--color-texto-atenuado);
+}
+
+/* Paso completado con tilde */
+.paso-completado {
+  /* Color blanco */
+  color: var(--color-texto-brillante);
+}
+
+/* Símbolo check de completado */
+.paso-check {
+  /* Color verde éxito */
+  color: var(--color-exito);
+  /* Negrita */
+  font-weight: 700;
+}
+
+/* Icono de reloj en revisión */
+.paso-reloj {
+  /* Glifo proporcional */
+  font-size: 0.85rem;
+}
+
+/* Paso activo actual */
+.paso-activo {
+  /* Color blanco brillante */
+  color: var(--color-texto-brillante);
+  /* Peso seminegrita */
+  font-weight: 600;
+}
+
+/* Badge de estado de moderación */
+.badge-alerta-negra {
+  /* Fondo negro carbón */
+  background-color: #0b0d13;
+  /* Borde tenue */
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  /* Color blanco */
+  color: var(--color-texto-brillante);
+  /* Tamaño de fuente extra chico */
+  font-size: 0.65rem;
+  /* Peso negrita */
+  font-weight: 700;
+  /* Espaciado */
+  letter-spacing: 0.05em;
+  /* Relleno */
+  padding: 0.25rem 0.65rem;
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-sm);
+}
+
+/* Secciones de formulario (fieldsets agrupados) */
+.seccion-formulario {
+  /* Quita borde por defecto de fieldset */
+  border: none;
+  /* Borde superior separador */
+  border-top: 1px solid var(--color-superficie-borde);
+  /* Relleno vertical amplio */
+  padding: var(--espacio-6) 0;
+  /* Margen cero */
+  margin: 0;
+  /* Ancho total */
+  width: 100%;
+}
+
+/* Leyenda superior de la sección */
+.seccion-leyenda {
+  /* Disposición en bloque */
+  display: block;
+  /* Margen inferior */
+  margin-bottom: var(--espacio-4);
+  /* Relleno cero */
+  padding: 0;
+  /* Ancho completo */
+  width: 100%;
+}
+
+/* Título de la sección de formulario */
+.seccion-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño destacado */
+  font-size: var(--texto-lg);
+  /* Peso negrita */
+  font-weight: 700;
+  /* Color brillante */
+  color: var(--color-texto-brillante);
+  /* Bloque */
+  display: block;
+}
+
+/* Subtítulo de la sección de formulario */
+.seccion-subtitulo {
+  /* Color atenuado */
+  color: var(--color-texto-atenuado);
+  /* Tamaño chico */
+  font-size: var(--texto-xs);
+  /* Bloque */
+  display: block;
+  /* Margen superior */
+  margin-top: 0.15rem;
+}
+
+/* Fila de campos de formulario de dos columnas en escritorio */
+.fila-campos-doble {
+  /* Cuadrícula de 2 columnas proporcionales */
+  display: grid;
+  /* 2 columnas iguales */
+  grid-template-columns: 1fr 1fr;
+  /* Separación horizontal y vertical */
+  gap: var(--espacio-4);
+  /* Ancho completo */
+  width: 100%;
+}
+
+/* Etiqueta del grupo de casillas de verificación de servicios */
+.servicios-etiqueta-grupo {
+  /* Bloque */
+  display: block;
+  /* Peso seminegrita */
+  font-weight: 600;
+  /* Tamaño chico */
+  font-size: var(--texto-sm);
+  /* Color brillante */
+  color: var(--color-texto-brillante);
+  /* Margen inferior */
+  margin-bottom: var(--espacio-2);
+}
+
+/* Cuadrícula de servicios */
+.cuadricula-checkboxes-servicios {
+  /* Cuadrícula CSS */
+  display: grid;
+  /* Columnas adaptables de al menos 200px */
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  /* Separación */
+  gap: var(--espacio-3);
+  /* Margen inferior */
+  margin-bottom: var(--espacio-4);
+}
+
+/* Barra inferior de acciones de la solicitud de sala */
+.solicitud-acciones-inferior {
+  /* Disposición flex */
+  display: flex;
+  /* Alineación centrada */
+  align-items: center;
+  /* Separación */
+  gap: var(--espacio-4);
+  /* Margen superior generoso */
+  margin-top: var(--espacio-6);
+  /* Margen inferior */
+  margin-bottom: var(--espacio-10);
+  /* Envoltura en pantallas chicas */
+  flex-wrap: wrap;
+}
+
+/* Texto de estado de guardado automático */
+.solicitud-estado-guardado {
+  /* Margen izquierdo automático para empujar a la derecha */
+  margin-left: auto;
+  /* Color atenuado */
+  color: var(--color-texto-atenuado);
+  /* Tamaño chico */
+  font-size: var(--texto-xs);
+}
+
+/* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
    -------------------------------------------------------------------------- */
@@ -1634,6 +2865,72 @@ dd {
     align-items: flex-start;
     /* Separación */
     gap: var(--espacio-2);
+  }
+
+  /* Filas de campos en formularios se apilan verticalmente a 360 px */
+  .fila-campos-doble {
+    /* Una sola columna en móvil */
+    grid-template-columns: 1fr;
+    /* Separación vertical */
+    gap: var(--espacio-2);
+  }
+
+  /* Tarjeta de autenticación compacta sin desborde horizontal */
+  .tarjeta-autenticacion {
+    /* Relleno compacto */
+    padding: var(--espacio-5) var(--espacio-3);
+  }
+
+  /* Acciones inferiores de solicitud de sala apiladas en vertical */
+  .solicitud-acciones-inferior {
+    /* Dirección vertical */
+    flex-direction: column;
+    /* Alineación al inicio */
+    align-items: stretch;
+    /* Separación */
+    gap: var(--espacio-3);
+  }
+
+  /* Botones ocupan el ancho completo en móvil */
+  .solicitud-acciones-inferior .boton {
+    /* 100% de ancho */
+    width: 100%;
+  }
+
+  /* Texto de guardado centrado en móvil */
+  .solicitud-estado-guardado {
+    /* Sin margen izquierdo automático */
+    margin-left: 0;
+    /* Centrado */
+    text-align: center;
+  }
+
+  /* Cuadrícula de funciones en una columna en móvil */
+  .cuadricula-funciones {
+    /* Una columna */
+    grid-template-columns: 1fr;
+    /* Separación */
+    gap: var(--espacio-4);
+  }
+
+  /* Cuadrícula de servicios en una columna en pantallas muy angostas */
+  .cuadricula-checkboxes-servicios {
+    /* Una columna para no desbordar */
+    grid-template-columns: 1fr;
+  }
+
+  /* Cabecera de solicitud apilada en móvil */
+  .encabezado-formulario-solicitud {
+    /* Dirección de columna */
+    flex-direction: column;
+    /* Alineación al inicio */
+    align-items: stretch;
+  }
+
+  /* Botón de guardado rápido al 100% en móvil */
+  .solicitud-acciones-cabecera .boton {
+    /* Ancho completo */
+    width: 100%;
   }
 }
 

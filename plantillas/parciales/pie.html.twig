@@ -3,6 +3,8 @@
   Estructura el pie del sitio en 4 columnas alineadas con los wireframes de la Entrega 2:
   Identidad del proyecto, enlaces de Exploración, Participación, Plataforma y créditos legales.
 #}
+{# Resuelve de forma segura el usuario en sesión o null para evitar errores en modo estricto de Twig #}
+{% set usr = usuario ?? null %}
 {# Elemento semántico footer que engloba el pie de página de la aplicación #}
 <footer class="pie-pagina">
   {# Contenedor con ancho delimitado y padding horizontal para centrar el contenido #}
@@ -61,7 +63,7 @@
         {# Enlace para postular un espacio físico propio como sala indie asociada #}
         <li><a href="/salas/solicitar">Abrir una sala</a></li>
         {# Si el usuario tiene rol organizador o superior, muestra acceso rápido a su panel #}
-        {% if usuario and usuario.alcanza('organizador') %}
+        {% if usr and usr.alcanza('organizador') %}
           <li><a href="/organizador">Panel de organizador</a></li>
         {% endif %}
         {# Enlace informativo al programa de fidelización y puntos por asistencia #}

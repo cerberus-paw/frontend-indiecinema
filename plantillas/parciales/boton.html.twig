@@ -1,0 +1,97 @@
+{#
+  Parcial de botón reutilizable (IC-45).
+  Permite renderizar elementos <button> o enlaces <a> con apariencia de botón consistente,
+  soportando variantes estilísticas (primario, secundario, peligro, fantasma), tamaños,
+  iconos accesibles y estados deshabilitados.
+
+  Parámetros recibidos:
+  - texto: (string, obligatorio) Etiqueta de texto visible del botón.
+  - tipo: (string, opcional, por defecto 'submit') 'submit' | 'button' | 'reset' (aplica a <button>).
+  - url: (string, opcional) Si se define, renderiza un elemento <a> en lugar de <button>.
+  - enlace: (string, opcional) Alias de 'url'.
+  - variante: (string, opcional, por defecto 'primario') 'primario' | 'secundario' | 'peligro' | 'fantasma' | 'outline'.
+  - tamano: (string, opcional, por defecto 'mediano') 'chico' | 'mediano' | 'grande'.
+  - icono: (string, opcional) Símbolo o glifo a mostrar junto al texto.
+  - icono_posicion: (string, opcional, por defecto 'antes') 'antes' | 'despues'.
+  - deshabilitado: (bool, opcional, por defecto false) Deshabilita la interacción del botón.
+  - bloque: (bool, opcional, por defecto false) Si es true, ocupa el 100% del ancho del contenedor.
+  - id: (string, opcional) Identificador único en el DOM.
+  - clase: (string, opcional) Clases CSS adicionales para personalización.
+  - nombre: (string, opcional) Atributo name para botones de envío.
+  - valor: (string, opcional) Atributo value enviado en formularios.
+  - aria_label: (string, opcional) Etiqueta descriptiva para lectores de pantalla.
+#}
+{# Normaliza la variante visual del botón predeterminando 'primario' si no se indicó otra #}
+{% set variante_boton = variante ?? 'primario' %}
+{# Normaliza el tamaño del botón predeterminando 'mediano' #}
+{% set tamano_boton = tamano ?? 'mediano' %}
+{# Resuelve el enlace de destino si fue provisto por 'url' o por su alias 'enlace' #}
+{% set destino_enlace = url ?? (enlace ?? null) %}
+{# Determina si el botón debe comportarse como un enlace hipertexto o un control interactivo nativo #}
+{% set es_enlace = destino_enlace is not null %}
+{# Resuelve la posición del icono predeterminando 'antes' del texto #}
+{% set pos_icono = icono_posicion ?? 'antes' %}
+{# Construye la lista de clases CSS combinando base, variante, tamaño y modificadores #}
+{% set clases_boton = 'boton boton-' ~ variante_boton ~ ' boton-' ~ tamano_boton ~ (bloque ?? false ? ' boton-bloque' : '') ~ (clase is defined ? ' ' ~ clase : '') %}
+
+{# Caso 1: Si se definió un destino, se renderiza como elemento de anclaje <a> #}
+{% if es_enlace %}
+  {# Elemento de enlace con clases de botón y atributos accesibles #}
+  <a
+    href="{{ destino_enlace }}"
+    class="{{ clases_boton }}{% if deshabilitado ?? false %} boton-deshabilitado{% endif %}"
+    {% if id is defined %}id="{{ id }}"{% endif %}
+    {% if aria_label is defined %}aria-label="{{ aria_label }}"{% endif %}
+    {% if deshabilitado ?? false %}role="button" aria-disabled="true" tabindex="-1"{% endif %}
+  >
+    {# Si se definió un icono y su posición es anterior al texto #}
+    {% if icono is defined and pos_icono == 'antes' %}
+      {# Contenedor del icono con ocultamiento para lectores de pantalla #}
+      <span class="boton-icono boton-icono-antes" aria-hidden="true">{{ icono }}</span>
+    {# Cierre del condicional de icono previo #}
+    {% endif %}
+
+    {# Texto visible del botón #}
+    <span class="boton-texto">{{ texto }}</span>
+
+    {# Si se definió un icono y su posición es posterior al texto #}
+    {% if icono is defined and pos_icono == 'despues' %}
+      {# Contenedor del icono posterior #}
+      <span class="boton-icono boton-icono-despues" aria-hidden="true">{{ icono }}</span>
+    {# Cierre del condicional de icono posterior #}
+    {% endif %}
+  {# Cierre del elemento ancla <a> #}
+  </a>
+
+{# Caso 2: Si no hay enlace, se renderiza como botón nativo <button> #}
+{% else %}
+  {# Elemento nativo button con tipo, nombre, valor y estado deshabilitado #}
+  <button
+    type="{{ tipo ?? 'submit' }}"
+    class="{{ clases_boton }}"
+    {% if id is defined %}id="{{ id }}"{% endif %}
+    {% if nombre is defined %}name="{{ nombre }}"{% endif %}
+    {% if valor is defined %}value="{{ valor }}"{% endif %}
+    {% if aria_label is defined %}aria-label="{{ aria_label }}"{% endif %}
+    {% if deshabilitado ?? false %}disabled aria-disabled="true"{% endif %}
+  >
+    {# Si se definió un icono y su posición es anterior al texto #}
+    {% if icono is defined and pos_icono == 'antes' %}
+      {# Contenedor del icono previo #}
+      <span class="boton-icono boton-icono-antes" aria-hidden="true">{{ icono }}</span>
+    {# Cierre del condicional de icono previo #}
+    {% endif %}
+
+    {# Texto visible del botón #}
+    <span class="boton-texto">{{ texto }}</span>
+
+    {# Si se definió un icono y su posición es posterior al texto #}
+    {% if icono is defined and pos_icono == 'despues' %}
+      {# Contenedor del icono posterior #}
+      <span class="boton-icono boton-icono-despues" aria-hidden="true">{{ icono }}</span>
+    {# Cierre del condicional de icono posterior #}
+    {% endif %}
+  {# Cierre del elemento botón #}
+  </button>
+{# Cierre del condicional de selección button o anchor #}
+{% endif %}

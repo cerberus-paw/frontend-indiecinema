@@ -3,6 +3,10 @@
   Contiene la barra de navegación superior fija, el logotipo, el buscador de películas y salas,
   la navegación pública de los wireframes, y el menú adaptativo según el rol de la sesión.
 #}
+{# Resuelve de forma segura el usuario en sesión o null para evitar errores en modo estricto de Twig #}
+{% set usr = usuario ?? null %}
+{# Resuelve de forma segura la ruta actual o cadena vacía si no fue provista por el controlador #}
+{% set ruta = ruta_actual ?? '' %}
 {# Elemento semántico header que representa la cabecera superior y fija de la página #}
 <header class="encabezado">
   {# Contenedor con ancho máximo centrado para mantener alineación consistente con el resto de la interfaz #}
@@ -44,30 +48,30 @@
     <nav class="navegacion-principal" aria-label="Navegación principal">
       {# Lista no ordenada de enlaces de navegación pública #}
       <ul class="nav-lista">
-        {# Enlace a Cartelera: se marca con la clase activo si ruta_actual coincide con la raíz #}
+        {# Enlace a Cartelera: se marca con la clase activo si ruta coincide con la raíz #}
         <li>
-          <a href="/" class="nav-enlace{% if ruta_actual == '/' %} activo{% endif %}">Cartelera</a>
+          <a href="/" class="nav-enlace{% if ruta == '/' %} activo{% endif %}">Cartelera</a>
         </li>
         {# Enlace a la sección de Salas indie registradas #}
         <li>
-          <a href="/salas" class="nav-enlace{% if ruta_actual starts with '/salas' %} activo{% endif %}">Salas</a>
+          <a href="/salas" class="nav-enlace{% if ruta starts with '/salas' %} activo{% endif %}">Salas</a>
         </li>
         {# Enlace al catálogo completo de Películas independientes #}
         <li>
-          <a href="/peliculas" class="nav-enlace{% if ruta_actual starts with '/peliculas' %} activo{% endif %}">Películas</a>
+          <a href="/peliculas" class="nav-enlace{% if ruta starts with '/peliculas' %} activo{% endif %}">Películas</a>
         </li>
         {# Enlace explicativo sobre la dinámica colaborativa de la plataforma #}
         <li>
-          <a href="/como-funciona" class="nav-enlace{% if ruta_actual starts with '/como-funciona' %} activo{% endif %}">Cómo funciona</a>
+          <a href="/como-funciona" class="nav-enlace{% if ruta starts with '/como-funciona' %} activo{% endif %}">Cómo funciona</a>
         </li>
 
-        {# Verificación segura: primero pregunta 'if usuario' para evitar fallos de Twig en desarrollo (strict_variables) #}
-        {# y luego evalúa 'usuario.alcanza' para determinar si el usuario tiene nivel suficiente de Organizador #}
-        {% if usuario and usuario.alcanza('organizador') %}
+        {# Verificación segura: primero pregunta 'if usr' para evitar fallos de Twig en desarrollo (strict_variables) #}
+        {# y luego evalúa 'usr.alcanza' para determinar si el usuario tiene nivel suficiente de Organizador #}
+        {% if usr and usr.alcanza('organizador') %}
           {# Item visible solo para organizadores, moderadores y administradores #}
           <li class="nav-item-rol">
             {# Acceso directo al panel de control de organización de salas y funciones #}
-            <a href="/organizador" class="nav-enlace enlace-rol{% if ruta_actual starts with '/organizador' %} activo{% endif %}" title="Panel de Organización">
+            <a href="/organizador" class="nav-enlace enlace-rol{% if ruta starts with '/organizador' %} activo{% endif %}" title="Panel de Organización">
               {# Ícono temático de ticket para identificar visualmente la sección de organización #}
               <span class="icono-rol" aria-hidden="true">🎟️</span> Organización
             </a>
@@ -76,11 +80,11 @@
         {% endif %}
 
         {# Evalúa si el usuario activo posee rol de Moderador o superior (Administrador) #}
-        {% if usuario and usuario.alcanza('moderador') %}
+        {% if usr and usr.alcanza('moderador') %}
           {# Item visible para personal con facultades de moderación #}
           <li class="nav-item-rol">
             {# Acceso directo al panel de revisión de solicitudes de salas y denuncias de usuarios #}
-            <a href="/moderacion" class="nav-enlace enlace-rol{% if ruta_actual starts with '/moderacion' %} activo{% endif %}" title="Panel de Moderación">
+            <a href="/moderacion" class="nav-enlace enlace-rol{% if ruta starts with '/moderacion' %} activo{% endif %}" title="Panel de Moderación">
               {# Ícono temático de escudo protector #}
               <span class="icono-rol" aria-hidden="true">🛡️</span> Moderación
             </a>
@@ -89,11 +93,11 @@
         {% endif %}
 
         {# Evalúa si el usuario activo posee rol de Administrador (máximo nivel de acceso en el sistema) #}
-        {% if usuario and usuario.alcanza('administrador') %}
+        {% if usr and usr.alcanza('administrador') %}
           {# Item visible exclusivamente para administradores de la plataforma #}
           <li class="nav-item-rol">
             {# Acceso directo a la configuración global de parámetros, roles y estadísticas #}
-            <a href="/admin" class="nav-enlace enlace-rol{% if ruta_actual starts with '/admin' %} activo{% endif %}" title="Panel de Administración">
+            <a href="/admin" class="nav-enlace enlace-rol{% if ruta starts with '/admin' %} activo{% endif %}" title="Panel de Administración">
               {# Ícono temático de engranaje de configuración #}
               <span class="icono-rol" aria-hidden="true">⚙️</span> Administración
             </a>
@@ -108,21 +112,21 @@
     {# Bloque de sesión: muestra el menú del usuario autenticado o los botones de acceso para invitados #}
     <div class="encabezado-usuario">
       {# Si existe un usuario en sesión, se renderiza su tarjeta y menú desplegable #}
-      {% if usuario %}
+      {% if usr %}
         {# Se utiliza la etiqueta HTML5 nativa 'details' para que el menú funcione incluso si falla o no carga JavaScript #}
         <details class="usuario-desplegable" id="menu-usuario">
           {# Elemento summary interactivo que sirve como disparador accesible del menú desplegable #}
           <summary class="usuario-resumen" aria-haspopup="menu" aria-label="Menú de usuario">
             {# Avatar circular generado dinámicamente con la primera letra del nombre en mayúscula para identidad visual #}
             <span class="usuario-avatar" aria-hidden="true">
-              {{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}
+              {{ usr.nombre ? usr.nombre|slice(0, 1)|upper : 'U' }}
             </span>
             {# Contenedor con los datos textuales de la sesión #}
             <div class="usuario-info">
               {# Muestra el nombre público del usuario provisto por las cabeceras de nginx o 'Usuario' por defecto #}
-              <span class="usuario-nombre">{{ usuario.nombre ?? 'Usuario' }}</span>
+              <span class="usuario-nombre">{{ usr.nombre ?? 'Usuario' }}</span>
               {# Insignia visual con el nombre del rol y una clase CSS específica para colorearlo adecuadamente #}
-              <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
+              <span class="usuario-rol rol-{{ usr.rol.value }}">{{ usr.rol.value }}</span>
             {# Cierre de información del usuario #}
             </div>
             {# Flecha indicadora de apertura que gira con animación CSS cuando details tiene el atributo open #}
@@ -134,8 +138,8 @@
           <div class="usuario-menu-flotante" role="menu">
             {# Encabezado informativo del menú para confirmar el usuario y rol actual #}
             <div class="menu-cabecera">
-              <strong class="menu-usuario-nombre">{{ usuario.nombre ?? 'Usuario' }}</strong>
-              <span class="menu-usuario-rol">Rol activo: {{ usuario.rol.value|capitalize }}</span>
+              <strong class="menu-usuario-nombre">{{ usr.nombre ?? 'Usuario' }}</strong>
+              <span class="menu-usuario-rol">Rol activo: {{ usr.rol.value|capitalize }}</span>
             </div>
 
             {# Línea divisoria visual entre el encabezado y las opciones #}
@@ -161,7 +165,7 @@
             </a>
 
             {# Sección condicional de opciones para el rol de Organizador #}
-            {% if usuario.alcanza('organizador') %}
+            {% if usr.alcanza('organizador') %}
               {# Separador visual para agrupar las herramientas de organizador #}
               <div class="menu-separador" role="separator"></div>
               {# Encabezado de la sección de organización #}
@@ -186,7 +190,7 @@
             {% endif %}
 
             {# Sección condicional de opciones para el rol de Moderador #}
-            {% if usuario.alcanza('moderador') %}
+            {% if usr.alcanza('moderador') %}
               {# Separador visual para agrupar las herramientas de moderación #}
               <div class="menu-separador" role="separator"></div>
               {# Encabezado de la sección de moderación #}
@@ -211,7 +215,7 @@
             {% endif %}
 
             {# Sección condicional de opciones para el rol de Administrador #}
-            {% if usuario.alcanza('administrador') %}
+            {% if usr.alcanza('administrador') %}
               {# Separador visual para agrupar las herramientas de administración #}
               <div class="menu-separador" role="separator"></div>
               {# Encabezado de la sección de administración global #}
