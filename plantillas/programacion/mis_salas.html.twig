@@ -1,0 +1,47 @@
+{#
+  «Mis salas» del organizador, en /organizador/salas: sólo las suyas, publicadas o esperando que
+  las habilite un administrador. Desde acá se da de alta una nueva o se edita una.
+
+  Variables:
+  - salas: lista de salas como las recibe parciales/tarjeta_sala.html.twig.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Mis salas{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Mis salas</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Mis salas</h1>
+      <p class="solicitud-bajada">Las salas que administrás. Una sala nueva aparece en el sitio cuando la habilita un administrador.</p>
+    </div>
+    {% include 'parciales/boton.html.twig' with {
+      texto: 'Publicar una sala',
+      url: '/organizador/salas/nueva',
+      variante: 'primario'
+    } %}
+  </header>
+
+  {% if salas is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'Todavía no cargaste ninguna sala.'
+    } %}
+  {% else %}
+    <div class="cuadricula-funciones">
+      {% for sala in salas %}
+        {% include 'parciales/tarjeta_sala.html.twig' with { sala: sala, editable: true } only %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
