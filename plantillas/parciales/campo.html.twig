@@ -13,6 +13,7 @@
   - errores: (map/array, opcional) Diccionario de errores donde se consulta errores[nombre].
   - ayuda: (string, opcional) Indicación o texto de ayuda debajo del control.
   - requerido: (bool, opcional, por defecto false) Si es obligatorio (agrega required y asterisco visual).
+  - marcado: (bool, opcional) Para 'checkbox': si la casilla está tildada. Sin él, se tilda cuando valor es verdadero, '1' u 'on'.
   - opciones: (array, opcional) Lista de opciones para 'select' (formato [{valor: 'x', etiqueta: 'Y'}] o diccionario clave: valor).
   - filas: (int, opcional, por defecto 4) Cantidad de filas cuando tipo == 'textarea'.
   - clase: (string, opcional) Clases CSS adicionales para el contenedor.
@@ -125,8 +126,8 @@
         value="{{ valor ?? '1' }}"
         {# Clase con estilos personalizados de dimensiones y acento dorado #}
         class="campo-control-checkbox"
-        {# Marca la casilla como seleccionada si el valor es verdadero o '1' #}
-        {% if valor is defined and (valor == true or valor == '1' or valor == 'on') %}checked{% endif %}
+        {# Marca la casilla según marcado (lo que envió el usuario) o, si no se pasó, según el valor #}
+        {% if marcado is defined ? marcado : (valor is defined and (valor == true or valor == '1' or valor == 'on')) %}checked{% endif %}
         {# Obliga a marcar la casilla (ej. aceptación de términos legales) #}
         {% if requerido ?? false %}required{% endif %}
         {# Asocia el ID del error si no se tildó y era obligatoria #}

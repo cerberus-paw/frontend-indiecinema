@@ -8,7 +8,7 @@
 #}
 <article class="tarjeta-funcion tarjeta-sala">
   <div class="tarjeta-funcion-afiche">
-    {% if sala.imagen %}
+    {% if sala.imagen ?? false %}
       <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="tarjeta-funcion-imagen" loading="lazy">
     {% else %}
       <div class="tarjeta-funcion-afiche-placeholder">
@@ -20,7 +20,7 @@
   <div class="tarjeta-funcion-cuerpo">
     {% if editable ?? false %}
       <div class="tarjeta-funcion-cabecera">
-        {% if sala.habilitada %}
+        {% if sala.habilitada ?? false %}
           <span class="insignia-estado insignia-programada">PUBLICADA</span>
         {% else %}
           <span class="insignia-estado insignia-votacion">ESPERA HABILITACIÓN</span>
@@ -31,11 +31,11 @@
     <div class="tarjeta-funcion-meta">
       <p class="tarjeta-funcion-dato">
         <span class="meta-icono" aria-hidden="true">📍</span>
-        <span class="meta-texto">{{ sala.localidad }}</span>
+        <span class="meta-texto">{{ sala.localidad ?? '' }}</span>
       </p>
       <p class="tarjeta-funcion-dato">
         <span class="meta-icono" aria-hidden="true">💺</span>
-        <span class="meta-texto">{{ sala.capacidad }} butacas</span>
+        <span class="meta-texto">{{ sala.capacidad ?? '—' }} butacas</span>
       </p>
     </div>
     {% if editable ?? false %}

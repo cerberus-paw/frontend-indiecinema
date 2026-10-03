@@ -31,7 +31,7 @@
     </div>
 
     {# El detalle técnico solo lo envía el backend en entorno de desarrollo #}
-    {% if detalle %}
+    {% if detalle is defined and detalle %}
       <div class="error-detalles-desarrollo">
         <h2 class="error-detalles-titulo">Detalle técnico (entorno de desarrollo):</h2>
         <pre class="error-detalles-codigo"><code>{{ detalle }}</code></pre>

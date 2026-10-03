@@ -96,12 +96,13 @@
         error: errores.password_confirmacion ?? null
       } %}
       {# Campo 5: Casilla de verificación de aceptación de términos y condiciones #}
-      {# Parámetros: nombre ('terminos'), tipo checkbox interactivo, etiqueta legal adyacente, valor '1', obligatorio y error si no fue marcado #}
+      {# Parámetros: nombre ('terminos'), tipo checkbox interactivo, etiqueta legal adyacente, valor '1', tildada sólo si el usuario la marcó, obligatorio y error si no fue marcado #}
       {% include 'parciales/campo.html.twig' with {
         nombre: 'terminos',
         tipo: 'checkbox',
         etiqueta: 'Acepto los términos del servicio y las normas de convivencia de IndieCinema.',
         valor: '1',
+        marcado: valores.terminos ?? false,
         requerido: true,
         error: errores.terminos ?? null
       } %}

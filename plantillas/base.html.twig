@@ -14,7 +14,7 @@
   {# Configura el viewport responsivo para adaptar el contenido al ancho de pantallas móviles y de escritorio #}
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {# Token CSRF para consumo seguro desde JavaScript y funciones AJAX de cliente #}
-  <meta name="csrf" content="{{ csrf }}">
+  <meta name="csrf" content="{{ csrf ?? (_csrf ?? '') }}">
   {# Define el título de la pestaña: el bloque 'titulo' lo completan las vistas y se añade el sufijo unificado #}
   <title>{% block titulo %}{% endblock %} · IndieCinema</title>
   {# Ícono de favoritos (favicon) oficial de IndieCinema en formato vectorial SVG #}
