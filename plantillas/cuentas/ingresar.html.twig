@@ -1,0 +1,76 @@
+{#
+  Plantilla de inicio de sesión (IC-29).
+  Formulario de ingreso con correo y contraseña del subsistema cuentas, con la misma tarjeta que el
+  registro y los parciales comunes: campo.html.twig, mensaje.html.twig y boton.html.twig.
+
+  Variables recibidas:
+  - valores: (array/map, opcional) Lo que cargó el usuario (sólo el correo: la contraseña no vuelve).
+  - errores: (array/map, opcional) Diccionario de errores de validación por campo.
+  - error_general: (string, opcional) Error que no es de un campo, como un correo o una contraseña incorrectos.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Ingresar{% endblock %}
+
+{% block contenido %}
+<div class="contenedor-autenticacion">
+  <div class="tarjeta-autenticacion">
+    <header class="autenticacion-cabecera">
+      <h1 class="autenticacion-titulo">Ingresar</h1>
+      <p class="autenticacion-subtitulo">
+        Entrá con tu correo y tu contraseña para votar títulos y reservar entradas.
+      </p>
+    </header>
+
+    {# Error general: correo o contraseña incorrectos (sin decir cuál de los dos) o cuenta suspendida #}
+    {% if error_general is defined %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'error',
+        titulo: 'No pudimos iniciar tu sesión',
+        mensaje: error_general
+      } %}
+    {% endif %}
+
+    <form action="/cuenta/ingresar" method="POST" class="formulario-ingreso" novalidate>
+      {# Campo oculto para el token de protección contra ataques CSRF #}
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'email',
+        etiqueta: 'Correo electrónico',
+        tipo: 'email',
+        valor: valores.email ?? '',
+        placeholder: 'nombre@ejemplo.com',
+        requerido: true,
+        error: errores.email ?? null
+      } %}
+
+      {# La contraseña nunca se vuelve a mostrar: el parcial no imprime el valor de los password #}
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'password',
+        etiqueta: 'Contraseña',
+        tipo: 'password',
+        requerido: true,
+        error: errores.password ?? null
+      } %}
+
+      <div class="formulario-acciones">
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Ingresar',
+          tipo: 'submit',
+          variante: 'primario',
+          tamano: 'grande',
+          bloque: true
+        } %}
+      </div>
+    </form>
+
+    <footer class="autenticacion-pie">
+      <p class="autenticacion-enlace-texto">
+        ¿Todavía no tenés cuenta?
+        <a href="/cuenta/registro" class="enlace-destacado">Crear cuenta</a>
+      </p>
+    </footer>
+  </div>
+</div>
+{% endblock %}
