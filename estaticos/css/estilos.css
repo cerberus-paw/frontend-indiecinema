@@ -64,6 +64,10 @@
   --color-texto-apagado: #8C8478;
   /* Texto inverso (#17141C): Tinta para lectura sobre botones con fondo primario ámbar */
   --color-texto-inverso: #17141C;
+  /* Texto de máximo contraste y realce visual en blanco puro */
+  --color-texto-brillante: #FFFFFF;
+  /* Alias de compatibilidad para texto atenuado equivalente a texto apagado */
+  --color-texto-atenuado: var(--color-texto-apagado);
 
   /* ── 1.5 Colores de Estado del Sistema ────────────────────────────────── */
   /* Éxito (#10b981): verde esmeralda para operaciones exitosas y cupos disponibles */
@@ -128,6 +132,8 @@
   --radio-lg: 16px;
   /* 9999px: botones tipo píldora, inputs de búsqueda y avatares circulares */
   --radio-completo: 9999px;
+  /* Alias de compatibilidad para radio de curvatura circular o de píldora */
+  --radio-full: var(--radio-completo);
 
   /* ── 1.10 Sombras e Iluminación Cinematográfica ──────────────────────── */
   /* Sombra sutil para elevaciones leves */
@@ -144,6 +150,8 @@
   --ancho-maximo: 1240px;
   /* Transición estándar para estados interactivos */
   --transicion-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transición rápida para micro-interacciones ágiles y cambios de color */
+  --transicion-rapida: 0.15s ease;
 }
 
 /* --------------------------------------------------------------------------

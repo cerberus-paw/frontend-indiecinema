@@ -21,12 +21,21 @@ frontend-indiecinema/
 ├── README.md                   # Documentación técnica del paquete
 ├── plantillas/                 # Plantillas Twig organizadas por jerarquía
 │   ├── base.html.twig          # Plantilla base compartida (esqueleto HTML, bloques titulo y contenido)
-│   ├── error.html.twig         # Plantilla común para páginas de error (404, 500, etc.)
+│   ├── error.html.twig         # Plantilla común para páginas de error (401, 403, 404, 500, etc.)
 │   ├── parciales/              # Componentes visuales reutilizables
 │   │   ├── encabezado.html.twig # Barra de navegación, buscador, accesos según rol y menú de usuario
-│   │   └── pie.html.twig       # Pie de página estructurado según wireframes (Explorar, Participar, etc.)
-│   ├── cuentas/                # Plantillas específicas del subsistema cuentas
-│   ├── programacion/           # Plantillas específicas del subsistema programación
+│   │   ├── pie.html.twig       # Pie de página estructurado según wireframes (Explorar, Participar, etc.)
+│   │   ├── campo.html.twig     # Control de formulario con etiqueta, ayuda y error accesible
+│   │   ├── mensaje.html.twig   # Alertas de éxito, error, advertencia e información
+│   │   ├── boton.html.twig     # Botón o enlace con variantes visuales y tamaños
+│   │   ├── tarjeta_funcion.html.twig # Tarjeta de función para home y cartelera
+│   │   └── tarjeta_sala.html.twig    # Tarjeta de sala indie para catálogo y «Mis salas»
+│   ├── cuentas/                # Plantillas del subsistema cuentas
+│   │   └── registro.html.twig  # Formulario de alta de usuario
+│   ├── programacion/           # Plantillas del subsistema programación
+│   │   ├── alta_sala.html.twig # Formulario de alta y edición de sala
+│   │   ├── mis_salas.html.twig # Gestión de salas del organizador
+│   │   └── salas.html.twig     # Catálogo público de salas indie habilitadas
 │   └── funciones/              # Plantillas específicas del subsistema funciones
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
     ├── css/
@@ -186,8 +195,31 @@ Componente reutilizable para la Cartelera y el Home que reproduce exactamente lo
 } %}
 ```
 
-### 7.5 Pantallas completas que implementan los parciales
+### 7.5 Tarjeta de sala indie (`parciales/tarjeta_sala.html.twig`)
 
-- **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y términos, mensajes de error y botón principal.
-- **`plantillas/programacion/alta_sala.html.twig`**: Formulario de alta y edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía y parámetros de proyección (películas por función, duración de función e intervalo).
+Componente para mostrar salas de cine independiente tanto en el listado público (`/salas`) como en la pantalla de gestión del organizador («Mis salas», `/organizador/salas`).
+- Fotografía del espacio (o marcador gráfico si aún no tiene imagen).
+- Nombre de la sala, localidad (📍) y capacidad en butacas (💺).
+- Modo editable: muestra el estado (`PUBLICADA` o `ESPERA HABILITACIÓN`) y el botón `Editar` hacia `/organizador/salas/{id}/editar`.
+
+```twig
+{% include 'parciales/tarjeta_sala.html.twig' with {
+  sala: {
+    id: 1,
+    nombre: 'Cineclub El Faro',
+    localidad: 'Luján',
+    capacidad: 85,
+    imagen: '/estaticos/img/salas/el-faro.webp',
+    habilitada: true
+  },
+  editable: true
+} %}
+```
+
+### 7.6 Pantallas completas que implementan los parciales
+
+- **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y casilla de términos sin tildar por defecto (`marcado: valores.terminos ?? false`), mensajes de error y botón principal.
+- **`plantillas/programacion/alta_sala.html.twig`**: Formulario de alta y edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía y parámetros de proyección.
+- **`plantillas/programacion/mis_salas.html.twig`**: Vista de «Mis salas» para organizadores en `/organizador/salas` con migas de pan, botón para publicar sala y cuadrícula de tarjetas editables (IC-38).
+- **`plantillas/programacion/salas.html.twig`**: Catálogo público de salas indie habilitadas en `/salas` con cuadrícula de tarjetas de sala (IC-39).
 
