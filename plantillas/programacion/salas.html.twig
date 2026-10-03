@@ -1,0 +1,34 @@
+{#
+  Listado público de salas indie, en /salas: las habilitadas por un administrador, sin necesidad
+  de iniciar sesión.
+
+  Variables:
+  - salas: lista de salas como las recibe parciales/tarjeta_sala.html.twig.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Salas indie{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Salas indie</h1>
+      <p class="solicitud-bajada">Los espacios donde se proyecta cine independiente en la comunidad.</p>
+    </div>
+  </header>
+
+  {% if salas is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'Todavía no hay salas publicadas.'
+    } %}
+  {% else %}
+    <div class="cuadricula-funciones">
+      {% for sala in salas %}
+        {% include 'parciales/tarjeta_sala.html.twig' with { sala: sala } only %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
