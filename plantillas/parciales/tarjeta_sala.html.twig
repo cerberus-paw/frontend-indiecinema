@@ -1,0 +1,53 @@
+{#
+  Tarjeta de una sala indie, para el listado público y para «Mis salas» del organizador.
+  Usa las clases de la tarjeta de función para que las dos se vean iguales en las cuadrículas.
+
+  Parámetros:
+  - sala: id, nombre, localidad, capacidad, imagen (la URL de la foto, o null) y habilitada.
+  - editable: (bool, opcional) en «Mis salas»: muestra si está publicada y el botón para editarla.
+#}
+<article class="tarjeta-funcion tarjeta-sala">
+  <div class="tarjeta-funcion-afiche">
+    {% if sala.imagen %}
+      <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="tarjeta-funcion-imagen" loading="lazy">
+    {% else %}
+      <div class="tarjeta-funcion-afiche-placeholder">
+        <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+        <span class="afiche-placeholder-texto">SALA</span>
+      </div>
+    {% endif %}
+  </div>
+  <div class="tarjeta-funcion-cuerpo">
+    {% if editable ?? false %}
+      <div class="tarjeta-funcion-cabecera">
+        {% if sala.habilitada %}
+          <span class="insignia-estado insignia-programada">PUBLICADA</span>
+        {% else %}
+          <span class="insignia-estado insignia-votacion">ESPERA HABILITACIÓN</span>
+        {% endif %}
+      </div>
+    {% endif %}
+    <h3 class="tarjeta-funcion-titulo">{{ sala.nombre }}</h3>
+    <div class="tarjeta-funcion-meta">
+      <p class="tarjeta-funcion-dato">
+        <span class="meta-icono" aria-hidden="true">📍</span>
+        <span class="meta-texto">{{ sala.localidad }}</span>
+      </p>
+      <p class="tarjeta-funcion-dato">
+        <span class="meta-icono" aria-hidden="true">💺</span>
+        <span class="meta-texto">{{ sala.capacidad }} butacas</span>
+      </p>
+    </div>
+    {% if editable ?? false %}
+      <div class="tarjeta-funcion-acciones">
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Editar',
+          url: '/organizador/salas/' ~ sala.id ~ '/editar',
+          variante: 'secundario',
+          tamano: 'chico',
+          bloque: true
+        } %}
+      </div>
+    {% endif %}
+  </div>
+</article>
