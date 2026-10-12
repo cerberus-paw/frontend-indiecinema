@@ -1,8 +1,9 @@
 {#
-  Parcial de encabezado (IC-43 / IC-44 / IC-45 / IC-94)
+  Parcial de encabezado (IC-43 / IC-44 / IC-45 / IC-94 / IC-97)
   Contiene la barra de navegación superior fija, el logotipo vectorial oficial,
   el buscador accesible hacia la cartelera, la navegación pública
-  y el menú adaptativo de usuario con cierre de sesión seguro por POST.
+  y el menú adaptativo de usuario según el rol (espectador, organizador y administrador)
+  con cierre de sesión seguro por POST.
 #}
 {# Resuelve de forma segura el usuario en sesión o null para evitar errores en modo estricto de Twig #}
 {% set usr = usuario ?? null %}
@@ -56,14 +57,20 @@
           <a href="/salas" class="nav-enlace{% if ruta starts with '/salas' %} activo{% endif %}">Salas</a>
         </li>
 
-        {# Verificación segura para rol Organizador: acceso directo a Mis salas #}
-        {% if usr and usr.alcanza('organizador') %}
-          {# Item visible para organizadores y superiores #}
+        {# Acceso directo en barra para Organizador: sólo visible para organizadores #}
+        {% if usr and usr.rol.value == 'organizador' %}
           <li class="nav-item-rol">
-            {# Acceso directo a la gestión de salas del organizador #}
             <a href="/organizador/salas" class="nav-enlace enlace-rol{% if ruta starts with '/organizador/salas' %} activo{% endif %}" title="Mis salas">
-              {# Ícono temático #}
               <span class="icono-rol" aria-hidden="true">🏛️</span> Mis salas
+            </a>
+          </li>
+        {% endif %}
+
+        {# Acceso directo en barra para Administrador: sólo visible para administradores #}
+        {% if usr and usr.alcanza('administrador') %}
+          <li class="nav-item-rol">
+            <a href="/cuenta/admin" class="nav-enlace enlace-rol{% if ruta starts with '/cuenta/admin' %} activo{% endif %}" title="Panel de Administración">
+              <span class="icono-rol" aria-hidden="true">⚙️</span> Administración
             </a>
           </li>
         {% endif %}
@@ -97,7 +104,7 @@
           {# Cierre de summary #}
           </summary>
 
-          {# Menú flotante con lista completa de acciones disponibles para el usuario #}
+          {# Menú flotante con lista completa de acciones disponibles para el usuario según su rol #}
           <div class="usuario-menu-flotante" role="menu">
             {# Encabezado informativo del menú #}
             <div class="menu-cabecera">
@@ -108,15 +115,15 @@
             {# Línea divisoria visual #}
             <div class="menu-separador" role="separator"></div>
 
-            {# Título de la sección de Mi Cuenta #}
+            {# Título de la sección de Mi Cuenta (común a todos los usuarios autenticados) #}
             <div class="menu-seccion-titulo">Mi cuenta</div>
             {# Enlace al panel principal de cuenta #}
             <a href="/cuenta/" class="menu-item" role="menuitem">
               <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
             </a>
 
-            {# Sección condicional de opciones para el rol de Organizador #}
-            {% if usr.alcanza('organizador') %}
+            {# Sección condicional de opciones exclusivas para el rol de Organizador #}
+            {% if usr.rol.value == 'organizador' %}
               <div class="menu-separador" role="separator"></div>
               <div class="menu-seccion-titulo">Panel del Organizador</div>
               <a href="/organizador/salas" class="menu-item" role="menuitem">
@@ -124,6 +131,18 @@
               </a>
               <a href="/organizador/salas/nueva" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">➕</span> Publicar una sala
+              </a>
+            {% endif %}
+
+            {# Sección condicional de opciones exclusivas para el rol de Administrador #}
+            {% if usr.alcanza('administrador') %}
+              <div class="menu-separador" role="separator"></div>
+              <div class="menu-seccion-titulo">Administración</div>
+              <a href="/cuenta/admin" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">⚙️</span> Panel de administración
+              </a>
+              <a href="/cuenta/admin/usuarios" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
               </a>
             {% endif %}
 
