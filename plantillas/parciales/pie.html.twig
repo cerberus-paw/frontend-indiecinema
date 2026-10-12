@@ -2,7 +2,7 @@
   Parcial de pie de página (IC-43 / IC-44 / IC-45 / IC-94 / IC-97)
   Estructura el pie del sitio alineado a la identidad visual oficial E1 y al backlog de la Entrega 3:
   Identidad del proyecto con logotipo oficial, enlaces a Cartelera (/cartelera) y Salas indie (/salas),
-  participación comunitaria y gestión según el rol del usuario, y créditos legales.
+  participación comunitaria y gestión según el rol del usuario, y créditos legales. Todos los enlaces apuntan a rutas que existen.
 #}
 {# Resuelve de forma segura el usuario en sesión o null para evitar errores en modo estricto de Twig #}
 {% set usr = usuario ?? null %}
@@ -53,11 +53,9 @@
       <ul class="pie-enlaces">
         {% if usr %}
           <li><a href="/cuenta/">Mi cuenta</a></li>
-          {% if usr.rol.value == 'organizador' %}
+          {% if usr.alcanza('organizador') %}
             <li><a href="/organizador/salas">Mis salas</a></li>
             <li><a href="/organizador/salas/nueva">Publicar una sala</a></li>
-          {% elseif usr.alcanza('administrador') %}
-            <li><a href="/cuenta/admin">Panel de administración</a></li>
           {% endif %}
         {% else %}
           <li><a href="/cuenta/ingresar">Ingresar</a></li>

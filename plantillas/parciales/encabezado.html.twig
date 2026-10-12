@@ -65,20 +65,11 @@
           <a href="/acerca-de" class="nav-enlace{% if ruta starts with '/acerca-de' %} activo{% endif %}">Acerca de</a>
         </li>
 
-        {# Acceso directo en barra para Organizador: sólo visible para organizadores #}
-        {% if usr and usr.rol.value == 'organizador' %}
+        {# Acceso directo en barra para Organizador: lo ven el organizador y los roles que lo alcanzan (moderador y administrador) #}
+        {% if usr and usr.alcanza('organizador') %}
           <li class="nav-item-rol">
             <a href="/organizador/salas" class="nav-enlace enlace-rol{% if ruta starts with '/organizador/salas' %} activo{% endif %}" title="Mis salas">
               Mis salas
-            </a>
-          </li>
-        {% endif %}
-
-        {# Acceso directo en barra para Administrador: sólo visible para administradores #}
-        {% if usr and usr.alcanza('administrador') %}
-          <li class="nav-item-rol">
-            <a href="/cuenta/admin" class="nav-enlace enlace-rol{% if ruta starts with '/cuenta/admin' %} activo{% endif %}" title="Panel de Administración">
-              <span class="icono-rol" aria-hidden="true">⚙️</span> Administración
             </a>
           </li>
         {% endif %}
@@ -130,8 +121,8 @@
               <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
             </a>
 
-            {# Sección condicional de opciones exclusivas para el rol de Organizador #}
-            {% if usr.rol.value == 'organizador' %}
+            {# Sección condicional de opciones del Organizador, también para los roles que lo alcanzan #}
+            {% if usr.alcanza('organizador') %}
               <div class="menu-separador" role="separator"></div>
               <div class="menu-seccion-titulo">Panel del Organizador</div>
               <a href="/organizador/salas" class="menu-item" role="menuitem">
@@ -139,18 +130,6 @@
               </a>
               <a href="/organizador/salas/nueva" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">➕</span> Publicar una sala
-              </a>
-            {% endif %}
-
-            {# Sección condicional de opciones exclusivas para el rol de Administrador #}
-            {% if usr.alcanza('administrador') %}
-              <div class="menu-separador" role="separator"></div>
-              <div class="menu-seccion-titulo">Administración</div>
-              <a href="/cuenta/admin" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">⚙️</span> Panel de administración
-              </a>
-              <a href="/cuenta/admin/usuarios" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
               </a>
             {% endif %}
 
