@@ -37,6 +37,7 @@ frontend-indiecinema/
 │   │   ├── cartelera.html.twig # Cartelera pública con filtros GET, paginado y descarga en CSV
 │   │   ├── ficha_funcion.html.twig # Ficha de una función: obras, sala, fecha, precio y estado
 │   │   ├── mis_salas.html.twig # Gestión de salas del organizador
+│   │   ├── sala.html.twig      # Ficha pública de una sala con sus próximas funciones
 │   │   └── salas.html.twig     # Catálogo público de salas indie habilitadas, con buscador
 │   └── funciones/              # Plantillas específicas del subsistema funciones
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
@@ -201,6 +202,7 @@ Componente reutilizable para la Cartelera y el Home que reproduce exactamente lo
 
 Componente para mostrar salas de cine independiente tanto en el listado público (`/salas`) como en la pantalla de gestión del organizador («Mis salas», `/organizador/salas`).
 - Fotografía del espacio (o marcador gráfico si aún no tiene imagen).
+- La fotografía enlaza a la ficha de la sala (`/salas/{id}`); en el listado público, también el botón `Ver sala`.
 - Nombre de la sala, localidad (📍) y capacidad en butacas (💺).
 - Modo editable: muestra el estado (`PUBLICADA` o `ESPERA HABILITACIÓN`) y el botón `Editar` hacia `/organizador/salas/{id}/editar`.
 
@@ -226,4 +228,5 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 - **`plantillas/programacion/ficha_funcion.html.twig`**: Ficha de una función en `/cartelera/{id}`, en cualquier estado: las obras (elegidas, o candidatas si está en votación) con su sinopsis, duración y géneros, la sala con su dirección y el enlace a su ficha, la fecha (o «Fecha a confirmar»), el precio, el cupo y el estado, con un aviso si se canceló (IC-86).
 - **`plantillas/programacion/mis_salas.html.twig`**: Vista de «Mis salas» para organizadores en `/organizador/salas` con migas de pan, botón para publicar sala y cuadrícula de tarjetas editables (IC-38).
 - **`plantillas/programacion/salas.html.twig`**: Catálogo público de salas indie habilitadas en `/salas` con cuadrícula de tarjetas de sala (IC-39), y un buscador GET por nombre y localidad que funciona sin JavaScript, con el aviso si la búsqueda no es válida y un mensaje propio sin resultados (IC-91).
+- **`plantillas/programacion/sala.html.twig`**: Ficha pública de una sala en `/salas/{id}`: la foto, la dirección, la capacidad, la descripción y sus próximas funciones con la tarjeta de función, o un mensaje si no tiene. Si todavía no está publicada (la ve sólo su organizador), lo avisa. Las tarjetas de sala enlazan a su ficha (IC-90).
 
