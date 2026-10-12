@@ -21,7 +21,7 @@ frontend-indiecinema/
 ├── README.md                   # Documentación técnica del paquete
 ├── plantillas/                 # Plantillas Twig organizadas por jerarquía
 │   ├── base.html.twig          # Plantilla base compartida (esqueleto HTML, bloques titulo y contenido)
-│   ├── error.html.twig         # Plantilla común para páginas de error (401, 403, 404, 500, etc.)
+│   ├── error.html.twig         # Plantilla común para páginas de error (401, 403, 404, 500, etc.), con «Volver al inicio»
 │   ├── parciales/              # Componentes visuales reutilizables
 │   │   ├── encabezado.html.twig # Barra de navegación, buscador, accesos según rol y menú de usuario
 │   │   ├── pie.html.twig       # Pie de página estructurado según wireframes (Explorar, Participar, etc.)
