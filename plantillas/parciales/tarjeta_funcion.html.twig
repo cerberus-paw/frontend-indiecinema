@@ -16,7 +16,7 @@
       - fecha: (string, opcional) Fecha y hora confirmada (ej: 'Sáb 19 sep · 20:30').
       - cierre_votacion: (string, opcional) Fecha límite cuando está en votación (ej: 'Cierra el 15 sep').
       - franjas_propuestas: (string|int, opcional) Cantidad de opciones cuando está en acuerdo de fecha.
-      - url: (string, opcional) URL de detalle personalizada (por defecto '/programacion/funciones/{id}').
+      - url: (string, opcional) URL de detalle personalizada (por defecto '/cartelera/{id}', la ficha de la función).
   - clase: (string, opcional) Clases CSS adicionales para el contenedor de la tarjeta.
 #}
 {# Resuelve el identificador único de la función para armar URLs y enlaces #}
@@ -43,8 +43,8 @@
   {% set clase_insignia = 'insignia-programada' %}
 {# Cierre del condicional de estados #}
 {% endif %}
-{# Resuelve la URL canónica de destino hacia el detalle de la función #}
-{% set url_detalle = funcion.url ?? ('/funcion/' ~ funcion_id) %}
+{# Resuelve la URL de la ficha de la función, que sirve programación: no va bajo /funcion/, que nginx envía al subsistema funciones #}
+{% set url_detalle = funcion.url ?? ('/cartelera/' ~ funcion_id) %}
 {# Resuelve la representación textual del precio de la función predeterminando 'A la gorra' si no se indicó #}
 {% set texto_precio = funcion.precio ?? 'A la gorra' %}
 {# Contenedor principal de la tarjeta con semántica de artículo independiente #}
