@@ -2675,6 +2675,71 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
+   17. CARTELERA: FILTROS, RESULTADOS Y PAGINADO (IC-80)
+   Componentes de programacion/cartelera.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Formulario GET de filtros sobre la cuadrícula de funciones */
+.filtros-cartelera {
+  /* Cuadrícula de columnas automáticas: cuatro en escritorio, una en móvil */
+  display: grid;
+  /* Cada campo de mínimo 180px */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  /* Separación entre campos */
+  gap: var(--espacio-4);
+  /* Alinea los botones con el pie de los campos */
+  align-items: end;
+  /* Separación con los resultados */
+  margin-bottom: var(--espacio-6);
+}
+
+/* Los campos del filtro no llevan el margen inferior de un formulario largo */
+.filtros-cartelera .grupo-campo {
+  /* Sin margen propio: lo da el gap */
+  margin-bottom: 0;
+}
+
+/* Botones de filtrar y limpiar */
+.filtros-cartelera-acciones {
+  /* En fila */
+  display: flex;
+  /* Separación entre botones */
+  gap: var(--espacio-2);
+}
+
+/* Cantidad de funciones encontradas */
+.cartelera-resultados {
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Tamaño chico */
+  font-size: var(--texto-sm);
+  /* Separación con la cuadrícula */
+  margin: 0 0 var(--espacio-4);
+}
+
+/* Navegación entre páginas de resultados */
+.paginado {
+  /* En fila */
+  display: flex;
+  /* Centrado */
+  justify-content: center;
+  /* Alineación vertical */
+  align-items: center;
+  /* Separación entre elementos */
+  gap: var(--espacio-4);
+  /* Separación con la cuadrícula */
+  margin-top: var(--espacio-8);
+}
+
+/* Página actual */
+.paginado-actual {
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Tamaño chico */
+  font-size: var(--texto-sm);
+}
+
+/* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
    -------------------------------------------------------------------------- */

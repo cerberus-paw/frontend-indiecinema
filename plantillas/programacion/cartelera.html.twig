@@ -1,0 +1,111 @@
+{#
+  Cartelera pública, en /cartelera: las funciones programadas que todavía no pasaron, para
+  cualquiera, con o sin sesión. Los filtros son un formulario GET, así viajan en la URL y
+  funcionan sin JavaScript.
+
+  Variables:
+  - funciones: lista de funciones como las recibe parciales/tarjeta_funcion.html.twig.
+  - filtros: los filtros aplicados (q, localidad, fecha en AAAA-MM-DD y genero); falta el que no se aplicó.
+  - filtrada: si hay algún filtro aplicado.
+  - avisos: lista de textos, uno por cada filtro inválido que se dejó afuera.
+  - localidades: lista de nombres de localidad con funciones, para el filtro.
+  - generos: lista de géneros (id, nombre), para el filtro.
+  - paginado: numero, total_paginas, total_funciones, y las URL anterior y siguiente (null si no hay).
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Cartelera{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Cartelera</h1>
+      <p class="solicitud-bajada">Las próximas funciones de cine independiente en las salas de la comunidad.</p>
+    </div>
+  </header>
+
+  {% set opciones_localidad = [{valor: '', etiqueta: 'Todas'}] %}
+  {% for localidad in localidades %}
+    {% set opciones_localidad = opciones_localidad|merge([{valor: localidad, etiqueta: localidad}]) %}
+  {% endfor %}
+  {% set opciones_genero = [{valor: '', etiqueta: 'Todos'}] %}
+  {% for genero in generos %}
+    {% set opciones_genero = opciones_genero|merge([{valor: genero.id, etiqueta: genero.nombre}]) %}
+  {% endfor %}
+
+  <form class="filtros-cartelera" action="/cartelera" method="get" role="search" aria-label="Filtrar la cartelera">
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'q',
+      etiqueta: 'Buscar',
+      tipo: 'search',
+      valor: filtros.q ?? '',
+      placeholder: 'Película, director o sala'
+    } only %}
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'localidad',
+      etiqueta: 'Localidad',
+      tipo: 'select',
+      valor: filtros.localidad ?? '',
+      opciones: opciones_localidad
+    } only %}
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'fecha',
+      etiqueta: 'Fecha',
+      tipo: 'date',
+      valor: filtros.fecha ?? ''
+    } only %}
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'genero',
+      etiqueta: 'Género',
+      tipo: 'select',
+      valor: filtros.genero ?? '',
+      opciones: opciones_genero
+    } only %}
+    <div class="filtros-cartelera-acciones">
+      {% include 'parciales/boton.html.twig' with { texto: 'Filtrar', variante: 'primario' } only %}
+      {% if filtrada %}
+        {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/cartelera', variante: 'fantasma' } only %}
+      {% endif %}
+    </div>
+  </form>
+
+  {% if avisos is not empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      titulo: 'Algunos filtros no se aplicaron',
+      detalles: avisos
+    } only %}
+  {% endif %}
+
+  {% if funciones is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: filtrada
+        ? 'No hay funciones que coincidan con la búsqueda. Probá con otros filtros.'
+        : 'Todavía no hay funciones programadas.'
+    } only %}
+  {% else %}
+    <p class="cartelera-resultados" role="status">
+      {{ paginado.total_funciones }} {{ paginado.total_funciones == 1 ? 'función' : 'funciones' }}
+    </p>
+    <div class="cuadricula-funciones">
+      {% for funcion in funciones %}
+        {% include 'parciales/tarjeta_funcion.html.twig' with { funcion: funcion } only %}
+      {% endfor %}
+    </div>
+
+    {% if paginado.total_paginas > 1 %}
+      <nav class="paginado" aria-label="Páginas de la cartelera">
+        {% if paginado.anterior %}
+          <a href="{{ paginado.anterior }}" class="boton boton-secundario boton-chico" rel="prev">Anterior</a>
+        {% endif %}
+        <span class="paginado-actual" aria-current="page">Página {{ paginado.numero }} de {{ paginado.total_paginas }}</span>
+        {% if paginado.siguiente %}
+          <a href="{{ paginado.siguiente }}" class="boton boton-secundario boton-chico" rel="next">Siguiente</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
