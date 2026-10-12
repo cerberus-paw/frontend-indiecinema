@@ -2,20 +2,28 @@
   Tarjeta de una sala indie, para el listado público y para «Mis salas» del organizador.
   Usa las clases de la tarjeta de función para que las dos se vean iguales en las cuadrículas.
 
+  La foto enlaza a la ficha de la sala (/salas/{id}), con sus próximas funciones, y en el listado
+  público también el botón «Ver sala». En «Mis salas» la foto también: el organizador ve la suya
+  aunque todavía no esté publicada.
+
   Parámetros:
   - sala: id, nombre, localidad, capacidad, imagen (la URL de la foto, o null) y habilitada.
-  - editable: (bool, opcional) en «Mis salas»: muestra si está publicada y el botón para editarla.
+  - editable: (bool, opcional) en «Mis salas»: muestra si está publicada y el botón para editarla;
+    si no, el botón lleva a la ficha.
 #}
 <article class="tarjeta-funcion tarjeta-sala">
   <div class="tarjeta-funcion-afiche">
-    {% if sala.imagen ?? false %}
-      <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="tarjeta-funcion-imagen" loading="lazy">
-    {% else %}
-      <div class="tarjeta-funcion-afiche-placeholder">
-        <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
-        <span class="afiche-placeholder-texto">SALA</span>
-      </div>
-    {% endif %}
+    {# Como en la tarjeta de función: el enlace de la foto no se anuncia ni se tabula, porque el botón lleva al mismo lugar. #}
+    <a href="/salas/{{ sala.id }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">
+      {% if sala.imagen ?? false %}
+        <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="tarjeta-funcion-imagen" loading="lazy">
+      {% else %}
+        <div class="tarjeta-funcion-afiche-placeholder">
+          <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+          <span class="afiche-placeholder-texto">SALA</span>
+        </div>
+      {% endif %}
+    </a>
   </div>
   <div class="tarjeta-funcion-cuerpo">
     {% if editable ?? false %}
@@ -38,8 +46,8 @@
         <span class="meta-texto">{{ sala.capacidad ?? '—' }} butacas</span>
       </p>
     </div>
-    {% if editable ?? false %}
-      <div class="tarjeta-funcion-acciones">
+    <div class="tarjeta-funcion-acciones">
+      {% if editable ?? false %}
         {% include 'parciales/boton.html.twig' with {
           texto: 'Editar',
           url: '/organizador/salas/' ~ sala.id ~ '/editar',
@@ -47,7 +55,15 @@
           tamano: 'chico',
           bloque: true
         } %}
-      </div>
-    {% endif %}
+      {% else %}
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Ver sala',
+          url: '/salas/' ~ sala.id,
+          variante: 'secundario',
+          tamano: 'chico',
+          bloque: true
+        } %}
+      {% endif %}
+    </div>
   </div>
 </article>

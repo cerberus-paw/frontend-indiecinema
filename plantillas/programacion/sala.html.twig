@@ -1,0 +1,78 @@
+{#
+  Ficha pública de una sala, en /salas/{id}: su foto, la dirección, la capacidad, la descripción y
+  sus próximas funciones, cada una enlazada a su ficha. Una sala sin habilitar sólo la ve su
+  organizador, con el aviso de que todavía no está publicada.
+
+  Encabezados, sin saltar niveles: h1 la sala; h2 las próximas funciones; h3 cada función, en su
+  tarjeta.
+
+  Variables:
+  - sala: id, nombre, descripcion, direccion, localidad, capacidad, imagen (la URL de la foto, o
+    null) y habilitada.
+  - funciones: lista de funciones como las recibe parciales/tarjeta_funcion.html.twig, por fecha.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}{{ sala.nombre }}{% endblock %}
+
+{% block contenido %}
+<div class="contenedor ficha-sala">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/salas" class="enlace-miga">Salas</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">{{ sala.nombre }}</li>
+    </ol>
+  </nav>
+
+  {% if not sala.habilitada %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      titulo: 'Todavía no está publicada',
+      mensaje: 'Sólo la ves vos. Aparece en el listado de salas y sus funciones en la cartelera cuando un administrador la habilite.'
+    } only %}
+  {% endif %}
+
+  <header class="ficha-sala-cabecera">
+    <div class="ficha-sala-foto">
+      {% if sala.imagen %}
+        <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="ficha-sala-foto-imagen">
+      {% else %}
+        <div class="tarjeta-funcion-afiche-placeholder">
+          <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+          <span class="afiche-placeholder-texto">SALA</span>
+        </div>
+      {% endif %}
+    </div>
+    <div class="ficha-sala-datos">
+      <h1 class="ficha-sala-nombre">{{ sala.nombre }}</h1>
+      <p class="tarjeta-funcion-dato">
+        <span class="meta-icono" aria-hidden="true">📍</span>
+        <span class="meta-texto">{{ sala.direccion }} · {{ sala.localidad }}</span>
+      </p>
+      <p class="tarjeta-funcion-dato">
+        <span class="meta-icono" aria-hidden="true">💺</span>
+        <span class="meta-texto">{{ sala.capacidad }} butacas</span>
+      </p>
+      {# La descripción puede tener saltos de línea: nl2br escapa el texto antes de agregar los <br>. #}
+      <p class="ficha-sala-descripcion">{{ sala.descripcion|nl2br }}</p>
+    </div>
+  </header>
+
+  <section class="ficha-sala-funciones" aria-labelledby="ficha-sala-funciones-titulo">
+    <h2 id="ficha-sala-funciones-titulo" class="ficha-sala-funciones-titulo">Próximas funciones</h2>
+    {% if funciones is empty %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'info',
+        mensaje: 'Esta sala no tiene funciones programadas por ahora.'
+      } only %}
+    {% else %}
+      <div class="cuadricula-funciones">
+        {% for funcion in funciones %}
+          {% include 'parciales/tarjeta_funcion.html.twig' with { funcion: funcion } only %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

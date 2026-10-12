@@ -2713,6 +2713,119 @@ dd {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 }
 
+/* --------------------------------------------------------------------------
+   19. FICHA DE LA SALA: FOTO, DATOS Y PRÓXIMAS FUNCIONES (IC-90)
+   Componentes de programacion/sala.html.twig
+   -------------------------------------------------------------------------- */
+
+/* La foto y los datos de la sala, lado a lado en escritorio */
+.ficha-sala-cabecera {
+  /* Cuadrícula de dos columnas: la foto un poco más ancha */
+  display: grid;
+  /* Foto y datos */
+  grid-template-columns: 3fr 2fr;
+  /* Separación entre las columnas */
+  gap: var(--espacio-8);
+  /* Los datos arrancan arriba, a la altura de la foto */
+  align-items: start;
+  /* Separación con las funciones */
+  margin: var(--espacio-6) 0 var(--espacio-10);
+}
+
+/* Marco de la foto, apaisado como una pantalla */
+.ficha-sala-foto {
+  /* Proporción de pantalla */
+  aspect-ratio: 16 / 9;
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-lg);
+  /* La imagen no se sale de las esquinas */
+  overflow: hidden;
+  /* Fondo mientras carga o sin foto */
+  background-color: var(--color-superficie);
+  /* Borde tenue */
+  border: 1px solid var(--color-borde);
+}
+
+/* La foto ocupa todo el marco sin deformarse */
+.ficha-sala-foto-imagen {
+  /* Ancho completo */
+  width: 100%;
+  /* Alto completo */
+  height: 100%;
+  /* Recorta en lugar de deformar */
+  object-fit: cover;
+  /* Sin el espacio de línea de una imagen en línea */
+  display: block;
+}
+
+/* Nombre, dirección, capacidad y descripción, en columna */
+.ficha-sala-datos {
+  /* En columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación entre los datos */
+  gap: var(--espacio-3);
+  /* Evita desborde con nombres largos */
+  min-width: 0;
+}
+
+/* Nombre de la sala */
+.ficha-sala-nombre {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño destacado */
+  font-size: var(--texto-3xl);
+  /* Interlineado compacto */
+  line-height: 1.15;
+  /* Sin margen propio: lo da el gap */
+  margin: 0;
+  /* Corta palabras muy largas */
+  overflow-wrap: anywhere;
+}
+
+/* Descripción de la sala */
+.ficha-sala-descripcion {
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Interlineado cómodo para leer */
+  line-height: 1.6;
+  /* Separación con los datos de arriba */
+  margin: var(--espacio-2) 0 0;
+}
+
+/* Título de la sección de funciones */
+.ficha-sala-funciones-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño de sección */
+  font-size: var(--texto-2xl);
+  /* Separación con la cuadrícula */
+  margin: 0 0 var(--espacio-6);
+}
+
+/* En tablet y celular, la foto arriba y los datos debajo */
+@media (max-width: 768px) {
+  .ficha-sala-cabecera {
+    /* Una sola columna */
+    grid-template-columns: 1fr;
+    /* Menos separación */
+    gap: var(--espacio-5);
+    /* Menos margen con las funciones */
+    margin-bottom: var(--espacio-8);
+  }
+
+  .ficha-sala-nombre {
+    /* Título más chico */
+    font-size: var(--texto-2xl);
+  }
+
+  .ficha-sala-funciones-titulo {
+    /* Título de sección más chico */
+    font-size: var(--texto-xl);
+  }
+}
+
 /* Cantidad de funciones encontradas y descarga en CSV */
 .cartelera-resumen {
   /* En fila */
