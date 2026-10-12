@@ -2826,6 +2826,269 @@ dd {
   }
 }
 
+/* --------------------------------------------------------------------------
+   20. PORTADA: PRESENTACIÓN, BUSCADOR, PRÓXIMAS FUNCIONES Y SALAS (IC-93)
+   Componentes de programacion/inicio.html.twig. Medidas del wireframe «Home»
+   de Figma, con los colores y las tipografías de la paleta.
+   -------------------------------------------------------------------------- */
+
+/* La portada empieza pegada al encabezado: sin el relleno superior del main, que cambia con el ancho */
+.contenido-principal:has(> .portada-presentacion:first-child) {
+  /* Sin relleno arriba */
+  padding-top: 0;
+}
+
+/* Franja de presentación con el buscador, de borde a borde de la ventana */
+.portada-presentacion {
+  /* El fondo y la línea inferior se extienden a todo el ancho sin generar scroll horizontal */
+  border-image: linear-gradient(to top, var(--color-borde) 1px, var(--color-fondo-alt) 1px) fill 0 / / 0 100vw;
+  /* 64 px arriba y 56 abajo, como el wireframe */
+  padding: calc(var(--espacio-8) * 2) 0 calc(var(--espacio-12) + var(--espacio-2));
+}
+
+/* Las tres etiquetas sobre el título */
+.portada-antetitulo {
+  /* Tipografía monoespaciada, como las insignias */
+  font-family: var(--fuente-codigo);
+  /* 11-12 px */
+  font-size: var(--texto-xs);
+  /* Mayúsculas */
+  text-transform: uppercase;
+  /* Espaciado entre letras */
+  letter-spacing: 0.08em;
+  /* Texto apagado */
+  color: var(--color-texto-apagado);
+  /* Separación con el título */
+  margin: 0 0 var(--espacio-4);
+}
+
+/* Título de la portada */
+.portada-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* 46 px en escritorio, más chico en pantallas angostas */
+  font-size: clamp(var(--texto-2xl), 4vw, 2.875rem);
+  /* Seminegrita */
+  font-weight: 600;
+  /* Interlineado compacto */
+  line-height: 1.08;
+  /* Apretado, como el wireframe */
+  letter-spacing: -0.025em;
+  /* Corta en tres líneas a 720 px */
+  max-width: 720px;
+  /* Separación con la bajada */
+  margin: 0 0 var(--espacio-4);
+}
+
+/* Bajada debajo del título */
+.portada-bajada {
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* 17-18 px */
+  font-size: var(--texto-md);
+  /* Interlineado cómodo */
+  line-height: 1.5;
+  /* Dos líneas en escritorio */
+  max-width: 560px;
+  /* 28 px hasta el buscador */
+  margin: 0 0 calc(var(--espacio-6) + var(--espacio-1));
+}
+
+/* Buscador: qué (lo que sobra), dónde (240 px) y el botón, en una fila */
+.portada-buscador {
+  /* Cuadrícula de tres columnas */
+  display: grid;
+  /* El texto se lleva el espacio que queda */
+  grid-template-columns: minmax(0, 1fr) 240px auto;
+  /* 12 px entre campos */
+  gap: var(--espacio-3);
+  /* Alinea el botón con el pie de los campos */
+  align-items: end;
+  /* No más ancho que el wireframe */
+  max-width: 900px;
+}
+
+/* Los campos del buscador no llevan el margen de un formulario largo */
+.portada-buscador .grupo-campo {
+  /* Sin margen propio: lo da el gap */
+  margin-bottom: 0;
+}
+
+/* Cantidad de salas y de funciones */
+.portada-resumen {
+  /* En fila */
+  display: flex;
+  /* En pantallas angostas, uno debajo del otro */
+  flex-wrap: wrap;
+  /* 28 px entre los dos datos */
+  gap: var(--espacio-2) calc(var(--espacio-6) + var(--espacio-1));
+  /* Texto apagado */
+  color: var(--color-texto-apagado);
+  /* 13-14 px */
+  font-size: var(--texto-sm);
+  /* 36 px desde el buscador (28 + 8) */
+  margin: calc(var(--espacio-8) + var(--espacio-1)) 0 0;
+}
+
+/* Cada sección de la portada, a 64 px de la anterior */
+.portada-seccion {
+  /* Separación entre secciones */
+  margin: calc(var(--espacio-8) * 2) 0;
+}
+
+/* La primera, a 56 px de la presentación */
+.portada-seccion:first-child {
+  /* Un poco menos arriba */
+  margin-top: calc(var(--espacio-12) + var(--espacio-2));
+}
+
+/* Título de la sección a la izquierda y el enlace a su listado a la derecha */
+.portada-seccion-cabecera {
+  /* En fila */
+  display: flex;
+  /* En los extremos */
+  justify-content: space-between;
+  /* Alineados por abajo */
+  align-items: flex-end;
+  /* En pantallas angostas, el enlace baja */
+  flex-wrap: wrap;
+  /* Separación */
+  gap: var(--espacio-2) var(--espacio-4);
+  /* 20 px hasta las tarjetas */
+  margin-bottom: var(--espacio-5);
+}
+
+/* Título de sección */
+.portada-seccion-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* 22-24 px */
+  font-size: var(--texto-xl);
+  /* Seminegrita */
+  font-weight: 600;
+  /* Apenas apretado */
+  letter-spacing: -0.01em;
+  /* Sin margen propio */
+  margin: 0;
+}
+
+/* Enlace al listado completo, subrayado con un borde fino */
+.portada-seccion-enlace {
+  /* El color del texto, no el de los enlaces */
+  color: var(--color-texto);
+  /* 14 px */
+  font-size: var(--texto-sm);
+  /* Sin el subrayado del navegador */
+  text-decoration: none;
+  /* Borde inferior como subrayado */
+  border-bottom: 1px solid var(--color-borde-medio);
+  /* Separación del borde */
+  padding-bottom: 1px;
+}
+
+/* Al pasar, el borde toma el color de los enlaces */
+.portada-seccion-enlace:hover {
+  /* Color primario */
+  border-bottom-color: var(--color-primario);
+}
+
+/* Las cuatro próximas funciones en una fila */
+.portada-funciones {
+  /* Cuatro columnas iguales en escritorio */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* En tablet, dos por fila */
+@media (max-width: 1024px) {
+  .portada-funciones {
+    /* Dos columnas */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Las tres salas en una fila */
+.portada-salas {
+  /* Cuadrícula */
+  display: grid;
+  /* Tres columnas en escritorio; baja a dos y a una cuando no entran */
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  /* 24 px entre tarjetas */
+  gap: var(--espacio-6);
+}
+
+/* Tarjeta de sala compacta: la foto cuadrada a la izquierda y los datos a la derecha */
+.tarjeta-sala-compacta {
+  /* En fila */
+  flex-direction: row;
+  /* 16 px entre la foto y los datos */
+  gap: var(--espacio-4);
+  /* 16 px de relleno */
+  padding: var(--espacio-4);
+}
+
+/* La foto, de 120 x 120 */
+.tarjeta-sala-compacta .tarjeta-funcion-afiche {
+  /* Ancho fijo */
+  width: 120px;
+  /* No se achica */
+  flex: none;
+  /* Cuadrada */
+  aspect-ratio: 1;
+  /* Esquinas como las del resto */
+  border-radius: var(--radio-sm);
+}
+
+/* Los datos sin el relleno de la tarjeta vertical */
+.tarjeta-sala-compacta .tarjeta-funcion-cuerpo {
+  /* Sin relleno: lo da la tarjeta */
+  padding: 0;
+  /* 8 px entre el nombre, los datos y el botón */
+  gap: var(--espacio-2);
+  /* Ocupa el resto */
+  min-width: 0;
+}
+
+/* El nombre un poco más chico que en la tarjeta vertical */
+.tarjeta-sala-compacta .tarjeta-funcion-titulo {
+  /* 16 px */
+  font-size: var(--texto-base);
+}
+
+/* El botón con su ancho, debajo de los datos */
+.tarjeta-sala-compacta .tarjeta-funcion-acciones {
+  /* Sin el margen automático que lo empuja al pie */
+  margin-top: var(--espacio-1);
+}
+
+/* En tablet y celular, el buscador en una columna */
+@media (max-width: 768px) {
+  .portada-presentacion {
+    /* Menos aire */
+    padding: var(--espacio-8) 0;
+  }
+
+  .portada-buscador {
+    /* Una sola columna */
+    grid-template-columns: 1fr;
+  }
+
+  .portada-buscador-accion .boton {
+    /* El botón a todo el ancho */
+    width: 100%;
+  }
+
+  .portada-seccion {
+    /* Menos separación entre secciones */
+    margin: var(--espacio-10) 0;
+  }
+
+  .portada-salas,
+  .portada-funciones {
+    /* Una columna */
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Cantidad de funciones encontradas y descarga en CSV */
 .cartelera-resumen {
   /* En fila */
