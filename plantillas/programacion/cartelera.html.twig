@@ -11,6 +11,7 @@
   - localidades: lista de nombres de localidad con funciones, para el filtro.
   - generos: lista de géneros (id, nombre), para el filtro.
   - paginado: numero, total_paginas, total_funciones, y las URL anterior y siguiente (null si no hay).
+  - csv: la URL de la cartelera en CSV con los mismos filtros, todas las páginas.
 #}
 {% extends 'base.html.twig' %}
 
@@ -86,9 +87,12 @@
         : 'Todavía no hay funciones programadas.'
     } only %}
   {% else %}
-    <p class="cartelera-resultados" role="status">
-      {{ paginado.total_funciones }} {{ paginado.total_funciones == 1 ? 'función' : 'funciones' }}
-    </p>
+    <div class="cartelera-resumen">
+      <p class="cartelera-resultados" role="status">
+        {{ paginado.total_funciones }} {{ paginado.total_funciones == 1 ? 'función' : 'funciones' }}
+      </p>
+      <a href="{{ csv }}" class="boton boton-secundario boton-chico" download>Descargar CSV</a>
+    </div>
     <div class="cuadricula-funciones">
       {% for funcion in funciones %}
         {% include 'parciales/tarjeta_funcion.html.twig' with { funcion: funcion } only %}
