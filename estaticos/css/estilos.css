@@ -2762,6 +2762,535 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
+   18. FICHA DE LA FUNCIÓN: SALA, OBRAS Y METADATOS (IC-87)
+   Componentes de programacion/ficha_funcion.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Contenedor principal de la ficha de la función */
+.ficha-funcion {
+  /* Ancho completo */
+  width: 100%;
+  /* Límite de ancho para legibilidad óptima */
+  max-width: 960px;
+  /* Centrado horizontal */
+  margin: 0 auto;
+}
+
+/* Envoltorio del contenido articulado */
+.ficha-funcion-contenido {
+  /* Disposición flex en columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación entre secciones */
+  gap: var(--espacio-6);
+}
+
+/* Cabecera hero de la función */
+.ficha-funcion-cabecera {
+  /* Fondo oscuro carbón */
+  background-color: var(--color-superficie);
+  /* Borde tenue */
+  border: 1px solid var(--color-superficie-borde);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-lg);
+  /* Relleno interno generoso */
+  padding: var(--espacio-6);
+  /* Sombra sutil de elevación */
+  box-shadow: var(--sombra-sm);
+}
+
+/* Información principal de la cabecera */
+.ficha-funcion-info-principal {
+  /* Disposición flex */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación interna */
+  gap: var(--espacio-3);
+}
+
+/* Contenedor para alinear insignia de estado */
+.ficha-insignia-contenedor {
+  /* Disposición flex */
+  display: flex;
+  /* Alineación al inicio */
+  align-items: center;
+}
+
+/* El aviso de cancelada, con el parcial de mensaje, separado del título */
+.ficha-alerta-cancelada {
+  /* Margen inferior */
+  margin-bottom: var(--espacio-2);
+}
+
+/* Título principal de la función en la ficha (h1) */
+.ficha-funcion-titulo {
+  /* Tipografía de marca IndieCinema */
+  font-family: var(--fuente-titulos);
+  /* Tamaño destacado 36px */
+  font-size: var(--texto-3xl);
+  /* Peso negrita */
+  font-weight: 700;
+  /* Color blanco brillante */
+  color: var(--color-texto-brillante);
+  /* Sin margen por defecto */
+  margin: 0;
+  /* Altura de línea armónica */
+  line-height: 1.2;
+  /* Rompe palabras largas para evitar scroll horizontal en móvil */
+  word-break: break-word;
+}
+
+/* Tira de metadatos de la función (fecha, precio, cupo) */
+.ficha-funcion-metadatos {
+  /* Disposición flex */
+  display: flex;
+  /* Envoltorio responsivo */
+  flex-wrap: wrap;
+  /* Separación */
+  gap: var(--espacio-3);
+  /* Margen superior */
+  margin-top: var(--espacio-2);
+}
+
+/* Chip individual de metadato */
+.ficha-metadato-chip {
+  /* Disposición en línea flexible */
+  display: inline-flex;
+  /* Alineación centrada */
+  align-items: center;
+  /* Separación */
+  gap: var(--espacio-2);
+  /* Fondo elevado */
+  background-color: var(--color-superficie-elevada);
+  /* Borde tenue */
+  border: 1px solid var(--color-superficie-borde);
+  /* Relleno interno */
+  padding: var(--espacio-2) var(--espacio-4);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-md);
+  /* Tamaño chico */
+  font-size: var(--texto-sm);
+  /* Color texto */
+  color: var(--color-texto);
+  /* Tipografía */
+  font-family: var(--fuente-cuerpo);
+}
+
+/* Icono dentro del chip de metadato */
+.ficha-metadato-icono {
+  /* Tamaño de icono */
+  font-size: 1.1rem;
+  /* Altura de línea compacta */
+  line-height: 1;
+}
+
+/* Texto del chip de metadato */
+.ficha-metadato-texto {
+  /* Peso seminegrita */
+  font-weight: 500;
+}
+
+/* Sección estructural dentro de la ficha */
+.ficha-seccion {
+  /* Ancho 100% */
+  width: 100%;
+}
+
+/* Tarjeta informativa de la sala indie */
+.ficha-sala-tarjeta {
+  /* Fondo superficie */
+  background-color: var(--color-superficie);
+  /* Borde tenue */
+  border: 1px solid var(--color-superficie-borde);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-lg);
+  /* Relleno generoso */
+  padding: var(--espacio-6);
+  /* Disposición flex */
+  display: flex;
+  /* Separación */
+  gap: var(--espacio-6);
+  /* Alineación superior */
+  align-items: flex-start;
+  /* Distribución a los extremos */
+  justify-content: space-between;
+  /* Sombra sutil */
+  box-shadow: var(--sombra-sm);
+}
+
+/* Columna de detalles textuales de la sala */
+.ficha-sala-detalles {
+  /* Ocupa el espacio restante */
+  flex: 1;
+  /* Permite que los hijos no desborden */
+  min-width: 0;
+  /* Disposición flex en columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación */
+  gap: var(--espacio-2);
+}
+
+/* Encabezado h2 de la sala */
+.ficha-sala-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño 24px */
+  font-size: var(--texto-xl);
+  /* Peso negrita */
+  font-weight: 700;
+  /* Color blanco brillante */
+  color: var(--color-texto-brillante);
+  /* Margen cero */
+  margin: 0;
+  /* Altura de línea */
+  line-height: 1.3;
+}
+
+/* Enlace hacia el detalle de la sala indie */
+.ficha-sala-enlace {
+  /* Color ámbar de marca */
+  color: var(--color-primario);
+  /* Sin subrayado continuo */
+  text-decoration: none;
+  /* Subrayado punteado elegante */
+  border-bottom: 1px dashed var(--color-primario-suave);
+  /* Transición suave */
+  transition: color var(--transicion-base), border-color var(--transicion-base);
+}
+
+/* Hover sobre el enlace de la sala */
+.ficha-sala-enlace:hover {
+  /* Ámbar encendido */
+  color: var(--color-primario-hover);
+  /* Subrayado sólido al posar ratón */
+  border-bottom-color: var(--color-primario-hover);
+}
+
+/* Ubicación y dirección de la sala */
+.ficha-sala-ubicacion {
+  /* Disposición flex */
+  display: flex;
+  /* Alineación baseline */
+  align-items: baseline;
+  /* Separación */
+  gap: var(--espacio-2);
+  /* Tamaño de fuente */
+  font-size: var(--texto-base);
+  /* Color crema secundario */
+  color: var(--color-texto-secundario);
+  /* Margen cero */
+  margin: 0;
+}
+
+/* Iconos temáticos de la sala */
+.ficha-sala-icono {
+  /* Opacidad sutil */
+  opacity: 0.85;
+  /* Altura compacta */
+  line-height: 1;
+}
+
+/* Reseña o descripción del espacio independiente */
+.ficha-sala-descripcion {
+  /* Tamaño de texto */
+  font-size: var(--texto-sm);
+  /* Color de lectura */
+  color: var(--color-texto-secundario);
+  /* Altura de línea relajada */
+  line-height: 1.55;
+  /* Margen vertical */
+  margin: var(--espacio-1) 0;
+}
+
+/* Butacas y capacidad de espectadores */
+.ficha-sala-capacidad {
+  /* Disposición flex */
+  display: flex;
+  /* Alineación baseline */
+  align-items: baseline;
+  /* Separación */
+  gap: var(--espacio-2);
+  /* Tamaño chico */
+  font-size: var(--texto-sm);
+  /* Color atenuado */
+  color: var(--color-texto-apagado);
+  /* Margen cero */
+  margin: 0;
+}
+
+/* Contenedor de acciones de la sala */
+.ficha-sala-acciones {
+  /* Margen superior */
+  margin-top: var(--espacio-3);
+}
+
+/* Columna fotográfica de la sala */
+.ficha-sala-imagen-columna {
+  /* Ancho fijo en escritorio */
+  width: 260px;
+  /* No se comprime */
+  flex-shrink: 0;
+}
+
+/* Fotografía de la sala */
+.ficha-sala-imagen {
+  /* Ancho 100% */
+  width: 100%;
+  /* Altura controlada */
+  height: 180px;
+  /* Recorte armónico */
+  object-fit: cover;
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-md);
+  /* Borde tenue */
+  border: 1px solid var(--color-superficie-borde);
+  /* Bloque */
+  display: block;
+}
+
+/* Cabecera de la sección de obras */
+.ficha-obras-cabecera {
+  /* Margen inferior */
+  margin-bottom: var(--espacio-4);
+  /* Relleno inferior */
+  padding-bottom: var(--espacio-2);
+  /* Línea divisoria sutil */
+  border-bottom: 1px solid var(--color-superficie-borde);
+}
+
+/* Rótulo de estado de las obras (programadas o candidatas en votación) */
+.ficha-obras-etiqueta {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño chico */
+  font-size: var(--texto-xs);
+  /* Mayúsculas */
+  text-transform: uppercase;
+  /* Espaciado de letras */
+  letter-spacing: 0.12em;
+  /* Peso negrita */
+  font-weight: 700;
+  /* Color ámbar primario */
+  color: var(--color-primario);
+  /* Margen cero */
+  margin: 0;
+}
+
+/* Lista vertical de tarjetas de obras */
+.ficha-obras-lista {
+  /* Disposición flex en columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación entre películas */
+  gap: var(--espacio-6);
+}
+
+/* Tarjeta individual de una película o cortometraje */
+.ficha-obra-tarjeta {
+  /* Fondo superficie */
+  background-color: var(--color-superficie);
+  /* Borde tenue */
+  border: 1px solid var(--color-superficie-borde);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-lg);
+  /* Relleno interno */
+  padding: var(--espacio-6);
+  /* Disposición flex */
+  display: flex;
+  /* Separación entre afiche y datos */
+  gap: var(--espacio-6);
+  /* Alineación superior */
+  align-items: flex-start;
+  /* Sombra sutil */
+  box-shadow: var(--sombra-sm);
+}
+
+/* Columna para el afiche cinematográfico */
+.ficha-obra-afiche-columna {
+  /* Ancho fijo de afiche */
+  width: 180px;
+  /* No se comprime */
+  flex-shrink: 0;
+}
+
+/* Marcador visual sustituto del afiche cuando no hay imagen */
+.ficha-obra-afiche-placeholder {
+  /* Ancho 100% */
+  width: 100%;
+  /* Proporción 2:3 */
+  aspect-ratio: 2 / 3;
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-md);
+  /* Fondo degradado suave */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%);
+  /* Borde tenue */
+  border: 1px solid var(--color-superficie-borde);
+  /* Disposición flex */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Centrado vertical */
+  align-items: center;
+  /* Centrado horizontal */
+  justify-content: center;
+  /* Separación */
+  gap: var(--espacio-2);
+}
+
+/* Cuerpo de información textual de la obra */
+.ficha-obra-cuerpo {
+  /* Ocupa el espacio restante */
+  flex: 1;
+  /* Evita desborde horizontal */
+  min-width: 0;
+  /* Disposición flex en columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación interna */
+  gap: var(--espacio-2);
+}
+
+/* Título de la obra individual (h2) */
+.ficha-obra-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño 30px */
+  font-size: var(--texto-2xl);
+  /* Peso negrita */
+  font-weight: 700;
+  /* Color blanco brillante */
+  color: var(--color-texto-brillante);
+  /* Margen cero */
+  margin: 0;
+  /* Altura de línea */
+  line-height: 1.25;
+}
+
+/* Año de realización o estreno */
+.ficha-obra-anio {
+  /* Tamaño normal */
+  font-size: var(--texto-lg);
+  /* Peso normal */
+  font-weight: 400;
+  /* Color atenuado */
+  color: var(--color-texto-apagado);
+  /* Separación del título */
+  margin-left: var(--espacio-1);
+}
+
+/* Fila de metadatos de la obra (dirección, duración, tipo) */
+.ficha-obra-metadatos {
+  /* Disposición flex */
+  display: flex;
+  /* Envoltorio responsivo */
+  flex-wrap: wrap;
+  /* Alineación centrada */
+  align-items: center;
+  /* Separación */
+  gap: var(--espacio-2);
+  /* Tamaño chico */
+  font-size: var(--texto-sm);
+  /* Color secundario */
+  color: var(--color-texto-secundario);
+  /* Margen vertical */
+  margin: var(--espacio-1) 0;
+}
+
+/* Énfasis en valores clave de metadatos */
+.ficha-obra-metadato strong {
+  /* Color blanco de lectura */
+  color: var(--color-texto);
+  /* Peso seminegrita */
+  font-weight: 600;
+}
+
+/* Separador puntual entre metadatos */
+.ficha-obra-separador {
+  /* Color atenuado */
+  color: var(--color-texto-apagado);
+}
+
+/* Contenedor de géneros cinematográficos */
+.ficha-obra-generos {
+  /* Disposición flex */
+  display: flex;
+  /* Envoltorio */
+  flex-wrap: wrap;
+  /* Alineación centrada */
+  align-items: center;
+  /* Separación */
+  gap: var(--espacio-2);
+  /* Margen superior */
+  margin-top: var(--espacio-1);
+}
+
+/* Rótulo de la lista de géneros */
+.ficha-obra-generos-rotulo {
+  /* Tamaño micro */
+  font-size: var(--texto-xs);
+  /* Peso seminegrita */
+  font-weight: 600;
+  /* Mayúsculas */
+  text-transform: uppercase;
+  /* Espaciado */
+  letter-spacing: 0.05em;
+  /* Color atenuado */
+  color: var(--color-texto-apagado);
+}
+
+/* Fila de chips de géneros */
+.ficha-obra-generos-chips {
+  /* Disposición flex */
+  display: flex;
+  /* Envoltorio */
+  flex-wrap: wrap;
+  /* Separación */
+  gap: var(--espacio-1);
+}
+
+/* Chip de género individual */
+.ficha-genero-chip {
+  /* Disposición en bloque de línea */
+  display: inline-block;
+  /* Relleno */
+  padding: 0.15rem 0.55rem;
+  /* Fondo ámbar suave */
+  background-color: var(--color-primario-suave);
+  /* Color ámbar primario */
+  color: var(--color-primario);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-full);
+  /* Tamaño micro */
+  font-size: var(--texto-xs);
+  /* Peso seminegrita */
+  font-weight: 600;
+}
+
+/* Contenedor de la sinopsis argumental */
+.ficha-obra-sinopsis {
+  /* Tamaño de lectura base */
+  font-size: var(--texto-base);
+  /* Color crema de lectura */
+  color: var(--color-texto-secundario);
+  /* Altura de línea confortable */
+  line-height: 1.6;
+  /* Margen superior */
+  margin-top: var(--espacio-2);
+}
+
+/* Párrafo dentro de la sinopsis */
+.ficha-obra-sinopsis p {
+  /* Sin margen propio */
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
    -------------------------------------------------------------------------- */
@@ -2905,6 +3434,67 @@ dd {
     left: auto;
     /* Ancho máximo ajustado al viewport móvil */
     width: calc(100vw - 2rem);
+  }
+  /* Ficha de la función apilada en móvil (IC-87 / E3-04.3) */
+  .ficha-sala-tarjeta {
+    /* Apila detalles e imagen en columna */
+    flex-direction: column-reverse;
+    /* Separación vertical */
+    gap: var(--espacio-4);
+  }
+
+  /* Imagen de la sala al 100% en pantallas medianas */
+  .ficha-sala-imagen-columna {
+    /* Ancho completo */
+    width: 100%;
+  }
+
+  /* Altura proporcional de imagen de sala en móvil */
+  .ficha-sala-imagen {
+    /* Ancho total */
+    width: 100%;
+    /* Altura moderada */
+    height: 200px;
+  }
+
+  /* Tarjeta de obra apilada verticalmente */
+  .ficha-obra-tarjeta {
+    /* Dirección de columna */
+    flex-direction: column;
+    /* Alineación estirada */
+    align-items: stretch;
+    /* Separación vertical */
+    gap: var(--espacio-4);
+  }
+
+  /* Afiche centrado y con ancho controlado en móvil */
+  .ficha-obra-afiche-columna {
+    /* Ancho responsivo */
+    width: 100%;
+    /* Límite para no ocupar toda la pantalla vertical */
+    max-width: 220px;
+    /* Centrado horizontal con margen inferior */
+    margin: 0 auto var(--espacio-2) auto;
+  }
+
+  /* Metadatos de la función apilados en móvil */
+  .ficha-funcion-metadatos {
+    /* Disposición en columna */
+    flex-direction: column;
+    /* Separación */
+    gap: var(--espacio-2);
+  }
+
+  /* Chips de metadatos al 100% de ancho */
+  .ficha-metadato-chip {
+    /* Ancho completo */
+    width: 100%;
+  }
+
+  /* Título de la función ajustado en móvil */
+  .ficha-funcion-titulo {
+    /* Tamaño 30px */
+    font-size: var(--texto-2xl);
   }
 }
 
@@ -3060,6 +3650,43 @@ dd {
   .solicitud-acciones-cabecera .boton {
     /* Ancho completo */
     width: 100%;
+  }
+  /* Ficha de la función en celulares angostos a 360 px (IC-87 / E3-04.3) */
+  .ficha-funcion-cabecera,
+  .ficha-sala-tarjeta,
+  .ficha-obra-tarjeta {
+    /* Relleno compacto */
+    padding: var(--espacio-4);
+  }
+
+  /* Afiche compacto en celulares angostos */
+  .ficha-obra-afiche-columna {
+    /* Máximo 180px */
+    max-width: 180px;
+  }
+
+  /* Título de la función a 360 px */
+  .ficha-funcion-titulo {
+    /* Tamaño adaptado */
+    font-size: 1.75rem;
+  }
+
+  /* Título de obra a 360 px */
+  .ficha-obra-titulo {
+    /* Tamaño 24px */
+    font-size: var(--texto-xl);
+  }
+
+  /* Título de sala a 360 px */
+  .ficha-sala-titulo {
+    /* Tamaño 20px */
+    font-size: var(--texto-lg);
+  }
+
+  /* Metadatos más compactos */
+  .ficha-obra-metadatos {
+    /* Tamaño micro */
+    font-size: var(--texto-xs);
   }
 }
 
