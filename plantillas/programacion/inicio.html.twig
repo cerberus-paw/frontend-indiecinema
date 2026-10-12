@@ -1,0 +1,98 @@
+{#
+  Portada, en /: para cualquiera, con o sin sesión. Un buscador que lleva a la cartelera filtrada
+  (un formulario GET, así funciona sin JavaScript), las próximas funciones y algunas salas, cada
+  sección con el acceso a su listado completo.
+
+  Encabezados, sin saltar niveles: h1 la portada; h2 cada sección; h3 cada tarjeta.
+
+  Variables:
+  - funciones: lista de las próximas funciones de la cartelera, como las recibe
+    parciales/tarjeta_funcion.html.twig.
+  - total_funciones: (int) cuántas funciones hay en toda la cartelera.
+  - salas: lista de salas publicadas, como las recibe parciales/tarjeta_sala.html.twig.
+  - total_salas: (int) cuántas salas publicadas hay.
+  - localidades: lista de nombres de localidad con funciones, para el buscador.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Cine independiente en salas de tu zona{% endblock %}
+
+{% block contenido %}
+{% set opciones_localidad = [{valor: '', etiqueta: 'Todas'}] %}
+{% for localidad in localidades %}
+  {% set opciones_localidad = opciones_localidad|merge([{valor: localidad, etiqueta: localidad}]) %}
+{% endfor %}
+
+<section class="portada-presentacion">
+  <div class="contenedor">
+    <p class="portada-antetitulo">Cine independiente · Salas indie · Programación participativa</p>
+    <h1 class="portada-titulo">El cine que no llega a la cartelera, programado por quienes lo van a ver</h1>
+    <p class="portada-bajada">Votá qué se proyecta, acordá la fecha con el resto del público y reservá tu lugar en salas independientes de tu zona.</p>
+
+    <form class="portada-buscador" action="/cartelera" method="get" role="search" aria-label="Buscar funciones">
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'q',
+        etiqueta: 'Qué querés ver',
+        tipo: 'search',
+        valor: '',
+        placeholder: 'Película, director o sala'
+      } only %}
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'localidad',
+        etiqueta: 'Dónde',
+        tipo: 'select',
+        valor: '',
+        opciones: opciones_localidad
+      } only %}
+      <div class="portada-buscador-accion">
+        {% include 'parciales/boton.html.twig' with { texto: 'Buscar funciones', variante: 'primario' } only %}
+      </div>
+    </form>
+
+    <p class="portada-resumen">
+      <span><span aria-hidden="true">📍</span> {{ total_salas }} {{ total_salas == 1 ? 'sala publicada' : 'salas publicadas' }}</span>
+      <span><span aria-hidden="true">📅</span> {{ total_funciones }} {{ total_funciones == 1 ? 'función' : 'funciones' }} en cartelera</span>
+    </p>
+  </div>
+</section>
+
+<div class="contenedor">
+  <section class="portada-seccion" aria-labelledby="portada-funciones-titulo">
+    <header class="portada-seccion-cabecera">
+      <h2 id="portada-funciones-titulo" class="portada-seccion-titulo">Próximas funciones</h2>
+      <a href="/cartelera" class="portada-seccion-enlace">Ver la cartelera completa</a>
+    </header>
+    {% if funciones is empty %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'info',
+        mensaje: 'Todavía no hay funciones programadas.'
+      } only %}
+    {% else %}
+      <div class="cuadricula-funciones portada-funciones">
+        {% for funcion in funciones %}
+          {% include 'parciales/tarjeta_funcion.html.twig' with { funcion: funcion } only %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="portada-seccion" aria-labelledby="portada-salas-titulo">
+    <header class="portada-seccion-cabecera">
+      <h2 id="portada-salas-titulo" class="portada-seccion-titulo">Salas indie</h2>
+      <a href="/salas" class="portada-seccion-enlace">Ver todas las salas</a>
+    </header>
+    {% if salas is empty %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'info',
+        mensaje: 'Todavía no hay salas publicadas.'
+      } only %}
+    {% else %}
+      <div class="portada-salas">
+        {% for sala in salas %}
+          {% include 'parciales/tarjeta_sala.html.twig' with { sala: sala, compacta: true } only %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

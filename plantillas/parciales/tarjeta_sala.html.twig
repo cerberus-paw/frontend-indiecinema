@@ -10,8 +10,11 @@
   - sala: id, nombre, localidad, capacidad, imagen (la URL de la foto, o null) y habilitada.
   - editable: (bool, opcional) en «Mis salas»: muestra si está publicada y el botón para editarla;
     si no, el botón lleva a la ficha.
+  - compacta: (bool, opcional) horizontal, con la foto chica a la izquierda y la localidad y la
+    capacidad en una línea, como en la portada.
 #}
-<article class="tarjeta-funcion tarjeta-sala">
+{% set es_compacta = compacta ?? false %}
+<article class="tarjeta-funcion tarjeta-sala{% if es_compacta %} tarjeta-sala-compacta{% endif %}">
   <div class="tarjeta-funcion-afiche">
     {# Como en la tarjeta de función: el enlace de la foto no se anuncia ni se tabula, porque el botón lleva al mismo lugar. #}
     <a href="/salas/{{ sala.id }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">
@@ -37,14 +40,20 @@
     {% endif %}
     <h3 class="tarjeta-funcion-titulo">{{ sala.nombre }}</h3>
     <div class="tarjeta-funcion-meta">
-      <p class="tarjeta-funcion-dato">
-        <span class="meta-icono" aria-hidden="true">📍</span>
-        <span class="meta-texto">{{ sala.localidad ?? '' }}</span>
-      </p>
-      <p class="tarjeta-funcion-dato">
-        <span class="meta-icono" aria-hidden="true">💺</span>
-        <span class="meta-texto">{{ sala.capacidad ?? '—' }} butacas</span>
-      </p>
+      {% if es_compacta %}
+        <p class="tarjeta-funcion-dato">
+          <span class="meta-texto">{{ sala.localidad ?? '' }} · {{ sala.capacidad ?? '—' }} butacas</span>
+        </p>
+      {% else %}
+        <p class="tarjeta-funcion-dato">
+          <span class="meta-icono" aria-hidden="true">📍</span>
+          <span class="meta-texto">{{ sala.localidad ?? '' }}</span>
+        </p>
+        <p class="tarjeta-funcion-dato">
+          <span class="meta-icono" aria-hidden="true">💺</span>
+          <span class="meta-texto">{{ sala.capacidad ?? '—' }} butacas</span>
+        </p>
+      {% endif %}
     </div>
     <div class="tarjeta-funcion-acciones">
       {% if editable ?? false %}
@@ -61,7 +70,7 @@
           url: '/salas/' ~ sala.id,
           variante: 'secundario',
           tamano: 'chico',
-          bloque: true
+          bloque: not es_compacta
         } %}
       {% endif %}
     </div>
