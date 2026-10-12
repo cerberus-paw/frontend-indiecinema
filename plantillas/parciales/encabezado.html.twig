@@ -30,13 +30,13 @@
       {# Formulario de búsqueda accesible por GET hacia la cartelera #}
       <form class="buscador-form" action="/cartelera" method="get" role="search">
         {# Etiqueta para lectores de pantalla oculta visualmente mediante la clase .sr-only por motivos estéticos #}
-        <label for="campo-busqueda" class="sr-only">Buscar películas, salas o localidad</label>
+        <label for="campo-busqueda" class="sr-only">Buscar en la cartelera por película, director o sala</label>
         {# Contenedor relativo que posiciona el icono de lupa dentro del campo de texto #}
         <div class="buscador-caja">
           {# Icono decorativo de lupa posicionado de forma absoluta dentro del input #}
           <span class="buscador-icono" aria-hidden="true">🔍</span>
           {# Campo de entrada de tipo search que permite autocompletado y borrado nativo #}
-          <input type="search" id="campo-busqueda" name="q" class="buscador-input" placeholder="Buscar películas, salas o localidad..." aria-label="Buscar películas, salas o localidad" value="{{ filtros.q ?? consulta_busqueda ?? '' }}">
+          <input type="search" id="campo-busqueda" name="q" class="buscador-input" placeholder="Película, director o sala" aria-label="Buscar en la cartelera por película, director o sala" value="{{ filtros.q ?? consulta_busqueda ?? '' }}">
         {# Cierre de la caja del buscador #}
         </div>
       {# Cierre del formulario del buscador #}
@@ -56,12 +56,20 @@
         <li>
           <a href="/salas" class="nav-enlace{% if ruta starts with '/salas' %} activo{% endif %}">Salas</a>
         </li>
+        {# Enlace a la explicación de la dinámica colaborativa, una sección de «Acerca de IndieCinema» #}
+        <li>
+          <a href="/acerca-de#como-funciona" class="nav-enlace">Cómo funciona</a>
+        </li>
+        {# Enlace a «Acerca de IndieCinema»: quiénes somos y cómo funciona el sitio #}
+        <li>
+          <a href="/acerca-de" class="nav-enlace{% if ruta starts with '/acerca-de' %} activo{% endif %}">Acerca de</a>
+        </li>
 
         {# Acceso directo en barra para Organizador: sólo visible para organizadores #}
         {% if usr and usr.rol.value == 'organizador' %}
           <li class="nav-item-rol">
             <a href="/organizador/salas" class="nav-enlace enlace-rol{% if ruta starts with '/organizador/salas' %} activo{% endif %}" title="Mis salas">
-              <span class="icono-rol" aria-hidden="true">🏛️</span> Mis salas
+              Mis salas
             </a>
           </li>
         {% endif %}

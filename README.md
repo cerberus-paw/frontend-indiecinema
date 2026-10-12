@@ -21,7 +21,7 @@ frontend-indiecinema/
 ├── README.md                   # Documentación técnica del paquete
 ├── plantillas/                 # Plantillas Twig organizadas por jerarquía
 │   ├── base.html.twig          # Plantilla base compartida (esqueleto HTML, bloques titulo y contenido)
-│   ├── error.html.twig         # Plantilla común para páginas de error (401, 403, 404, 500, etc.)
+│   ├── error.html.twig         # Plantilla común para páginas de error (401, 403, 404, 500, etc.), con «Volver al inicio»
 │   ├── parciales/              # Componentes visuales reutilizables
 │   │   ├── encabezado.html.twig # Barra de navegación, buscador, accesos según rol y menú de usuario
 │   │   ├── pie.html.twig       # Pie de página estructurado según wireframes (Explorar, Participar, etc.)
@@ -33,9 +33,11 @@ frontend-indiecinema/
 │   ├── cuentas/                # Plantillas del subsistema cuentas
 │   │   └── registro.html.twig  # Formulario de alta de usuario
 │   ├── programacion/           # Plantillas del subsistema programación
+│   │   ├── acerca_de.html.twig # «Acerca de IndieCinema»: quiénes somos y cómo funciona
 │   │   ├── alta_sala.html.twig # Formulario de alta y edición de sala
 │   │   ├── cartelera.html.twig # Cartelera pública con filtros GET, paginado y descarga en CSV
 │   │   ├── ficha_funcion.html.twig # Ficha de una función: obras, sala, fecha, precio y estado
+│   │   ├── inicio.html.twig    # Portada: buscador, próximas funciones y salas
 │   │   ├── mis_salas.html.twig # Gestión de salas del organizador
 │   │   ├── sala.html.twig      # Ficha pública de una sala con sus próximas funciones
 │   │   └── salas.html.twig     # Catálogo público de salas indie habilitadas, con buscador
@@ -87,7 +89,7 @@ Cada plantilla renderizada por el núcleo recibe automáticamente las siguientes
 El encabezado y el pie adaptan sus opciones y enlaces según el estado de la sesión y el rol activo, asegurando que cada rol vea únicamente sus opciones:
 
 - **Sin sesión (Invitado / Visitante):**
-  - Enlaces públicos a Cartelera (`/cartelera`), Salas (`/salas`) y Buscador hacia la cartelera (`action="/cartelera"` con parámetro `q`).
+  - Enlaces a Cartelera (`/cartelera`), Salas (`/salas`), Cómo funciona (`/acerca-de#como-funciona`), Acerca de (`/acerca-de`) y Buscador hacia la cartelera (`action="/cartelera"` con parámetro `q`).
   - Botones de acción: **Ingresar** (`/cuenta/ingresar`) y **Crear cuenta** (`/cuenta/registro`).
   - En el pie: enlaces a explorar, ingresar, crear cuenta y publicar una sala.
 - **Espectador (`rol: espectador`):**
@@ -212,6 +214,7 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 - La fotografía enlaza a la ficha de la sala (`/salas/{id}`); en el listado público, también el botón `Ver sala`.
 - Nombre de la sala, localidad (📍) y capacidad en butacas (💺).
 - Modo editable: muestra el estado (`PUBLICADA` o `ESPERA HABILITACIÓN`) y el botón `Editar` hacia `/organizador/salas/{id}/editar`.
+- Modo compacto (`compacta: true`, en la portada): horizontal, con la foto cuadrada a la izquierda y la localidad y la capacidad en una línea.
 
 ```twig
 {% include 'parciales/tarjeta_sala.html.twig' with {
@@ -230,9 +233,11 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 ### 7.6 Pantallas completas que implementan los parciales
 
 - **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y casilla de términos sin tildar por defecto (`marcado: valores.terminos ?? false`), mensajes de error y botón principal.
+- **`plantillas/programacion/acerca_de.html.twig`**: «Acerca de IndieCinema» en `/acerca-de`, estática: quiénes somos, los cuatro pasos de cómo funciona una función (como la sección del wireframe de la portada) y quién participa. Las secciones `#quienes-somos` y `#como-funciona` son las que enlazan el encabezado y el pie (IC-95).
 - **`plantillas/programacion/alta_sala.html.twig`**: Formulario de alta y edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía y parámetros de proyección.
 - **`plantillas/programacion/cartelera.html.twig`**: Cartelera pública en `/cartelera` con un formulario GET de filtros (búsqueda, localidad, fecha y género) que funciona sin JavaScript, avisos de los filtros inválidos, mensaje propio sin resultados, cuadrícula de tarjetas de función, paginado anterior/siguiente (IC-80) y un enlace para descargar en CSV la cartelera con los mismos filtros (IC-83).
 - **`plantillas/programacion/ficha_funcion.html.twig`**: Ficha de una función en `/cartelera/{id}`, en cualquier estado: las obras (elegidas, o candidatas si está en votación) con su sinopsis, duración y géneros, la sala con su dirección y el enlace a su ficha, la fecha (o «Fecha a confirmar»), el precio, el cupo y el estado, con un aviso si se canceló (IC-86). Migas de pan, la sala y cada obra en tarjetas que en celular pasan a una columna, y encabezados sin saltos de nivel: `h1` la función, `h2` la sala y cada obra (IC-87).
+- **`plantillas/programacion/inicio.html.twig`**: Portada en `/`: la presentación con un buscador GET (qué y dónde) que lleva a la cartelera filtrada, la cantidad de salas publicadas y de funciones en cartelera, las próximas cuatro funciones y tres salas, cada sección con el enlace a su listado y un mensaje propio si está vacía (IC-93).
 - **`plantillas/programacion/mis_salas.html.twig`**: Vista de «Mis salas» para organizadores en `/organizador/salas` con migas de pan, botón para publicar sala y cuadrícula de tarjetas editables (IC-38).
 - **`plantillas/programacion/salas.html.twig`**: Catálogo público de salas indie habilitadas en `/salas` con cuadrícula de tarjetas de sala (IC-39), y un buscador GET por nombre y localidad que funciona sin JavaScript, con el aviso si la búsqueda no es válida y un mensaje propio sin resultados (IC-91).
 - **`plantillas/programacion/sala.html.twig`**: Ficha pública de una sala en `/salas/{id}`: la foto, la dirección, la capacidad, la descripción y sus próximas funciones con la tarjeta de función, o un mensaje si no tiene. Si todavía no está publicada (la ve sólo su organizador), lo avisa. Las tarjetas de sala enlazan a su ficha (IC-90).
