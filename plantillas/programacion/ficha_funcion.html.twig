@@ -3,6 +3,12 @@
   dirección, la fecha, el precio y el estado. Se ve en cualquier estado: en votación, en acuerdo
   de fecha, programada, finalizada o cancelada.
 
+  Encabezados, sin saltar niveles: h1 la función; h2 la sala y cada obra. El rótulo de las obras
+  («La obra», «Obras candidatas»…) no es un encabezado: nombra la sección con aria-labelledby.
+
+  En celular (hasta 768 px) la sala y cada obra pasan a una columna, y la fecha y el precio se
+  apilan.
+
   Variables:
   - funcion:
       - titulo: (string) las obras de la función, juntas con « + ».
@@ -16,7 +22,8 @@
       - sala: url (de su ficha), nombre, descripcion, direccion, localidad, capacidad e imagen
         (la URL de la foto, o null).
       - obras: lista con titulo, sinopsis, anio, director, duracion (en minutos) y generos (lista
-        de nombres).
+        de nombres). Todavía sin afiche, porque no hay una ruta que lo sirva: se muestra el
+        marcador.
 #}
 {% extends 'base.html.twig' %}
 
@@ -29,62 +36,122 @@
   programada: 'insignia-programada'
 } %}
 <div class="contenedor ficha-funcion">
+  <nav class="navegacion-migas" aria-label="Ruta de navegación">
+    <ol class="lista-migas">
+      <li><a href="/cartelera" class="enlace-miga">Cartelera</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="miga-activa" aria-current="page">{{ funcion.titulo }}</li>
+    </ol>
+  </nav>
+
   <article class="ficha-funcion-contenido">
     <header class="ficha-funcion-cabecera">
-      {% if funcion.es_cancelada %}
-        {% include 'parciales/mensaje.html.twig' with {
-          tipo: 'error',
-          titulo: 'Función cancelada',
-          mensaje: 'Esta función fue cancelada.'
-        } only %}
-      {% else %}
-        <span class="insignia-estado {{ clases_estado[funcion.estado] ?? '' }}">{{ funcion.estado_etiqueta|upper }}</span>
-      {% endif %}
+      <div class="ficha-funcion-info-principal">
+        {% if funcion.es_cancelada %}
+          {% include 'parciales/mensaje.html.twig' with {
+            tipo: 'error',
+            titulo: 'Función cancelada',
+            mensaje: 'Esta función fue cancelada.',
+            clase: 'ficha-alerta-cancelada'
+          } only %}
+        {% else %}
+          <div class="ficha-insignia-contenedor">
+            <span class="insignia-estado {{ clases_estado[funcion.estado] ?? '' }}">{{ funcion.estado_etiqueta|upper }}</span>
+          </div>
+        {% endif %}
 
-      <h1 class="ficha-funcion-titulo">{{ funcion.titulo }}</h1>
+        <h1 class="ficha-funcion-titulo">{{ funcion.titulo }}</h1>
 
-      <div class="ficha-funcion-metadatos">
-        <p class="ficha-funcion-fecha">
-          <span aria-hidden="true">📅</span> {{ funcion.fecha ?? 'Fecha a confirmar' }}
-        </p>
-        <p class="ficha-funcion-precio">
-          <span aria-hidden="true">🎟️</span> {{ funcion.precio }} · {{ funcion.cupo }} lugares
-        </p>
+        <div class="ficha-funcion-metadatos">
+          <div class="ficha-metadato-chip ficha-metadato-fecha">
+            <span class="ficha-metadato-icono" aria-hidden="true">📅</span>
+            <span class="ficha-metadato-texto">{{ funcion.fecha ?? 'Fecha a confirmar' }}</span>
+          </div>
+          <div class="ficha-metadato-chip ficha-metadato-precio">
+            <span class="ficha-metadato-icono" aria-hidden="true">🎟️</span>
+            <span class="ficha-metadato-texto">{{ funcion.precio }} · {{ funcion.cupo }} lugares</span>
+          </div>
+        </div>
       </div>
     </header>
 
-    <section class="ficha-funcion-sala" aria-labelledby="ficha-funcion-sala-titulo">
-      <h2 id="ficha-funcion-sala-titulo">Sala: <a href="{{ funcion.sala.url }}">{{ funcion.sala.nombre }}</a></h2>
-      {% if funcion.sala.imagen %}
-        <img src="{{ funcion.sala.imagen }}" alt="Foto de {{ funcion.sala.nombre }}" class="ficha-funcion-sala-imagen" loading="lazy">
-      {% endif %}
-      <p class="ficha-funcion-sala-ubicacion">
-        <span aria-hidden="true">📍</span> {{ funcion.sala.direccion }} · {{ funcion.sala.localidad }}
-      </p>
-      <p>{{ funcion.sala.descripcion }}</p>
-      <p>{{ funcion.sala.capacidad }} butacas</p>
+    <section class="ficha-seccion ficha-seccion-sala" aria-labelledby="ficha-funcion-sala-titulo">
+      <div class="ficha-sala-tarjeta">
+        <div class="ficha-sala-detalles">
+          <h2 id="ficha-funcion-sala-titulo" class="ficha-sala-titulo">
+            Sala: <a href="{{ funcion.sala.url }}" class="ficha-sala-enlace">{{ funcion.sala.nombre }}</a>
+          </h2>
+          <p class="ficha-sala-ubicacion">
+            <span class="ficha-sala-icono" aria-hidden="true">📍</span>
+            <span>{{ funcion.sala.direccion }} · {{ funcion.sala.localidad }}</span>
+          </p>
+          {% if funcion.sala.descripcion %}
+            <p class="ficha-sala-descripcion">{{ funcion.sala.descripcion }}</p>
+          {% endif %}
+          <p class="ficha-sala-capacidad">
+            <span class="ficha-sala-icono" aria-hidden="true">💺</span>
+            <span>{{ funcion.sala.capacidad }} butacas</span>
+          </p>
+          <div class="ficha-sala-acciones">
+            <a href="{{ funcion.sala.url }}" class="boton boton-secundario boton-chico">Ver sala y cartelera</a>
+          </div>
+        </div>
+        {% if funcion.sala.imagen %}
+          <div class="ficha-sala-imagen-columna">
+            <img src="{{ funcion.sala.imagen }}" alt="Foto de {{ funcion.sala.nombre }}" class="ficha-sala-imagen" loading="lazy">
+          </div>
+        {% endif %}
+      </div>
     </section>
 
-    <section class="ficha-funcion-obras" aria-labelledby="ficha-funcion-obras-titulo">
-      <h2 id="ficha-funcion-obras-titulo">
-        {% if funcion.obras_elegidas %}
-          {{ funcion.obras|length == 1 ? 'La obra' : 'Las obras' }}
-        {% elseif funcion.estado == 'en_votacion_titulos' %}
-          Obras candidatas en votación
-        {% else %}
-          Obras candidatas
-        {% endif %}
-      </h2>
-      {% for obra in funcion.obras %}
-        <article class="ficha-funcion-obra">
-          <h3>{{ obra.titulo }} ({{ obra.anio }})</h3>
-          <p class="ficha-funcion-obra-datos">Dirección: {{ obra.director }} · {{ obra.duracion }} min</p>
-          {% if obra.generos is not empty %}
-            <p class="ficha-funcion-obra-generos">{{ obra.generos|join(', ') }}</p>
+    <section class="ficha-seccion ficha-seccion-obras" aria-labelledby="ficha-funcion-obras-titulo">
+      <div class="ficha-obras-cabecera">
+        <p id="ficha-funcion-obras-titulo" class="ficha-obras-etiqueta">
+          {% if funcion.obras_elegidas %}
+            {{ funcion.obras|length == 1 ? 'La obra' : 'Las obras' }}
+          {% elseif funcion.estado == 'en_votacion_titulos' %}
+            Obras candidatas en votación
+          {% else %}
+            Obras candidatas
           {% endif %}
-          <p>{{ obra.sinopsis }}</p>
-        </article>
-      {% endfor %}
+        </p>
+      </div>
+
+      <div class="ficha-obras-lista">
+        {% for obra in funcion.obras %}
+          <article class="ficha-obra-tarjeta">
+            <div class="ficha-obra-afiche-columna">
+              <div class="ficha-obra-afiche-placeholder" aria-hidden="true">
+                <span class="afiche-placeholder-icono">🎬</span>
+                <span class="afiche-placeholder-texto">AFICHE</span>
+              </div>
+            </div>
+            <div class="ficha-obra-cuerpo">
+              <h2 class="ficha-obra-titulo">
+                {{ obra.titulo }} <span class="ficha-obra-anio">({{ obra.anio }})</span>
+              </h2>
+              <div class="ficha-obra-metadatos">
+                <span class="ficha-obra-metadato">Dirección: <strong>{{ obra.director }}</strong></span>
+                <span class="ficha-obra-separador" aria-hidden="true">·</span>
+                <span class="ficha-obra-metadato">Duración: <strong>{{ obra.duracion }} min</strong></span>
+              </div>
+              {% if obra.generos is not empty %}
+                <div class="ficha-obra-generos">
+                  <span class="ficha-obra-generos-rotulo">Géneros:</span>
+                  <div class="ficha-obra-generos-chips">
+                    {% for genero in obra.generos %}
+                      <span class="ficha-genero-chip">{{ genero }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+              <div class="ficha-obra-sinopsis">
+                <p>{{ obra.sinopsis }}</p>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
     </section>
   </article>
 </div>
