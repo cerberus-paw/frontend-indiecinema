@@ -1,8 +1,8 @@
 {#
-  Parcial de pie de página (IC-43 / IC-44 / IC-45)
+  Parcial de pie de página (IC-43 / IC-44 / IC-45 / IC-94)
   Estructura el pie del sitio alineado a la identidad visual oficial E1 y al backlog de la Entrega 3:
-  Identidad del proyecto con logotipo oficial, enlaces a Cartelera (/cartelera), Salas y Películas (/obras),
-  participación comunitaria y créditos legales.
+  Identidad del proyecto con logotipo oficial, enlaces a Cartelera (/cartelera) y Salas indie (/salas),
+  participación comunitaria y créditos legales. Todos los enlaces apuntan a rutas que existen.
 #}
 {# Resuelve de forma segura el usuario en sesión o null para evitar errores en modo estricto de Twig #}
 {% set usr = usuario ?? null %}
@@ -40,8 +40,6 @@
         <li><a href="/cartelera">Cartelera</a></li>
         {# Enlace al directorio de salas indie registradas #}
         <li><a href="/salas">Salas indie</a></li>
-        {# Enlace al catálogo de películas (obras) #}
-        <li><a href="/obras">Películas / Catálogo</a></li>
       {# Cierre de la lista de exploración #}
       </ul>
     {# Cierre de la segunda columna #}
@@ -53,29 +51,28 @@
       <h3 class="pie-subtitulo">Participar</h3>
       {# Lista de enlaces de participación disponibles #}
       <ul class="pie-enlaces">
-        {# Enlace a la explicación de cómo funciona, en «Acerca de IndieCinema» #}
-        <li><a href="/acerca-de#como-funciona">Cómo funciona</a></li>
-        {# Enlace para registrarse en el subsistema de cuentas #}
-        <li><a href="/cuenta/registro">Crear cuenta</a></li>
-        {# Acceso a mis reservas #}
-        <li><a href="/funcion/mis-reservas">Mis reservas</a></li>
-        {# Si el usuario tiene rol organizador o superior, muestra acceso rápido a su panel #}
-        {% if usr and usr.alcanza('organizador') %}
-          <li><a href="/organizador">Panel del Organizador</a></li>
-          <li><a href="/organizador/salas/nueva">Publicar una sala</a></li>
+        {% if usr %}
+          <li><a href="/cuenta/">Mi cuenta</a></li>
+          {% if usr.alcanza('organizador') %}
+            <li><a href="/organizador/salas">Mis salas</a></li>
+            <li><a href="/organizador/salas/nueva">Publicar una sala</a></li>
+          {% endif %}
+        {% else %}
+          <li><a href="/cuenta/ingresar">Ingresar</a></li>
+          <li><a href="/cuenta/registro">Crear cuenta</a></li>
         {% endif %}
       {# Cierre de la lista de participación #}
       </ul>
     {# Cierre de la tercera columna #}
     </div>
 
-    {# Columna 4: Información de plataforma institucional (E3) #}
+    {# Columna 4: Información de plataforma comunitaria (E3) #}
     <div class="pie-columna">
       <h3 class="pie-subtitulo">Comunidad</h3>
       <ul class="pie-enlaces">
-        <li><a href="/acerca-de#como-funciona">Dinámica colaborativa</a></li>
-        <li><a href="/obras">Postular obras</a></li>
-        <li><a href="/cartelera">Próximas funciones</a></li>
+        {# Las secciones de «Acerca de IndieCinema» #}
+        <li><a href="/acerca-de#quienes-somos">Quiénes somos</a></li>
+        <li><a href="/acerca-de#como-funciona">Cómo funciona</a></li>
       </ul>
     </div>
   {# Cierre del contenedor principal del pie #}

@@ -644,12 +644,6 @@ a:hover {
   font-weight: 600;
 }
 
-/* Icono del rol */
-.enlace-rol .icono-rol {
-  /* Tamaño de icono proporcional */
-  font-size: 0.85rem;
-}
-
 /* Acciones de usuario / Invitado */
 .encabezado-usuario {
   /* Disposición flex */
