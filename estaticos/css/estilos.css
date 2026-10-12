@@ -3943,7 +3943,7 @@ dd {
     margin-top: var(--espacio-1);
   }
 
-  /* Fila 3: Navegación horizontal touch sin desbordar el viewport */
+  /* Fila 3: Navegación a todo el ancho, sin desbordar el viewport */
   .navegacion-principal {
     /* Cuarta posición */
     order: 4;
@@ -3951,22 +3951,13 @@ dd {
     width: 100%;
     /* Limita al ancho del contenedor */
     max-width: 100%;
-    /* Desplazamiento horizontal táctil */
-    overflow-x: auto;
-    /* Desplazamiento nativo suave con inercia en iOS */
-    -webkit-overflow-scrolling: touch;
-    /* Oculta la barra de scroll nativa para un aspecto más limpio en Firefox */
-    scrollbar-width: none;
   }
 
-  /* Oculta la barra de scroll en navegadores basados en WebKit */
-  .navegacion-principal::-webkit-scrollbar {
-    /* Desactiva scrollbar */
-    display: none;
-  }
-
-  /* Lista de navegación móvil */
-  .nav-lista {
+  /* Lista de navegación móvil: los enlaces que no entran bajan a otra línea, en vez de quedar
+     escondidos fuera de la pantalla */
+  .navegacion-principal .nav-lista {
+    /* Bajan a la línea siguiente */
+    flex-wrap: wrap;
     /* Relleno vertical */
     padding: var(--espacio-1) 0;
     /* Separación entre botones */
