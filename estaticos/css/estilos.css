@@ -2707,6 +2707,12 @@ dd {
   gap: var(--espacio-2);
 }
 
+/* El buscador del listado de salas usa la misma grilla, con un solo campo un poco más ancho */
+.buscador-salas {
+  /* El campo y los botones, de mínimo 240px */
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
 /* Cantidad de funciones encontradas y descarga en CSV */
 .cartelera-resumen {
   /* En fila */

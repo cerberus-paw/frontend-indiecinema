@@ -1,9 +1,12 @@
 {#
   Listado público de salas indie, en /salas: las habilitadas por un administrador, sin necesidad
-  de iniciar sesión.
+  de iniciar sesión. El buscador es un formulario GET, así viaja en la URL y funciona sin
+  JavaScript.
 
   Variables:
   - salas: lista de salas como las recibe parciales/tarjeta_sala.html.twig.
+  - busqueda: el texto que se buscó en el nombre y la localidad, o null si no se busca nada.
+  - avisos: lista de textos, uno si la búsqueda no era válida y se dejó afuera.
 #}
 {% extends 'base.html.twig' %}
 
@@ -18,11 +21,37 @@
     </div>
   </header>
 
+  <form class="filtros-cartelera buscador-salas" action="/salas" method="get" role="search" aria-label="Buscar salas">
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'q',
+      etiqueta: 'Buscar',
+      tipo: 'search',
+      valor: busqueda ?? '',
+      placeholder: 'Nombre o localidad'
+    } only %}
+    <div class="filtros-cartelera-acciones">
+      {% include 'parciales/boton.html.twig' with { texto: 'Buscar', variante: 'primario' } only %}
+      {% if busqueda is not null %}
+        {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/salas', variante: 'fantasma' } only %}
+      {% endif %}
+    </div>
+  </form>
+
+  {% if avisos is not empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      titulo: 'La búsqueda no se aplicó',
+      detalles: avisos
+    } only %}
+  {% endif %}
+
   {% if salas is empty %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'info',
-      mensaje: 'Todavía no hay salas publicadas.'
-    } %}
+      mensaje: busqueda is not null
+        ? 'No hay salas que coincidan con la búsqueda. Probá con otro nombre o localidad.'
+        : 'Todavía no hay salas publicadas.'
+    } only %}
   {% else %}
     <div class="cuadricula-funciones">
       {% for sala in salas %}
