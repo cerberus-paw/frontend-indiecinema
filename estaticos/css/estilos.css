@@ -2707,14 +2707,30 @@ dd {
   gap: var(--espacio-2);
 }
 
+/* Cantidad de funciones encontradas y descarga en CSV */
+.cartelera-resumen {
+  /* En fila */
+  display: flex;
+  /* La cantidad a la izquierda, la descarga a la derecha */
+  justify-content: space-between;
+  /* Alineación vertical */
+  align-items: center;
+  /* En pantallas angostas, la descarga baja */
+  flex-wrap: wrap;
+  /* Separación entre los dos */
+  gap: var(--espacio-2);
+  /* Separación con la cuadrícula */
+  margin-bottom: var(--espacio-4);
+}
+
 /* Cantidad de funciones encontradas */
 .cartelera-resultados {
   /* Texto secundario */
   color: var(--color-texto-secundario);
   /* Tamaño chico */
   font-size: var(--texto-sm);
-  /* Separación con la cuadrícula */
-  margin: 0 0 var(--espacio-4);
+  /* Sin margen propio: lo da .cartelera-resumen */
+  margin: 0;
 }
 
 /* Navegación entre páginas de resultados */
