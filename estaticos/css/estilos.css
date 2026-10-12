@@ -3089,6 +3089,201 @@ dd {
   }
 }
 
+/* --------------------------------------------------------------------------
+   21. ACERCA DE INDIECINEMA: QUIÉNES SOMOS Y CÓMO FUNCIONA (IC-95)
+   Componentes de programacion/acerca_de.html.twig. Los pasos siguen la
+   sección «Cómo funciona una función» del wireframe «Home» de Figma.
+   -------------------------------------------------------------------------- */
+
+/* Cabecera de la página */
+.acerca-de-cabecera {
+  /* Separación con la primera sección */
+  margin-bottom: var(--espacio-10);
+}
+
+/* Título de la página */
+.acerca-de-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Como el título de la portada, un poco más chico */
+  font-size: clamp(var(--texto-2xl), 3.5vw, 2.5rem);
+  /* Seminegrita */
+  font-weight: 600;
+  /* Interlineado compacto */
+  line-height: 1.1;
+  /* Apretado */
+  letter-spacing: -0.025em;
+  /* Separación con la bajada */
+  margin: 0 0 var(--espacio-4);
+}
+
+/* Bajada debajo del título */
+.acerca-de-bajada {
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Un poco mayor que el cuerpo */
+  font-size: var(--texto-md);
+  /* Interlineado cómodo */
+  line-height: 1.5;
+  /* Ancho de lectura */
+  max-width: 640px;
+  /* Sin margen propio */
+  margin: 0;
+}
+
+/* Cada sección de la página */
+.acerca-de-seccion {
+  /* Separación entre secciones */
+  margin-bottom: var(--espacio-12);
+  /* Al llegar por el ancla, deja ver el título debajo del encabezado */
+  scroll-margin-top: var(--espacio-8);
+}
+
+/* Párrafos de «Quiénes somos» */
+.acerca-de-texto {
+  /* Ancho de lectura */
+  max-width: 720px;
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Interlineado cómodo */
+  line-height: 1.6;
+  /* Separación con el título */
+  margin-top: var(--espacio-5);
+}
+
+/* Separación entre los párrafos */
+.acerca-de-texto p {
+  /* Sin margen arriba */
+  margin: 0 0 var(--espacio-4);
+}
+
+/* «Cómo funciona»: un recuadro con los cuatro pasos, como en el wireframe */
+.acerca-de-pasos {
+  /* Fondo apenas distinto */
+  background-color: var(--color-fondo-alt);
+  /* Borde tenue */
+  border: 1px solid var(--color-borde);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-md);
+  /* 40 px arriba y abajo, 48 a los lados */
+  padding: var(--espacio-10) var(--espacio-12);
+}
+
+/* Los cuatro pasos en una fila */
+.acerca-de-lista-pasos {
+  /* Cuadrícula */
+  display: grid;
+  /* Cuatro columnas iguales */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* 32 px entre pasos */
+  gap: var(--espacio-8);
+  /* Sin la numeración ni el sangrado de la lista */
+  list-style: none;
+  /* Sin relleno */
+  padding: 0;
+  /* 24 px desde el título */
+  margin: var(--espacio-6) 0 0;
+}
+
+/* Número del paso, en el color primario */
+.acerca-de-paso-numero {
+  /* Bloque, encima del título */
+  display: block;
+  /* Monoespaciada */
+  font-family: var(--fuente-codigo);
+  /* 24 px */
+  font-size: var(--texto-xl);
+  /* Color primario */
+  color: var(--color-primario);
+  /* Separación con el título */
+  margin-bottom: var(--espacio-2);
+}
+
+/* Título de cada paso y de cada rol */
+.acerca-de-paso-titulo {
+  /* 15-16 px */
+  font-size: var(--texto-base);
+  /* Seminegrita */
+  font-weight: 600;
+  /* Separación con el texto */
+  margin: 0 0 var(--espacio-2);
+}
+
+/* Texto de cada paso y de cada rol */
+.acerca-de-paso-texto {
+  /* Texto apagado */
+  color: var(--color-texto-apagado);
+  /* 13-14 px */
+  font-size: var(--texto-sm);
+  /* Interlineado cómodo */
+  line-height: 1.5;
+  /* Sin margen */
+  margin: 0;
+}
+
+/* Los roles, en tarjetas de a tres */
+.acerca-de-roles {
+  /* Cuadrícula */
+  display: grid;
+  /* Tres columnas que bajan cuando no entran */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  /* Separación */
+  gap: var(--espacio-6);
+  /* Sin viñetas */
+  list-style: none;
+  /* Sin relleno */
+  padding: 0;
+  /* Separación con el título */
+  margin: var(--espacio-5) 0 0;
+}
+
+/* Cada rol */
+.acerca-de-rol {
+  /* Superficie de tarjeta */
+  background-color: var(--color-superficie);
+  /* Borde tenue */
+  border: 1px solid var(--color-superficie-borde);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-md);
+  /* Relleno */
+  padding: var(--espacio-5);
+}
+
+/* Botones al final de la página */
+.acerca-de-acciones {
+  /* En fila */
+  display: flex;
+  /* Bajan en pantallas angostas */
+  flex-wrap: wrap;
+  /* Separación */
+  gap: var(--espacio-3);
+  /* Sin margen */
+  margin: 0;
+}
+
+/* En tablet, los pasos de a dos */
+@media (max-width: 1024px) {
+  .acerca-de-lista-pasos {
+    /* Dos columnas */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* En celular, los pasos en una columna y el recuadro con menos relleno */
+@media (max-width: 600px) {
+  .acerca-de-pasos {
+    /* Menos relleno */
+    padding: var(--espacio-6) var(--espacio-5);
+  }
+
+  .acerca-de-lista-pasos {
+    /* Una columna */
+    grid-template-columns: 1fr;
+    /* Menos separación */
+    gap: var(--espacio-6);
+  }
+}
+
 /* Cantidad de funciones encontradas y descarga en CSV */
 .cartelera-resumen {
   /* En fila */
@@ -3748,7 +3943,7 @@ dd {
     margin-top: var(--espacio-1);
   }
 
-  /* Fila 3: Navegación horizontal touch sin desbordar el viewport */
+  /* Fila 3: Navegación a todo el ancho, sin desbordar el viewport */
   .navegacion-principal {
     /* Cuarta posición */
     order: 4;
@@ -3756,22 +3951,13 @@ dd {
     width: 100%;
     /* Limita al ancho del contenedor */
     max-width: 100%;
-    /* Desplazamiento horizontal táctil */
-    overflow-x: auto;
-    /* Desplazamiento nativo suave con inercia en iOS */
-    -webkit-overflow-scrolling: touch;
-    /* Oculta la barra de scroll nativa para un aspecto más limpio en Firefox */
-    scrollbar-width: none;
   }
 
-  /* Oculta la barra de scroll en navegadores basados en WebKit */
-  .navegacion-principal::-webkit-scrollbar {
-    /* Desactiva scrollbar */
-    display: none;
-  }
-
-  /* Lista de navegación móvil */
-  .nav-lista {
+  /* Lista de navegación móvil: los enlaces que no entran bajan a otra línea, en vez de quedar
+     escondidos fuera de la pantalla */
+  .navegacion-principal .nav-lista {
+    /* Bajan a la línea siguiente */
+    flex-wrap: wrap;
     /* Relleno vertical */
     padding: var(--espacio-1) 0;
     /* Separación entre botones */
