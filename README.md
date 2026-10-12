@@ -179,7 +179,7 @@ Componente reutilizable para la Cartelera y el Home que reproduce exactamente lo
 - Precio de la función (`$3.500`, `Gratis`, `A la gorra`).
 - Nombre de la sala indie y localidad con icono de ubicación 📍.
 - Fecha/hora confirmada, plazo de votación o franjas horarias con icono de calendario 📅.
-- Botón de acción `Ver función` enlazado a la ficha de la función.
+- Botón de acción `Ver función` enlazado a la ficha de la función, en `/cartelera/{id}` (la sirve programación; `/funcion/` es el prefijo del subsistema funciones). Se puede cambiar con `funcion.url`.
 
 ```twig
 {% include 'parciales/tarjeta_funcion.html.twig' with {
