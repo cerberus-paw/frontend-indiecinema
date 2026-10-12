@@ -35,6 +35,7 @@ frontend-indiecinema/
 │   ├── programacion/           # Plantillas del subsistema programación
 │   │   ├── alta_sala.html.twig # Formulario de alta y edición de sala
 │   │   ├── cartelera.html.twig # Cartelera pública con filtros GET, paginado y descarga en CSV
+│   │   ├── ficha_funcion.html.twig # Ficha de una función: obras, sala, fecha, precio y estado
 │   │   ├── mis_salas.html.twig # Gestión de salas del organizador
 │   │   └── salas.html.twig     # Catálogo público de salas indie habilitadas
 │   └── funciones/              # Plantillas específicas del subsistema funciones
@@ -222,6 +223,7 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 - **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y casilla de términos sin tildar por defecto (`marcado: valores.terminos ?? false`), mensajes de error y botón principal.
 - **`plantillas/programacion/alta_sala.html.twig`**: Formulario de alta y edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía y parámetros de proyección.
 - **`plantillas/programacion/cartelera.html.twig`**: Cartelera pública en `/cartelera` con un formulario GET de filtros (búsqueda, localidad, fecha y género) que funciona sin JavaScript, avisos de los filtros inválidos, mensaje propio sin resultados, cuadrícula de tarjetas de función, paginado anterior/siguiente (IC-80) y un enlace para descargar en CSV la cartelera con los mismos filtros (IC-83).
+- **`plantillas/programacion/ficha_funcion.html.twig`**: Ficha de una función en `/cartelera/{id}`, en cualquier estado: las obras (elegidas, o candidatas si está en votación) con su sinopsis, duración y géneros, la sala con su dirección y el enlace a su ficha, la fecha (o «Fecha a confirmar»), el precio, el cupo y el estado, con un aviso si se canceló (IC-86).
 - **`plantillas/programacion/mis_salas.html.twig`**: Vista de «Mis salas» para organizadores en `/organizador/salas` con migas de pan, botón para publicar sala y cuadrícula de tarjetas editables (IC-38).
 - **`plantillas/programacion/salas.html.twig`**: Catálogo público de salas indie habilitadas en `/salas` con cuadrícula de tarjetas de sala (IC-39).
 

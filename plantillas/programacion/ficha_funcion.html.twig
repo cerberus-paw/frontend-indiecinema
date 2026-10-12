@@ -1,0 +1,91 @@
+{#
+  Ficha de una función, en /cartelera/{id}: las obras con su sinopsis y duración, la sala con su
+  dirección, la fecha, el precio y el estado. Se ve en cualquier estado: en votación, en acuerdo
+  de fecha, programada, finalizada o cancelada.
+
+  Variables:
+  - funcion:
+      - titulo: (string) las obras de la función, juntas con « + ».
+      - estado: (string) 'en_votacion_titulos' | 'en_acuerdo_fecha' | 'programada' | 'cancelada' | 'finalizada'.
+      - estado_etiqueta: (string) cómo se nombra el estado ('en votación de títulos', 'programada'…).
+      - es_cancelada: (bool) si se canceló.
+      - precio: (string) ya escrito ('$ 2.500', 'A la gorra').
+      - cupo: (int) cuántos espectadores entran.
+      - fecha: (string|null) ya escrita ('Sáb 19 sep · 20:30'), o null si todavía no se acordó.
+      - obras_elegidas: (bool) si las obras son las elegidas; si no, son las candidatas.
+      - sala: url (de su ficha), nombre, descripcion, direccion, localidad, capacidad e imagen
+        (la URL de la foto, o null).
+      - obras: lista con titulo, sinopsis, anio, director, duracion (en minutos) y generos (lista
+        de nombres).
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}{{ funcion.titulo }}{% endblock %}
+
+{% block contenido %}
+{% set clases_estado = {
+  en_votacion_titulos: 'insignia-votacion',
+  en_acuerdo_fecha: 'insignia-acuerdo',
+  programada: 'insignia-programada'
+} %}
+<div class="contenedor ficha-funcion">
+  <article class="ficha-funcion-contenido">
+    <header class="ficha-funcion-cabecera">
+      {% if funcion.es_cancelada %}
+        {% include 'parciales/mensaje.html.twig' with {
+          tipo: 'error',
+          titulo: 'Función cancelada',
+          mensaje: 'Esta función fue cancelada.'
+        } only %}
+      {% else %}
+        <span class="insignia-estado {{ clases_estado[funcion.estado] ?? '' }}">{{ funcion.estado_etiqueta|upper }}</span>
+      {% endif %}
+
+      <h1 class="ficha-funcion-titulo">{{ funcion.titulo }}</h1>
+
+      <div class="ficha-funcion-metadatos">
+        <p class="ficha-funcion-fecha">
+          <span aria-hidden="true">📅</span> {{ funcion.fecha ?? 'Fecha a confirmar' }}
+        </p>
+        <p class="ficha-funcion-precio">
+          <span aria-hidden="true">🎟️</span> {{ funcion.precio }} · {{ funcion.cupo }} lugares
+        </p>
+      </div>
+    </header>
+
+    <section class="ficha-funcion-sala" aria-labelledby="ficha-funcion-sala-titulo">
+      <h2 id="ficha-funcion-sala-titulo">Sala: <a href="{{ funcion.sala.url }}">{{ funcion.sala.nombre }}</a></h2>
+      {% if funcion.sala.imagen %}
+        <img src="{{ funcion.sala.imagen }}" alt="Foto de {{ funcion.sala.nombre }}" class="ficha-funcion-sala-imagen" loading="lazy">
+      {% endif %}
+      <p class="ficha-funcion-sala-ubicacion">
+        <span aria-hidden="true">📍</span> {{ funcion.sala.direccion }} · {{ funcion.sala.localidad }}
+      </p>
+      <p>{{ funcion.sala.descripcion }}</p>
+      <p>{{ funcion.sala.capacidad }} butacas</p>
+    </section>
+
+    <section class="ficha-funcion-obras" aria-labelledby="ficha-funcion-obras-titulo">
+      <h2 id="ficha-funcion-obras-titulo">
+        {% if funcion.obras_elegidas %}
+          {{ funcion.obras|length == 1 ? 'La obra' : 'Las obras' }}
+        {% elseif funcion.estado == 'en_votacion_titulos' %}
+          Obras candidatas en votación
+        {% else %}
+          Obras candidatas
+        {% endif %}
+      </h2>
+      {% for obra in funcion.obras %}
+        <article class="ficha-funcion-obra">
+          <h3>{{ obra.titulo }} ({{ obra.anio }})</h3>
+          <p class="ficha-funcion-obra-datos">Dirección: {{ obra.director }} · {{ obra.duracion }} min</p>
+          {% if obra.generos is not empty %}
+            <p class="ficha-funcion-obra-generos">{{ obra.generos|join(', ') }}</p>
+          {% endif %}
+          <p>{{ obra.sinopsis }}</p>
+        </article>
+      {% endfor %}
+    </section>
+  </article>
+</div>
+{% endblock %}
