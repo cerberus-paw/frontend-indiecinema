@@ -92,8 +92,8 @@ El encabezado y el pie adaptan sus opciones y enlaces según el estado de la ses
   - Enlaces a Cartelera (`/cartelera`), Salas (`/salas`), Cómo funciona (`/acerca-de#como-funciona`), Acerca de (`/acerca-de`) y Buscador hacia la cartelera (`action="/cartelera"` con parámetro `q`).
   - Botones de acción: **Ingresar** (`/cuenta/ingresar`) y **Crear cuenta** (`/cuenta/registro`).
   - En el pie: Cartelera y Salas indie, **Ingresar** y **Crear cuenta**, y las secciones de «Acerca de».
-- **Espectador (`rol: espectador`):**
-  - Acceso al menú de usuario con su avatar, nombre e insignia visual de rol `espectador`.
+- **Espectador (cualquier usuario con sesión):**
+  - Acceso al menú de usuario con su avatar, su nombre y una insignia con su rol.
   - Enlace al panel de **Mi cuenta** (`/cuenta/`).
   - No ve los accesos del organizador.
   - Botón seguro de **Cerrar sesión** por POST (`/cuenta/salir`) con token CSRF.
