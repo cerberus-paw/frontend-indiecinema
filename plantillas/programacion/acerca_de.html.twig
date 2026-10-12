@@ -1,0 +1,81 @@
+{#
+  «Acerca de IndieCinema», en /acerca-de: quiénes somos y cómo funciona el sitio. Es estática: no
+  recibe variables más allá de las que tiene toda plantilla.
+
+  Las secciones tienen id para enlazarlas desde el encabezado y el pie: #quienes-somos y
+  #como-funciona. Los cuatro pasos siguen la sección «Cómo funciona una función» del wireframe de
+  la portada.
+
+  Encabezados, sin saltar niveles: h1 la página; h2 cada sección; h3 cada paso y cada rol.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Acerca de IndieCinema{% endblock %}
+
+{% block contenido %}
+<div class="contenedor acerca-de">
+  <header class="acerca-de-cabecera">
+    <p class="portada-antetitulo">Cine independiente · Salas indie · Programación participativa</p>
+    <h1 class="acerca-de-titulo">Acerca de IndieCinema</h1>
+    <p class="acerca-de-bajada">Una plataforma para que el cine que no llega a las salas comerciales encuentre su público en espacios independientes, y para que ese público decida qué se proyecta.</p>
+  </header>
+
+  <section id="quienes-somos" class="acerca-de-seccion" aria-labelledby="quienes-somos-titulo">
+    <h2 id="quienes-somos-titulo" class="portada-seccion-titulo">Quiénes somos</h2>
+    <div class="acerca-de-texto">
+      <p>IndieCinema conecta tres partes que hoy se buscan por separado: las salas independientes (cineclubes, centros culturales, espacios comunitarios), las películas que circulan por fuera del circuito comercial y el público que quiere verlas cerca de su casa.</p>
+      <p>Lo hacemos con una programación participativa: en lugar de que cada sala decida sola, el público vota qué se proyecta y acuerda cuándo, y la función se confirma cuando hay suficientes asistentes. Así cada sala llena su cartelera con lo que su comunidad quiere ver.</p>
+      <p>El sitio es el trabajo práctico integrador de Programación en Ambiente Web de la Universidad Nacional de Luján, hecho por el Grupo Cerberus: Salvador Baez, Mateo Nomico y Tomás Resnik.</p>
+    </div>
+  </section>
+
+  <section id="como-funciona" class="acerca-de-seccion acerca-de-pasos" aria-labelledby="como-funciona-titulo">
+    <h2 id="como-funciona-titulo" class="portada-seccion-titulo">Cómo funciona una función en IndieCinema</h2>
+    <ol class="acerca-de-lista-pasos">
+      <li class="acerca-de-paso">
+        <span class="acerca-de-paso-numero" aria-hidden="true">01</span>
+        <h3 class="acerca-de-paso-titulo">Se vota qué se proyecta</h3>
+        <p class="acerca-de-paso-texto">El organizador propone títulos candidatos del catálogo y el público elige.</p>
+      </li>
+      <li class="acerca-de-paso">
+        <span class="acerca-de-paso-numero" aria-hidden="true">02</span>
+        <h3 class="acerca-de-paso-titulo">Se acuerda la fecha</h3>
+        <p class="acerca-de-paso-texto">Se vota entre las franjas horarias propuestas; la función se confirma al llegar al mínimo de asistentes.</p>
+      </li>
+      <li class="acerca-de-paso">
+        <span class="acerca-de-paso-numero" aria-hidden="true">03</span>
+        <h3 class="acerca-de-paso-titulo">Reservás tu lugar</h3>
+        <p class="acerca-de-paso-texto">Pagás la entrada por Mercado Pago y recibís el comprobante con código.</p>
+      </li>
+      <li class="acerca-de-paso">
+        <span class="acerca-de-paso-numero" aria-hidden="true">04</span>
+        <h3 class="acerca-de-paso-titulo">Calificás la función</h3>
+        <p class="acerca-de-paso-texto">Sólo quien asistió puede calificar. El promedio define el ranking de salas.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="acerca-de-seccion" aria-labelledby="quien-participa-titulo">
+    <h2 id="quien-participa-titulo" class="portada-seccion-titulo">Quién participa</h2>
+    <ul class="acerca-de-roles">
+      <li class="acerca-de-rol">
+        <h3 class="acerca-de-paso-titulo">Espectadores</h3>
+        <p class="acerca-de-paso-texto">Buscan funciones en la cartelera, votan títulos y fechas, reservan su lugar y califican lo que vieron.</p>
+      </li>
+      <li class="acerca-de-rol">
+        <h3 class="acerca-de-paso-titulo">Organizadores</h3>
+        <p class="acerca-de-paso-texto">Publican su sala, arman el catálogo de obras y abren funciones para que el público las programe.</p>
+      </li>
+      <li class="acerca-de-rol">
+        <h3 class="acerca-de-paso-titulo">Moderación</h3>
+        <p class="acerca-de-paso-texto">Revisa las salas antes de publicarlas y atiende las denuncias, para que el sitio siga siendo de confianza.</p>
+      </li>
+    </ul>
+  </section>
+
+  <p class="acerca-de-acciones">
+    {% include 'parciales/boton.html.twig' with { texto: 'Ver la cartelera', url: '/cartelera', variante: 'primario' } only %}
+    {% include 'parciales/boton.html.twig' with { texto: 'Conocer las salas', url: '/salas', variante: 'secundario' } only %}
+  </p>
+</div>
+{% endblock %}

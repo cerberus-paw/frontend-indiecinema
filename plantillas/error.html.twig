@@ -22,11 +22,11 @@
       {% if estado == 401 %}
         {# Para no autenticado, botón directo hacia el inicio de sesión del subsistema de cuentas #}
         <a href="/cuenta/ingresar" class="boton boton-primario">Ingresar</a>
-        <a href="/cartelera" class="boton boton-secundario">Volver a la cartelera</a>
+        <a href="/" class="boton boton-secundario">Volver al inicio</a>
       {% else %}
-        {# Para otros estados, enlace prioritario a la cartelera y enlace secundario a la cuenta #}
-        <a href="/cartelera" class="boton boton-primario">Volver a la cartelera</a>
-        <a href="/cuenta/" class="boton boton-secundario">Ir a mi cuenta</a>
+        {# Para otros estados (404, 403, 500…), de vuelta a la portada, y la cartelera como alternativa #}
+        <a href="/" class="boton boton-primario">Volver al inicio</a>
+        <a href="/cartelera" class="boton boton-secundario">Ver la cartelera</a>
       {% endif %}
     </div>
 
