@@ -59,9 +59,13 @@
         <li>
           <a href="/obras" class="nav-enlace{% if ruta starts with '/obras' %} activo{% endif %}">Películas</a>
         </li>
-        {# Enlace explicativo sobre la dinámica colaborativa de la plataforma #}
+        {# Enlace a la explicación de la dinámica colaborativa, una sección de «Acerca de IndieCinema» #}
         <li>
-          <a href="/como-funciona" class="nav-enlace{% if ruta starts with '/como-funciona' %} activo{% endif %}">Cómo funciona</a>
+          <a href="/acerca-de#como-funciona" class="nav-enlace">Cómo funciona</a>
+        </li>
+        {# Enlace a «Acerca de IndieCinema»: quiénes somos y cómo funciona el sitio #}
+        <li>
+          <a href="/acerca-de" class="nav-enlace{% if ruta starts with '/acerca-de' %} activo{% endif %}">Acerca de</a>
         </li>
 
         {# Verificación segura para rol Organizador #}
