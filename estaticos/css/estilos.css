@@ -4122,19 +4122,44 @@ dd {
   display: block;
 }
 
-/* Quién está en sesión y el botón para salir, abajo de todo */
+/* Quién está en sesión y, debajo, el botón para salir, abajo de todo */
 .panel-admin-sesion {
   margin-top: auto;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--espacio-2) var(--espacio-3);
+  flex-direction: column;
+  gap: var(--espacio-3);
   padding-top: var(--espacio-4);
   border-top: 1px solid var(--color-borde);
 }
 
+/* El avatar y, al lado, el nombre sobre el rol */
+.panel-admin-sesion-usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  min-width: 0;
+}
+
+.panel-admin-sesion-datos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+/* Un nombre largo se corta con puntos suspensivos en vez de ensanchar la barra */
+.panel-admin-sesion-nombre {
+  max-width: 100%;
+  font-weight: 600;
+  font-size: var(--texto-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .panel-admin-salir {
-  margin-left: auto;
+  width: 100%;
 }
 
 /* El contenido, con aire y sin estirarse de más en pantallas anchas */
@@ -4294,11 +4319,20 @@ dd {
     grid-row: 2;
   }
 
+  /* En el renglón del logo queda sólo el botón para salir: el nombre no entra */
   .panel-admin-sesion {
     margin-top: 0;
     padding-top: 0;
     border-top: none;
-    justify-content: flex-end;
+    align-items: flex-end;
+  }
+
+  .panel-admin-sesion-usuario {
+    display: none;
+  }
+
+  .panel-admin-salir {
+    width: auto;
   }
 
   .panel-admin-contenido {

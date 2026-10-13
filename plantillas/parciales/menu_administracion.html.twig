@@ -32,14 +32,16 @@
 
   {% if usuario %}
     <div class="panel-admin-sesion">
-      <span class="usuario-avatar" aria-hidden="true">{{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}</span>
-      <div class="usuario-info">
-        <span class="usuario-nombre">{{ usuario.nombre }}</span>
-        <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
+      <div class="panel-admin-sesion-usuario">
+        <span class="usuario-avatar" aria-hidden="true">{{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}</span>
+        <div class="panel-admin-sesion-datos">
+          <span class="panel-admin-sesion-nombre">{{ usuario.nombre }}</span>
+          <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
+        </div>
       </div>
-      <form action="/cuenta/salir" method="POST" class="panel-admin-salir">
+      <form action="/cuenta/salir" method="POST">
         <input type="hidden" name="_csrf" value="{{ csrf }}">
-        <button type="submit" class="boton boton-fantasma boton-chico">Cerrar sesión</button>
+        <button type="submit" class="boton boton-secundario boton-chico panel-admin-salir">Cerrar sesión</button>
       </form>
     </div>
   {% endif %}
