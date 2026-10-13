@@ -46,7 +46,10 @@ frontend-indiecinema/
     ├── css/
     │   └── estilos.css         # Hoja de estilos con paleta cinematográfica oscura y responsive
     ├── js/
-    │   └── app.js              # Manejo automático de tokens CSRF y utilidades interactivas
+    │   ├── paw.js              # Clase utilitaria PAW: contenedor, nuevoElemento, cargarScript y enviar con CSRF
+    │   ├── app.js              # Clase App: en DOMContentLoaded carga e inicia los componentes de la página
+    │   └── componentes/        # Una clase por archivo, cada una recibe su contenedor
+    │       └── menu-usuario.js # MenuUsuario: cierra el menú del usuario con un clic afuera o con Escape
     └── img/
         ├── icon.svg            # Isotipo e icono oficial de IndieCinema (favicon)
         ├── logo-horizontal-dark.svg # Logotipo horizontal oficial sobre fondo oscuro
@@ -239,3 +242,19 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 - **`plantillas/programacion/salas.html.twig`**: Catálogo público de salas indie habilitadas en `/salas` con cuadrícula de tarjetas de sala (IC-39), y un buscador GET por nombre y localidad que funciona sin JavaScript, con el aviso si la búsqueda no es válida y un mensaje propio sin resultados (IC-91).
 - **`plantillas/programacion/sala.html.twig`**: Ficha pública de una sala en `/salas/{id}`: la foto, la dirección, la capacidad, la descripción y sus próximas funciones con la tarjeta de función, o un mensaje si no tiene. Si todavía no está publicada (la ve sólo su organizador), lo avisa. Las tarjetas de sala enlazan a su ficha (IC-90).
 
+---
+
+## 8. JavaScript (IC-100)
+
+Sin librerías y con una clase por archivo. La plantilla base carga, con `defer` y en este orden, `paw.js` y `app.js`; los componentes los carga `app.js` sólo en las páginas que los usan.
+
+- **`js/paw.js`, la clase utilitaria `PAW`**, con métodos estáticos para la aplicación y los componentes:
+  - `contenedor(pContenedor)`: el elemento de un componente, a partir del elemento o de su selector.
+  - `nuevoElemento(etiqueta, contenido, atributos)`: crea un elemento; el contenido va como texto (`textContent`), nunca como HTML.
+  - `cargarScript(nombre, url, alCargar)`: carga un script una sola vez y llama a `alCargar` cuando está listo, aunque ya se hubiera cargado.
+  - `enviar(url, opciones)`: `fetch()` que agrega `X-CSRF-Token` (de `<meta name="csrf">`) a los POST, PUT, PATCH y DELETE al mismo sitio, y nunca a otro dominio.
+- **`js/app.js`, la clase de aplicación `App`**: su constructor sólo espera a `DOMContentLoaded`; ahí, por cada componente cuyo contenedor está en la página, carga su script con `PAW.cargarScript()` y lo crea pasándole el contenedor.
+- **`js/componentes/`, una clase por componente**: el constructor recibe su contenedor (elemento o selector) y no busca nada fuera de él salvo los eventos del documento que necesite. Hoy:
+  - `menu-usuario.js`, `MenuUsuario` (`#menu-usuario`): cierra el menú del usuario con un clic afuera o con Escape, y devuelve el foco al botón. Sin JavaScript, el `<details>` se abre y se cierra igual.
+
+Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.iniciar()`, la carga condicionada a que su contenedor esté en la página.
