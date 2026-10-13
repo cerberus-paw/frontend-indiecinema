@@ -57,6 +57,9 @@
             <li><a href="/organizador/salas">Mis salas</a></li>
             <li><a href="/organizador/salas/nueva">Publicar una sala</a></li>
           {% endif %}
+          {% if usr.alcanza('administrador') %}
+            <li><a href="/cuenta/administracion/usuarios">Usuarios y roles</a></li>
+          {% endif %}
         {% else %}
           <li><a href="/cuenta/ingresar">Ingresar</a></li>
           <li><a href="/cuenta/registro">Crear cuenta</a></li>
