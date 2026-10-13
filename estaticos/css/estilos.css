@@ -4180,9 +4180,8 @@ a.tabla-admin-principal:focus-visible {
   text-decoration: underline;
 }
 
-/* Columna de los botones: a la derecha y sin cortar el texto del botón */
+/* Columna de los botones: alineados con su título, como el wireframe, y sin cortar el texto */
 .tabla-admin-acciones {
-  text-align: right;
   white-space: nowrap;
 }
 
