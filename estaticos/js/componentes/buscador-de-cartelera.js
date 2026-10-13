@@ -3,6 +3,10 @@
  * pero en JSON (Accept: application/json), y vuelve a dibujar la sección de resultados sin recargar
  * la página. Lo mismo con los links del paginado.
  *
+ * Mientras busca (también mientras espera que se deje de escribir) la sección queda con
+ * aria-busy, atenuada, y con el aviso «Buscando funciones…» fijo abajo de la pantalla, así se ve
+ * aunque se haya buscado desde el paginado, al pie de la lista.
+ *
  * Sin JavaScript, el formulario GET y los links funcionan igual, así que este componente sólo
  * mejora lo que ya anda. Si el pedido falla, navega a la URL como lo haría el formulario.
  */
@@ -29,6 +33,10 @@ class BuscadorDeCartelera {
     }
     this.pedido = null;
     this.espera = null;
+    this.indicador = this.nodo('p', { class: 'cartelera-cargando', role: 'status' }, [
+      this.nodo('span', { class: 'cartelera-cargando-icono', 'aria-hidden': 'true' }),
+      'Buscando funciones…',
+    ]);
 
     this.formulario.addEventListener('submit', (evento) => {
       evento.preventDefault();
@@ -42,6 +50,8 @@ class BuscadorDeCartelera {
     });
     this.formulario.addEventListener('input', (evento) => {
       if (evento.target.name === 'q') {
+        // Se ve que va a buscar desde la primera tecla, aunque el pedido salga después.
+        this.mostrarCargando(true);
         clearTimeout(this.espera);
         this.espera = setTimeout(() => this.buscar(this.urlDelFormulario()), BuscadorDeCartelera.ESPERA_AL_ESCRIBIR);
       }
@@ -80,8 +90,10 @@ class BuscadorDeCartelera {
    */
   async buscar(url) {
     clearTimeout(this.espera);
+    this.espera = null;
     this.pedido?.abort();
     this.pedido = new AbortController();
+    this.mostrarCargando(true);
     try {
       const respuesta = await PAW.enviar(url, {
         headers: { Accept: 'application/json' },
@@ -91,11 +103,29 @@ class BuscadorDeCartelera {
         throw new Error(`La cartelera respondió ${respuesta.status}.`);
       }
       this.mostrar(await respuesta.json());
+      // Si mientras volvía se siguió escribiendo, falta otra búsqueda: el indicador sigue.
+      this.mostrarCargando(this.espera !== null);
     } catch (error) {
       if (error.name !== 'AbortError') {
         // Que se encargue el servidor, como sin JavaScript.
         window.location.assign(url);
       }
+    }
+  }
+
+  /**
+   * El indicador de carga: la sección atenuada y con aria-busy, y el aviso para verlo y para los
+   * lectores de pantalla. Un pedido cancelado por otro no lo saca: sigue el nuevo.
+   *
+   * @param {boolean} cargando
+   */
+  mostrarCargando(cargando) {
+    if (cargando) {
+      this.resultados.setAttribute('aria-busy', 'true');
+      this.resultados.append(this.indicador);
+    } else {
+      this.resultados.removeAttribute('aria-busy');
+      this.indicador.remove();
     }
   }
 
