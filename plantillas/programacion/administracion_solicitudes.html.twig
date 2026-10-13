@@ -1,0 +1,230 @@
+{#
+  Bandeja de solicitudes de sala, en /administracion/solicitudes, como el wireframe de la E2
+  (moderacion-solicitudes): el buscador y la lista a la izquierda; a la derecha la elegida, con la
+  sala, los datos del espacio y el historial de quien la mandó, y la resolución con su motivo
+  obligatorio. «Ver historial de decisiones» lista las resueltas; desde una aprobada la sala se
+  retira del sitio o se vuelve a publicar. Queda afuera lo que todavía no existe: las otras
+  bandejas de moderación, la documentación, el checklist, la categoría, la revisión manual y
+  guardar sin enviar.
+
+  Resolver es un POST con el token CSRF, la resolución (aprobar o rechazar) y el motivo, que se le
+  muestra a quien la mandó. Aprobarla publica la sala y le da el rol de organizador.
+
+  Variables:
+  - historial: si la lista es la de las resueltas.
+  - q: lo que se buscó.
+  - total_pendientes: cuántas esperan, para la pestaña.
+  - total_en_la_lista: cuántas hay en la lista, aunque muestre menos.
+  - solicitudes: lista de {id, estado, sala, localidad, solicitante (o null), enviada, elegida}.
+  - elegida: {id, estado, enviada, resuelta, motivo, sala: {id, nombre, localidad, capacidad,
+    imagen, habilitada, descripcion, direccion, peliculas_por_funcion, duracion_funcion,
+    tiempo_entre_funciones}, solicitante: {nombre, correo, cuenta_creada, es_organizador} (null
+    si ya no existe, false si cuentas no respondió), solicitante_nombre, solicitudes_previas},
+    o null.
+  - valores: lo que mandó si hubo errores, {resolucion, motivo}.
+  - errores: campo => qué está mal.
+  - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
+  - mensaje_exito: el aviso de lo que se acaba de hacer (opcional).
+#}
+{% extends 'administracion.html.twig' %}
+
+{% block titulo %}Solicitudes de sala{% endblock %}
+
+{% block seccion %}solicitudes{% endblock %}
+
+{% block panel %}
+{% set estados = { pendiente: 'Pendiente', aprobada: 'Aprobada', rechazada: 'Rechazada' } %}
+{% set clases = { pendiente: 'estado-cuenta', aprobada: 'estado-cuenta estado-cuenta-activa', rechazada: 'estado-cuenta estado-cuenta-suspendida' } %}
+
+<header class="panel-admin-cabecera bandeja-cabecera">
+  <div>
+    <h1 class="panel-admin-titulo">Bandeja de solicitudes</h1>
+    <p class="panel-admin-bajada">Revisá los datos del espacio y resolvé con un motivo registrado.</p>
+  </div>
+  {% if historial %}
+    <a href="/administracion/solicitudes" class="boton boton-secundario">Volver a las pendientes</a>
+  {% else %}
+    <a href="/administracion/solicitudes?ver=historial" class="boton boton-secundario">Ver historial de decisiones</a>
+  {% endif %}
+</header>
+
+{% if mensaje_exito is defined %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
+{% endif %}
+
+<nav class="pestanas" aria-label="Bandejas">
+  {% if historial %}
+    <a href="/administracion/solicitudes?ver=historial" class="pestana activa" aria-current="page">Historial de decisiones</a>
+  {% else %}
+    <a href="/administracion/solicitudes" class="pestana activa" aria-current="page">
+      Solicitudes de sala <span class="bandeja-cuenta">{{ total_pendientes }}</span>
+    </a>
+  {% endif %}
+</nav>
+
+<div class="bandeja">
+  <section class="bandeja-lista" aria-label="{{ historial ? 'Solicitudes resueltas' : 'Solicitudes pendientes' }}">
+    <form class="bandeja-buscador" action="/administracion/solicitudes" method="get" role="search">
+      {% if historial %}<input type="hidden" name="ver" value="historial">{% endif %}
+      <label class="panel-admin-busqueda">
+        <span class="sr-only">Buscar solicitud o solicitante</span>
+        <span class="panel-admin-busqueda-icono" aria-hidden="true">🔍</span>
+        <input type="search" name="q" value="{{ q }}" placeholder="Buscar solicitud o solicitante" maxlength="100" class="campo-control">
+      </label>
+    </form>
+
+    {% if solicitudes is empty %}
+      <p class="bandeja-nota">
+        {% if q != '' %}
+          Ninguna solicitud coincide con «{{ q }}».
+        {% else %}
+          {{ historial ? 'Todavía no resolviste ninguna solicitud.' : 'No hay solicitudes esperando.' }}
+        {% endif %}
+      </p>
+    {% else %}
+      <ul class="bandeja-items">
+        {% for solicitud in solicitudes %}
+          {% set url = '/administracion/solicitudes?id=' ~ solicitud.id ~ (q != '' ? '&q=' ~ q|url_encode : '') %}
+          <li>
+            <a href="{{ url }}" class="bandeja-item{% if solicitud.elegida %} activo{% endif %}"{% if solicitud.elegida %} aria-current="true"{% endif %}>
+              <span class="bandeja-item-fila">
+                <span class="bandeja-item-sala">{{ solicitud.sala }}</span>
+                <span class="{{ clases[solicitud.estado] }}">{{ estados[solicitud.estado] }}</span>
+              </span>
+              <span class="bandeja-item-datos">{{ solicitud.solicitante ? solicitud.solicitante ~ ' · ' : '' }}{{ solicitud.localidad }}</span>
+              <span class="bandeja-item-datos"><span aria-hidden="true">📅</span> Enviada {{ solicitud.enviada }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if total_en_la_lista > solicitudes|length %}
+        <p class="bandeja-nota">Se muestran {{ solicitudes|length }} de {{ total_en_la_lista }}. Buscá para encontrar las demás.</p>
+      {% endif %}
+    {% endif %}
+  </section>
+
+  {% if elegida %}
+    {% set sala = elegida.sala %}
+    <article class="bandeja-detalle" aria-labelledby="titulo-solicitud">
+      <header class="bandeja-detalle-cabecera">
+        <h2 id="titulo-solicitud" class="bandeja-detalle-titulo">{{ sala.nombre }}</h2>
+        <span class="{{ clases[elegida.estado] }}">{{ estados[elegida.estado] }}</span>
+      </header>
+      <p class="bandeja-detalle-datos bandeja-detalle-meta">
+        <span><span aria-hidden="true">📍</span> {{ sala.direccion }}, {{ sala.localidad }}</span>
+        <span><span aria-hidden="true">👥</span> {{ sala.capacidad }} lugares declarados</span>
+        <span>Enviada el {{ elegida.enviada }}</span>
+      </p>
+
+      {% if sala.imagen %}
+        <div class="bandeja-fotos">
+          <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="bandeja-foto" loading="lazy">
+        </div>
+      {% endif %}
+
+      {# En una pendiente, el formulario abarca la resolución y el motivo, que en el wireframe
+         están en lugares distintos de la pantalla #}
+      {% if elegida.estado == 'pendiente' %}
+        <form action="/administracion/solicitudes/{{ elegida.id }}/resolver" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+      {% endif %}
+      <div class="bandeja-columnas">
+        <div>
+          <h3 class="bandeja-subtitulo">Datos del espacio</h3>
+          {# nl2br escapa antes de agregar los <br> #}
+          <p class="bandeja-texto">{{ sala.descripcion|nl2br }}</p>
+          <dl class="bandeja-ficha">
+            <dt>Películas por función</dt>
+            <dd>{{ sala.peliculas_por_funcion }}</dd>
+            <dt>Duración máxima de la función</dt>
+            <dd>{{ sala.duracion_funcion }} minutos</dd>
+            <dt>Tiempo entre funciones</dt>
+            <dd>{{ sala.tiempo_entre_funciones }} minutos</dd>
+          </dl>
+
+          <h3 class="bandeja-subtitulo">Historial del solicitante</h3>
+          {% if elegida.solicitante is same as(false) %}
+            <p class="bandeja-nota bandeja-nota-suelta">No pudimos consultar los datos de la cuenta. Probá de nuevo en un rato.</p>
+          {% elseif elegida.solicitante is null %}
+            <p class="bandeja-nota bandeja-nota-suelta">La cuenta que la mandó ya no existe.</p>
+          {% endif %}
+          <dl class="bandeja-ficha">
+            {% if elegida.solicitante %}
+              <dt>Cuenta</dt>
+              <dd>{{ elegida.solicitante.nombre }} · <a href="mailto:{{ elegida.solicitante.correo|url_encode|replace({'%40': '@'}) }}">{{ elegida.solicitante.correo }}</a></dd>
+              <dt>Cuenta creada</dt>
+              <dd>{{ elegida.solicitante.cuenta_creada }}</dd>
+              <dt>Rol</dt>
+              <dd>{{ elegida.solicitante.es_organizador ? 'Ya es organizador' : 'Espectador: aprobarla lo hace organizador' }}</dd>
+            {% elseif elegida.solicitante_nombre %}
+              <dt>Cuenta</dt>
+              <dd>{{ elegida.solicitante_nombre }}</dd>
+            {% endif %}
+            <dt>Solicitudes previas</dt>
+            <dd>{{ elegida.solicitudes_previas }}</dd>
+          </dl>
+        </div>
+
+        <div>
+          {% if elegida.estado == 'pendiente' %}
+              <fieldset class="bandeja-caja{% if errores.resolucion is defined %} con-error{% endif %}">
+                <legend class="bandeja-caja-titulo">Resolución</legend>
+                {% for valor, texto in { aprobar: 'Aprobar y publicar la sala', rechazar: 'Rechazar la solicitud' } %}
+                  <label class="bandeja-opcion">
+                    <input type="radio" name="resolucion" value="{{ valor }}" required{% if (valores.resolucion ?? '') == valor %} checked{% endif %}{% if errores.resolucion is defined %} aria-invalid="true" aria-describedby="error-resolucion"{% endif %}>
+                    {{ texto }}
+                  </label>
+                {% endfor %}
+                {% if errores.resolucion is defined %}
+                  <span id="error-resolucion" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.resolucion }}</span>
+                {% endif %}
+              </fieldset>
+          {% else %}
+            <div class="bandeja-caja">
+              <p class="bandeja-caja-titulo">Resolución</p>
+              <p class="bandeja-detalle-datos">{{ estados[elegida.estado] }} el {{ elegida.resuelta }}</p>
+              <p class="bandeja-texto">{{ elegida.motivo|nl2br }}</p>
+            </div>
+            {% if elegida.estado == 'aprobada' %}
+              <div class="bandeja-caja">
+                <p class="bandeja-caja-titulo">La sala en el sitio</p>
+                <p class="bandeja-detalle-datos">
+                  {{ sala.habilitada ? 'Publicada: se ve en el listado de salas y sus funciones en la cartelera.' : 'Retirada: no se ve en el sitio.' }}
+                </p>
+                <form action="/administracion/solicitudes/{{ elegida.id }}/{{ sala.habilitada ? 'deshabilitar-sala' : 'habilitar-sala' }}" method="post" class="solicitud-acciones-inferior">
+                  <input type="hidden" name="_csrf" value="{{ csrf }}">
+                  <button type="submit" class="boton {{ sala.habilitada ? 'boton-secundario' : 'boton-primario' }} boton-chico">{{ sala.habilitada ? 'Retirar del sitio' : 'Volver a publicar' }}</button>
+                  {% if sala.habilitada %}
+                    <a href="/salas/{{ sala.id }}" class="boton boton-fantasma boton-chico">Ver la ficha pública</a>
+                  {% endif %}
+                </form>
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+
+      {% if elegida.estado == 'pendiente' %}
+        <div class="bandeja-motivo">
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'motivo',
+            etiqueta: 'Motivo de la resolución',
+            tipo: 'textarea',
+            filas: 4,
+            valor: valores.motivo ?? '',
+            requerido: true,
+            maximo: maximo_motivo,
+            ayuda: 'Obligatorio en cualquier resolución. Queda registrado en el historial de la solicitud.',
+            errores: errores
+          } only %}
+          <div class="bandeja-acciones">
+            <button type="submit" class="boton boton-primario">Enviar resolución</button>
+            <p class="bandeja-acciones-nota">El motivo se le muestra a quien la mandó.</p>
+          </div>
+        </div>
+        </form>
+      {% endif %}
+    </article>
+  {% endif %}
+</div>
+{% endblock %}

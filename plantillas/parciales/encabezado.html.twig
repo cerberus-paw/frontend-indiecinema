@@ -135,7 +135,7 @@
             {% endif %}
             {# Quien todavía no es organizador puede pedirlo con la solicitud #}
             {% if not usr.alcanza('organizador') %}
-              <a href="/cuenta/solicitud" class="menu-item" role="menuitem">
+              <a href="/solicitar-sala" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">🎬</span> Abrir una sala
               </a>
             {% endif %}
@@ -153,7 +153,7 @@
               <a href="/organizador/funciones/nueva" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">🎬</span> Programar función
               </a>
-              <a href="/organizador/salas/nueva" class="menu-item" role="menuitem">
+              <a href="/solicitar-sala" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">➕</span> Publicar una sala
               </a>
             {% endif %}
@@ -165,11 +165,8 @@
               <a href="/cuenta/administracion/usuarios" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
               </a>
-              <a href="/cuenta/administracion/solicitudes" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">📨</span> Solicitudes
-              </a>
-              <a href="/administracion/salas" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">✅</span> Habilitar salas
+              <a href="/administracion/solicitudes" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">📨</span> Solicitudes de sala
               </a>
             {% endif %}
 

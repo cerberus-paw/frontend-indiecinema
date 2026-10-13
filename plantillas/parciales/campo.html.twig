@@ -19,8 +19,10 @@
   - clase: (string, opcional) Clases CSS adicionales para el contenedor.
   - minimo / maximo: (int, opcional) Largo mínimo y máximo del texto (minlength y maxlength), en 'text', 'email', 'tel' y 'textarea'.
   - patron: (string, opcional) Expresión que tiene que cumplir todo el valor (pattern), salvo en 'textarea'.
+  - valor_minimo / valor_maximo: (int, opcional) Para 'number': el menor y el mayor valor (min y max).
+  - aceptar: (string, opcional) Para 'file': los tipos que se pueden elegir (accept).
   - autocompletar: (string, opcional) Qué dato es, para que el navegador lo sugiera (autocomplete).
-  Con minimo, maximo y patron tomados de las reglas que manda el backend, el navegador valida lo mismo que el servidor.
+  Con minimo, maximo, patron, valor_minimo, valor_maximo y aceptar tomados de las reglas que manda el backend, el navegador valida lo mismo que el servidor.
 #}
 {# Resuelve el mensaje de error puntual o desde la colección de errores para evitar duplicar condicionales #}
 {% set mensaje_error = error ?? (errores[nombre] ?? null) %}
@@ -169,6 +171,9 @@
         {% if minimo is defined %}minlength="{{ minimo }}"{% endif %}
         {% if maximo is defined %}maxlength="{{ maximo }}"{% endif %}
         {% if patron is defined %}pattern="{{ patron }}"{% endif %}
+        {% if valor_minimo is defined %}min="{{ valor_minimo }}"{% endif %}
+        {% if valor_maximo is defined %}max="{{ valor_maximo }}"{% endif %}
+        {% if aceptar is defined %}accept="{{ aceptar }}"{% endif %}
         {# Pista para que el navegador sugiera el dato guardado (correo, teléfono…) #}
         {% if autocompletar is defined %}autocomplete="{{ autocompletar }}"{% endif %}
         {# Soporte de accesibilidad anunciando el mensaje de error o texto de ayuda #}

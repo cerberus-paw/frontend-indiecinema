@@ -1,11 +1,12 @@
 {#
-  Barra lateral de las pantallas del administrador, como el wireframe de la E2
-  (administracion-usuarios-parametros): el logo, las secciones que ya tienen pantalla y, al pie,
-  quién está en sesión y el botón para salir. Reemplaza al encabezado del sitio, así que el cierre
-  de sesión tiene que estar acá.
+  Barra lateral de las pantallas del administrador, como los wireframes de la E2: el logo, las
+  secciones que ya tienen pantalla y, al pie, quién está en sesión y el botón para salir. Reemplaza
+  al encabezado del sitio, así que el cierre de sesión tiene que estar acá. Las secciones van en
+  los dos grupos de los wireframes: «Administración» (administracion-usuarios-parametros) y
+  «Moderación» (moderacion-solicitudes), que mientras no haya moderador resuelve el administrador.
 
   Parámetros recibidos:
-  - activa: (string) la sección actual: 'usuarios', 'solicitudes' o 'salas'.
+  - activa: (string) la sección actual: 'usuarios' o 'solicitudes'.
   - usuario: el usuario en sesión.
   - csrf: el token del formulario para salir.
 #}
@@ -21,11 +22,14 @@
       <li>
         <a href="/cuenta/administracion/usuarios" class="panel-admin-menu-enlace{% if activa == 'usuarios' %} activo{% endif %}"{% if activa == 'usuarios' %} aria-current="page"{% endif %}>Usuarios y roles</a>
       </li>
+    </ul>
+  </nav>
+
+  <nav aria-label="Moderación">
+    <p class="panel-admin-menu-titulo">Moderación</p>
+    <ul class="panel-admin-menu-lista">
       <li>
-        <a href="/cuenta/administracion/solicitudes" class="panel-admin-menu-enlace{% if activa == 'solicitudes' %} activo{% endif %}"{% if activa == 'solicitudes' %} aria-current="page"{% endif %}>Solicitudes</a>
-      </li>
-      <li>
-        <a href="/administracion/salas" class="panel-admin-menu-enlace{% if activa == 'salas' %} activo{% endif %}"{% if activa == 'salas' %} aria-current="page"{% endif %}>Salas</a>
+        <a href="/administracion/solicitudes" class="panel-admin-menu-enlace{% if activa == 'solicitudes' %} activo{% endif %}"{% if activa == 'solicitudes' %} aria-current="page"{% endif %}>Solicitudes de sala</a>
       </li>
     </ul>
   </nav>
