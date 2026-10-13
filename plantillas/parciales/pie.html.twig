@@ -6,6 +6,8 @@
 #}
 {# Resuelve de forma segura el usuario en sesión o null para evitar errores en modo estricto de Twig #}
 {% set usr = usuario ?? null %}
+{# El administrador no usa el sitio público: su pie lleva sólo la marca, su panel y los créditos #}
+{% set es_admin = usr and usr.alcanza('administrador') %}
 {# Elemento semántico footer que engloba el pie de página de la aplicación #}
 <footer class="pie-pagina">
   {# Contenedor con ancho delimitado y padding horizontal para centrar el contenido #}
@@ -30,6 +32,16 @@
     {# Cierre de la primera columna #}
     </div>
 
+    {% if es_admin %}
+    <div class="pie-columna">
+      <h3 class="pie-subtitulo">Administración</h3>
+      <ul class="pie-enlaces">
+        <li><a href="/cuenta/administracion/usuarios">Usuarios y roles</a></li>
+        <li><a href="/cuenta/administracion/solicitudes">Solicitudes</a></li>
+        <li><a href="/administracion/salas">Salas</a></li>
+      </ul>
+    </div>
+    {% else %}
     {# Columna 2: Enlaces de exploración y catálogo público del backlog E3 #}
     <div class="pie-columna">
       {# Título de la columna #}
@@ -62,11 +74,6 @@
             <li><a href="/organizador/funciones/nueva">Programar una función</a></li>
             <li><a href="/organizador/salas/nueva">Publicar una sala</a></li>
           {% endif %}
-          {% if usr.alcanza('administrador') %}
-            <li><a href="/cuenta/administracion/usuarios">Usuarios y roles</a></li>
-            <li><a href="/cuenta/administracion/solicitudes">Solicitudes</a></li>
-            <li><a href="/administracion/salas">Habilitar salas</a></li>
-          {% endif %}
         {% else %}
           <li><a href="/cuenta/ingresar">Ingresar</a></li>
           <li><a href="/cuenta/registro">Crear cuenta</a></li>
@@ -85,6 +92,7 @@
         <li><a href="/acerca-de#como-funciona">Cómo funciona</a></li>
       </ul>
     </div>
+    {% endif %}
   {# Cierre del contenedor principal del pie #}
   </div>
 

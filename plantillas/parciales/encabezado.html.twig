@@ -9,6 +9,8 @@
 {% set usr = usuario ?? null %}
 {# Resuelve la ruta completa normalizada combinando el prefijo del subsistema y la ruta actual #}
 {% set ruta = (prefijo ?? '') ~ (ruta_actual ?? '') %}
+{# El administrador no usa el sitio público: sin buscador ni navegación, sólo el acceso a su panel #}
+{% set es_admin = usr and usr.alcanza('administrador') %}
 {# Elemento semántico header que representa la cabecera superior y fija de la página #}
 <header class="encabezado">
   {# Contenedor con ancho máximo centrado para mantener alineación consistente con el resto de la interfaz #}
@@ -25,6 +27,7 @@
     {# Cierre de la sección de marca #}
     </div>
 
+    {% if not es_admin %}
     {# Sección del buscador rápido hacia la cartelera #}
     <div class="encabezado-buscador">
       {# Formulario de búsqueda accesible por GET hacia la cartelera #}
@@ -43,11 +46,17 @@
       </form>
     {# Cierre de la sección del buscador #}
     </div>
+    {% endif %}
 
     {# Navegación principal estructurada semánticamente con nav #}
     <nav class="navegacion-principal" aria-label="Navegación principal">
       {# Lista no ordenada de enlaces de navegación pública #}
       <ul class="nav-lista">
+        {% if es_admin %}
+          <li class="nav-item-rol">
+            <a href="/cuenta/administracion/usuarios" class="nav-enlace enlace-rol">Panel de administración</a>
+          </li>
+        {% else %}
         {# Enlace a Cartelera: ruta /cartelera #}
         <li>
           <a href="/cartelera" class="nav-enlace{% if ruta == '/cartelera' or ruta starts with '/cartelera' %} activo{% endif %}">Cartelera</a>
@@ -65,13 +74,14 @@
           <a href="/acerca-de" class="nav-enlace{% if ruta starts with '/acerca-de' %} activo{% endif %}">Acerca de</a>
         </li>
 
-        {# Acceso directo en barra para Organizador: lo ven el organizador y los roles que lo alcanzan (moderador y administrador) #}
+        {# Acceso directo en barra para Organizador: lo ven el organizador y el moderador #}
         {% if usr and usr.alcanza('organizador') %}
           <li class="nav-item-rol">
             <a href="/organizador/salas" class="nav-enlace enlace-rol{% if ruta starts with '/organizador/salas' %} activo{% endif %}" title="Mis salas">
               Mis salas
             </a>
           </li>
+        {% endif %}
         {% endif %}
       {# Cierre de la lista de navegación principal #}
       </ul>
@@ -111,15 +121,18 @@
               <span class="menu-usuario-rol">Rol activo: {{ usr.rol.value|capitalize }}</span>
             </div>
 
+            {# «Mi cuenta» es del sitio público: el administrador tiene sólo su panel #}
+            {% if not es_admin %}
             {# Línea divisoria visual #}
             <div class="menu-separador" role="separator"></div>
 
-            {# Título de la sección de Mi Cuenta (común a todos los usuarios autenticados) #}
+            {# Título de la sección de Mi Cuenta #}
             <div class="menu-seccion-titulo">Mi cuenta</div>
             {# Enlace al panel principal de cuenta #}
             <a href="/cuenta/" class="menu-item" role="menuitem">
               <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
             </a>
+            {% endif %}
             {# Quien todavía no es organizador puede pedirlo con la solicitud #}
             {% if not usr.alcanza('organizador') %}
               <a href="/cuenta/solicitud" class="menu-item" role="menuitem">
@@ -127,8 +140,8 @@
               </a>
             {% endif %}
 
-            {# Sección condicional de opciones del Organizador, también para los roles que lo alcanzan #}
-            {% if usr.alcanza('organizador') %}
+            {# Sección condicional de opciones del Organizador, también para el moderador #}
+            {% if usr.alcanza('organizador') and not es_admin %}
               <div class="menu-separador" role="separator"></div>
               <div class="menu-seccion-titulo">Panel del Organizador</div>
               <a href="/organizador/salas" class="menu-item" role="menuitem">
