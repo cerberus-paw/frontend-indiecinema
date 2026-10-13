@@ -26,6 +26,9 @@ class BuscadorDeCartelera {
   /** Cuánto esperar entre vaciar el anuncio y escribirlo, para que se lea aunque se repita. */
   static ESPERA_DEL_ANUNCIO = 100;
 
+  /** El mensaje genérico si falla el pedido: se muestra en la sección y se anuncia. */
+  static MENSAJE_DE_ERROR = 'No pudimos actualizar la cartelera. Probá de nuevo en un rato.';
+
   /** Los estados de la tarjeta, como en parciales/tarjeta_funcion.html.twig. */
   static ESTADOS = {
     PROGRAMADA: ['PROGRAMADA', 'insignia-programada'],
@@ -155,6 +158,7 @@ class BuscadorDeCartelera {
     } catch (error) {
       if (error.name !== 'AbortError') {
         this.mostrarError(url);
+        this.decir(BuscadorDeCartelera.MENSAJE_DE_ERROR);
       }
     }
   }
@@ -181,9 +185,18 @@ class BuscadorDeCartelera {
     if (datos.avisos.length > 0) {
       partes.push('Algunos filtros no se aplicaron.');
     }
-    // Se vacía antes, así se lee aunque el texto sea el mismo que el anterior.
+    this.decir(partes.join(' '));
+  }
+
+  /**
+   * Escribe un texto en la región del anuncio. Se vacía antes, así se lee aunque el texto sea el
+   * mismo que el anterior.
+   *
+   * @param {string} texto
+   */
+  decir(texto) {
     this.anuncio.textContent = '';
-    setTimeout(() => { this.anuncio.textContent = partes.join(' '); }, BuscadorDeCartelera.ESPERA_DEL_ANUNCIO);
+    setTimeout(() => { this.anuncio.textContent = texto; }, BuscadorDeCartelera.ESPERA_DEL_ANUNCIO);
   }
 
   /**
@@ -195,7 +208,7 @@ class BuscadorDeCartelera {
   mostrarError(url) {
     clearTimeout(this.espera);
     this.espera = null;
-    const error = this.alerta('error', 'alert', { texto: 'No pudimos actualizar la cartelera. Probá de nuevo en un rato.' });
+    const error = this.alerta('error', 'alert', { texto: BuscadorDeCartelera.MENSAJE_DE_ERROR });
     error.querySelector('.alerta-contenido').append(this.nodo('p', { class: 'alerta-texto' }, [
       this.nodo('a', { href: url, class: 'alerta-enlace' }, ['Cargar esta búsqueda de nuevo']),
     ]));
