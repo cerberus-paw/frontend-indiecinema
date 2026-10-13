@@ -1,0 +1,163 @@
+{#
+  Solicitud para ser organizador, en /cuenta/solicitud, como el wireframe de la E2
+  (solicitud-de-sala): cada sección con su título a la izquierda y sus campos a la derecha.
+  Está recortada a lo que pide la E3 (los datos del espacio, el contacto, la presentación y las
+  declaraciones). Queda afuera lo que todavía no existe: el estado de la solicitud, la
+  documentación, las fotos, el equipamiento, los parámetros de la sala y el borrador.
+
+  Las validaciones del navegador salen de las reglas que manda el backend, las mismas con las que
+  valida él. Cada regla trae las claves que espera el parcial de campo (requerido, minimo, maximo
+  y patron), así se le pasan tal cual: un límite cambia en un solo lugar.
+
+  Variables:
+  - reglas: campo => {requerido, maximo y, si los tiene, minimo y patron}.
+  - valores: lo que mandó, para volver a mostrarlo (las casillas, como verdadero o falso).
+  - errores: campo => qué está mal.
+  - ya_es_organizador: ya tiene el rol, o uno que lo incluye; no se muestra el formulario.
+  - error_general: si hubo errores (opcional).
+  - mensaje_exito: si la acaba de mandar (opcional); tampoco se muestra el formulario.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Solicitud para abrir una sala{% endblock %}
+
+{% block contenido %}
+<div class="contenedor-formulario-amplio">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga"><a href="/cuenta/" class="enlace-miga">Mi cuenta</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Solicitud de sala</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div>
+      <h1 class="solicitud-titulo">Solicitud para abrir una sala indie</h1>
+      <p class="solicitud-bajada">
+        Contanos de tu espacio. El equipo de IndieCinema revisa la solicitud y, si la aprueba, te da
+        el rol de organizador para que publiques tu sala.
+      </p>
+    </div>
+  </header>
+
+  {% if mensaje_exito is defined %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', titulo: 'Solicitud enviada', mensaje: mensaje_exito } only %}
+    <p><a href="/cartelera" class="enlace-destacado">Volver a la cartelera</a></p>
+  {% elseif ya_es_organizador %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      titulo: 'Ya sos organizador',
+      mensaje: 'Tu cuenta ya puede publicar salas, así que no hace falta pedirlo.'
+    } only %}
+    <p><a href="/organizador/salas" class="enlace-destacado">Ir a «Mis salas»</a></p>
+  {% else %}
+    {% if error_general is defined %}
+      {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se pudo enviar la solicitud', mensaje: error_general } only %}
+    {% endif %}
+
+    {# Sin novalidate: el navegador avisa antes de mandar, y el backend vuelve a validar todo #}
+    <form action="/cuenta/solicitud" method="post">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+      <fieldset class="seccion-formulario seccion-lateral">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Datos del espacio</span>
+          <span class="seccion-subtitulo">Lo que va a ver el público en la ficha de la sala.</span>
+        </legend>
+        <div class="seccion-campos">
+          <div class="fila-campos-doble">
+            {% include 'parciales/campo.html.twig' with reglas.sala|merge({
+              nombre: 'sala',
+              etiqueta: 'Nombre de la sala',
+              valor: valores.sala ?? '',
+              placeholder: 'El Galpón de la Estación',
+              errores: errores
+            }) only %}
+            {% include 'parciales/campo.html.twig' with reglas.localidad|merge({
+              nombre: 'localidad',
+              etiqueta: 'Localidad',
+              valor: valores.localidad ?? '',
+              placeholder: 'Luján',
+              errores: errores
+            }) only %}
+          </div>
+          {% include 'parciales/campo.html.twig' with reglas.presentacion|merge({
+            nombre: 'presentacion',
+            etiqueta: 'Presentación',
+            tipo: 'textarea',
+            filas: 5,
+            valor: valores.presentacion ?? '',
+            placeholder: 'Galpón ferroviario reciclado como espacio cultural, a dos cuadras de la estación…',
+            ayuda: 'Qué es el espacio, cuántas personas entran y qué te gustaría programar. Entre '
+              ~ reglas.presentacion.minimo ~ ' y ' ~ reglas.presentacion.maximo ~ ' caracteres.',
+            errores: errores
+          }) only %}
+        </div>
+      </fieldset>
+
+      <fieldset class="seccion-formulario seccion-lateral">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Contacto</span>
+          <span class="seccion-subtitulo">Por dónde te responde el equipo.</span>
+        </legend>
+        <div class="seccion-campos">
+          <div class="fila-campos-doble">
+            {% include 'parciales/campo.html.twig' with reglas.correo|merge({
+              nombre: 'correo',
+              etiqueta: 'Correo de contacto',
+              tipo: 'email',
+              valor: valores.correo ?? '',
+              placeholder: 'nombre@ejemplo.com',
+              autocompletar: 'email',
+              errores: errores
+            }) only %}
+            {% include 'parciales/campo.html.twig' with reglas.telefono|merge({
+              nombre: 'telefono',
+              etiqueta: 'Teléfono',
+              tipo: 'tel',
+              valor: valores.telefono ?? '',
+              placeholder: '+54 2323 44-1234',
+              ayuda: 'Optativo. Con números, espacios o guiones.',
+              autocompletar: 'tel',
+              errores: errores
+            }) only %}
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="seccion-formulario seccion-lateral">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Términos y condiciones</span>
+          <span class="seccion-subtitulo">Sin las dos no se puede mandar la solicitud.</span>
+        </legend>
+        <div class="seccion-campos">
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'habilitacion',
+            etiqueta: 'Declaro que el espacio cuenta con la habilitación y las condiciones de seguridad necesarias, y que soy responsable de ellas.',
+            tipo: 'checkbox',
+            marcado: valores.habilitacion ?? false,
+            requerido: true,
+            errores: errores
+          } only %}
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'derechos',
+            etiqueta: 'Me comprometo a contar con los derechos de exhibición de cada obra que programe en esta sala.',
+            tipo: 'checkbox',
+            marcado: valores.derechos ?? false,
+            requerido: true,
+            errores: errores
+          } only %}
+        </div>
+      </fieldset>
+
+      <div class="solicitud-acciones-inferior">
+        {% include 'parciales/boton.html.twig' with { texto: 'Enviar la solicitud', tipo: 'submit', variante: 'primario' } only %}
+        <a href="/" class="boton boton-secundario">Cancelar</a>
+      </div>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
