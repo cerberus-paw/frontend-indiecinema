@@ -3984,8 +3984,7 @@ dd {
 
 /* --------------------------------------------------------------------------
    22. ADMINISTRACIÓN: TABLAS DEL PANEL (IC-106)
-   Componentes de cuentas/administracion_usuarios.html.twig y
-   programacion/administracion_salas.html.twig (IC-105)
+   Componentes de cuentas/administracion_usuarios.html.twig, y la tabla de «Mis funciones»
    -------------------------------------------------------------------------- */
 
 /* Caja de la tabla: en pantallas angostas la tabla se desplaza adentro y la página no se corre */
@@ -4545,16 +4544,6 @@ a.tabla-admin-principal {
 a.tabla-admin-principal:hover,
 a.tabla-admin-principal:focus-visible {
   text-decoration: underline;
-}
-
-/* Columna de los botones: alineados con su título, como el wireframe, y sin cortar el texto */
-.tabla-admin-acciones {
-  white-space: nowrap;
-}
-
-/* El formulario de cada botón no ocupa más que el botón */
-.tabla-admin-acciones form {
-  display: inline;
 }
 
 /* --------------------------------------------------------------------------
