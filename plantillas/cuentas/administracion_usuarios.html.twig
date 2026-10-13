@@ -1,10 +1,10 @@
 {#
   «Usuarios y roles» del administrador, en /cuenta/administracion/usuarios, como el wireframe de la
-  E2 (administracion-usuarios-parametros): la barra lateral de administración, el buscador con los
-  filtros de rol y estado, la tabla y el paginado numerado. Queda afuera lo que todavía no existe:
-  las tarjetas de números, las columnas de conducta y funciones, «Acciones» (ver, suspender, dar
-  de baja), exportar, invitar y los parámetros. Los filtros son un formulario GET, así viajan en la
-  URL y funcionan sin JavaScript.
+  E2 (administracion-usuarios-parametros): la barra lateral de administración, las tarjetas de
+  números, el buscador con los filtros de rol y estado, la tabla y el paginado numerado. Queda
+  afuera lo que todavía no existe: las tarjetas de funciones y recaudación, las columnas de
+  conducta y funciones, «Acciones» (ver, suspender, dar de baja), exportar, invitar y los
+  parámetros. Los filtros son un formulario GET, así viajan en la URL y funcionan sin JavaScript.
 
   El rol de cada fila es un desplegable, como en el wireframe: elegir otro y «Guardar» es un POST
   con el token CSRF y los filtros en campos ocultos, para volver a la misma búsqueda. «Guardar»
@@ -13,6 +13,8 @@
   moderador y al administrador no se los cambia desde la web: su desplegable está deshabilitado.
 
   Variables:
+  - resumen: {usuarios, nuevos (este mes), organizadores (con la cuenta activa)}, sobre todas las
+    cuentas.
   - usuarios: lista de {id, nombre, correo, rol (el mayor), estado (pendiente, activa o suspendida)}.
   - filtros: los filtros aplicados (q, rol, estado); falta el que no se aplicó.
   - avisos: lista de textos, uno por cada filtro inválido que se dejó afuera.
@@ -31,6 +33,19 @@
   <h1 class="panel-admin-titulo">Usuarios y roles</h1>
   <p class="panel-admin-bajada">Buscá cuentas y asigná roles.</p>
 </header>
+
+<dl class="panel-admin-resumen">
+  <div class="panel-admin-dato">
+    <dt>Usuarios registrados</dt>
+    <dd class="panel-admin-dato-valor">{{ resumen.usuarios|number_format(0, ',', '.') }}</dd>
+    <dd class="panel-admin-dato-nota">+{{ resumen.nuevos|number_format(0, ',', '.') }} este mes</dd>
+  </div>
+  <div class="panel-admin-dato">
+    <dt>Organizadores activos</dt>
+    <dd class="panel-admin-dato-valor">{{ resumen.organizadores|number_format(0, ',', '.') }}</dd>
+    <dd class="panel-admin-dato-nota">con la cuenta activa</dd>
+  </div>
+</dl>
 
 <form class="panel-admin-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios">
   <label class="panel-admin-busqueda">

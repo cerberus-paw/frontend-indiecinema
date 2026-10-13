@@ -4106,6 +4106,66 @@ dd {
   color: var(--color-error);
 }
 
+/* Tarjetas de números arriba de la tabla, como el wireframe: del ancho de cuatro por fila, aunque
+   haya dos */
+.panel-admin-resumen {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espacio-4);
+  margin: 0 0 var(--espacio-6);
+  /* Sin la caja que el dl tiene en todo el sitio: cada tarjeta tiene la suya */
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.panel-admin-dato {
+  padding: var(--espacio-4) var(--espacio-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie);
+}
+
+/* «USUARIOS REGISTRADOS», en versalitas como los títulos de las columnas */
+.panel-admin-dato dt {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+.panel-admin-dato dd {
+  margin: 0;
+}
+
+.panel-admin-dato-valor {
+  margin-top: var(--espacio-2);
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-3xl);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-texto-brillante);
+}
+
+.panel-admin-dato-nota {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* En tablet, dos por fila; en el celular, una */
+@media (max-width: 900px) {
+  .panel-admin-resumen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .panel-admin-resumen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* El body corta lo que se sale a los costados con overflow-x: hidden, que lo vuelve un contenedor
    con desplazamiento propio: la barra lateral (sticky) se pegaba a él, que nunca se desplaza, y se
    iba con la página. clip corta igual sin eso */
