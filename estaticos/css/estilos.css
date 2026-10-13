@@ -4813,11 +4813,12 @@ a.tabla-admin-principal:focus-visible {
   margin-top: var(--espacio-4);
 }
 
+/* Una sola foto: más grande que las miniaturas del wireframe, y en 16:9 como en la ficha de la sala */
 .bandeja-foto {
   display: block;
-  width: 240px;
+  width: 400px;
   max-width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
   border-radius: var(--radio-md);
   border: 1px solid var(--color-borde);
