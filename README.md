@@ -38,6 +38,7 @@ frontend-indiecinema/
 │   │   ├── cartelera.html.twig # Cartelera pública con filtros GET, paginado y descarga en CSV
 │   │   ├── ficha_funcion.html.twig # Ficha de una función: obras, sala, fecha, precio y estado
 │   │   ├── inicio.html.twig    # Portada: buscador, próximas funciones y salas
+│   │   ├── mis_funciones.html.twig # «Mis funciones»: las funciones de las salas del organizador, con estado y fecha
 │   │   ├── mis_salas.html.twig # Gestión de salas del organizador
 │   │   ├── sala.html.twig      # Ficha pública de una sala con sus próximas funciones
 │   │   └── salas.html.twig     # Catálogo público de salas indie habilitadas, con buscador
@@ -102,10 +103,10 @@ El encabezado y el pie adaptan sus opciones y enlaces según el estado de la ses
   - No ve los accesos del organizador.
   - Botón seguro de **Cerrar sesión** por POST (`/cuenta/salir`) con token CSRF.
 - **Organizador (`usuario.alcanza('organizador')`):**
-  - Todo lo de espectador más la gestión de sus salas:
+  - Todo lo de espectador más la gestión de sus salas y sus funciones:
   - Acceso directo en la barra de navegación superior: **Mis salas** (`/organizador/salas`).
-  - En el menú desplegable: sección **Panel del Organizador** con accesos a **Mis salas** (`/organizador/salas`) y **Publicar una sala** (`/organizador/salas/nueva`).
-  - En el pie: accesos a **Mi cuenta**, **Mis salas** y **Publicar una sala**.
+  - En el menú desplegable: sección **Panel del Organizador** con accesos a **Mis salas** (`/organizador/salas`), **Mis funciones** (`/organizador/funciones`) y **Publicar una sala** (`/organizador/salas/nueva`).
+  - En el pie: accesos a **Mi cuenta**, **Mis salas**, **Mis funciones** y **Publicar una sala**.
 - **Moderador y administrador:**
   - Lo mismo que el organizador: el backend los deja entrar a esas pantallas.
   - Todavía no tienen opciones propias: la moderación y la administración (usuarios y roles) no tienen pantalla. Su sección del menú se suma con ellas.
@@ -239,6 +240,7 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 - **`plantillas/programacion/cartelera.html.twig`**: Cartelera pública en `/cartelera` con un formulario GET de filtros (búsqueda, localidad, fecha y género) que funciona sin JavaScript, avisos de los filtros inválidos, mensaje propio sin resultados, cuadrícula de tarjetas de función, paginado anterior/siguiente (IC-80) y un enlace para descargar en CSV la cartelera con los mismos filtros (IC-83). Los resultados van en la sección `#resultados-cartelera`, que con JavaScript redibuja `BuscadorDeCartelera` sin recargar (IC-101).
 - **`plantillas/programacion/ficha_funcion.html.twig`**: Ficha de una función en `/cartelera/{id}`, en cualquier estado: las obras (elegidas, o candidatas si está en votación) con su sinopsis, duración y géneros, la sala con su dirección y el enlace a su ficha, la fecha (o «Fecha a confirmar»), el precio, el cupo y el estado, con un aviso si se canceló (IC-86). Migas de pan, la sala y cada obra en tarjetas que en celular pasan a una columna, y encabezados sin saltos de nivel: `h1` la función, `h2` la sala y cada obra (IC-87).
 - **`plantillas/programacion/inicio.html.twig`**: Portada en `/`: la presentación con un buscador GET (qué y dónde) que lleva a la cartelera filtrada, la cantidad de salas publicadas y de funciones en cartelera, las próximas cuatro funciones y tres salas, cada sección con el enlace a su listado y un mensaje propio si está vacía (IC-93).
+- **`plantillas/programacion/mis_funciones.html.twig`**: «Mis funciones» para organizadores en `/organizador/funciones`, con migas de pan: una tabla con las funciones de sus salas en cualquier estado, también las canceladas y las que todavía no tienen fecha, con la sala, la fecha (o «Sin fecha todavía»), el estado y la entrada. Sólo enlaza a la ficha de la función y a la de la sala si la sala está habilitada, y muestra un mensaje si no tiene ninguna función (IC-120).
 - **`plantillas/programacion/mis_salas.html.twig`**: Vista de «Mis salas» para organizadores en `/organizador/salas` con migas de pan, botón para publicar sala y cuadrícula de tarjetas editables (IC-38).
 - **`plantillas/programacion/salas.html.twig`**: Catálogo público de salas indie habilitadas en `/salas` con cuadrícula de tarjetas de sala (IC-39), y un buscador GET por nombre y localidad que funciona sin JavaScript, con el aviso si la búsqueda no es válida y un mensaje propio sin resultados (IC-91).
 - **`plantillas/programacion/sala.html.twig`**: Ficha pública de una sala en `/salas/{id}`: la foto, la dirección, la capacidad, la descripción y sus próximas funciones con la tarjeta de función, o un mensaje si no tiene. Si todavía no está publicada (la ve sólo su organizador), lo avisa. Las tarjetas de sala enlazan a su ficha (IC-90).
