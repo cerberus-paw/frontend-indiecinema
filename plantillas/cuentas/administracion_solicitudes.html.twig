@@ -80,7 +80,8 @@
             <dt>Cuenta creada</dt>
             <dd>{{ elegida.solicitante.cuenta_creada }}</dd>
             <dt>Correo de contacto</dt>
-            <dd><a href="mailto:{{ elegida.correo }}">{{ elegida.correo }}</a></dd>
+            {# Codificado: un ? o un & del correo armarían parámetros del mailto (una copia, otro asunto). La @ queda como es. #}
+            <dd><a href="mailto:{{ elegida.correo|url_encode|replace({'%40': '@'}) }}">{{ elegida.correo }}</a></dd>
             <dt>Teléfono</dt>
             <dd>{{ elegida.telefono ?? 'No lo dejó' }}</dd>
           </dl>
