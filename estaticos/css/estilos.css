@@ -4078,8 +4078,9 @@ dd {
   color: var(--color-fondo);
 }
 
-/* Cuenta suspendida */
-.estado-cuenta-suspendida {
+/* Cuenta suspendida, y la función cancelada en «Mis funciones»: las dos son la baja */
+.estado-cuenta-suspendida,
+.estado-cuenta-cancelada {
   border-color: var(--color-error);
   color: var(--color-error);
 }
