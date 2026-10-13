@@ -3882,7 +3882,7 @@ dd {
 .tabla-admin {
   /* Todo el ancho, con un mínimo para que las columnas no se aprieten en el celular */
   width: 100%;
-  min-width: 640px;
+  min-width: 520px;
   /* Bordes de celda unidos */
   border-collapse: collapse;
   /* Texto */
@@ -3912,8 +3912,8 @@ dd {
   padding: var(--espacio-3) var(--espacio-4);
   /* Línea entre filas */
   border-bottom: 1px solid var(--color-borde);
-  /* Arriba, así el nombre y el correo quedan alineados con el resto */
-  vertical-align: top;
+  /* Al medio, alineado con el avatar */
+  vertical-align: middle;
 }
 
 /* La última fila no lleva línea: la cierra el borde de la caja */
@@ -3942,45 +3942,230 @@ dd {
   overflow-wrap: anywhere;
 }
 
-/* Lista de insignias de rol de una fila */
-.tabla-admin-insignias {
-  /* Sin viñetas ni sangría */
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  /* En fila, y bajan si no entran */
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--espacio-1);
-}
-
-/* La insignia del menú de usuario, sin el margen que la separa del nombre */
-.tabla-admin-insignias .usuario-rol {
+/* La insignia del menú de usuario, en la celda del rol */
+.tabla-admin .usuario-rol {
+  /* Sin el margen que la separa del nombre en el menú */
   margin-top: 0;
+  /* En su línea */
+  display: inline-block;
 }
 
-/* Estado de la cuenta */
+/* Avatar con la inicial y, al lado, el nombre y el correo */
+.tabla-admin-usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+}
+
+/* Círculo con la inicial, como el del wireframe */
+.tabla-admin-avatar {
+  /* Círculo fijo */
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  /* La inicial centrada */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  /* Neutro */
+  background-color: var(--color-superficie-elevada);
+  color: var(--color-texto-secundario);
+  border: 1px solid var(--color-borde-medio);
+}
+
+/* Estado de la cuenta: píldora en mayúsculas, como el wireframe */
 .estado-cuenta {
-  /* Píldora */
   display: inline-block;
-  padding: 0.1rem var(--espacio-2);
+  padding: 0.15rem var(--espacio-3);
   border-radius: var(--radio-completo);
-  /* Texto chico */
+  /* Texto chico y espaciado */
   font-size: var(--texto-xs);
   font-weight: 600;
-  /* Neutro, para la pendiente */
-  background-color: var(--color-superficie-elevada);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  /* Contorno, para la pendiente */
+  border: 1px solid var(--color-borde-medio);
   color: var(--color-texto-secundario);
 }
 
-/* Cuenta activa */
+/* Cuenta activa: la píldora llena */
 .estado-cuenta-activa {
-  color: var(--color-exito);
+  background-color: var(--color-texto);
+  border-color: var(--color-texto);
+  color: var(--color-fondo);
 }
 
 /* Cuenta suspendida */
 .estado-cuenta-suspendida {
+  border-color: var(--color-error);
   color: var(--color-error);
+}
+
+/* Panel del administrador: la barra lateral y el contenido, como el wireframe */
+.panel-admin {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: var(--espacio-8);
+  align-items: start;
+  /* Separación con el encabezado y el pie */
+  padding-top: var(--espacio-8);
+  padding-bottom: var(--espacio-12);
+}
+
+/* Barra lateral */
+.panel-admin-menu {
+  /* Acompaña al desplazarse */
+  position: sticky;
+  top: var(--espacio-6);
+}
+
+/* «ADMINISTRACIÓN», sobre las secciones */
+.panel-admin-menu-titulo {
+  margin: 0 0 var(--espacio-3);
+  font-size: var(--texto-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+/* Las secciones, una debajo de otra */
+.panel-admin-menu-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+/* Cada sección */
+.panel-admin-menu-enlace {
+  display: block;
+  padding: var(--espacio-2) var(--espacio-3);
+  border-radius: var(--radio-md);
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.panel-admin-menu-enlace:hover {
+  background-color: var(--color-superficie-hover);
+  color: var(--color-texto);
+}
+
+/* La sección actual, resaltada como en el wireframe */
+.panel-admin-menu-enlace.activo {
+  background-color: var(--color-superficie-elevada);
+  color: var(--color-texto-brillante);
+  font-weight: 600;
+}
+
+/* Título y bajada del contenido */
+.panel-admin-cabecera {
+  margin-bottom: var(--espacio-6);
+}
+
+.panel-admin-titulo {
+  margin: 0;
+}
+
+.panel-admin-bajada {
+  margin: var(--espacio-1) 0 0;
+  color: var(--color-texto-secundario);
+}
+
+/* Buscador y filtros en una fila: el buscador más ancho */
+.panel-admin-filtros {
+  display: grid;
+  grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(140px, 1fr)) auto;
+  gap: var(--espacio-3);
+  align-items: center;
+  margin-bottom: var(--espacio-6);
+}
+
+/* El buscador con la lupa adentro */
+.panel-admin-busqueda {
+  position: relative;
+}
+
+.panel-admin-busqueda-icono {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--texto-xs);
+  pointer-events: none;
+}
+
+.panel-admin-busqueda .campo-control {
+  /* Lugar para la lupa */
+  padding-left: 2.4rem;
+}
+
+/* Paginado numerado, como el wireframe: un cuadrado por página */
+.paginado-numerado ul {
+  list-style: none;
+  margin: var(--espacio-6) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.paginado-numero {
+  /* Cuadrado */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 var(--espacio-2);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-sm);
+  color: var(--color-texto);
+  text-decoration: none;
+  font-size: var(--texto-sm);
+}
+
+.paginado-numero:hover {
+  background-color: var(--color-superficie-hover);
+}
+
+/* La página actual, llena */
+.paginado-numero.actual {
+  background-color: var(--color-texto);
+  border-color: var(--color-texto);
+  color: var(--color-fondo);
+  font-weight: 600;
+}
+
+/* «…» entre páginas salteadas */
+.paginado-salto {
+  color: var(--color-texto-apagado);
+}
+
+/* En tablet y celular, la barra lateral pasa arriba y en fila, y los filtros uno debajo de otro */
+@media (max-width: 900px) {
+  .panel-admin {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-4);
+  }
+
+  .panel-admin-menu {
+    position: static;
+  }
+
+  .panel-admin-menu-lista {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .panel-admin-filtros {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* --------------------------------------------------------------------------
