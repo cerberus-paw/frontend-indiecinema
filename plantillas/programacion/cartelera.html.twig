@@ -5,11 +5,12 @@
 
   Variables:
   - funciones: lista de funciones como las recibe parciales/tarjeta_funcion.html.twig.
-  - filtros: los filtros aplicados (q, localidad, fecha en AAAA-MM-DD y genero); falta el que no se aplicó.
+  - filtros: los filtros aplicados (q, localidad, fecha en AAAA-MM-DD y genero, por su nombre); falta el que no se aplicó.
   - filtrada: si hay algún filtro aplicado.
   - avisos: lista de textos, uno por cada filtro inválido que se dejó afuera.
   - localidades: lista de nombres de localidad con funciones, para el filtro.
-  - generos: lista de géneros (id, nombre), para el filtro.
+  - generos: lista de géneros (id, nombre), para el filtro. Cada opción manda el nombre, como la
+    localidad, así la URL se lee y se puede escribir a mano: /cartelera?genero=Comedia.
   - paginado: numero, total_paginas, total_funciones, y las URL anterior y siguiente (null si no hay).
   - csv: la URL de la cartelera en CSV con los mismos filtros, todas las páginas.
 #}
@@ -32,7 +33,7 @@
   {% endfor %}
   {% set opciones_genero = [{valor: '', etiqueta: 'Todos'}] %}
   {% for genero in generos %}
-    {% set opciones_genero = opciones_genero|merge([{valor: genero.id, etiqueta: genero.nombre}]) %}
+    {% set opciones_genero = opciones_genero|merge([{valor: genero.nombre, etiqueta: genero.nombre}]) %}
   {% endfor %}
 
   <form class="filtros-cartelera" action="/cartelera" method="get" role="search" aria-label="Filtrar la cartelera">
