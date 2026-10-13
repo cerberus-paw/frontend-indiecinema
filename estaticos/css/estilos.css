@@ -3857,8 +3857,8 @@ dd {
 
 /* --------------------------------------------------------------------------
    22. ADMINISTRACIÓN: TABLAS DEL PANEL (IC-106)
-   Componentes de cuentas/administracion_usuarios.html.twig; las comparten las otras tablas
-   del administrador
+   Componentes de cuentas/administracion_usuarios.html.twig y
+   programacion/administracion_salas.html.twig (IC-105)
    -------------------------------------------------------------------------- */
 
 /* Caja de la tabla: en pantallas angostas la tabla se desplaza adentro y la página no se corre */
@@ -4166,6 +4166,29 @@ dd {
   .panel-admin-filtros {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* El nombre de la fila como enlace (la ficha de la sala) */
+a.tabla-admin-principal {
+  /* Del color del texto, subrayado al pasar */
+  color: var(--color-texto);
+  text-decoration: none;
+}
+
+a.tabla-admin-principal:hover,
+a.tabla-admin-principal:focus-visible {
+  text-decoration: underline;
+}
+
+/* Columna de los botones: a la derecha y sin cortar el texto del botón */
+.tabla-admin-acciones {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* El formulario de cada botón no ocupa más que el botón */
+.tabla-admin-acciones form {
+  display: inline;
 }
 
 /* --------------------------------------------------------------------------
