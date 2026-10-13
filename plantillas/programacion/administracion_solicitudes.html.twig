@@ -116,12 +116,6 @@
         <span>Enviada el {{ elegida.enviada }}</span>
       </p>
 
-      {% if sala.imagen %}
-        <div class="bandeja-fotos">
-          <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="bandeja-foto">
-        </div>
-      {% endif %}
-
       {# En una pendiente, el formulario abarca la resolución y el motivo, que en el wireframe
          están en lugares distintos de la pantalla #}
       {% if elegida.estado == 'pendiente' %}
@@ -130,6 +124,11 @@
       {% endif %}
       <div class="bandeja-columnas">
         <div>
+          {# La sala tiene una sola foto, no la fila de miniaturas del wireframe: arriba de la
+             columna, la resolución queda al lado y no un hueco #}
+          {% if sala.imagen %}
+            <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="bandeja-foto">
+          {% endif %}
           <h3 class="bandeja-subtitulo">Datos del espacio</h3>
           {# nl2br escapa antes de agregar los <br> #}
           <p class="bandeja-texto">{{ sala.descripcion|nl2br }}</p>

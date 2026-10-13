@@ -4794,19 +4794,13 @@ a.tabla-admin-principal:focus-visible {
   gap: var(--espacio-1) var(--espacio-5);
 }
 
-/* Las fotos en fila, como las miniaturas del wireframe */
-.bandeja-fotos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--espacio-3);
-  margin-top: var(--espacio-4);
-}
-
-/* Una sola foto: más grande que las miniaturas del wireframe, y en 16:9 como en la ficha de la sala */
+/* La foto, a lo ancho de su columna y en 16:9 como en la ficha de la sala; a la altura de la caja
+   de la resolución, que también deja ese margen arriba */
 .bandeja-foto {
   display: block;
-  width: 400px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 640px;
+  margin-top: var(--espacio-6);
   aspect-ratio: 16 / 9;
   object-fit: cover;
   border-radius: var(--radio-md);
