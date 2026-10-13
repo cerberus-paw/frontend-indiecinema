@@ -1,0 +1,117 @@
+{#
+  Bandeja de solicitudes para ser organizador, en /cuenta/administracion/solicitudes, como el
+  wireframe de la E2 (moderacion-solicitudes): a la izquierda las pendientes, a la derecha la
+  elegida con sus datos, quién la mandó y la resolución. Queda afuera lo que todavía no existe:
+  las otras bandejas de moderación, la documentación, las fotos, el checklist y el historial.
+
+  Aprobar o rechazar es un POST con el token CSRF y el motivo, que es obligatorio y se le muestra a
+  quien la mandó. Aprobarla le da el rol de organizador.
+
+  Variables:
+  - pendientes: lista de {id, sala, localidad, solicitante, enviada, elegida}, la más vieja primero.
+  - total_pendientes: cuántas hay, aunque la lista muestre menos.
+  - elegida: {id, estado, sala, localidad, presentacion, correo, telefono, enviada, motivo,
+    resuelta, solicitante: {nombre, correo, cuenta_creada}}, o null si no hay ninguna.
+  - motivo: lo que escribió, si hubo un error.
+  - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
+  - error_motivo: qué está mal en el motivo (opcional).
+  - mensaje_exito: el aviso de la resolución que se acaba de hacer (opcional).
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Solicitudes{% endblock %}
+
+{% block contenido %}
+{% set estados = { pendiente: 'Pendiente', aprobada: 'Aprobada', rechazada: 'Rechazada' } %}
+<div class="contenedor panel-admin">
+  {% include 'parciales/menu_administracion.html.twig' with { activa: 'solicitudes' } only %}
+
+  <div class="panel-admin-contenido">
+    <header class="panel-admin-cabecera">
+      <h1 class="panel-admin-titulo">Solicitudes para ser organizador</h1>
+      <p class="panel-admin-bajada">Resolvé cada una con un motivo, que ve quien la mandó. Aprobarla le da el rol de organizador.</p>
+    </header>
+
+    {% if mensaje_exito is defined %}
+      {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
+    {% endif %}
+
+    <div class="bandeja">
+      <section class="bandeja-lista" aria-labelledby="titulo-pendientes">
+        <h2 id="titulo-pendientes" class="bandeja-lista-titulo">
+          Pendientes <span class="bandeja-cuenta">{{ total_pendientes }}</span>
+        </h2>
+        {% if pendientes is empty %}
+          <p class="bandeja-nota">No hay solicitudes esperando.</p>
+        {% else %}
+          <ul class="bandeja-items">
+            {% for solicitud in pendientes %}
+              <li>
+                <a href="/cuenta/administracion/solicitudes?id={{ solicitud.id }}" class="bandeja-item{% if solicitud.elegida %} activo{% endif %}"{% if solicitud.elegida %} aria-current="true"{% endif %}>
+                  <span class="bandeja-item-sala">{{ solicitud.sala }}</span>
+                  <span class="bandeja-item-datos">{{ solicitud.solicitante }} · {{ solicitud.localidad }}</span>
+                  <span class="bandeja-item-datos">Enviada el {{ solicitud.enviada }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+          {% if total_pendientes > pendientes|length %}
+            <p class="bandeja-nota">Se muestran las {{ pendientes|length }} que llevan más tiempo esperando.</p>
+          {% endif %}
+        {% endif %}
+      </section>
+
+      {% if elegida %}
+        <article class="bandeja-detalle" aria-labelledby="titulo-solicitud">
+          <header class="bandeja-detalle-cabecera">
+            <h2 id="titulo-solicitud" class="bandeja-detalle-titulo">{{ elegida.sala }}</h2>
+            <span class="estado-cuenta{% if elegida.estado == 'aprobada' %} estado-cuenta-activa{% elseif elegida.estado == 'rechazada' %} estado-cuenta-suspendida{% endif %}">{{ estados[elegida.estado] }}</span>
+          </header>
+          <p class="bandeja-detalle-datos">{{ elegida.localidad }} · Enviada el {{ elegida.enviada }}</p>
+
+          <h3 class="bandeja-subtitulo">Presentación</h3>
+          {# nl2br escapa antes de agregar los <br> #}
+          <p class="bandeja-texto">{{ elegida.presentacion|nl2br }}</p>
+
+          <h3 class="bandeja-subtitulo">Quién la mandó</h3>
+          <dl class="bandeja-ficha">
+            <dt>Cuenta</dt>
+            <dd>{{ elegida.solicitante.nombre }} · {{ elegida.solicitante.correo }}</dd>
+            <dt>Cuenta creada</dt>
+            <dd>{{ elegida.solicitante.cuenta_creada }}</dd>
+            <dt>Correo de contacto</dt>
+            <dd><a href="mailto:{{ elegida.correo }}">{{ elegida.correo }}</a></dd>
+            <dt>Teléfono</dt>
+            <dd>{{ elegida.telefono ?? 'No lo dejó' }}</dd>
+          </dl>
+
+          {% if elegida.estado == 'pendiente' %}
+            <form action="/cuenta/administracion/solicitudes/{{ elegida.id }}/aprobar" method="post" class="bandeja-resolucion">
+              <input type="hidden" name="_csrf" value="{{ csrf }}">
+              {% include 'parciales/campo.html.twig' with {
+                nombre: 'motivo',
+                etiqueta: 'Motivo de la resolución',
+                tipo: 'textarea',
+                filas: 4,
+                valor: motivo,
+                requerido: true,
+                maximo: maximo_motivo,
+                ayuda: 'Obligatorio, para aprobar o para rechazar. Se le muestra a quien la mandó.',
+                error: error_motivo ?? null
+              } only %}
+              <div class="solicitud-acciones-inferior">
+                {% include 'parciales/boton.html.twig' with { texto: 'Aprobar y dar el rol', tipo: 'submit', variante: 'primario' } only %}
+                <button type="submit" formaction="/cuenta/administracion/solicitudes/{{ elegida.id }}/rechazar" class="boton boton-secundario">Rechazar</button>
+              </div>
+            </form>
+          {% else %}
+            <h3 class="bandeja-subtitulo">Resolución</h3>
+            <p class="bandeja-detalle-datos">{{ estados[elegida.estado] }} el {{ elegida.resuelta }}</p>
+            <p class="bandeja-texto">{{ elegida.motivo|nl2br }}</p>
+          {% endif %}
+        </article>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

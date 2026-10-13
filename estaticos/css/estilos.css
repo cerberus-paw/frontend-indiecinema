@@ -4228,6 +4228,156 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* --------------------------------------------------------------------------
+   24. BANDEJA DE SOLICITUDES DEL ADMINISTRADOR (IC-112)
+   Componentes de cuentas/administracion_solicitudes.html.twig: como el wireframe, la lista de
+   pendientes a la izquierda y la elegida a la derecha
+   -------------------------------------------------------------------------- */
+
+.bandeja {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: var(--espacio-6);
+  align-items: start;
+}
+
+/* La lista, en una caja como las tablas del panel */
+.bandeja-lista {
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie);
+  overflow: hidden;
+}
+
+/* «Pendientes» y cuántas hay */
+.bandeja-lista-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+  padding: var(--espacio-3) var(--espacio-4);
+  font-size: var(--texto-sm);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.bandeja-cuenta {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-apagado);
+}
+
+.bandeja-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bandeja-items li + li {
+  border-top: 1px solid var(--color-borde);
+}
+
+/* Cada solicitud: la sala, quién y de dónde, y cuándo */
+.bandeja-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: var(--espacio-3) var(--espacio-4);
+  color: var(--color-texto);
+  text-decoration: none;
+  /* El borde que marca la elegida, transparente en las demás para que no se corran */
+  border-left: 3px solid transparent;
+}
+
+.bandeja-item:hover,
+.bandeja-item:focus-visible {
+  background-color: var(--color-superficie-hover);
+}
+
+/* La elegida, marcada con un borde a la izquierda como en el wireframe */
+.bandeja-item.activo {
+  background-color: var(--color-superficie-elevada);
+  border-left-color: var(--color-primario);
+}
+
+.bandeja-item-sala {
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.bandeja-item-datos {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+/* «No hay solicitudes» y «se muestran las más viejas» */
+.bandeja-nota {
+  margin: 0;
+  padding: var(--espacio-3) var(--espacio-4);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* El nombre de la sala y su estado en una fila */
+.bandeja-detalle-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+  flex-wrap: wrap;
+}
+
+.bandeja-detalle-titulo {
+  margin: 0;
+}
+
+.bandeja-detalle-datos {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.bandeja-subtitulo {
+  margin: var(--espacio-6) 0 var(--espacio-2);
+  font-size: var(--texto-base);
+}
+
+/* Lo que escribieron: una palabra larga o un correo no ensanchan la columna */
+.bandeja-texto {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Los datos de quién la mandó, en dos columnas dentro de una caja */
+.bandeja-ficha {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--espacio-2) var(--espacio-4);
+  margin: 0;
+  padding: var(--espacio-4);
+  font-size: var(--texto-sm);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.bandeja-ficha dt {
+  color: var(--color-texto-secundario);
+}
+
+.bandeja-ficha dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.bandeja-resolucion {
+  margin-top: var(--espacio-6);
+}
+
+/* En tablet y celular, la elegida va debajo de la lista */
+@media (max-width: 900px) {
+  .bandeja {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
    -------------------------------------------------------------------------- */
