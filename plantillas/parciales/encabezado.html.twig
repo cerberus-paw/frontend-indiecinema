@@ -120,6 +120,12 @@
             <a href="/cuenta/" class="menu-item" role="menuitem">
               <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
             </a>
+            {# Quien todavía no es organizador puede pedirlo con la solicitud #}
+            {% if not usr.alcanza('organizador') %}
+              <a href="/cuenta/solicitud" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🎬</span> Abrir una sala
+              </a>
+            {% endif %}
 
             {# Sección condicional de opciones del Organizador, también para los roles que lo alcanzan #}
             {% if usr.alcanza('organizador') %}

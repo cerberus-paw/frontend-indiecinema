@@ -17,6 +17,10 @@
   - opciones: (array, opcional) Lista de opciones para 'select' (formato [{valor: 'x', etiqueta: 'Y'}] o diccionario clave: valor).
   - filas: (int, opcional, por defecto 4) Cantidad de filas cuando tipo == 'textarea'.
   - clase: (string, opcional) Clases CSS adicionales para el contenedor.
+  - minimo / maximo: (int, opcional) Largo mínimo y máximo del texto (minlength y maxlength), en 'text', 'email', 'tel' y 'textarea'.
+  - patron: (string, opcional) Expresión que tiene que cumplir todo el valor (pattern), salvo en 'textarea'.
+  - autocompletar: (string, opcional) Qué dato es, para que el navegador lo sugiera (autocomplete).
+  Con minimo, maximo y patron tomados de las reglas que manda el backend, el navegador valida lo mismo que el servidor.
 #}
 {# Resuelve el mensaje de error puntual o desde la colección de errores para evitar duplicar condicionales #}
 {% set mensaje_error = error ?? (errores[nombre] ?? null) %}
@@ -60,6 +64,9 @@
       {% if placeholder is defined %}placeholder="{{ placeholder }}"{% endif %}
       {# Añade el atributo nativo de validación obligatoria en el navegador #}
       {% if requerido ?? false %}required{% endif %}
+      {# Largos que controla el navegador, los mismos que valida el backend #}
+      {% if minimo is defined %}minlength="{{ minimo }}"{% endif %}
+      {% if maximo is defined %}maxlength="{{ maximo }}"{% endif %}
       {# Comunica estado inválido y asocia los IDs de error o ayuda para tecnologías de asistencia #}
       {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% elseif ayuda is defined %}aria-describedby="{{ id_ayuda }}"{% endif %}
     {# Renderiza el contenido persistido escapado y cierra la etiqueta textarea #}
@@ -158,6 +165,12 @@
         {% if placeholder is defined %}placeholder="{{ placeholder }}"{% endif %}
         {# Exige que el usuario complete el campo antes de enviar el formulario #}
         {% if requerido ?? false %}required{% endif %}
+        {# Largos y formato que controla el navegador, los mismos que valida el backend #}
+        {% if minimo is defined %}minlength="{{ minimo }}"{% endif %}
+        {% if maximo is defined %}maxlength="{{ maximo }}"{% endif %}
+        {% if patron is defined %}pattern="{{ patron }}"{% endif %}
+        {# Pista para que el navegador sugiera el dato guardado (correo, teléfono…) #}
+        {% if autocompletar is defined %}autocomplete="{{ autocompletar }}"{% endif %}
         {# Soporte de accesibilidad anunciando el mensaje de error o texto de ayuda #}
         {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% elseif ayuda is defined %}aria-describedby="{{ id_ayuda }}"{% endif %}
       {# Cierre del elemento input #}

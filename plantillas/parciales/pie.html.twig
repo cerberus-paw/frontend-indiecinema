@@ -53,6 +53,9 @@
       <ul class="pie-enlaces">
         {% if usr %}
           <li><a href="/cuenta/">Mi cuenta</a></li>
+          {% if not usr.alcanza('organizador') %}
+            <li><a href="/cuenta/solicitud">Abrir una sala</a></li>
+          {% endif %}
           {% if usr.alcanza('organizador') %}
             <li><a href="/organizador/salas">Mis salas</a></li>
             <li><a href="/organizador/salas/nueva">Publicar una sala</a></li>

@@ -4272,6 +4272,43 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* --------------------------------------------------------------------------
+   23. SOLICITUD PARA SER ORGANIZADOR (IC-110)
+   Componentes de cuentas/solicitud.html.twig: como el wireframe, el título de cada sección a la
+   izquierda y sus campos a la derecha
+   -------------------------------------------------------------------------- */
+
+/* La sección contiene a su leyenda flotada, aunque sea más alta que los campos */
+.seccion-lateral {
+  display: flow-root;
+}
+
+/* La leyenda a la izquierda. Un fieldset no deja ubicar su leyenda con grid ni flex, pero
+   flotada pasa a ser una caja común */
+.seccion-lateral > .seccion-leyenda {
+  float: left;
+  width: 28%;
+  margin-bottom: 0;
+}
+
+/* Los campos, en el resto del ancho */
+.seccion-lateral > .seccion-campos {
+  margin-left: calc(28% + var(--espacio-6));
+}
+
+/* En el celular, la leyenda vuelve arriba de los campos */
+@media (max-width: 768px) {
+  .seccion-lateral > .seccion-leyenda {
+    float: none;
+    width: 100%;
+    margin-bottom: var(--espacio-4);
+  }
+
+  .seccion-lateral > .seccion-campos {
+    margin-left: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
    -------------------------------------------------------------------------- */
