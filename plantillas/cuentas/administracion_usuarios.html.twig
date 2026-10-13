@@ -17,135 +17,131 @@
   - paginado: numero, total_paginas, total_usuarios, las URL anterior y siguiente (null si no hay)
     y paginas: lista de {numero, url, actual}, con null donde se saltean páginas.
 #}
-{% extends 'base.html.twig' %}
+{% extends 'administracion.html.twig' %}
 
 {% block titulo %}Usuarios y roles{% endblock %}
 
-{% block contenido %}
-<div class="contenedor panel-admin">
-  {% include 'parciales/menu_administracion.html.twig' with { activa: 'usuarios' } only %}
+{% block seccion %}usuarios{% endblock %}
 
-  <div class="panel-admin-contenido">
-    <header class="panel-admin-cabecera">
-      <h1 class="panel-admin-titulo">Usuarios y roles</h1>
-      <p class="panel-admin-bajada">Buscá cuentas por su nombre o su correo.</p>
-    </header>
+{% block panel %}
+<header class="panel-admin-cabecera">
+  <h1 class="panel-admin-titulo">Usuarios y roles</h1>
+  <p class="panel-admin-bajada">Buscá cuentas por su nombre o su correo.</p>
+</header>
 
-    <form class="panel-admin-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios">
-      <label class="panel-admin-busqueda">
-        <span class="sr-only">Buscar por nombre o correo</span>
-        <span class="panel-admin-busqueda-icono" aria-hidden="true">🔍</span>
-        <input type="search" name="q" value="{{ filtros.q ?? '' }}" placeholder="Buscar por nombre o correo" maxlength="254" class="campo-control">
-      </label>
-      <label>
-        <span class="sr-only">Rol</span>
-        <select name="rol" class="campo-control control-select">
-          <option value="">Rol: todos</option>
-          {% for valor, etiqueta in { espectador: 'Espectador', organizador: 'Organizador', moderador: 'Moderador', administrador: 'Administrador' } %}
-            <option value="{{ valor }}"{% if (filtros.rol ?? '') == valor %} selected{% endif %}>{{ etiqueta }}</option>
-          {% endfor %}
-        </select>
-      </label>
-      <label>
-        <span class="sr-only">Estado</span>
-        <select name="estado" class="campo-control control-select">
-          <option value="">Estado: todos</option>
-          {% for valor, etiqueta in { activa: 'Activa', pendiente: 'Pendiente', suspendida: 'Suspendida' } %}
-            <option value="{{ valor }}"{% if (filtros.estado ?? '') == valor %} selected{% endif %}>{{ etiqueta }}</option>
-          {% endfor %}
-        </select>
-      </label>
-      <div class="filtros-cartelera-acciones">
-        {% include 'parciales/boton.html.twig' with { texto: 'Buscar', variante: 'primario' } only %}
-        {% if filtros is not empty %}
-          {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/cuenta/administracion/usuarios', variante: 'fantasma' } only %}
-        {% endif %}
-      </div>
-    </form>
-
-    {% if mensaje_exito %}
-      {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
-    {% endif %}
-
-    {% if avisos is not empty %}
-      {% include 'parciales/mensaje.html.twig' with {
-        tipo: 'advertencia',
-        titulo: 'Algunos filtros no se aplicaron',
-        detalles: avisos
-      } only %}
-    {% endif %}
-
-    {% if usuarios is empty %}
-      {% include 'parciales/mensaje.html.twig' with {
-        tipo: 'info',
-        mensaje: filtros is not empty
-          ? 'No hay usuarios que coincidan con la búsqueda. Probá con otros filtros.'
-          : 'Todavía no hay usuarios registrados.'
-      } only %}
-    {% else %}
-      <p class="sr-only" role="status">{{ paginado.total_usuarios }} {{ paginado.total_usuarios == 1 ? 'usuario' : 'usuarios' }}</p>
-
-      {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
-      <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Usuarios">
-        <table class="tabla-admin">
-          <thead>
-            <tr>
-              <th scope="col">Usuario</th>
-              <th scope="col">Rol</th>
-              <th scope="col">Estado</th>
-              <th scope="col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for usuario in usuarios %}
-              <tr data-usuario="{{ usuario.id }}">
-                <td>
-                  <div class="tabla-admin-usuario">
-                    <span class="tabla-admin-avatar" aria-hidden="true">{{ usuario.nombre|slice(0, 1)|upper }}</span>
-                    <div>
-                      <span class="tabla-admin-principal">{{ usuario.nombre }}</span>
-                      <span class="tabla-admin-secundario">{{ usuario.correo }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td><span class="usuario-rol rol-{{ usuario.rol }}">{{ usuario.rol }}</span></td>
-                <td><span class="estado-cuenta estado-cuenta-{{ usuario.estado }}">{{ usuario.estado }}</span></td>
-                <td class="tabla-admin-acciones">
-                  {% if usuario.rol in ['espectador', 'organizador'] %}
-                    {% set dar = usuario.rol == 'espectador' %}
-                    <form action="/cuenta/administracion/usuarios/{{ usuario.id }}/{{ dar ? 'dar-organizador' : 'quitar-organizador' }}" method="POST">
-                      <input type="hidden" name="_csrf" value="{{ csrf }}">
-                      {% for nombre, valor in filtros %}
-                        <input type="hidden" name="{{ nombre }}" value="{{ valor }}">
-                      {% endfor %}
-                      <button type="submit" class="boton {{ dar ? 'boton-primario' : 'boton-secundario' }} boton-chico" aria-label="{{ dar ? 'Dar rol de organizador a' : 'Quitar rol de organizador a' }} {{ usuario.nombre }}">
-                        {{ dar ? 'Dar rol de organizador' : 'Quitar rol' }}
-                      </button>
-                    </form>
-                  {% endif %}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      {% if paginado.total_paginas > 1 %}
-        <nav class="paginado-numerado" aria-label="Páginas de usuarios">
-          <ul>
-            {% for pagina in paginado.paginas %}
-              {% if pagina is null %}
-                <li class="paginado-salto" aria-hidden="true">…</li>
-              {% elseif pagina.actual %}
-                <li><a href="{{ pagina.url }}" class="paginado-numero actual" aria-current="page">{{ pagina.numero }}</a></li>
-              {% else %}
-                <li><a href="{{ pagina.url }}" class="paginado-numero"{% if pagina.url == paginado.anterior %} rel="prev"{% elseif pagina.url == paginado.siguiente %} rel="next"{% endif %} aria-label="Página {{ pagina.numero }}">{{ pagina.numero }}</a></li>
-              {% endif %}
-            {% endfor %}
-          </ul>
-        </nav>
-      {% endif %}
+<form class="panel-admin-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios">
+  <label class="panel-admin-busqueda">
+    <span class="sr-only">Buscar por nombre o correo</span>
+    <span class="panel-admin-busqueda-icono" aria-hidden="true">🔍</span>
+    <input type="search" name="q" value="{{ filtros.q ?? '' }}" placeholder="Buscar por nombre o correo" maxlength="254" class="campo-control">
+  </label>
+  <label>
+    <span class="sr-only">Rol</span>
+    <select name="rol" class="campo-control control-select">
+      <option value="">Rol: todos</option>
+      {% for valor, etiqueta in { espectador: 'Espectador', organizador: 'Organizador', moderador: 'Moderador', administrador: 'Administrador' } %}
+        <option value="{{ valor }}"{% if (filtros.rol ?? '') == valor %} selected{% endif %}>{{ etiqueta }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>
+    <span class="sr-only">Estado</span>
+    <select name="estado" class="campo-control control-select">
+      <option value="">Estado: todos</option>
+      {% for valor, etiqueta in { activa: 'Activa', pendiente: 'Pendiente', suspendida: 'Suspendida' } %}
+        <option value="{{ valor }}"{% if (filtros.estado ?? '') == valor %} selected{% endif %}>{{ etiqueta }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <div class="filtros-cartelera-acciones">
+    {% include 'parciales/boton.html.twig' with { texto: 'Buscar', variante: 'primario' } only %}
+    {% if filtros is not empty %}
+      {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/cuenta/administracion/usuarios', variante: 'fantasma' } only %}
     {% endif %}
   </div>
-</div>
+</form>
+
+{% if mensaje_exito %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
+{% endif %}
+
+{% if avisos is not empty %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'advertencia',
+    titulo: 'Algunos filtros no se aplicaron',
+    detalles: avisos
+  } only %}
+{% endif %}
+
+{% if usuarios is empty %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'info',
+    mensaje: filtros is not empty
+      ? 'No hay usuarios que coincidan con la búsqueda. Probá con otros filtros.'
+      : 'Todavía no hay usuarios registrados.'
+  } only %}
+{% else %}
+  <p class="sr-only" role="status">{{ paginado.total_usuarios }} {{ paginado.total_usuarios == 1 ? 'usuario' : 'usuarios' }}</p>
+
+  {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
+  <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Usuarios">
+    <table class="tabla-admin">
+      <thead>
+        <tr>
+          <th scope="col">Usuario</th>
+          <th scope="col">Rol</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for usuario in usuarios %}
+          <tr data-usuario="{{ usuario.id }}">
+            <td>
+              <div class="tabla-admin-usuario">
+                <span class="tabla-admin-avatar" aria-hidden="true">{{ usuario.nombre|slice(0, 1)|upper }}</span>
+                <div>
+                  <span class="tabla-admin-principal">{{ usuario.nombre }}</span>
+                  <span class="tabla-admin-secundario">{{ usuario.correo }}</span>
+                </div>
+              </div>
+            </td>
+            <td><span class="usuario-rol rol-{{ usuario.rol }}">{{ usuario.rol }}</span></td>
+            <td><span class="estado-cuenta estado-cuenta-{{ usuario.estado }}">{{ usuario.estado }}</span></td>
+            <td class="tabla-admin-acciones">
+              {% if usuario.rol in ['espectador', 'organizador'] %}
+                {% set dar = usuario.rol == 'espectador' %}
+                <form action="/cuenta/administracion/usuarios/{{ usuario.id }}/{{ dar ? 'dar-organizador' : 'quitar-organizador' }}" method="POST">
+                  <input type="hidden" name="_csrf" value="{{ csrf }}">
+                  {% for nombre, valor in filtros %}
+                    <input type="hidden" name="{{ nombre }}" value="{{ valor }}">
+                  {% endfor %}
+                  <button type="submit" class="boton {{ dar ? 'boton-primario' : 'boton-secundario' }} boton-chico" aria-label="{{ dar ? 'Dar rol de organizador a' : 'Quitar rol de organizador a' }} {{ usuario.nombre }}">
+                    {{ dar ? 'Dar rol de organizador' : 'Quitar rol' }}
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if paginado.total_paginas > 1 %}
+    <nav class="paginado-numerado" aria-label="Páginas de usuarios">
+      <ul>
+        {% for pagina in paginado.paginas %}
+          {% if pagina is null %}
+            <li class="paginado-salto" aria-hidden="true">…</li>
+          {% elseif pagina.actual %}
+            <li><a href="{{ pagina.url }}" class="paginado-numero actual" aria-current="page">{{ pagina.numero }}</a></li>
+          {% else %}
+            <li><a href="{{ pagina.url }}" class="paginado-numero"{% if pagina.url == paginado.anterior %} rel="prev"{% elseif pagina.url == paginado.siguiente %} rel="next"{% endif %} aria-label="Página {{ pagina.numero }}">{{ pagina.numero }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </nav>
+  {% endif %}
+{% endif %}
 {% endblock %}

@@ -4085,22 +4085,63 @@ dd {
   color: var(--color-error);
 }
 
-/* Panel del administrador: la barra lateral y el contenido, como el wireframe */
-.panel-admin {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: var(--espacio-8);
-  align-items: start;
-  /* Separación con el encabezado y el pie */
-  padding-top: var(--espacio-8);
-  padding-bottom: var(--espacio-12);
+/* Sin encabezado ni pie, el panel del administrador ocupa toda la pantalla, como el wireframe */
+.contenido-principal:has(> .panel-admin) {
+  max-width: none;
+  padding: 0;
+  display: flex;
 }
 
-/* Barra lateral */
+/* Panel del administrador: la barra lateral y el contenido, como el wireframe */
+.panel-admin {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+}
+
+/* Barra lateral: el logo, las secciones y, al pie, la sesión */
 .panel-admin-menu {
-  /* Acompaña al desplazarse */
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+  padding: var(--espacio-6) var(--espacio-4);
+  background-color: var(--color-superficie);
+  border-right: 1px solid var(--color-borde);
+  /* Del alto de la pantalla y quieta al desplazar el contenido, así salir siempre está a mano */
   position: sticky;
-  top: var(--espacio-6);
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.panel-admin-marca {
+  align-self: flex-start;
+}
+
+.panel-admin-marca img {
+  display: block;
+}
+
+/* Quién está en sesión y el botón para salir, abajo de todo */
+.panel-admin-sesion {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2) var(--espacio-3);
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--color-borde);
+}
+
+.panel-admin-salir {
+  margin-left: auto;
+}
+
+/* El contenido, con aire y sin estirarse de más en pantallas anchas */
+.panel-admin-contenido {
+  width: 100%;
+  max-width: 1180px;
+  padding: var(--espacio-8) var(--espacio-8) var(--espacio-12);
 }
 
 /* «ADMINISTRACIÓN», sobre las secciones */
@@ -4233,11 +4274,35 @@ dd {
 @media (max-width: 900px) {
   .panel-admin {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--espacio-4);
+    align-content: start;
   }
 
+  /* Arriba: el logo y la sesión en un renglón y las secciones debajo */
   .panel-admin-menu {
     position: static;
+    height: auto;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--espacio-4);
+    border-right: none;
+    border-bottom: 1px solid var(--color-borde);
+  }
+
+  .panel-admin-menu nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .panel-admin-sesion {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    justify-content: flex-end;
+  }
+
+  .panel-admin-contenido {
+    padding: var(--espacio-6) var(--espacio-4) var(--espacio-12);
   }
 
   .panel-admin-menu-lista {
