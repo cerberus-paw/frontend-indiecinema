@@ -4169,11 +4169,10 @@ dd {
   width: 100%;
 }
 
-/* El contenido, con aire y sin estirarse de más en pantallas anchas */
+/* El contenido, en todo el ancho que deja la barra, como el wireframe */
 .panel-admin-contenido {
-  width: 100%;
-  max-width: 1180px;
-  padding: var(--espacio-8) var(--espacio-8) var(--espacio-12);
+  min-width: 0;
+  padding: var(--espacio-8) var(--espacio-10) var(--espacio-12);
 }
 
 /* «ADMINISTRACIÓN», sobre las secciones */
