@@ -3385,6 +3385,21 @@ dd {
   }
 }
 
+/* Link del mensaje de error de la búsqueda en vivo: carga la misma búsqueda como página (IC-102) */
+.alerta-enlace {
+  /* Del color del mensaje */
+  color: inherit;
+  /* Subrayado para que se lea como link */
+  text-decoration: underline;
+  /* Destacado */
+  font-weight: 600;
+}
+
+/* Separación entre el texto del mensaje y el link */
+.alerta-texto + .alerta-texto {
+  margin-top: var(--espacio-2);
+}
+
 /* Sin animación para quien la desactivó: queda el aro y el texto */
 @media (prefers-reduced-motion: reduce) {
   .cartelera-cargando-icono {

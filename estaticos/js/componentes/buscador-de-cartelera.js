@@ -12,8 +12,12 @@
  * piden de nuevo. Cuando llegan los resultados se anuncian en una región aria-live que no se
  * redibuja, porque un lector de pantalla no siempre lee una región que se acaba de crear.
  *
+ * Si el pedido falla (sin conexión, o el servidor no devuelve la cartelera), la sección muestra un
+ * mensaje de error con un link a la misma búsqueda, que la carga sin JavaScript. Los filtros quedan
+ * como estaban, así se puede volver a intentar.
+ *
  * Sin JavaScript, el formulario GET y los links funcionan igual, así que este componente sólo
- * mejora lo que ya anda. Si el pedido falla, navega a la URL como lo haría el formulario.
+ * mejora lo que ya anda.
  */
 class BuscadorDeCartelera {
   /** Cuánto esperar después de la última tecla antes de buscar, en milisegundos. */
@@ -150,12 +154,7 @@ class BuscadorDeCartelera {
       this.anunciar(datos);
     } catch (error) {
       if (error.name !== 'AbortError') {
-        // Que se encargue el servidor, como sin JavaScript. Volviendo, la URL ya es esa.
-        if (historial) {
-          window.location.assign(url);
-        } else {
-          window.location.reload();
-        }
+        this.mostrarError(url);
       }
     }
   }
@@ -185,6 +184,23 @@ class BuscadorDeCartelera {
     // Se vacía antes, así se lee aunque el texto sea el mismo que el anterior.
     this.anuncio.textContent = '';
     setTimeout(() => { this.anuncio.textContent = partes.join(' '); }, BuscadorDeCartelera.ESPERA_DEL_ANUNCIO);
+  }
+
+  /**
+   * El mensaje genérico de error en lugar de los resultados, que ya no son los de los filtros.
+   * El link carga la misma búsqueda como página, por si el problema es sólo del pedido JSON.
+   *
+   * @param {string} url
+   */
+  mostrarError(url) {
+    clearTimeout(this.espera);
+    this.espera = null;
+    const error = this.alerta('error', 'alert', { texto: 'No pudimos actualizar la cartelera. Probá de nuevo en un rato.' });
+    error.querySelector('.alerta-contenido').append(this.nodo('p', { class: 'alerta-texto' }, [
+      this.nodo('a', { href: url, class: 'alerta-enlace' }, ['Cargar esta búsqueda de nuevo']),
+    ]));
+    this.resultados.replaceChildren(error);
+    this.mostrarCargando(false);
   }
 
   /**
@@ -317,13 +333,13 @@ class BuscadorDeCartelera {
   /**
    * Como parciales/mensaje.html.twig.
    *
-   * @param {string} tipo 'info' | 'advertencia'
+   * @param {string} tipo 'info' | 'advertencia' | 'error'
    * @param {string} rol 'status' | 'alert'
    * @param {{titulo?: string, texto?: string, detalles?: Array<string>}} contenido
    * @returns {HTMLElement}
    */
   alerta(tipo, rol, { titulo = null, texto = null, detalles = [] }) {
-    const simbolo = tipo === 'advertencia' ? '⚠️' : 'ℹ';
+    const simbolo = { advertencia: '⚠️', error: '✕' }[tipo] ?? 'ℹ';
     const cuerpo = [];
     if (titulo) {
       cuerpo.push(this.nodo('strong', { class: 'alerta-titulo' }, [titulo]));
