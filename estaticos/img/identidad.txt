@@ -24,4 +24,6 @@ Archivos
 
   Los .svg son la fuente editable; los .png están exportados en alta
   resolución con fondo transparente (versión clara) u fondo tinta
-  sólido (versión oscura).
+  sólido (versión oscura). logo-horizontal-dark.svg no lleva fondo: el sitio
+  lo pone sobre superficies de distintos tonos (encabezado, pie y la barra
+  del panel del administrador) y el recuadro tinta se notaba como una caja.
