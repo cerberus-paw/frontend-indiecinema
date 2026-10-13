@@ -7,12 +7,20 @@
  * aria-busy, atenuada, y con el aviso «Buscando funciones…» fijo abajo de la pantalla, así se ve
  * aunque se haya buscado desde el paginado, al pie de la lista.
  *
+ * Cada búsqueda deja su URL en el historial (pushState), así se puede compartir o recargar, y
+ * «Atrás» y «Adelante» vuelven a la búsqueda anterior: completan el formulario con esa URL y la
+ * piden de nuevo. Cuando llegan los resultados se anuncian en una región aria-live que no se
+ * redibuja, porque un lector de pantalla no siempre lee una región que se acaba de crear.
+ *
  * Sin JavaScript, el formulario GET y los links funcionan igual, así que este componente sólo
  * mejora lo que ya anda. Si el pedido falla, navega a la URL como lo haría el formulario.
  */
 class BuscadorDeCartelera {
   /** Cuánto esperar después de la última tecla antes de buscar, en milisegundos. */
   static ESPERA_AL_ESCRIBIR = 400;
+
+  /** Cuánto esperar entre vaciar el anuncio y escribirlo, para que se lea aunque se repita. */
+  static ESPERA_DEL_ANUNCIO = 100;
 
   /** Los estados de la tarjeta, como en parciales/tarjeta_funcion.html.twig. */
   static ESTADOS = {
@@ -33,10 +41,15 @@ class BuscadorDeCartelera {
     }
     this.pedido = null;
     this.espera = null;
+    // La búsqueda que se está mostrando: la de la página cargada, después la última que llegó.
+    this.urlMostrada = window.location.pathname + window.location.search;
     this.indicador = this.nodo('p', { class: 'cartelera-cargando', role: 'status' }, [
       this.nodo('span', { class: 'cartelera-cargando-icono', 'aria-hidden': 'true' }),
       'Buscando funciones…',
     ]);
+    // Afuera de la sección, que se redibuja entera: la región tiene que existir antes del cambio.
+    this.anuncio = this.nodo('p', { class: 'sr-only', role: 'status', 'aria-live': 'polite' });
+    this.resultados.after(this.anuncio);
 
     this.formulario.addEventListener('submit', (evento) => {
       evento.preventDefault();
@@ -63,6 +76,28 @@ class BuscadorDeCartelera {
         this.buscar(enlace.getAttribute('href'));
       }
     });
+    // «Atrás» y «Adelante» entre búsquedas de la cartelera.
+    window.addEventListener('popstate', () => {
+      const url = window.location.pathname + window.location.search;
+      // Un link a un ancla (#…) también llega acá, sin cambiar la búsqueda.
+      if (window.location.pathname === this.formulario.getAttribute('action') && url !== this.urlMostrada) {
+        this.completarFormulario(new URLSearchParams(window.location.search));
+        this.buscar(url, { historial: false });
+      }
+    });
+  }
+
+  /**
+   * Pone en el formulario los filtros de una URL; el que no está, vacío.
+   *
+   * @param {URLSearchParams} consulta
+   */
+  completarFormulario(consulta) {
+    for (const campo of this.formulario.elements) {
+      if (campo.name && campo.type !== 'submit') {
+        campo.value = consulta.get(campo.name) ?? '';
+      }
+    }
   }
 
   /**
@@ -84,11 +119,13 @@ class BuscadorDeCartelera {
 
   /**
    * Pide la URL en JSON y dibuja los resultados. Un pedido nuevo cancela el anterior, así una
-   * respuesta lenta no pisa a una más reciente.
+   * respuesta lenta no pisa a una más reciente. Con los resultados, la URL pasa al historial,
+   * salvo que se esté volviendo a una que ya estaba («Atrás» o «Adelante»).
    *
    * @param {string} url
+   * @param {{historial?: boolean}} [opciones]
    */
-  async buscar(url) {
+  async buscar(url, { historial = true } = {}) {
     clearTimeout(this.espera);
     this.espera = null;
     this.pedido?.abort();
@@ -102,15 +139,52 @@ class BuscadorDeCartelera {
       if (!respuesta.ok) {
         throw new Error(`La cartelera respondió ${respuesta.status}.`);
       }
-      this.mostrar(await respuesta.json());
+      const datos = await respuesta.json();
+      this.mostrar(datos);
       // Si mientras volvía se siguió escribiendo, falta otra búsqueda: el indicador sigue.
       this.mostrarCargando(this.espera !== null);
+      if (historial && url !== window.location.pathname + window.location.search) {
+        window.history.pushState(null, '', url);
+      }
+      this.urlMostrada = url;
+      this.anunciar(datos);
     } catch (error) {
       if (error.name !== 'AbortError') {
-        // Que se encargue el servidor, como sin JavaScript.
-        window.location.assign(url);
+        // Que se encargue el servidor, como sin JavaScript. Volviendo, la URL ya es esa.
+        if (historial) {
+          window.location.assign(url);
+        } else {
+          window.location.reload();
+        }
       }
     }
+  }
+
+  /**
+   * Lo que cambió, para los lectores de pantalla: cuántas funciones hay (o que no hay), la página
+   * y si algún filtro no se aplicó.
+   *
+   * @param {{funciones: Array<Object>, filtros: Object, avisos: Array<string>, paginado: Object}} datos
+   */
+  anunciar(datos) {
+    const partes = [];
+    const total = datos.paginado.total_funciones;
+    if (total === 0) {
+      partes.push(Object.keys(datos.filtros).length > 0
+        ? 'No hay funciones que coincidan con la búsqueda.'
+        : 'Todavía no hay funciones programadas.');
+    } else {
+      partes.push(`${total} ${total === 1 ? 'función' : 'funciones'}.`);
+      if (datos.paginado.total_paginas > 1) {
+        partes.push(`Página ${datos.paginado.numero} de ${datos.paginado.total_paginas}.`);
+      }
+    }
+    if (datos.avisos.length > 0) {
+      partes.push('Algunos filtros no se aplicaron.');
+    }
+    // Se vacía antes, así se lee aunque el texto sea el mismo que el anterior.
+    this.anuncio.textContent = '';
+    setTimeout(() => { this.anuncio.textContent = partes.join(' '); }, BuscadorDeCartelera.ESPERA_DEL_ANUNCIO);
   }
 
   /**
