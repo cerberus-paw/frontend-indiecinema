@@ -3856,6 +3856,134 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
+   22. ADMINISTRACIÓN: TABLAS DEL PANEL (IC-106)
+   Componentes de cuentas/administracion_usuarios.html.twig; las comparten las otras tablas
+   del administrador
+   -------------------------------------------------------------------------- */
+
+/* Caja de la tabla: en pantallas angostas la tabla se desplaza adentro y la página no se corre */
+.tabla-admin-contenedor {
+  /* Desplazamiento horizontal propio */
+  overflow-x: auto;
+  /* Borde y fondo como las tarjetas */
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie);
+}
+
+/* Se puede enfocar con el teclado para desplazarla: se marca el foco */
+.tabla-admin-contenedor:focus-visible {
+  /* Contorno en el color primario */
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+/* Tabla del panel del administrador */
+.tabla-admin {
+  /* Todo el ancho, con un mínimo para que las columnas no se aprieten en el celular */
+  width: 100%;
+  min-width: 640px;
+  /* Bordes de celda unidos */
+  border-collapse: collapse;
+  /* Texto */
+  font-size: var(--texto-sm);
+  color: var(--color-texto);
+}
+
+/* Encabezado de las columnas, en versalitas como el wireframe */
+.tabla-admin th {
+  /* Alineado a la izquierda */
+  text-align: left;
+  /* Texto chico, apagado y espaciado */
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+  /* Relleno */
+  padding: var(--espacio-3) var(--espacio-4);
+  /* Línea bajo el encabezado */
+  border-bottom: 1px solid var(--color-borde-medio);
+}
+
+/* Celdas */
+.tabla-admin td {
+  /* Relleno */
+  padding: var(--espacio-3) var(--espacio-4);
+  /* Línea entre filas */
+  border-bottom: 1px solid var(--color-borde);
+  /* Arriba, así el nombre y el correo quedan alineados con el resto */
+  vertical-align: top;
+}
+
+/* La última fila no lleva línea: la cierra el borde de la caja */
+.tabla-admin tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Fila bajo el puntero */
+.tabla-admin tbody tr:hover {
+  background-color: var(--color-superficie-hover);
+}
+
+/* Dato principal de la fila (el nombre) */
+.tabla-admin-principal {
+  /* En su renglón */
+  display: block;
+  font-weight: 600;
+}
+
+/* Dato secundario bajo el principal (el correo) */
+.tabla-admin-secundario {
+  /* En su renglón */
+  display: block;
+  color: var(--color-texto-secundario);
+  /* Un correo largo se corta en vez de ensanchar la columna */
+  overflow-wrap: anywhere;
+}
+
+/* Lista de insignias de rol de una fila */
+.tabla-admin-insignias {
+  /* Sin viñetas ni sangría */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* En fila, y bajan si no entran */
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1);
+}
+
+/* La insignia del menú de usuario, sin el margen que la separa del nombre */
+.tabla-admin-insignias .usuario-rol {
+  margin-top: 0;
+}
+
+/* Estado de la cuenta */
+.estado-cuenta {
+  /* Píldora */
+  display: inline-block;
+  padding: 0.1rem var(--espacio-2);
+  border-radius: var(--radio-completo);
+  /* Texto chico */
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  /* Neutro, para la pendiente */
+  background-color: var(--color-superficie-elevada);
+  color: var(--color-texto-secundario);
+}
+
+/* Cuenta activa */
+.estado-cuenta-activa {
+  color: var(--color-exito);
+}
+
+/* Cuenta suspendida */
+.estado-cuenta-suspendida {
+  color: var(--color-error);
+}
+
+/* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
    -------------------------------------------------------------------------- */
