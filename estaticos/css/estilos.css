@@ -3961,9 +3961,10 @@ dd {
 
 /* Tabla del panel del administrador */
 .tabla-admin {
-  /* Todo el ancho, con un mínimo para que las columnas no se aprieten en el celular */
+  /* Todo el ancho, con un mínimo para que las columnas no se aprieten en el celular: con menos, el
+     nombre y el correo se cortaban letra por letra */
   width: 100%;
-  min-width: 520px;
+  min-width: 680px;
   /* Bordes de celda unidos */
   border-collapse: collapse;
   /* Texto */
@@ -4029,6 +4030,11 @@ dd {
   margin-top: 0;
   /* En su línea */
   display: inline-block;
+  /* Del tamaño de la píldora del estado, en la columna de al lado: la del menú es más chica */
+  padding: 0.15rem var(--espacio-3);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }
 
 /* Avatar con la inicial y, al lado, el nombre y el correo */
@@ -4123,6 +4129,7 @@ dd {
 
 .panel-admin-marca {
   align-self: flex-start;
+  padding-left: var(--espacio-2);
 }
 
 .panel-admin-marca img {
@@ -4208,10 +4215,11 @@ dd {
   color: var(--color-texto);
 }
 
-/* La sección actual, resaltada como en el wireframe */
+/* La sección actual, llena como en el wireframe: con los colores invertidos, como la página
+   actual del paginado */
 .panel-admin-menu-enlace.activo {
-  background-color: var(--color-superficie-elevada);
-  color: var(--color-texto-brillante);
+  background-color: var(--color-texto);
+  color: var(--color-texto-inverso);
   font-weight: 600;
 }
 
@@ -4220,8 +4228,10 @@ dd {
   margin-bottom: var(--espacio-6);
 }
 
+/* Más chico que el título de las páginas públicas: acá manda la tabla, no el título */
 .panel-admin-titulo {
   margin: 0;
+  font-size: var(--texto-2xl);
 }
 
 .panel-admin-bajada {

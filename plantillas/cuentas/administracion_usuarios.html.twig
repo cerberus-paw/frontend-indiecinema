@@ -7,7 +7,8 @@
 
   En «Acciones», al espectador se le da el rol de organizador y al organizador se le quita: es un
   POST con el token CSRF y los filtros en campos ocultos, para volver a la misma búsqueda. El
-  moderador y el administrador no tienen acciones: esos roles no se cambian desde la web.
+  moderador y el administrador no tienen acciones: esos roles no se cambian desde la web. Los
+  botones van con contorno, como los del wireframe: una columna entera en naranja tapaba el resto.
 
   Variables:
   - usuarios: lista de {id, nombre, correo, rol (el mayor), estado (pendiente, activa o suspendida)}.
@@ -116,7 +117,7 @@
                   {% for nombre, valor in filtros %}
                     <input type="hidden" name="{{ nombre }}" value="{{ valor }}">
                   {% endfor %}
-                  <button type="submit" class="boton {{ dar ? 'boton-primario' : 'boton-secundario' }} boton-chico" aria-label="{{ dar ? 'Dar rol de organizador a' : 'Quitar rol de organizador a' }} {{ usuario.nombre }}">
+                  <button type="submit" class="boton boton-secundario boton-chico" aria-label="{{ dar ? 'Dar rol de organizador a' : 'Quitar rol de organizador a' }} {{ usuario.nombre }}">
                     {{ dar ? 'Dar rol de organizador' : 'Quitar rol' }}
                   </button>
                 </form>
