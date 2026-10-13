@@ -4085,6 +4085,13 @@ dd {
   color: var(--color-error);
 }
 
+/* El body corta lo que se sale a los costados con overflow-x: hidden, que lo vuelve un contenedor
+   con desplazamiento propio: la barra lateral (sticky) se pegaba a él, que nunca se desplaza, y se
+   iba con la página. clip corta igual sin eso */
+.cuerpo-app:has(.panel-admin) {
+  overflow-x: clip;
+}
+
 /* Sin encabezado ni pie, el panel del administrador ocupa toda la pantalla, como el wireframe */
 .contenido-principal:has(> .panel-admin) {
   max-width: none;
