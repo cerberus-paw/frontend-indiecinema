@@ -3,13 +3,16 @@
   (administracion-usuarios-parametros): sólo las secciones que ya tienen pantalla.
 
   Parámetros recibidos:
-  - activa: (string) la sección actual: 'usuarios'.
+  - activa: (string) la sección actual: 'usuarios' o 'salas'.
 #}
 <nav class="panel-admin-menu" aria-label="Administración">
   <p class="panel-admin-menu-titulo">Administración</p>
   <ul class="panel-admin-menu-lista">
     <li>
       <a href="/cuenta/administracion/usuarios" class="panel-admin-menu-enlace{% if activa == 'usuarios' %} activo{% endif %}"{% if activa == 'usuarios' %} aria-current="page"{% endif %}>Usuarios y roles</a>
+    </li>
+    <li>
+      <a href="/administracion/salas" class="panel-admin-menu-enlace{% if activa == 'salas' %} activo{% endif %}"{% if activa == 'salas' %} aria-current="page"{% endif %}>Salas</a>
     </li>
   </ul>
 </nav>
