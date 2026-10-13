@@ -34,6 +34,7 @@ frontend-indiecinema/
 │   │   └── registro.html.twig  # Formulario de alta de usuario
 │   ├── programacion/           # Plantillas del subsistema programación
 │   │   ├── acerca_de.html.twig # «Acerca de IndieCinema»: quiénes somos y cómo funciona
+│   │   ├── alta_funcion.html.twig # Formulario de alta para programar una función (IC-121)
 │   │   ├── alta_sala.html.twig # Formulario de alta y edición de sala
 │   │   ├── cartelera.html.twig # Cartelera pública con filtros GET, paginado y descarga en CSV
 │   │   ├── ficha_funcion.html.twig # Ficha de una función: obras, sala, fecha, precio y estado
@@ -236,6 +237,7 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 
 - **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y casilla de términos sin tildar por defecto (`marcado: valores.terminos ?? false`), mensajes de error y botón principal.
 - **`plantillas/programacion/acerca_de.html.twig`**: «Acerca de IndieCinema» en `/acerca-de`, estática: quiénes somos, los cuatro pasos de cómo funciona una función (como la sección del wireframe de la portada) y quién participa. Las secciones `#quienes-somos` y `#como-funciona` son las que enlazan el encabezado y el pie (IC-95).
+- **`plantillas/programacion/alta_funcion.html.twig`**: Formulario de alta para programar una función en `/organizador/funciones/nueva` (IC-121 / E3-11.2) con selector de sala propia habilitada, selección de obras del catálogo, fecha y hora de proyección, precio y cupo de localidades.
 - **`plantillas/programacion/alta_sala.html.twig`**: Formulario de alta y edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía y parámetros de proyección.
 - **`plantillas/programacion/cartelera.html.twig`**: Cartelera pública en `/cartelera` con un formulario GET de filtros (búsqueda, localidad, fecha y género) que funciona sin JavaScript, avisos de los filtros inválidos, mensaje propio sin resultados, cuadrícula de tarjetas de función, paginado anterior/siguiente (IC-80) y un enlace para descargar en CSV la cartelera con los mismos filtros (IC-83). Los resultados van en la sección `#resultados-cartelera`, que con JavaScript redibuja `BuscadorDeCartelera` sin recargar (IC-101).
 - **`plantillas/programacion/ficha_funcion.html.twig`**: Ficha de una función en `/cartelera/{id}`, en cualquier estado: las obras (elegidas, o candidatas si está en votación) con su sinopsis, duración y géneros, la sala con su dirección y el enlace a su ficha, la fecha (o «Fecha a confirmar»), el precio, el cupo y el estado, con un aviso si se canceló (IC-86). Migas de pan, la sala y cada obra en tarjetas que en celular pasan a una columna, y encabezados sin saltos de nivel: `h1` la función, `h2` la sala y cada obra (IC-87).

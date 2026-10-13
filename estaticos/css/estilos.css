@@ -4460,6 +4460,201 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* --------------------------------------------------------------------------
+   FORMULARIO DE ALTA DE FUNCIÓN (IC-121 / E3-11.2)
+   Componentes para plantillas/programacion/alta_funcion.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Formulario principal de programación de función */
+.formulario-alta-funcion {
+  width: 100%;
+}
+
+/* Cuadrícula interactiva de selección de obras del catálogo */
+.cuadricula-seleccion-obras {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-2);
+  margin-bottom: var(--espacio-4);
+  width: 100%;
+}
+
+/* Tarjeta individual con casilla de verificación para cada obra */
+.tarjeta-seleccion-obra {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  cursor: pointer;
+  transition: border-color var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+.tarjeta-seleccion-obra:hover {
+  border-color: var(--color-dorado-acento);
+  background-color: rgba(230, 180, 80, 0.05);
+}
+
+.tarjeta-seleccion-obra input[type="checkbox"]:checked ~ .info-seleccion-obra .titulo-seleccion-obra {
+  color: var(--color-dorado-acento);
+}
+
+.info-seleccion-obra {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.titulo-seleccion-obra {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.meta-seleccion-obra {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-atenuado);
+}
+
+/* Cabecera del formulario con botón de acción lateral */
+.encabezado-formulario-solicitud {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--espacio-4);
+  flex-wrap: wrap;
+}
+
+.solicitud-texto-cabecera {
+  flex: 1 1 500px;
+}
+
+.solicitud-accion-cabecera {
+  flex-shrink: 0;
+}
+
+/* Layout en dos columnas estilo Figma para el formulario del organizador */
+.panel-organizador-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espacio-8);
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .panel-organizador-grid {
+    grid-template-columns: 1fr 310px;
+    align-items: start;
+  }
+}
+
+.panel-organizador-principal {
+  min-width: 0;
+  width: 100%;
+}
+
+.panel-organizador-lateral {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Tarjeta lateral con los parámetros heredados de la sala (Figma #109:2) */
+.tarjeta-parametros-sala {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.parametros-sala-titulo {
+  font-family: var(--fuente-mono, monospace);
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-texto-atenuado);
+  margin: 0;
+}
+
+.parametros-sala-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin: 0;
+  padding: 0;
+}
+
+.parametro-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px dashed var(--color-superficie-borde);
+  padding-bottom: var(--espacio-2);
+}
+
+.parametro-item dt {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-atenuado);
+}
+
+.parametro-item dd {
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  color: var(--color-texto-brillante);
+  margin: 0;
+  text-align: right;
+}
+
+.parametros-sala-pie {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-atenuado);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Banner de aviso antes de publicar como en Figma */
+.aviso-publicacion-funcion {
+  display: flex;
+  gap: var(--espacio-3);
+  align-items: flex-start;
+  padding: var(--espacio-4);
+  background-color: rgba(240, 166, 59, 0.08);
+  border: 1px solid rgba(240, 166, 59, 0.3);
+  border-radius: var(--radio-md);
+  margin-top: var(--espacio-4);
+  margin-bottom: var(--espacio-4);
+}
+
+.aviso-publicacion-funcion .aviso-icono {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.aviso-publicacion-funcion .aviso-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.aviso-publicacion-funcion .aviso-titulo {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-dorado-acento);
+}
+
+.aviso-publicacion-funcion .aviso-texto {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-principal);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
    -------------------------------------------------------------------------- */

@@ -1,0 +1,300 @@
+{#
+  Formulario de alta para programar una función (IC-121 / E3-11.2).
+  Permite al organizador seleccionar una de sus salas habilitadas, una o más obras
+  del catálogo, la fecha y hora de la proyección, el precio de la entrada y el cupo.
+  Una vez guardada con éxito, la función queda programada y aparece en la cartelera.
+
+  Variables recibidas:
+  - accion: (string, opcional) URL de destino del POST (por defecto '/organizador/funciones/nueva').
+  - csrf: (string, obligatorio) Token CSRF para validar el envío POST.
+  - salas: (list, obligatorio) Lista de salas propias del organizador habilitadas para proyectar.
+  - obras: (list, obligatorio) Obras disponibles en el catálogo de IndieCinema.
+  - valores: (map, opcional) Valores enviados por el usuario tras un error de validación.
+  - errores: (map, opcional) Diccionario de mensajes de error de validación por campo.
+  - error_general: (string, opcional) Mensaje de error general si falló la validación.
+  - mensaje_exito: (string, opcional) Mensaje tras guardar exitosamente la función.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Programar una función{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+  {# Migas de pan para ubicación dentro del panel de organizador #}
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga"><a href="/organizador/funciones" class="enlace-miga">Mis funciones</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Programar función</li>
+    </ol>
+  </nav>
+
+  {# Encabezado descriptivo de la pantalla de alta #}
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Programar una función</h1>
+      <p class="solicitud-bajada">
+        Elegí tu sala, las obras del catálogo, la fecha y horario, el precio de la entrada y el cupo disponible. Al guardarla, tu función aparecerá en la cartelera.
+      </p>
+    </div>
+    <div class="solicitud-accion-cabecera">
+      <a href="/organizador/funciones" class="boton boton-secundario">Ver mis funciones</a>
+    </div>
+  </header>
+
+  {# Alerta de error general si algún dato no superó las reglas de negocio #}
+  {% if error_general is defined and error_general %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'error',
+      titulo: 'No se pudo programar la función',
+      mensaje: error_general
+    } only %}
+  {% endif %}
+
+  {# Alerta de confirmación exitosa #}
+  {% if mensaje_exito is defined and mensaje_exito %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: '¡Función programada con éxito!',
+      mensaje: mensaje_exito
+    } only %}
+  {% endif %}
+
+  {# Si el organizador no tiene salas habilitadas, advertirle antes de que intente enviar el formulario #}
+  {% if salas is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      titulo: 'No tenés salas habilitadas',
+      mensaje: 'Para poder programar una función necesitás tener al menos una sala habilitada por un administrador.'
+    } only %}
+    <div class="solicitud-acciones-inferior" style="margin-top: 1rem;">
+      {% include 'parciales/boton.html.twig' with {
+        texto: 'Publicar una sala',
+        url: '/organizador/salas/nueva',
+        variante: 'primario'
+      } only %}
+      <a href="/organizador/funciones" class="boton boton-secundario">Volver a mis funciones</a>
+    </div>
+  {% else %}
+    {# Formulario principal de alta de función #}
+    <form action="{{ accion ?? '/organizador/funciones/nueva' }}" method="POST" class="formulario-sala formulario-alta-funcion" novalidate>
+      {# Token de protección CSRF #}
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+      {# ==================================================================== #}
+      {# SECCIÓN 1: SALA PROPIA                                               #}
+      {# ==================================================================== #}
+      <fieldset class="seccion-formulario">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Sala de proyección</span>
+          <span class="seccion-subtitulo">Seleccioná una de tus salas habilitadas para llevar a cabo la proyección.</span>
+        </legend>
+
+        {# Genera la lista de opciones para el selector de sala propia #}
+        {% set opciones_salas = [] %}
+        {% for s in salas %}
+          {% set capacidad_texto = s.capacidad ?? (s.datos.capacidad ?? null) %}
+          {% set localidad_texto = s.localidad ?? (s.datos.localidad ?? null) %}
+          {% set etiqueta_sala = s.nombre ?? (s.datos.nombre ?? 'Sala sin nombre') %}
+          {% if capacidad_texto %}
+            {% set etiqueta_sala = etiqueta_sala ~ ' (' ~ capacidad_texto ~ ' butacas' ~ (localidad_texto ? ' · ' ~ localidad_texto : '') ~ ')' %}
+          {% endif %}
+          {% set opciones_salas = opciones_salas|merge([{
+            valor: s.id,
+            etiqueta: etiqueta_sala
+          }]) %}
+        {% endfor %}
+
+        {% include 'parciales/campo.html.twig' with {
+          nombre: 'sala_id',
+          etiqueta: 'Sala',
+          tipo: 'select',
+          placeholder: 'Seleccioná una sala...',
+          opciones: opciones_salas,
+          valor: valores.sala_id ?? '',
+          requerido: true,
+          errores: errores,
+          ayuda: 'Solo se listan las salas propias que ya fueron habilitadas.'
+        } only %}
+      </fieldset>
+
+      {# ==================================================================== #}
+      {# SECCIÓN 2: OBRAS DEL CATÁLOGO                                        #}
+      {# ==================================================================== #}
+      <fieldset class="seccion-formulario">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Obras del catálogo</span>
+          <span class="seccion-subtitulo">Elegí la obra o los títulos a proyectar en la función.</span>
+        </legend>
+
+        {% if obras is empty %}
+          {% include 'parciales/mensaje.html.twig' with {
+            tipo: 'info',
+            mensaje: 'No hay obras cargadas actualmente en el catálogo.'
+          } only %}
+        {% else %}
+          {# Cuadrícula accesible de selección de obras con casillas de verificación #}
+          <div class="cuadricula-seleccion-obras" role="group" aria-label="Selección de obras del catálogo">
+            {% set seleccionadas = valores.obras ?? (valores.obras_ids ?? (valores.obra_id is defined ? [valores.obra_id] : [])) %}
+            {% for obra in obras %}
+              {% set marcada = obra.id in seleccionadas %}
+              <label class="tarjeta-seleccion-obra{% if marcada %} seleccionada{% endif %}">
+                <input
+                  type="checkbox"
+                  name="obras[]"
+                  value="{{ obra.id }}"
+                  class="campo-control-checkbox"
+                  {% if marcada %}checked{% endif %}
+                >
+                <div class="info-seleccion-obra">
+                  <span class="titulo-seleccion-obra">{{ obra.titulo }}</span>
+                  <span class="meta-seleccion-obra">
+                    {{ obra.anio ?? '' }}
+                    {% set dur = obra.duracion ?? (obra.duracionMinutos ?? null) %}
+                    {% if dur %} · {{ dur }} min{% endif %}
+                    {% if obra.director is defined and obra.director %} · Dir: {{ obra.director }}{% endif %}
+                  </span>
+                </div>
+              </label>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {# Mensaje de error para la selección de obras #}
+        {% set error_obras = errores.obras ?? (errores.obras_ids ?? (errores.obra_id ?? null)) %}
+        {% if error_obras %}
+          <span class="campo-error" role="alert">
+            <span class="error-icono" aria-hidden="true">⚠️</span> {{ error_obras }}
+          </span>
+        {% else %}
+          <span class="campo-ayuda">Marcá al menos una obra del catálogo para esta función.</span>
+        {% endif %}
+      </fieldset>
+
+      {# ==================================================================== #}
+      {# SECCIÓN 3: FECHA Y HORA                                              #}
+      {# ==================================================================== #}
+      <fieldset class="seccion-formulario">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Fecha y horario</span>
+          <span class="seccion-subtitulo">Día y hora pactados para la proyección en sala.</span>
+        </legend>
+
+        <div class="fila-campos-doble">
+          {# Campo: Fecha de proyección #}
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'fecha',
+            etiqueta: 'Fecha de proyección',
+            tipo: 'date',
+            valor: valores.fecha ?? '',
+            requerido: true,
+            errores: errores,
+            ayuda: 'La fecha debe ser a partir de hoy o futura.'
+          } only %}
+
+          {# Campo: Horario de inicio #}
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'hora',
+            etiqueta: 'Horario de inicio',
+            tipo: 'time',
+            valor: valores.hora ?? '',
+            placeholder: 'Ej: 20:30',
+            requerido: true,
+            errores: errores,
+            ayuda: 'Hora estimada en la que comienza la función.'
+          } only %}
+        </div>
+      </fieldset>
+
+      {# ==================================================================== #}
+      {# SECCIÓN 4: PRECIO Y CUPO                                             #}
+      {# ==================================================================== #}
+      <fieldset class="seccion-formulario">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Precio y cupo</span>
+          <span class="seccion-subtitulo">Valores de acceso a la función y cantidad de localidades disponibles.</span>
+        </legend>
+
+        <div class="fila-campos-doble">
+          {# Campo: Precio de la entrada #}
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'precio',
+            etiqueta: 'Precio de la entrada ($)',
+            tipo: 'number',
+            valor: valores.precio ?? '',
+            placeholder: 'Ej: 1500',
+            requerido: true,
+            errores: errores,
+            ayuda: 'Poné 0 para función gratuita o a la gorra.'
+          } only %}
+
+          {# Campo: Cupo de butacas disponibles #}
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'cupo',
+            etiqueta: 'Cupo disponible (butacas)',
+            tipo: 'number',
+            valor: valores.cupo ?? '',
+            placeholder: 'Ej: 50',
+            requerido: true,
+            errores: errores,
+            ayuda: 'Cantidad de entradas disponibles. No puede superar la capacidad de la sala.'
+          } only %}
+        </div>
+      </fieldset>
+
+      {# ==================================================================== #}
+      {# ACCIONES FINALES                                                     #}
+      {# ==================================================================== #}
+      {# Banner informativo de publicación como en Figma #}
+      <div class="aviso-publicacion-funcion" role="status">
+        <span class="aviso-icono" aria-hidden="true">💡</span>
+        <div class="aviso-contenido">
+          <strong class="aviso-titulo">Publicación directa</strong>
+          <p class="aviso-texto">Al guardar la función, quedará en estado <strong>programada</strong> y aparecerá disponible inmediatamente en la cartelera para reservas.</p>
+        </div>
+      </div>
+
+      <footer class="pie-formulario-acciones">
+        <a href="/organizador/funciones" class="boton boton-secundario">Descartar</a>
+
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Programar función',
+          tipo: 'submit',
+          variante: 'primario',
+          tamano: 'grande'
+        } only %}
+      </footer>
+    </form>
+    </div>
+
+    {# Parámetros heredados de la sala como en Figma #}
+    <aside class="panel-organizador-lateral" aria-labelledby="titulo-parametros-sala">
+      <div class="tarjeta-parametros-sala">
+        <h2 id="titulo-parametros-sala" class="parametros-sala-titulo">Parámetros heredados de la sala</h2>
+        <dl class="parametros-sala-lista">
+          <div class="parametro-item">
+            <dt>Capacidad</dt>
+            <dd>Hasta límite de la sala</dd>
+          </div>
+          <div class="parametro-item">
+            <dt>Tiempo entre funciones</dt>
+            <dd>45 min</dd>
+          </div>
+          <div class="parametro-item">
+            <dt>Mínimo de asistentes</dt>
+            <dd>1 persona</dd>
+          </div>
+          <div class="parametro-item">
+            <dt>Conducta mínima</dt>
+            <dd>No exige</dd>
+          </div>
+        </dl>
+        <p class="parametros-sala-pie">Los parámetros salen de la configuración de la sala. Al guardarla, tu función aparecerá en la cartelera.</p>
+      </div>
+    </aside>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

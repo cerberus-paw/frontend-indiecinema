@@ -4,8 +4,9 @@
   ciclo de vida (votación de títulos, acuerdo de fecha, programada, cancelada o finalizada).
 
   Usa la tabla del panel del administrador (tabla-admin), como «Salas»: es la misma forma de
-  listar con estado, y así las pantallas de listado se ven igual en todo el sitio. El alta, la
-  edición y la cancelación suman su columna de acciones cuando tengan pantalla (IC-121 a IC-123).
+  listar con estado, y así las pantallas de listado se ven igual en todo el sitio.
+  Permite programar una función nueva (IC-121) mediante el botón en el encabezado.
+  La edición y la cancelación suman su columna de acciones cuando tengan pantalla (IC-122 a IC-123).
 
   Variables:
   - funciones: lista de funciones con id, titulo, titulos_elegidos, sala, sala_id,
@@ -30,6 +31,11 @@
       <h1 class="solicitud-titulo">Mis funciones</h1>
       <p class="solicitud-bajada">Las funciones de tus salas. Una función aparece en la cartelera cuando queda programada y su sala está habilitada.</p>
     </div>
+    {% include 'parciales/boton.html.twig' with {
+      texto: 'Programar una función',
+      url: '/organizador/funciones/nueva',
+      variante: 'primario'
+    } only %}
   </header>
 
   {% if funciones is empty %}
@@ -37,6 +43,13 @@
       tipo: 'info',
       mensaje: 'Todavía no tenés ninguna función en tus salas.'
     } only %}
+    <div style="margin-top: 1rem;">
+      {% include 'parciales/boton.html.twig' with {
+        texto: 'Programar tu primera función',
+        url: '/organizador/funciones/nueva',
+        variante: 'primario'
+      } only %}
+    </div>
   {% else %}
     {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
     <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Mis funciones">
