@@ -46,7 +46,8 @@
   {# Incluye el pie de página reutilizable con las columnas de exploración, participación y legales #}
   {% include 'parciales/pie.html.twig' %}
 
-  {# Carga el script principal con atributo 'defer' para no bloquear el parseo del DOM, gestionando CSRF e interactividad #}
+  {# Las utilidades y la aplicación, con 'defer' para no bloquear el parseo del DOM y en este orden: app.js usa paw.js. Los componentes los carga app.js según la página. #}
+  <script src="/estaticos/js/paw.js" defer></script>
   <script src="/estaticos/js/app.js" defer></script>
   {# Bloque opcional para que vistas individuales incluyan scripts de JavaScript específicos #}
   {% block scripts %}{% endblock %}

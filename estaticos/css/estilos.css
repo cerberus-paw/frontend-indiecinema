@@ -3326,6 +3326,87 @@ dd {
   font-size: var(--texto-sm);
 }
 
+/* Mientras la búsqueda en vivo trae resultados, los anteriores quedan atenuados y sin clics (IC-102) */
+.cartelera-resultados-seccion[aria-busy="true"] > :not(.cartelera-cargando) {
+  /* Atenuados */
+  opacity: 0.45;
+  /* Sin clics hasta que lleguen los nuevos */
+  pointer-events: none;
+  /* El cambio, suave */
+  transition: opacity 0.15s ease;
+}
+
+/* Aviso de carga de la búsqueda en vivo: fijo abajo y centrado, se ve aunque se haya buscado desde el paginado */
+.cartelera-cargando {
+  /* Fijo en la pantalla */
+  position: fixed;
+  /* Abajo */
+  bottom: var(--espacio-6);
+  /* Centrado */
+  left: 50%;
+  transform: translateX(-50%);
+  /* Por encima del contenido */
+  z-index: 50;
+  /* Ícono y texto en fila */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  /* Sin margen propio */
+  margin: 0;
+  /* Píldora */
+  padding: var(--espacio-2) var(--espacio-4);
+  border-radius: 999px;
+  /* Superficie elevada con borde */
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  /* Texto */
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  /* Sombra para separarlo de lo que tiene abajo */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Círculo que gira */
+.cartelera-cargando-icono {
+  /* Tamaño del ícono */
+  width: 1rem;
+  height: 1rem;
+  /* Aro con un tramo en el color primario */
+  border: 2px solid var(--color-borde-fuerte);
+  border-top-color: var(--color-primario);
+  border-radius: 50%;
+  /* Giro continuo */
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Link del mensaje de error de la búsqueda en vivo: carga la misma búsqueda como página (IC-102) */
+.alerta-enlace {
+  /* Del color del mensaje */
+  color: inherit;
+  /* Subrayado para que se lea como link */
+  text-decoration: underline;
+  /* Destacado */
+  font-weight: 600;
+}
+
+/* Separación entre el texto del mensaje y el link */
+.alerta-texto + .alerta-texto {
+  margin-top: var(--espacio-2);
+}
+
+/* Sin animación para quien la desactivó: queda el aro y el texto */
+@media (prefers-reduced-motion: reduce) {
+  .cartelera-cargando-icono {
+    animation: none;
+  }
+}
+
 /* --------------------------------------------------------------------------
    18. FICHA DE LA FUNCIÓN: SALA, OBRAS Y METADATOS (IC-87)
    Componentes de programacion/ficha_funcion.html.twig

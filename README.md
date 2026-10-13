@@ -46,7 +46,11 @@ frontend-indiecinema/
     ├── css/
     │   └── estilos.css         # Hoja de estilos con paleta cinematográfica oscura y responsive
     ├── js/
-    │   └── app.js              # Manejo automático de tokens CSRF y utilidades interactivas
+    │   ├── paw.js              # Clase utilitaria PAW: contenedor, nuevoElemento, cargarScript y enviar con CSRF
+    │   ├── app.js              # Clase App: en DOMContentLoaded carga e inicia los componentes de la página
+    │   └── componentes/        # Una clase por archivo, cada una recibe su contenedor
+    │       ├── buscador-de-cartelera.js # BuscadorDeCartelera: filtra la cartelera sin recargar, con el JSON de la misma URL
+    │       └── menu-usuario.js # MenuUsuario: cierra el menú del usuario con un clic afuera o con Escape
     └── img/
         ├── icon.svg            # Isotipo e icono oficial de IndieCinema (favicon)
         ├── logo-horizontal-dark.svg # Logotipo horizontal oficial sobre fondo oscuro
@@ -232,10 +236,27 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 - **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y casilla de términos sin tildar por defecto (`marcado: valores.terminos ?? false`), mensajes de error y botón principal.
 - **`plantillas/programacion/acerca_de.html.twig`**: «Acerca de IndieCinema» en `/acerca-de`, estática: quiénes somos, los cuatro pasos de cómo funciona una función (como la sección del wireframe de la portada) y quién participa. Las secciones `#quienes-somos` y `#como-funciona` son las que enlazan el encabezado y el pie (IC-95).
 - **`plantillas/programacion/alta_sala.html.twig`**: Formulario de alta y edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía y parámetros de proyección.
-- **`plantillas/programacion/cartelera.html.twig`**: Cartelera pública en `/cartelera` con un formulario GET de filtros (búsqueda, localidad, fecha y género) que funciona sin JavaScript, avisos de los filtros inválidos, mensaje propio sin resultados, cuadrícula de tarjetas de función, paginado anterior/siguiente (IC-80) y un enlace para descargar en CSV la cartelera con los mismos filtros (IC-83).
+- **`plantillas/programacion/cartelera.html.twig`**: Cartelera pública en `/cartelera` con un formulario GET de filtros (búsqueda, localidad, fecha y género) que funciona sin JavaScript, avisos de los filtros inválidos, mensaje propio sin resultados, cuadrícula de tarjetas de función, paginado anterior/siguiente (IC-80) y un enlace para descargar en CSV la cartelera con los mismos filtros (IC-83). Los resultados van en la sección `#resultados-cartelera`, que con JavaScript redibuja `BuscadorDeCartelera` sin recargar (IC-101).
 - **`plantillas/programacion/ficha_funcion.html.twig`**: Ficha de una función en `/cartelera/{id}`, en cualquier estado: las obras (elegidas, o candidatas si está en votación) con su sinopsis, duración y géneros, la sala con su dirección y el enlace a su ficha, la fecha (o «Fecha a confirmar»), el precio, el cupo y el estado, con un aviso si se canceló (IC-86). Migas de pan, la sala y cada obra en tarjetas que en celular pasan a una columna, y encabezados sin saltos de nivel: `h1` la función, `h2` la sala y cada obra (IC-87).
 - **`plantillas/programacion/inicio.html.twig`**: Portada en `/`: la presentación con un buscador GET (qué y dónde) que lleva a la cartelera filtrada, la cantidad de salas publicadas y de funciones en cartelera, las próximas cuatro funciones y tres salas, cada sección con el enlace a su listado y un mensaje propio si está vacía (IC-93).
 - **`plantillas/programacion/mis_salas.html.twig`**: Vista de «Mis salas» para organizadores en `/organizador/salas` con migas de pan, botón para publicar sala y cuadrícula de tarjetas editables (IC-38).
 - **`plantillas/programacion/salas.html.twig`**: Catálogo público de salas indie habilitadas en `/salas` con cuadrícula de tarjetas de sala (IC-39), y un buscador GET por nombre y localidad que funciona sin JavaScript, con el aviso si la búsqueda no es válida y un mensaje propio sin resultados (IC-91).
 - **`plantillas/programacion/sala.html.twig`**: Ficha pública de una sala en `/salas/{id}`: la foto, la dirección, la capacidad, la descripción y sus próximas funciones con la tarjeta de función, o un mensaje si no tiene. Si todavía no está publicada (la ve sólo su organizador), lo avisa. Las tarjetas de sala enlazan a su ficha (IC-90).
 
+---
+
+## 8. JavaScript (IC-100)
+
+Sin librerías y con una clase por archivo. La plantilla base carga, con `defer` y en este orden, `paw.js` y `app.js`; los componentes los carga `app.js` sólo en las páginas que los usan.
+
+- **`js/paw.js`, la clase utilitaria `PAW`**, con métodos estáticos para la aplicación y los componentes:
+  - `contenedor(pContenedor)`: el elemento de un componente, a partir del elemento o de su selector.
+  - `nuevoElemento(etiqueta, contenido, atributos)`: crea un elemento; el contenido va como texto (`textContent`), nunca como HTML.
+  - `cargarScript(nombre, url, alCargar)`: carga un script una sola vez y llama a `alCargar` cuando está listo, aunque ya se hubiera cargado.
+  - `enviar(url, opciones)`: `fetch()` que agrega `X-CSRF-Token` (de `<meta name="csrf">`) a los POST, PUT, PATCH y DELETE al mismo sitio, y nunca a otro dominio.
+- **`js/app.js`, la clase de aplicación `App`**: su constructor sólo espera a `DOMContentLoaded`; ahí, por cada componente cuyo contenedor está en la página, carga su script con `PAW.cargarScript()` y lo crea pasándole el contenedor.
+- **`js/componentes/`, una clase por componente**: el constructor recibe su contenedor (elemento o selector) y no busca nada fuera de él salvo los eventos del documento que necesite. Hoy:
+  - `buscador-de-cartelera.js`, `BuscadorDeCartelera` (`.filtros-cartelera` y `#resultados-cartelera`, IC-101): recibe el formulario de filtros y la sección de resultados. Al elegir una localidad, una fecha o un género, al dejar de escribir en «Buscar» (400 ms) o al enviar el formulario, pide la misma URL que el formulario con `Accept: application/json` y vuelve a dibujar la sección como `cartelera.html.twig`: los avisos, el total, las tarjetas (como `tarjeta_funcion.html.twig`), el paginado (sus links también van por JSON) o el mensaje sin resultados. También agrega o saca «Limpiar» según haya filtros. Un pedido nuevo cancela al anterior. Mientras busca, y también desde la primera tecla mientras espera que se deje de escribir, la sección queda con `aria-busy="true"`, los resultados anteriores atenuados y sin clics, y el aviso «Buscando funciones…» (`role="status"`) fijo abajo de la pantalla, así se ve aunque se haya buscado desde el paginado; sin animación con `prefers-reduced-motion` (IC-102). Cada búsqueda deja su URL en el historial (`pushState`, sin repetir la misma), así se puede compartir o recargar; «Atrás» y «Adelante» completan el formulario con esa URL y la vuelven a pedir. Cuando llegan los resultados, una región `aria-live` fuera de la sección (que no se redibuja) anuncia el total, la página y si algún filtro no se aplicó, o el mensaje de error si el pedido falla (IC-103). Si el pedido falla (sin conexión o sin la cartelera en JSON), la sección muestra el mensaje genérico de error (`alerta-error`, `role="alert"`) con un link que carga la misma búsqueda como página, y los filtros quedan como estaban para volver a intentar (IC-102). Sin JavaScript, el formulario y los links funcionan igual.
+  - `menu-usuario.js`, `MenuUsuario` (`#menu-usuario`): cierra el menú del usuario con un clic afuera o con Escape, y devuelve el foco al botón. Sin JavaScript, el `<details>` se abre y se cierra igual.
+
+Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.iniciar()`, la carga condicionada a que su contenedor esté en la página.
