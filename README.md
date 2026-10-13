@@ -84,19 +84,27 @@ Cada plantilla renderizada por el núcleo recibe automáticamente las siguientes
 
 ---
 
-## 5. Menú Dinámico según el Rol (Entrega 3 · IC-94)
+## 5. Menú Dinámico según el Rol (Entrega 3 · IC-97)
 
-El encabezado adapta sus opciones y enlaces según el estado de la sesión y el rol alcanzado, enlazando exclusivamente a rutas con pantallas implementadas (sin enlaces 404):
+El encabezado y el pie adaptan sus opciones y enlaces según el estado de la sesión y el rol, para que cada rol vea sólo sus opciones. Los roles son acumulativos, como en el backend (`Rol::alcanza()`): cada uno ve lo del anterior y lo suyo, con `usuario.alcanza('<rol>')`. Sólo se enlazan pantallas que existen (sin 404).
 
-- **Sin sesión (Invitado):**
+- **Sin sesión (Invitado / Visitante):**
   - Enlaces a Cartelera (`/cartelera`), Salas (`/salas`), Cómo funciona (`/acerca-de#como-funciona`), Acerca de (`/acerca-de`) y Buscador hacia la cartelera (`action="/cartelera"` con parámetro `q`).
   - Botones de acción: **Ingresar** (`/cuenta/ingresar`) y **Crear cuenta** (`/cuenta/registro`).
-- **Espectador:**
-  - Acceso al menú de usuario con su nombre y avatar.
+  - En el pie: Cartelera y Salas indie, **Ingresar** y **Crear cuenta**, y las secciones de «Acerca de».
+- **Espectador (cualquier usuario con sesión):**
+  - Acceso al menú de usuario con su avatar, su nombre y una insignia con su rol.
   - Enlace al panel de **Mi cuenta** (`/cuenta/`).
+  - No ve los accesos del organizador.
   - Botón seguro de **Cerrar sesión** por POST (`/cuenta/salir`) con token CSRF.
 - **Organizador (`usuario.alcanza('organizador')`):**
-  - Todo lo de espectador más acceso directo en barra de navegación y menú a **Mis salas** (`/organizador/salas`) y **Publicar una sala** (`/organizador/salas/nueva`).
+  - Todo lo de espectador más la gestión de sus salas:
+  - Acceso directo en la barra de navegación superior: **Mis salas** (`/organizador/salas`).
+  - En el menú desplegable: sección **Panel del Organizador** con accesos a **Mis salas** (`/organizador/salas`) y **Publicar una sala** (`/organizador/salas/nueva`).
+  - En el pie: accesos a **Mi cuenta**, **Mis salas** y **Publicar una sala**.
+- **Moderador y administrador:**
+  - Lo mismo que el organizador: el backend los deja entrar a esas pantallas.
+  - Todavía no tienen opciones propias: la moderación y la administración (usuarios y roles) no tienen pantalla. Su sección del menú se suma con ellas.
 
 ---
 
