@@ -133,6 +133,15 @@
               </a>
             {% endif %}
 
+            {# Sección de administración: sólo el administrador, el único rol que alcanza esas rutas #}
+            {% if usr.alcanza('administrador') %}
+              <div class="menu-separador" role="separator"></div>
+              <div class="menu-seccion-titulo">Administración</div>
+              <a href="/cuenta/administracion/usuarios" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
+              </a>
+            {% endif %}
+
             {# Separador visual antes del botón de cierre de sesión #}
             <div class="menu-separador" role="separator"></div>
             {# Formulario POST con token CSRF para invalidar la sesión de forma segura contra ataques CSRF #}
