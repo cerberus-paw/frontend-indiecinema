@@ -1,14 +1,16 @@
 {#
   «Usuarios y roles» del administrador, en /cuenta/administracion/usuarios, como el wireframe de la
   E2 (administracion-usuarios-parametros): la barra lateral de administración, el buscador con los
-  filtros de rol y estado, la tabla y el paginado numerado. Queda afuera lo que todavía no existe
-  (estadísticas, conducta, funciones, exportar, invitar, suspender y parámetros). Los filtros son
-  un formulario GET, así viajan en la URL y funcionan sin JavaScript.
+  filtros de rol y estado, la tabla y el paginado numerado. Queda afuera lo que todavía no existe:
+  las tarjetas de números, las columnas de conducta y funciones, «Acciones» (ver, suspender, dar
+  de baja), exportar, invitar y los parámetros. Los filtros son un formulario GET, así viajan en la
+  URL y funcionan sin JavaScript.
 
-  En «Acciones», al espectador se le da el rol de organizador y al organizador se le quita: es un
-  POST con el token CSRF y los filtros en campos ocultos, para volver a la misma búsqueda. El
-  moderador y el administrador no tienen acciones: esos roles no se cambian desde la web. Los
-  botones van con contorno, como los del wireframe: una columna entera en naranja tapaba el resto.
+  El rol de cada fila es un desplegable, como en el wireframe: elegir otro y «Guardar» es un POST
+  con el token CSRF y los filtros en campos ocultos, para volver a la misma búsqueda. «Guardar»
+  aparece recién al elegir otro rol, con CSS. No se guarda solo al cambiar: con el teclado, las
+  flechas cambian la opción de un desplegable cerrado, y se cambiaría un rol sin querer. Al
+  moderador y al administrador no se los cambia desde la web: su desplegable está deshabilitado.
 
   Variables:
   - usuarios: lista de {id, nombre, correo, rol (el mayor), estado (pendiente, activa o suspendida)}.
@@ -27,7 +29,7 @@
 {% block panel %}
 <header class="panel-admin-cabecera">
   <h1 class="panel-admin-titulo">Usuarios y roles</h1>
-  <p class="panel-admin-bajada">Buscá cuentas por su nombre o su correo.</p>
+  <p class="panel-admin-bajada">Buscá cuentas y asigná roles.</p>
 </header>
 
 <form class="panel-admin-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios">
@@ -92,7 +94,6 @@
           <th scope="col">Usuario</th>
           <th scope="col">Rol</th>
           <th scope="col">Estado</th>
-          <th scope="col">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -107,22 +108,26 @@
                 </div>
               </div>
             </td>
-            <td><span class="usuario-rol rol-{{ usuario.rol }}">{{ usuario.rol }}</span></td>
-            <td><span class="estado-cuenta estado-cuenta-{{ usuario.estado }}">{{ usuario.estado }}</span></td>
-            <td class="tabla-admin-acciones">
+            <td>
               {% if usuario.rol in ['espectador', 'organizador'] %}
-                {% set dar = usuario.rol == 'espectador' %}
-                <form action="/cuenta/administracion/usuarios/{{ usuario.id }}/{{ dar ? 'dar-organizador' : 'quitar-organizador' }}" method="POST">
+                <form class="tabla-admin-rol" action="/cuenta/administracion/usuarios/{{ usuario.id }}/rol" method="POST">
                   <input type="hidden" name="_csrf" value="{{ csrf }}">
                   {% for nombre, valor in filtros %}
                     <input type="hidden" name="{{ nombre }}" value="{{ valor }}">
                   {% endfor %}
-                  <button type="submit" class="boton boton-secundario boton-chico" aria-label="{{ dar ? 'Dar rol de organizador a' : 'Quitar rol de organizador a' }} {{ usuario.nombre }}">
-                    {{ dar ? 'Dar rol de organizador' : 'Quitar rol' }}
-                  </button>
+                  <select name="nuevo_rol" class="campo-control control-select" aria-label="Rol de {{ usuario.nombre }}">
+                    <option value="espectador"{% if usuario.rol == 'espectador' %} selected{% endif %}>Espectador</option>
+                    <option value="organizador"{% if usuario.rol == 'organizador' %} selected{% endif %}>Organizador</option>
+                  </select>
+                  <button type="submit" class="boton boton-primario boton-chico" aria-label="Guardar el rol de {{ usuario.nombre }}">Guardar</button>
                 </form>
+              {% else %}
+                <select class="campo-control control-select tabla-admin-rol-fijo" disabled aria-label="Rol de {{ usuario.nombre }}: no se cambia desde la web" title="Este rol no se cambia desde la web">
+                  <option>{{ usuario.rol|capitalize }}</option>
+                </select>
               {% endif %}
             </td>
+            <td><span class="estado-cuenta estado-cuenta-{{ usuario.estado }}">{{ usuario.estado }}</span></td>
           </tr>
         {% endfor %}
       </tbody>

@@ -4024,17 +4024,32 @@ dd {
   overflow-wrap: anywhere;
 }
 
-/* La insignia del menú de usuario, en la celda del rol */
-.tabla-admin .usuario-rol {
-  /* Sin el margen que la separa del nombre en el menú */
-  margin-top: 0;
-  /* En su línea */
-  display: inline-block;
-  /* Del tamaño de la píldora del estado, en la columna de al lado: la del menú es más chica */
-  padding: 0.15rem var(--espacio-3);
-  font-size: var(--texto-xs);
-  font-weight: 600;
-  letter-spacing: 0.06em;
+/* El desplegable del rol y, al lado, «Guardar» */
+.tabla-admin-rol {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+/* El desplegable del rol, del ancho del rol más largo y no de toda la columna, como el wireframe */
+.tabla-admin .control-select {
+  width: 11rem;
+  flex: none;
+  padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
+}
+
+/* «Guardar» aparece recién al elegir otro rol: mientras siga elegida la opción que vino marcada
+   (selected), no hay nada que guardar. Oculto sin sacarlo del renglón, así la columna no cambia de
+   ancho al aparecer. Un navegador sin :has lo muestra siempre */
+.tabla-admin-rol:has(option[selected]:checked) .boton {
+  visibility: hidden;
+}
+
+/* El rol del moderador y del administrador, que no se cambia desde la web: el desplegable apagado */
+.tabla-admin-rol-fijo:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* Avatar con la inicial y, al lado, el nombre y el correo */
