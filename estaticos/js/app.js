@@ -16,6 +16,10 @@ class App {
     if (document.querySelector('#menu-usuario')) {
       PAW.cargarScript('MenuUsuario', `${App.COMPONENTES}/menu-usuario.js`, () => new MenuUsuario('#menu-usuario'));
     }
+    // La búsqueda en vivo, en la cartelera.
+    if (document.querySelector('.filtros-cartelera') && document.querySelector('#resultados-cartelera')) {
+      PAW.cargarScript('BuscadorDeCartelera', `${App.COMPONENTES}/buscador-de-cartelera.js`, () => new BuscadorDeCartelera('.filtros-cartelera', '#resultados-cartelera'));
+    }
   }
 }
 

@@ -1,7 +1,9 @@
 {#
   Cartelera pública, en /cartelera: las funciones programadas que todavía no pasaron, para
   cualquiera, con o sin sesión. Los filtros son un formulario GET, así viajan en la URL y
-  funcionan sin JavaScript.
+  funcionan sin JavaScript. Con JavaScript, el componente BuscadorDeCartelera recibe el formulario
+  y la sección #resultados-cartelera, y la vuelve a dibujar con el JSON de la misma URL sin recargar:
+  lo que cambie acá adentro de la sección tiene que cambiar también en el componente.
 
   Variables:
   - funciones: lista de funciones como las recibe parciales/tarjeta_funcion.html.twig.
@@ -71,6 +73,7 @@
     </div>
   </form>
 
+  <section id="resultados-cartelera" class="cartelera-resultados-seccion" aria-label="Funciones de la cartelera">
   {% if avisos is not empty %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'advertencia',
@@ -111,5 +114,6 @@
       </nav>
     {% endif %}
   {% endif %}
+  </section>
 </div>
 {% endblock %}
