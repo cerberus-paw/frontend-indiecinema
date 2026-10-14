@@ -9,75 +9,71 @@
   - salas: lista de salas como las recibe parciales/tarjeta_sala.html.twig (id, nombre, localidad, capacidad, imagen, habilitada).
   - mensaje_exito: el aviso del cambio que se acaba de hacer, o null.
 #}
-{% extends 'base.html.twig' %}
+{% extends 'administracion.html.twig' %}
 
 {% block titulo %}Salas{% endblock %}
 
-{% block contenido %}
-<div class="contenedor panel-admin">
-  {% include 'parciales/menu_administracion.html.twig' with { activa: 'salas' } only %}
+{% block seccion %}salas{% endblock %}
 
-  <div class="panel-admin-contenido">
-    <header class="panel-admin-cabecera">
-      <h1 class="panel-admin-titulo">Salas</h1>
-      <p class="panel-admin-bajada">Una sala aparece en el listado público y sus funciones en la cartelera cuando la habilitás.</p>
-    </header>
+{% block panel %}
+<header class="panel-admin-cabecera">
+  <h1 class="panel-admin-titulo">Salas</h1>
+  <p class="panel-admin-bajada">Una sala aparece en el listado público y sus funciones en la cartelera cuando la habilitás.</p>
+</header>
 
-    {% if mensaje_exito %}
-      {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
-    {% endif %}
+{% if mensaje_exito %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
+{% endif %}
 
-    {% if salas is empty %}
-      {% include 'parciales/mensaje.html.twig' with {
-        tipo: 'info',
-        mensaje: 'Todavía no hay salas cargadas.'
-      } only %}
-    {% else %}
-      {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
-      <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Salas">
-        <table class="tabla-admin">
-          <thead>
-            <tr>
-              <th scope="col">Sala</th>
-              <th scope="col">Capacidad</th>
-              <th scope="col">Estado</th>
-              <th scope="col"><span class="sr-only">Acciones</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for sala in salas %}
-              <tr data-sala="{{ sala.id }}">
-                <td>
-                  {# Sólo la habilitada lleva a su ficha: una sin habilitar la ve únicamente su organizador. #}
-                  {% if sala.habilitada %}
-                    <a href="/salas/{{ sala.id }}" class="tabla-admin-principal">{{ sala.nombre }}</a>
-                  {% else %}
-                    <span class="tabla-admin-principal">{{ sala.nombre }}</span>
-                  {% endif %}
-                  <span class="tabla-admin-secundario">{{ sala.localidad }}</span>
-                </td>
-                <td>{{ sala.capacidad }}</td>
-                <td>
-                  {% if sala.habilitada %}
-                    <span class="estado-cuenta estado-cuenta-activa">habilitada</span>
-                  {% else %}
-                    <span class="estado-cuenta">esperando</span>
-                  {% endif %}
-                </td>
-                <td class="tabla-admin-acciones">
-                  <form action="/administracion/salas/{{ sala.id }}/{{ sala.habilitada ? 'deshabilitar' : 'habilitar' }}" method="POST">
-                    <input type="hidden" name="_csrf" value="{{ csrf }}">
-                    <button type="submit" class="boton {{ sala.habilitada ? 'boton-secundario' : 'boton-primario' }} boton-chico" aria-label="{{ sala.habilitada ? 'Deshabilitar' : 'Habilitar' }} {{ sala.nombre }}">
-                      {{ sala.habilitada ? 'Deshabilitar' : 'Habilitar' }}
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% endif %}
+{% if salas is empty %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'info',
+    mensaje: 'Todavía no hay salas cargadas.'
+  } only %}
+{% else %}
+  {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
+  <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Salas">
+    <table class="tabla-admin">
+      <thead>
+        <tr>
+          <th scope="col">Sala</th>
+          <th scope="col">Capacidad</th>
+          <th scope="col">Estado</th>
+          <th scope="col"><span class="sr-only">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sala in salas %}
+          <tr data-sala="{{ sala.id }}">
+            <td>
+              {# Sólo la habilitada lleva a su ficha: una sin habilitar la ve únicamente su organizador. #}
+              {% if sala.habilitada %}
+                <a href="/salas/{{ sala.id }}" class="tabla-admin-principal">{{ sala.nombre }}</a>
+              {% else %}
+                <span class="tabla-admin-principal">{{ sala.nombre }}</span>
+              {% endif %}
+              <span class="tabla-admin-secundario">{{ sala.localidad }}</span>
+            </td>
+            <td>{{ sala.capacidad }}</td>
+            <td>
+              {% if sala.habilitada %}
+                <span class="estado-cuenta estado-cuenta-activa">habilitada</span>
+              {% else %}
+                <span class="estado-cuenta">esperando</span>
+              {% endif %}
+            </td>
+            <td class="tabla-admin-acciones">
+              <form action="/administracion/salas/{{ sala.id }}/{{ sala.habilitada ? 'deshabilitar' : 'habilitar' }}" method="POST">
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                <button type="submit" class="boton {{ sala.habilitada ? 'boton-secundario' : 'boton-primario' }} boton-chico" aria-label="{{ sala.habilitada ? 'Deshabilitar' : 'Habilitar' }} {{ sala.nombre }}">
+                  {{ sala.habilitada ? 'Deshabilitar' : 'Habilitar' }}
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-</div>
+{% endif %}
 {% endblock %}

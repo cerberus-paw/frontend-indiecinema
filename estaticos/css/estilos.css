@@ -3961,9 +3961,10 @@ dd {
 
 /* Tabla del panel del administrador */
 .tabla-admin {
-  /* Todo el ancho, con un mínimo para que las columnas no se aprieten en el celular */
+  /* Todo el ancho, con un mínimo para que las columnas no se aprieten en el celular: con menos, el
+     nombre y el correo se cortaban letra por letra */
   width: 100%;
-  min-width: 520px;
+  min-width: 680px;
   /* Bordes de celda unidos */
   border-collapse: collapse;
   /* Texto */
@@ -4023,12 +4024,70 @@ dd {
   overflow-wrap: anywhere;
 }
 
-/* La insignia del menú de usuario, en la celda del rol */
-.tabla-admin .usuario-rol {
-  /* Sin el margen que la separa del nombre en el menú */
-  margin-top: 0;
-  /* En su línea */
-  display: inline-block;
+/* Las columnas de «Usuarios y roles», de ancho fijo: si no, el rol y el estado se corren de una
+   página a otra según el largo de los nombres y los correos. El usuario se queda con el resto */
+.tabla-admin-usuarios {
+  table-layout: fixed;
+}
+
+/* En partes del ancho: el rol arranca cerca del medio de la tabla, no contra el borde derecho */
+.tabla-admin-columna-rol {
+  width: 35%;
+}
+
+.tabla-admin-columna-estado {
+  width: 20%;
+}
+
+/* El desplegable del rol, del ancho del rol más largo y no de toda la columna, como el wireframe */
+.tabla-admin .control-select {
+  width: 11rem;
+  flex: none;
+  padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
+}
+
+/* La barra de «Guardar cambios», debajo de la tabla: los botones a la izquierda, como «Guardar
+   parámetros» del wireframe, y la nota a la derecha. Queda pegada abajo de la pantalla si la tabla
+   sigue más abajo */
+.tabla-admin-cambios {
+  position: sticky;
+  bottom: var(--espacio-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-4);
+  padding: var(--espacio-3) var(--espacio-4);
+  border: 1px solid var(--color-primario);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie-elevada);
+  box-shadow: var(--sombra-md);
+}
+
+/* Aparece recién al elegir otro rol: mientras en todos los desplegables siga elegida la opción que
+   vino marcada (selected), no hay nada que guardar. Un navegador sin :has la muestra siempre */
+.tabla-admin-formulario:not(:has(option[selected]:not(:checked))) .tabla-admin-cambios {
+  display: none;
+}
+
+.tabla-admin-cambios-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+.tabla-admin-cambios-nota {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* El rol del moderador y del administrador, que no se cambia desde la web: el desplegable apagado */
+.tabla-admin-rol-fijo:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* Avatar con la inicial y, al lado, el nombre y el correo */
@@ -4085,22 +4144,155 @@ dd {
   color: var(--color-error);
 }
 
-/* Panel del administrador: la barra lateral y el contenido, como el wireframe */
-.panel-admin {
+/* Tarjetas de números arriba de la tabla, como el wireframe: del ancho de cuatro por fila, aunque
+   haya dos */
+.panel-admin-resumen {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: var(--espacio-8);
-  align-items: start;
-  /* Separación con el encabezado y el pie */
-  padding-top: var(--espacio-8);
-  padding-bottom: var(--espacio-12);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espacio-4);
+  margin: 0 0 var(--espacio-6);
+  /* Sin la caja que el dl tiene en todo el sitio: cada tarjeta tiene la suya */
+  padding: 0;
+  border: none;
+  background: none;
 }
 
-/* Barra lateral */
+.panel-admin-dato {
+  padding: var(--espacio-4) var(--espacio-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie);
+}
+
+/* «USUARIOS REGISTRADOS», en versalitas como los títulos de las columnas */
+.panel-admin-dato dt {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+.panel-admin-dato dd {
+  margin: 0;
+}
+
+.panel-admin-dato-valor {
+  margin-top: var(--espacio-2);
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-3xl);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-texto-brillante);
+}
+
+.panel-admin-dato-nota {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* En tablet, dos por fila; en el celular, una */
+@media (max-width: 900px) {
+  .panel-admin-resumen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .panel-admin-resumen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* El body corta lo que se sale a los costados con overflow-x: hidden, que lo vuelve un contenedor
+   con desplazamiento propio: la barra lateral (sticky) se pegaba a él, que nunca se desplaza, y se
+   iba con la página. clip corta igual sin eso */
+.cuerpo-app:has(.panel-admin) {
+  overflow-x: clip;
+}
+
+/* Sin encabezado ni pie, el panel del administrador ocupa toda la pantalla, como el wireframe */
+.contenido-principal:has(> .panel-admin) {
+  max-width: none;
+  padding: 0;
+  display: flex;
+}
+
+/* Panel del administrador: la barra lateral y el contenido, como el wireframe */
+.panel-admin {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+}
+
+/* Barra lateral: el logo, las secciones y, al pie, la sesión */
 .panel-admin-menu {
-  /* Acompaña al desplazarse */
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+  padding: var(--espacio-6) var(--espacio-4);
+  background-color: var(--color-superficie);
+  border-right: 1px solid var(--color-borde);
+  /* Del alto de la pantalla y quieta al desplazar el contenido, así salir siempre está a mano */
   position: sticky;
-  top: var(--espacio-6);
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.panel-admin-marca {
+  align-self: flex-start;
+  padding-left: var(--espacio-2);
+}
+
+.panel-admin-marca img {
+  display: block;
+}
+
+/* Quién está en sesión y, debajo, el botón para salir, abajo de todo */
+.panel-admin-sesion {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--color-borde);
+}
+
+/* El avatar y, al lado, el nombre sobre el rol */
+.panel-admin-sesion-usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  min-width: 0;
+}
+
+.panel-admin-sesion-datos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+/* Un nombre largo se corta con puntos suspensivos en vez de ensanchar la barra */
+.panel-admin-sesion-nombre {
+  max-width: 100%;
+  font-weight: 600;
+  font-size: var(--texto-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel-admin-salir {
+  width: 100%;
+}
+
+/* El contenido, en todo el ancho que deja la barra, como el wireframe */
+.panel-admin-contenido {
+  min-width: 0;
+  padding: var(--espacio-8) var(--espacio-10) var(--espacio-12);
 }
 
 /* «ADMINISTRACIÓN», sobre las secciones */
@@ -4136,10 +4328,11 @@ dd {
   color: var(--color-texto);
 }
 
-/* La sección actual, resaltada como en el wireframe */
+/* La sección actual, llena como en el wireframe: con los colores invertidos, como la página
+   actual del paginado */
 .panel-admin-menu-enlace.activo {
-  background-color: var(--color-superficie-elevada);
-  color: var(--color-texto-brillante);
+  background-color: var(--color-texto);
+  color: var(--color-texto-inverso);
   font-weight: 600;
 }
 
@@ -4148,8 +4341,10 @@ dd {
   margin-bottom: var(--espacio-6);
 }
 
+/* Más chico que el título de las páginas públicas: acá manda la tabla, no el título */
 .panel-admin-titulo {
   margin: 0;
+  font-size: var(--texto-2xl);
 }
 
 .panel-admin-bajada {
@@ -4160,7 +4355,7 @@ dd {
 /* Buscador y filtros en una fila: el buscador más ancho */
 .panel-admin-filtros {
   display: grid;
-  grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(140px, 1fr)) auto;
+  grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(140px, 1fr)) auto;
   gap: var(--espacio-3);
   align-items: center;
   margin-bottom: var(--espacio-6);
@@ -4233,11 +4428,44 @@ dd {
 @media (max-width: 900px) {
   .panel-admin {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--espacio-4);
+    align-content: start;
   }
 
+  /* Arriba: el logo y la sesión en un renglón y las secciones debajo */
   .panel-admin-menu {
     position: static;
+    height: auto;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--espacio-4);
+    border-right: none;
+    border-bottom: 1px solid var(--color-borde);
+  }
+
+  .panel-admin-menu nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  /* En el renglón del logo queda sólo el botón para salir: el nombre no entra */
+  .panel-admin-sesion {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    align-items: flex-end;
+  }
+
+  .panel-admin-sesion-usuario {
+    display: none;
+  }
+
+  .panel-admin-salir {
+    width: auto;
+  }
+
+  .panel-admin-contenido {
+    padding: var(--espacio-6) var(--espacio-4) var(--espacio-12);
   }
 
   .panel-admin-menu-lista {

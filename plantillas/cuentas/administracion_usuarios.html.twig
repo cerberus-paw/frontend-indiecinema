@@ -1,151 +1,189 @@
 {#
   «Usuarios y roles» del administrador, en /cuenta/administracion/usuarios, como el wireframe de la
-  E2 (administracion-usuarios-parametros): la barra lateral de administración, el buscador con los
-  filtros de rol y estado, la tabla y el paginado numerado. Queda afuera lo que todavía no existe
-  (estadísticas, conducta, funciones, exportar, invitar, suspender y parámetros). Los filtros son
-  un formulario GET, así viajan en la URL y funcionan sin JavaScript.
+  E2 (administracion-usuarios-parametros): la barra lateral de administración, las tarjetas de
+  números, el buscador con los filtros de rol, estado y año de alta, la tabla y el paginado
+  numerado. Queda afuera lo que todavía no existe: las tarjetas de funciones y recaudación, las
+  columnas de conducta y funciones, «Acciones» (ver, suspender, dar de baja), exportar, invitar y
+  los parámetros. Los filtros son un formulario GET, así viajan en la URL. Como en el wireframe, no
+  hay «Buscar»: el texto se busca con Enter y los desplegables se aplican al elegir
+  (componentes/enviar-al-elegir.js). Sin JavaScript, «Buscar» vuelve, en el <noscript>.
 
-  En «Acciones», al espectador se le da el rol de organizador y al organizador se le quita: es un
-  POST con el token CSRF y los filtros en campos ocultos, para volver a la misma búsqueda. El
-  moderador y el administrador no tienen acciones: esos roles no se cambian desde la web.
+  El rol de cada fila es un desplegable, como en el wireframe, y la tabla entera es un formulario:
+  al elegir otro rol aparece abajo la barra con «Guardar cambios» y «Descartar cambios» (con CSS,
+  sin JavaScript), y guardar manda en un POST los de toda la página, con el token CSRF y los
+  filtros en campos ocultos, para volver a la misma búsqueda. Junto a cada rol va el que tenía al
+  mostrarse (antes[id]): el servidor cambia sólo el que se tocó. Al moderador y al administrador no
+  se los cambia desde la web: su desplegable está deshabilitado y no se manda.
 
   Variables:
+  - resumen: {usuarios, nuevos (este mes), organizadores (con la cuenta activa)}, sobre todas las
+    cuentas.
   - usuarios: lista de {id, nombre, correo, rol (el mayor), estado (pendiente, activa o suspendida)}.
-  - filtros: los filtros aplicados (q, rol, estado); falta el que no se aplicó.
+  - filtros: los filtros aplicados (q, rol, estado, alta); falta el que no se aplicó.
+  - anios_de_alta: los años en que se creó alguna cuenta, del más nuevo al más viejo.
   - avisos: lista de textos, uno por cada filtro inválido que se dejó afuera.
   - mensaje_exito: el aviso del cambio de rol que se acaba de hacer, o null.
   - paginado: numero, total_paginas, total_usuarios, las URL anterior y siguiente (null si no hay)
     y paginas: lista de {numero, url, actual}, con null donde se saltean páginas.
 #}
-{% extends 'base.html.twig' %}
+{% extends 'administracion.html.twig' %}
 
 {% block titulo %}Usuarios y roles{% endblock %}
 
-{% block contenido %}
-<div class="contenedor panel-admin">
-  {% include 'parciales/menu_administracion.html.twig' with { activa: 'usuarios' } only %}
+{% block seccion %}usuarios{% endblock %}
 
-  <div class="panel-admin-contenido">
-    <header class="panel-admin-cabecera">
-      <h1 class="panel-admin-titulo">Usuarios y roles</h1>
-      <p class="panel-admin-bajada">Buscá cuentas por su nombre o su correo.</p>
-    </header>
+{% block panel %}
+<header class="panel-admin-cabecera">
+  <h1 class="panel-admin-titulo">Usuarios y roles</h1>
+  <p class="panel-admin-bajada">Buscá cuentas y asigná roles.</p>
+</header>
 
-    <form class="panel-admin-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios">
-      <label class="panel-admin-busqueda">
-        <span class="sr-only">Buscar por nombre o correo</span>
-        <span class="panel-admin-busqueda-icono" aria-hidden="true">🔍</span>
-        <input type="search" name="q" value="{{ filtros.q ?? '' }}" placeholder="Buscar por nombre o correo" maxlength="254" class="campo-control">
-      </label>
-      <label>
-        <span class="sr-only">Rol</span>
-        <select name="rol" class="campo-control control-select">
-          <option value="">Rol: todos</option>
-          {% for valor, etiqueta in { espectador: 'Espectador', organizador: 'Organizador', moderador: 'Moderador', administrador: 'Administrador' } %}
-            <option value="{{ valor }}"{% if (filtros.rol ?? '') == valor %} selected{% endif %}>{{ etiqueta }}</option>
-          {% endfor %}
-        </select>
-      </label>
-      <label>
-        <span class="sr-only">Estado</span>
-        <select name="estado" class="campo-control control-select">
-          <option value="">Estado: todos</option>
-          {% for valor, etiqueta in { activa: 'Activa', pendiente: 'Pendiente', suspendida: 'Suspendida' } %}
-            <option value="{{ valor }}"{% if (filtros.estado ?? '') == valor %} selected{% endif %}>{{ etiqueta }}</option>
-          {% endfor %}
-        </select>
-      </label>
-      <div class="filtros-cartelera-acciones">
-        {% include 'parciales/boton.html.twig' with { texto: 'Buscar', variante: 'primario' } only %}
-        {% if filtros is not empty %}
-          {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/cuenta/administracion/usuarios', variante: 'fantasma' } only %}
-        {% endif %}
-      </div>
-    </form>
-
-    {% if mensaje_exito %}
-      {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
-    {% endif %}
-
-    {% if avisos is not empty %}
-      {% include 'parciales/mensaje.html.twig' with {
-        tipo: 'advertencia',
-        titulo: 'Algunos filtros no se aplicaron',
-        detalles: avisos
-      } only %}
-    {% endif %}
-
-    {% if usuarios is empty %}
-      {% include 'parciales/mensaje.html.twig' with {
-        tipo: 'info',
-        mensaje: filtros is not empty
-          ? 'No hay usuarios que coincidan con la búsqueda. Probá con otros filtros.'
-          : 'Todavía no hay usuarios registrados.'
-      } only %}
-    {% else %}
-      <p class="sr-only" role="status">{{ paginado.total_usuarios }} {{ paginado.total_usuarios == 1 ? 'usuario' : 'usuarios' }}</p>
-
-      {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
-      <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Usuarios">
-        <table class="tabla-admin">
-          <thead>
-            <tr>
-              <th scope="col">Usuario</th>
-              <th scope="col">Rol</th>
-              <th scope="col">Estado</th>
-              <th scope="col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for usuario in usuarios %}
-              <tr data-usuario="{{ usuario.id }}">
-                <td>
-                  <div class="tabla-admin-usuario">
-                    <span class="tabla-admin-avatar" aria-hidden="true">{{ usuario.nombre|slice(0, 1)|upper }}</span>
-                    <div>
-                      <span class="tabla-admin-principal">{{ usuario.nombre }}</span>
-                      <span class="tabla-admin-secundario">{{ usuario.correo }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td><span class="usuario-rol rol-{{ usuario.rol }}">{{ usuario.rol }}</span></td>
-                <td><span class="estado-cuenta estado-cuenta-{{ usuario.estado }}">{{ usuario.estado }}</span></td>
-                <td class="tabla-admin-acciones">
-                  {% if usuario.rol in ['espectador', 'organizador'] %}
-                    {% set dar = usuario.rol == 'espectador' %}
-                    <form action="/cuenta/administracion/usuarios/{{ usuario.id }}/{{ dar ? 'dar-organizador' : 'quitar-organizador' }}" method="POST">
-                      <input type="hidden" name="_csrf" value="{{ csrf }}">
-                      {% for nombre, valor in filtros %}
-                        <input type="hidden" name="{{ nombre }}" value="{{ valor }}">
-                      {% endfor %}
-                      <button type="submit" class="boton {{ dar ? 'boton-primario' : 'boton-secundario' }} boton-chico" aria-label="{{ dar ? 'Dar rol de organizador a' : 'Quitar rol de organizador a' }} {{ usuario.nombre }}">
-                        {{ dar ? 'Dar rol de organizador' : 'Quitar rol' }}
-                      </button>
-                    </form>
-                  {% endif %}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      {% if paginado.total_paginas > 1 %}
-        <nav class="paginado-numerado" aria-label="Páginas de usuarios">
-          <ul>
-            {% for pagina in paginado.paginas %}
-              {% if pagina is null %}
-                <li class="paginado-salto" aria-hidden="true">…</li>
-              {% elseif pagina.actual %}
-                <li><a href="{{ pagina.url }}" class="paginado-numero actual" aria-current="page">{{ pagina.numero }}</a></li>
-              {% else %}
-                <li><a href="{{ pagina.url }}" class="paginado-numero"{% if pagina.url == paginado.anterior %} rel="prev"{% elseif pagina.url == paginado.siguiente %} rel="next"{% endif %} aria-label="Página {{ pagina.numero }}">{{ pagina.numero }}</a></li>
-              {% endif %}
-            {% endfor %}
-          </ul>
-        </nav>
-      {% endif %}
-    {% endif %}
+<dl class="panel-admin-resumen">
+  <div class="panel-admin-dato">
+    <dt>Usuarios registrados</dt>
+    <dd class="panel-admin-dato-valor">{{ resumen.usuarios|number_format(0, ',', '.') }}</dd>
+    <dd class="panel-admin-dato-nota">+{{ resumen.nuevos|number_format(0, ',', '.') }} este mes</dd>
   </div>
-</div>
+  <div class="panel-admin-dato">
+    <dt>Organizadores activos</dt>
+    <dd class="panel-admin-dato-valor">{{ resumen.organizadores|number_format(0, ',', '.') }}</dd>
+    <dd class="panel-admin-dato-nota">con la cuenta activa</dd>
+  </div>
+</dl>
+
+<form class="panel-admin-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios" data-enviar-al-elegir>
+  <label class="panel-admin-busqueda">
+    <span class="sr-only">Buscar por nombre o correo</span>
+    <span class="panel-admin-busqueda-icono" aria-hidden="true">🔍</span>
+    <input type="search" name="q" value="{{ filtros.q ?? '' }}" placeholder="Buscar por nombre o correo" maxlength="254" class="campo-control">
+  </label>
+  <label>
+    <span class="sr-only">Rol</span>
+    <select name="rol" class="campo-control control-select">
+      <option value="">Rol: todos</option>
+      {% for valor, etiqueta in { espectador: 'Espectador', organizador: 'Organizador', moderador: 'Moderador', administrador: 'Administrador' } %}
+        <option value="{{ valor }}"{% if (filtros.rol ?? '') == valor %} selected{% endif %}>{{ etiqueta }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>
+    <span class="sr-only">Estado</span>
+    <select name="estado" class="campo-control control-select">
+      <option value="">Estado: todos</option>
+      {% for valor, etiqueta in { activa: 'Activa', pendiente: 'Pendiente', suspendida: 'Suspendida' } %}
+        <option value="{{ valor }}"{% if (filtros.estado ?? '') == valor %} selected{% endif %}>{{ etiqueta }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>
+    <span class="sr-only">Año de alta</span>
+    <select name="alta" class="campo-control control-select">
+      <option value="">Alta: todas</option>
+      {% for anio in anios_de_alta %}
+        <option value="{{ anio }}"{% if (filtros.alta ?? '') == anio %} selected{% endif %}>{{ anio }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <noscript>{% include 'parciales/boton.html.twig' with { texto: 'Buscar', variante: 'primario' } only %}</noscript>
+  {% if filtros is not empty %}
+    {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/cuenta/administracion/usuarios', variante: 'fantasma' } only %}
+  {% endif %}
+</form>
+
+{% if mensaje_exito %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
+{% endif %}
+
+{% if avisos is not empty %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'advertencia',
+    titulo: 'Algunos filtros no se aplicaron',
+    detalles: avisos
+  } only %}
+{% endif %}
+
+{% if usuarios is empty %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'info',
+    mensaje: filtros is not empty
+      ? 'No hay usuarios que coincidan con la búsqueda. Probá con otros filtros.'
+      : 'Todavía no hay usuarios registrados.'
+  } only %}
+{% else %}
+  <p class="sr-only" role="status">{{ paginado.total_usuarios }} {{ paginado.total_usuarios == 1 ? 'usuario' : 'usuarios' }}</p>
+
+  <form class="tabla-admin-formulario" action="/cuenta/administracion/usuarios/roles" method="POST">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+  {% for nombre, valor in filtros %}
+    <input type="hidden" name="{{ nombre }}" value="{{ valor }}">
+  {% endfor %}
+
+  {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
+  <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Usuarios">
+    <table class="tabla-admin tabla-admin-usuarios">
+      <thead>
+        <tr>
+          <th scope="col">Usuario</th>
+          <th scope="col" class="tabla-admin-columna-rol">Rol</th>
+          <th scope="col" class="tabla-admin-columna-estado">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for usuario in usuarios %}
+          <tr data-usuario="{{ usuario.id }}">
+            <td>
+              <div class="tabla-admin-usuario">
+                <span class="tabla-admin-avatar" aria-hidden="true">{{ usuario.nombre|slice(0, 1)|upper }}</span>
+                <div>
+                  <span class="tabla-admin-principal">{{ usuario.nombre }}</span>
+                  <span class="tabla-admin-secundario">{{ usuario.correo }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if usuario.rol in ['espectador', 'organizador'] %}
+                <input type="hidden" name="antes[{{ usuario.id }}]" value="{{ usuario.rol }}">
+                <select name="roles[{{ usuario.id }}]" class="campo-control control-select" aria-label="Rol de {{ usuario.nombre }}">
+                  <option value="espectador"{% if usuario.rol == 'espectador' %} selected{% endif %}>Espectador</option>
+                  <option value="organizador"{% if usuario.rol == 'organizador' %} selected{% endif %}>Organizador</option>
+                </select>
+              {% else %}
+                <select class="campo-control control-select tabla-admin-rol-fijo" disabled aria-label="Rol de {{ usuario.nombre }}: no se cambia desde la web" title="Este rol no se cambia desde la web">
+                  <option>{{ usuario.rol|capitalize }}</option>
+                </select>
+              {% endif %}
+            </td>
+            <td><span class="estado-cuenta estado-cuenta-{{ usuario.estado }}">{{ usuario.estado }}</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# Aparece al elegir otro rol en alguna fila; «Descartar cambios» los vuelve a como estaban #}
+  <div class="tabla-admin-cambios">
+    <div class="tabla-admin-cambios-botones">
+      <button type="submit" class="boton boton-primario">Guardar cambios</button>
+      <button type="reset" class="boton boton-secundario">Descartar cambios</button>
+    </div>
+    <p class="tabla-admin-cambios-nota">Hay roles sin guardar. El rol nuevo se ve la próxima vez que el usuario ingrese.</p>
+  </div>
+  </form>
+
+  {% if paginado.total_paginas > 1 %}
+    <nav class="paginado-numerado" aria-label="Páginas de usuarios">
+      <ul>
+        {% for pagina in paginado.paginas %}
+          {% if pagina is null %}
+            <li class="paginado-salto" aria-hidden="true">…</li>
+          {% elseif pagina.actual %}
+            <li><a href="{{ pagina.url }}" class="paginado-numero actual" aria-current="page">{{ pagina.numero }}</a></li>
+          {% else %}
+            <li><a href="{{ pagina.url }}" class="paginado-numero"{% if pagina.url == paginado.anterior %} rel="prev"{% elseif pagina.url == paginado.siguiente %} rel="next"{% endif %} aria-label="Página {{ pagina.numero }}">{{ pagina.numero }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </nav>
+  {% endif %}
+{% endif %}
 {% endblock %}

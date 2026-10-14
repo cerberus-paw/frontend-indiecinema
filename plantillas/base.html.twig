@@ -33,8 +33,8 @@
 </head>
 {# Aplica la clase 'cuerpo-app' al body para manejar la estructura flexbox que mantiene el footer pegado al fondo #}
 <body class="cuerpo-app">
-  {# Incluye el encabezado reutilizable con logo, buscador, enlaces públicos y menú según rol #}
-  {% include 'parciales/encabezado.html.twig' %}
+  {# Incluye el encabezado reutilizable con logo, buscador, enlaces públicos y menú según rol. Es un bloque para que el panel del administrador, que tiene su propia barra, lo saque #}
+  {% block encabezado %}{% include 'parciales/encabezado.html.twig' %}{% endblock %}
 
   {# Contenedor principal semántico que delimita el contenido propio de cada subsistema y pantalla #}
   <main id="contenido-principal" class="contenido-principal">
@@ -43,8 +43,8 @@
   {# Cierre del elemento semántico main #}
   </main>
 
-  {# Incluye el pie de página reutilizable con las columnas de exploración, participación y legales #}
-  {% include 'parciales/pie.html.twig' %}
+  {# Incluye el pie de página reutilizable con las columnas de exploración, participación y legales. Es un bloque por la misma razón que el encabezado #}
+  {% block pie %}{% include 'parciales/pie.html.twig' %}{% endblock %}
 
   {# Las utilidades y la aplicación, con 'defer' para no bloquear el parseo del DOM y en este orden: app.js usa paw.js. Los componentes los carga app.js según la página. #}
   <script src="/estaticos/js/paw.js" defer></script>

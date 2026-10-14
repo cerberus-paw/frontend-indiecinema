@@ -1,21 +1,48 @@
 {#
   Barra lateral de las pantallas del administrador, como el wireframe de la E2
-  (administracion-usuarios-parametros): sólo las secciones que ya tienen pantalla.
+  (administracion-usuarios-parametros): el logo, las secciones que ya tienen pantalla y, al pie,
+  quién está en sesión y el botón para salir. Reemplaza al encabezado del sitio, así que el cierre
+  de sesión tiene que estar acá.
 
   Parámetros recibidos:
   - activa: (string) la sección actual: 'usuarios', 'solicitudes' o 'salas'.
+  - usuario: el usuario en sesión.
+  - csrf: el token del formulario para salir.
 #}
-<nav class="panel-admin-menu" aria-label="Administración">
-  <p class="panel-admin-menu-titulo">Administración</p>
-  <ul class="panel-admin-menu-lista">
-    <li>
-      <a href="/cuenta/administracion/usuarios" class="panel-admin-menu-enlace{% if activa == 'usuarios' %} activo{% endif %}"{% if activa == 'usuarios' %} aria-current="page"{% endif %}>Usuarios y roles</a>
-    </li>
-    <li>
-      <a href="/cuenta/administracion/solicitudes" class="panel-admin-menu-enlace{% if activa == 'solicitudes' %} activo{% endif %}"{% if activa == 'solicitudes' %} aria-current="page"{% endif %}>Solicitudes</a>
-    </li>
-    <li>
-      <a href="/administracion/salas" class="panel-admin-menu-enlace{% if activa == 'salas' %} activo{% endif %}"{% if activa == 'salas' %} aria-current="page"{% endif %}>Salas</a>
-    </li>
-  </ul>
-</nav>
+<aside class="panel-admin-menu">
+  {# El logo lleva al inicio del panel: la portada pública redirige ahí al administrador #}
+  <a href="/cuenta/administracion/usuarios" class="panel-admin-marca" aria-label="IndieCinema: inicio del panel">
+    <img src="/estaticos/img/logo-horizontal-dark.svg" alt="IndieCinema" width="140" height="60">
+  </a>
+
+  <nav aria-label="Administración">
+    <p class="panel-admin-menu-titulo">Administración</p>
+    <ul class="panel-admin-menu-lista">
+      <li>
+        <a href="/cuenta/administracion/usuarios" class="panel-admin-menu-enlace{% if activa == 'usuarios' %} activo{% endif %}"{% if activa == 'usuarios' %} aria-current="page"{% endif %}>Usuarios y roles</a>
+      </li>
+      <li>
+        <a href="/cuenta/administracion/solicitudes" class="panel-admin-menu-enlace{% if activa == 'solicitudes' %} activo{% endif %}"{% if activa == 'solicitudes' %} aria-current="page"{% endif %}>Solicitudes</a>
+      </li>
+      <li>
+        <a href="/administracion/salas" class="panel-admin-menu-enlace{% if activa == 'salas' %} activo{% endif %}"{% if activa == 'salas' %} aria-current="page"{% endif %}>Salas</a>
+      </li>
+    </ul>
+  </nav>
+
+  {% if usuario %}
+    <div class="panel-admin-sesion">
+      <div class="panel-admin-sesion-usuario">
+        <span class="usuario-avatar" aria-hidden="true">{{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}</span>
+        <div class="panel-admin-sesion-datos">
+          <span class="panel-admin-sesion-nombre">{{ usuario.nombre }}</span>
+          <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
+        </div>
+      </div>
+      <form action="/cuenta/salir" method="POST">
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+        <button type="submit" class="boton boton-secundario boton-chico panel-admin-salir">Cerrar sesión</button>
+      </form>
+    </div>
+  {% endif %}
+</aside>
