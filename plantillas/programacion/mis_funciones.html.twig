@@ -6,14 +6,14 @@
   Usa la tabla del panel del administrador (tabla-admin), como «Salas»: es la misma forma de
   listar con estado, y así las pantallas de listado se ven igual en todo el sitio.
   Permite programar una función nueva (IC-121) mediante el botón en el encabezado.
-  Suma la columna de acciones con el botón para editar la función (IC-122 / E3-11.3).
-  La cancelación suma su acción cuando tenga pantalla (IC-123).
+  Suma la columna de acciones con los botones para editar (IC-122 / E3-11.3) y cancelar la función con confirmación (IC-123 / E3-11.4).
 
   Variables:
   - funciones: lista de funciones con id, titulo, titulos_elegidos, sala, sala_id,
     sala_habilitada, estado, estado_valor, es_final, fecha (o null), precio y cupo.
   - programada: (string|null, opcional) ID de función recién programada para mensaje de éxito.
   - guardada / editada: (string|bool|null, opcional) Aviso de éxito al guardar cambios de edición.
+  - cancelada: (string|bool|null, opcional) Aviso de confirmación tras cancelar la función (baja lógica).
 #}
 {% extends 'base.html.twig' %}
 
@@ -54,6 +54,14 @@
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       mensaje: 'Los cambios en la función se guardaron con éxito.'
+    } only %}
+  {% endif %}
+
+  {# Al volver de la cancelación (baja lógica) #}
+  {% if cancelada ?? false %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      mensaje: 'La función fue cancelada. Ya no aparece en la cartelera pero permanece registrada en tu panel.'
     } only %}
   {% endif %}
 
@@ -122,12 +130,20 @@
               </td>
               <td class="tabla-admin-acciones">
                 {% if not funcion.es_final %}
-                  {% include 'parciales/boton.html.twig' with {
-                    texto: 'Editar',
-                    url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
-                    variante: 'secundario',
-                    tamano: 'chico'
-                  } only %}
+                  <div class="tabla-admin-acciones-grupo">
+                    {% include 'parciales/boton.html.twig' with {
+                      texto: 'Editar',
+                      url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
+                      variante: 'secundario',
+                      tamano: 'chico'
+                    } only %}
+                    {% include 'parciales/boton.html.twig' with {
+                      texto: 'Cancelar',
+                      url: '/organizador/funciones/' ~ funcion.id ~ '/cancelar',
+                      variante: 'peligro',
+                      tamano: 'chico'
+                    } only %}
+                  </div>
                 {% else %}
                   <span class="tabla-admin-secundario">—</span>
                 {% endif %}

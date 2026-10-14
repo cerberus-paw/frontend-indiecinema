@@ -1,0 +1,94 @@
+{#
+  Pantalla de confirmación para cancelar una función propia (IC-123 / E3-11.4).
+  Permite al organizador confirmar la cancelación (baja lógica) de una función
+  de sus salas. Una vez cancelada, la función sale de la cartelera pública pero
+  permanece visible en el panel de Mis funciones en estado 'cancelada'.
+
+  Variables recibidas:
+  - funcion: (map, obligatorio) Datos de la función a cancelar:
+      - id: (string) Identificador UUID de la función.
+      - titulo: (string) Título o títulos de las obras.
+      - sala: (string) Nombre de la sala.
+      - fecha: (string|null) Fecha y horario programado o null.
+      - precio: (string) Precio de la entrada formateado.
+      - cupo: (int) Cupo de butacas disponibles.
+      - estado: (string) Etiqueta legible del estado actual.
+  - csrf: (string, obligatorio) Token CSRF para validar la petición POST.
+  - accion: (string, opcional) URL de destino del POST (por defecto '/organizador/funciones/{id}/cancelar').
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Cancelar función: {{ funcion.titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="contenedor contenedor-confirmacion-cancelacion">
+  {# Migas de pan para navegación de retorno hacia Mis funciones #}
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga"><a href="/organizador/funciones" class="enlace-miga">Mis funciones</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Cancelar función</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Cancelar función</h1>
+      <p class="solicitud-bajada">
+        Confirmación de baja lógica de la proyección.
+      </p>
+    </div>
+  </header>
+
+  {# Alerta de advertencia sobre la acción irreversible #}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'advertencia',
+    titulo: '¿Estás seguro de que deseás cancelar esta función?',
+    mensaje: 'La función dejará de estar visible en la cartelera pública inmediatamente (baja lógica). No podrá volver a programarse ni recibir reservas, pero quedará registrada en tu panel con estado cancelada para tu historial.'
+  } only %}
+
+  {# Ficha resumen de los datos de la función a cancelar #}
+  <article class="tarjeta-resumen-cancelacion">
+    <h2 class="resumen-cancelacion-titulo">{{ funcion.titulo }}</h2>
+    <dl class="resumen-cancelacion-lista">
+      <div class="parametro-item">
+        <dt>Sala de proyección</dt>
+        <dd>{{ funcion.sala }}</dd>
+      </div>
+      <div class="parametro-item">
+        <dt>Fecha y horario</dt>
+        <dd>{{ funcion.fecha ?? 'Sin fecha todavía' }}</dd>
+      </div>
+      <div class="parametro-item">
+        <dt>Precio de la entrada</dt>
+        <dd>{{ funcion.precio }}</dd>
+      </div>
+      <div class="parametro-item">
+        <dt>Cupo asignado</dt>
+        <dd>{{ funcion.cupo }} lugares</dd>
+      </div>
+      <div class="parametro-item">
+        <dt>Estado actual</dt>
+        <dd><span class="estado-cuenta">{{ funcion.estado }}</span></dd>
+      </div>
+    </dl>
+  </article>
+
+  {# Formulario de confirmación con método POST y protección CSRF #}
+  <form action="{{ accion ?? ('/organizador/funciones/' ~ funcion.id ~ '/cancelar') }}" method="POST" class="formulario-confirmacion-cancelacion">
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+    <div class="pie-formulario-acciones">
+      {% include 'parciales/boton.html.twig' with {
+        texto: 'Confirmar cancelación',
+        tipo: 'submit',
+        variante: 'peligro'
+      } only %}
+
+      <a href="/organizador/funciones" class="boton boton-secundario">Conservar función</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

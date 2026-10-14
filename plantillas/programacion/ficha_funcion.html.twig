@@ -83,14 +83,22 @@
             <span class="ficha-metadato-texto">{{ funcion.precio }} · {{ funcion.cupo }} lugares</span>
           </div>
           {% if funcion.editable ?? (editable ?? false) %}
-            <div class="ficha-metadato-accion">
-              {% include 'parciales/boton.html.twig' with {
-                texto: 'Editar función',
-                url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
-                variante: 'secundario',
-                tamano: 'chico'
-              } only %}
-            </div>
+            {% if not (funcion.es_cancelada ?? false) %}
+              <div class="ficha-metadato-accion">
+                {% include 'parciales/boton.html.twig' with {
+                  texto: 'Editar función',
+                  url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
+                  variante: 'secundario',
+                  tamano: 'chico'
+                } only %}
+                {% include 'parciales/boton.html.twig' with {
+                  texto: 'Cancelar función',
+                  url: '/organizador/funciones/' ~ funcion.id ~ '/cancelar',
+                  variante: 'peligro',
+                  tamano: 'chico'
+                } only %}
+              </div>
+            {% endif %}
           {% endif %}
         </div>
       </div>
