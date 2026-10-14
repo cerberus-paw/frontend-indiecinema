@@ -4317,7 +4317,7 @@ dd {
 /* Buscador y filtros en una fila: el buscador más ancho */
 .panel-admin-filtros {
   display: grid;
-  grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(140px, 1fr)) auto;
+  grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(140px, 1fr)) auto;
   gap: var(--espacio-3);
   align-items: center;
   margin-bottom: var(--espacio-6);
