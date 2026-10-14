@@ -37,8 +37,7 @@
       <h3 class="pie-subtitulo">Administración</h3>
       <ul class="pie-enlaces">
         <li><a href="/cuenta/administracion/usuarios">Usuarios y roles</a></li>
-        <li><a href="/cuenta/administracion/solicitudes">Solicitudes</a></li>
-        <li><a href="/administracion/salas">Salas</a></li>
+        <li><a href="/administracion/solicitudes">Solicitudes de sala</a></li>
       </ul>
     </div>
     {% else %}
@@ -66,13 +65,13 @@
         {% if usr %}
           <li><a href="/cuenta/">Mi cuenta</a></li>
           {% if not usr.alcanza('organizador') %}
-            <li><a href="/cuenta/solicitud">Abrir una sala</a></li>
+            <li><a href="/solicitar-sala">Abrir una sala</a></li>
           {% endif %}
           {% if usr.alcanza('organizador') %}
             <li><a href="/organizador/salas">Mis salas</a></li>
             <li><a href="/organizador/funciones">Mis funciones</a></li>
             <li><a href="/organizador/funciones/nueva">Programar una función</a></li>
-            <li><a href="/organizador/salas/nueva">Publicar una sala</a></li>
+            <li><a href="/solicitar-sala">Publicar una sala</a></li>
           {% endif %}
         {% else %}
           <li><a href="/cuenta/ingresar">Ingresar</a></li>

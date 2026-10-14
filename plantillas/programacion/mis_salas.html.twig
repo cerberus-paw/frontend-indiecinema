@@ -22,11 +22,11 @@
   <header class="encabezado-formulario-solicitud">
     <div class="solicitud-texto-cabecera">
       <h1 class="solicitud-titulo">Mis salas</h1>
-      <p class="solicitud-bajada">Las salas que administrás. Una sala nueva aparece en el sitio cuando la habilita un administrador.</p>
+      <p class="solicitud-bajada">Las salas que administrás. Una sala nueva aparece en el sitio cuando aprueban su solicitud.</p>
     </div>
     {% include 'parciales/boton.html.twig' with {
       texto: 'Publicar una sala',
-      url: '/organizador/salas/nueva',
+      url: '/solicitar-sala',
       variante: 'primario'
     } %}
   </header>

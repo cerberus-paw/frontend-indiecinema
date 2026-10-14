@@ -21,6 +21,7 @@ frontend-indiecinema/
 ├── README.md                   # Documentación técnica del paquete
 ├── plantillas/                 # Plantillas Twig organizadas por jerarquía
 │   ├── base.html.twig          # Plantilla base compartida (esqueleto HTML, bloques titulo y contenido)
+│   ├── administracion.html.twig # Armado del panel del administrador: barra lateral, sin encabezado ni pie
 │   ├── error.html.twig         # Plantilla común para páginas de error (401, 403, 404, 500, etc.), con «Volver al inicio»
 │   ├── parciales/              # Componentes visuales reutilizables
 │   │   ├── encabezado.html.twig # Barra de navegación, buscador, accesos según rol y menú de usuario
@@ -29,19 +30,23 @@ frontend-indiecinema/
 │   │   ├── mensaje.html.twig   # Alertas de éxito, error, advertencia e información
 │   │   ├── boton.html.twig     # Botón o enlace con variantes visuales y tamaños
 │   │   ├── tarjeta_funcion.html.twig # Tarjeta de función para home y cartelera
+│   │   ├── menu_administracion.html.twig # Barra lateral del panel del administrador
 │   │   └── tarjeta_sala.html.twig    # Tarjeta de sala indie para catálogo y «Mis salas»
 │   ├── cuentas/                # Plantillas del subsistema cuentas
+│   │   ├── administracion_usuarios.html.twig # «Usuarios y roles» del administrador
 │   │   └── registro.html.twig  # Formulario de alta de usuario
 │   ├── programacion/           # Plantillas del subsistema programación
 │   │   ├── acerca_de.html.twig # «Acerca de IndieCinema»: quiénes somos y cómo funciona
+│   │   ├── administracion_solicitudes.html.twig # Bandeja de solicitudes de sala del administrador
 │   │   ├── alta_funcion.html.twig # Formulario de alta para programar una función (IC-121)
-│   │   ├── alta_sala.html.twig # Formulario de alta y edición de sala
+│   │   ├── alta_sala.html.twig # Formulario de edición de sala
 │   │   ├── cartelera.html.twig # Cartelera pública con filtros GET, paginado y descarga en CSV
 │   │   ├── ficha_funcion.html.twig # Ficha de una función: obras, sala, fecha, precio y estado
 │   │   ├── inicio.html.twig    # Portada: buscador, próximas funciones y salas
 │   │   ├── mis_funciones.html.twig # «Mis funciones»: las funciones de las salas del organizador, con estado y fecha
 │   │   ├── mis_salas.html.twig # Gestión de salas del organizador
 │   │   ├── sala.html.twig      # Ficha pública de una sala con sus próximas funciones
+│   │   ├── solicitar_sala.html.twig # Solicitud para abrir una sala, con su estado
 │   │   └── salas.html.twig     # Catálogo público de salas indie habilitadas, con buscador
 │   └── funciones/              # Plantillas específicas del subsistema funciones
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
@@ -108,7 +113,7 @@ El encabezado y el pie adaptan sus opciones y enlaces según el estado de la ses
 - **Organizador (`usuario.alcanza('organizador')`):**
   - Todo lo de espectador más la gestión de sus salas y sus funciones:
   - Acceso directo en la barra de navegación superior: **Mis salas** (`/organizador/salas`).
-  - En el menú desplegable: sección **Panel del Organizador** con accesos a **Mis salas** (`/organizador/salas`), **Mis funciones** (`/organizador/funciones`) y **Publicar una sala** (`/organizador/salas/nueva`).
+  - En el menú desplegable: sección **Panel del Organizador** con accesos a **Mis salas** (`/organizador/salas`), **Mis funciones** (`/organizador/funciones`) y **Publicar una sala** (`/solicitar-sala`, la solicitud de sala).
   - En el pie: accesos a **Mi cuenta**, **Mis salas**, **Mis funciones** y **Publicar una sala**.
 - **Moderador y administrador:**
   - Lo mismo que el organizador: el backend los deja entrar a esas pantallas.
@@ -239,8 +244,11 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 
 - **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y casilla de términos sin tildar por defecto (`marcado: valores.terminos ?? false`), mensajes de error y botón principal.
 - **`plantillas/programacion/acerca_de.html.twig`**: «Acerca de IndieCinema» en `/acerca-de`, estática: quiénes somos, los cuatro pasos de cómo funciona una función (como la sección del wireframe de la portada) y quién participa. Las secciones `#quienes-somos` y `#como-funciona` son las que enlazan el encabezado y el pie (IC-95).
+- **`plantillas/administracion.html.twig`**: Armado de las pantallas del administrador, como el wireframe `administracion-usuarios-parametros`: sin el encabezado ni el pie del sitio, con la barra lateral (`parciales/menu_administracion.html.twig`: el logo, los grupos «Administración» y «Moderación», y la sesión) y el contenido. Cada pantalla define `seccion` y `panel` (IC-245).
+- **`plantillas/programacion/administracion_solicitudes.html.twig`**: Bandeja de solicitudes de sala en `/administracion/solicitudes`, como el wireframe `moderacion-solicitudes`: buscador y lista a la izquierda, y la elegida a la derecha con la foto, los datos del espacio, el historial de quien la mandó y la resolución (aprobar o rechazar) con su motivo obligatorio; «Ver historial de decisiones» lista las resueltas (IC-246).
+- **`plantillas/programacion/solicitar_sala.html.twig`**: Solicitud para abrir una sala en `/solicitar-sala`, como el wireframe `solicitud-de-sala`, para el espectador y el organizador: los datos del espacio, la foto, los parámetros y las declaraciones, con las validaciones que manda el backend. Arriba, el estado de la última que mandó; si la rechazaron, el motivo y el formulario con la sala para corregirla (IC-246).
 - **`plantillas/programacion/alta_funcion.html.twig`**: Formulario de alta para programar una función en `/organizador/funciones/nueva` (IC-121 / E3-11.2) con selector de sala propia habilitada, selección de obras del catálogo, fecha y hora de proyección, precio y cupo de localidades.
-- **`plantillas/programacion/alta_sala.html.twig`**: Formulario de alta y edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía y parámetros de proyección.
+- **`plantillas/programacion/alta_sala.html.twig`**: Formulario de edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía y parámetros de proyección. Las salas nuevas entran por la solicitud de sala.
 - **`plantillas/programacion/cartelera.html.twig`**: Cartelera pública en `/cartelera` con un formulario GET de filtros (búsqueda, localidad, fecha y género) que funciona sin JavaScript, avisos de los filtros inválidos, mensaje propio sin resultados, cuadrícula de tarjetas de función, paginado anterior/siguiente (IC-80) y un enlace para descargar en CSV la cartelera con los mismos filtros (IC-83). Los resultados van en la sección `#resultados-cartelera`, que con JavaScript redibuja `BuscadorDeCartelera` sin recargar (IC-101).
 - **`plantillas/programacion/ficha_funcion.html.twig`**: Ficha de una función en `/cartelera/{id}`, en cualquier estado: las obras (elegidas, o candidatas si está en votación) con su sinopsis, duración y géneros, la sala con su dirección y el enlace a su ficha, la fecha (o «Fecha a confirmar»), el precio, el cupo y el estado, con un aviso si se canceló (IC-86). Migas de pan, la sala y cada obra en tarjetas que en celular pasan a una columna, y encabezados sin saltos de nivel: `h1` la función, `h2` la sala y cada obra (IC-87).
 - **`plantillas/programacion/inicio.html.twig`**: Portada en `/`: la presentación con un buscador GET (qué y dónde) que lleva a la cartelera filtrada, la cantidad de salas publicadas y de funciones en cartelera, las próximas cuatro funciones y tres salas, cada sección con el enlace a su listado y un mensaje propio si está vacía (IC-93).

@@ -2532,6 +2532,52 @@ dd {
   font-weight: 600;
 }
 
+/* Los pasos y el estado en un renglón; debajo, si la rechazaron, el pedido de corrección */
+.progreso-solicitud-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  width: 100%;
+}
+
+/* El pedido de corrección con su motivo, como el aviso del wireframe */
+.progreso-solicitud-aviso {
+  display: flex;
+  gap: var(--espacio-3);
+  width: 100%;
+  padding-top: var(--espacio-3);
+  border-top: 1px solid var(--color-superficie-borde);
+  color: var(--color-advertencia);
+}
+
+.progreso-solicitud-aviso-titulo {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-brillante);
+}
+
+.progreso-solicitud-aviso-texto {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+  overflow-wrap: anywhere;
+}
+
+/* La foto que mandó, al corregir una solicitud rechazada */
+.solicitud-foto-actual {
+  display: block;
+  margin-bottom: var(--espacio-3);
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radio-md);
+  border: 1px solid var(--color-borde);
+}
+
 /* Badge de estado de moderación */
 .badge-alerta-negra {
   /* Fondo negro carbón */
@@ -3938,8 +3984,7 @@ dd {
 
 /* --------------------------------------------------------------------------
    22. ADMINISTRACIÓN: TABLAS DEL PANEL (IC-106)
-   Componentes de cuentas/administracion_usuarios.html.twig y
-   programacion/administracion_salas.html.twig (IC-105)
+   Componentes de cuentas/administracion_usuarios.html.twig, y la tabla de «Mis funciones»
    -------------------------------------------------------------------------- */
 
 /* Caja de la tabla: en pantallas angostas la tabla se desplaza adentro y la página no se corre */
@@ -4218,11 +4263,14 @@ dd {
   display: flex;
 }
 
-/* Panel del administrador: la barra lateral y el contenido, como el wireframe */
+/* Panel del administrador: la barra lateral y el contenido, como el wireframe. El fondo de la
+   columna de la barra lo pinta el panel, así sigue hasta abajo aunque la página sea más alta que
+   la pantalla (la barra es del alto de la pantalla) */
 .panel-admin {
   flex: 1;
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
+  background: linear-gradient(to right, var(--color-superficie) 259px, var(--color-borde) 259px 260px, transparent 260px);
 }
 
 /* Barra lateral: el logo, las secciones y, al pie, la sesión */
@@ -4429,6 +4477,7 @@ dd {
   .panel-admin {
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
+    background: none;
   }
 
   /* Arriba: el logo y la sesión en un renglón y las secciones debajo */
@@ -4443,13 +4492,20 @@ dd {
     border-bottom: 1px solid var(--color-borde);
   }
 
+  /* El logo y la sesión en el primer renglón; cada grupo de secciones, en uno propio debajo */
+  .panel-admin-marca {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
   .panel-admin-menu nav {
     grid-column: 1 / -1;
-    grid-row: 2;
   }
 
   /* En el renglón del logo queda sólo el botón para salir: el nombre no entra */
   .panel-admin-sesion {
+    grid-row: 1;
+    grid-column: 2;
     margin-top: 0;
     padding-top: 0;
     border-top: none;
@@ -4490,16 +4546,6 @@ a.tabla-admin-principal:focus-visible {
   text-decoration: underline;
 }
 
-/* Columna de los botones: alineados con su título, como el wireframe, y sin cortar el texto */
-.tabla-admin-acciones {
-  white-space: nowrap;
-}
-
-/* El formulario de cada botón no ocupa más que el botón */
-.tabla-admin-acciones form {
-  display: inline;
-}
-
 /* --------------------------------------------------------------------------
    23. SOLICITUD PARA SER ORGANIZADOR (IC-110)
    Componentes de cuentas/solicitud.html.twig: como el wireframe, el título de cada sección a la
@@ -4538,14 +4584,14 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* --------------------------------------------------------------------------
-   24. BANDEJA DE SOLICITUDES DEL ADMINISTRADOR (IC-112)
-   Componentes de cuentas/administracion_solicitudes.html.twig: como el wireframe, la lista de
-   pendientes a la izquierda y la elegida a la derecha
+   24. BANDEJA DE SOLICITUDES DE SALA (IC-112 / IC-246)
+   Componentes de programacion/administracion_solicitudes.html.twig: como el wireframe
+   moderacion-solicitudes, la lista a la izquierda y la elegida a la derecha
    -------------------------------------------------------------------------- */
 
 .bandeja {
   display: grid;
-  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
   gap: var(--espacio-6);
   align-items: start;
 }
@@ -4684,6 +4730,175 @@ a.tabla-admin-principal:focus-visible {
 @media (max-width: 900px) {
   .bandeja {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Pestañas sobre la bandeja, como el wireframe: subrayada la actual, con cuántas hay en cada una */
+.pestanas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-6);
+  margin-bottom: var(--espacio-6);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.pestana {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--espacio-2);
+  padding: var(--espacio-2) 0;
+  /* Pisa el borde de la fila: la actual se ve subrayada sobre él */
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.pestana:hover {
+  color: var(--color-texto);
+}
+
+.pestana.activa {
+  border-bottom-color: var(--color-primario);
+  color: var(--color-texto-brillante);
+  font-weight: 600;
+}
+
+/* En la lista, el nombre y el estado en un renglón */
+.bandeja-item-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+/* El título a la izquierda y «Ver historial de decisiones» a la derecha */
+.bandeja-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--espacio-4);
+}
+
+/* El buscador arriba de la lista, dentro de su caja */
+.bandeja-buscador {
+  padding: var(--espacio-3);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+/* La dirección, la capacidad y la fecha, separadas como en el wireframe */
+.bandeja-detalle-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1) var(--espacio-5);
+}
+
+/* La foto, a lo ancho de su columna y en 16:9 como en la ficha de la sala; a la altura de la caja
+   de la resolución, que también deja ese margen arriba */
+.bandeja-foto {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  margin-top: var(--espacio-6);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radio-md);
+  border: 1px solid var(--color-borde);
+}
+
+/* Los datos y el historial a la izquierda; la resolución a la derecha */
+.bandeja-columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: var(--espacio-6);
+  align-items: start;
+}
+
+/* Las cajas de la derecha: la resolución y la sala en el sitio */
+.bandeja-caja {
+  margin: var(--espacio-6) 0 0;
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie);
+  min-width: 0;
+}
+
+.bandeja-caja + .bandeja-caja {
+  margin-top: var(--espacio-4);
+}
+
+/* «RESOLUCIÓN», en versalitas como en el wireframe. Como leyenda del fieldset, flotada a todo el
+   ancho para que quede adentro de la caja y no sobre el borde */
+.bandeja-caja-titulo {
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 var(--espacio-3);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+/* Cada opción de la resolución, un renglón con su botón redondo */
+.bandeja-opcion {
+  clear: both;
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: var(--espacio-1) 0;
+  cursor: pointer;
+}
+
+.bandeja-opcion input {
+  accent-color: var(--color-primario);
+}
+
+/* El error de la resolución, debajo de las opciones */
+.bandeja-caja .campo-error {
+  clear: both;
+  margin-top: var(--espacio-2);
+}
+
+/* La ficha debajo de la descripción de la sala */
+.bandeja-texto + .bandeja-ficha {
+  margin-top: var(--espacio-3);
+}
+
+/* Un aviso suelto, fuera de la caja de la lista */
+.bandeja-nota-suelta {
+  padding: 0 0 var(--espacio-2);
+}
+
+/* El motivo a todo el ancho, debajo de las columnas */
+.bandeja-motivo {
+  margin-top: var(--espacio-6);
+}
+
+/* «Enviar resolución» y, a la derecha, a quién se le muestra el motivo */
+.bandeja-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-4);
+}
+
+.bandeja-acciones-nota {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* En pantallas medianas, la resolución va debajo de los datos */
+@media (max-width: 1200px) {
+  .bandeja-columnas {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
   }
 }
 
