@@ -8,11 +8,12 @@
   hay «Buscar»: el texto se busca con Enter y los desplegables se aplican al elegir
   (componentes/enviar-al-elegir.js). Sin JavaScript, «Buscar» vuelve, en el <noscript>.
 
-  El rol de cada fila es un desplegable, como en el wireframe: elegir otro y «Guardar» es un POST
-  con el token CSRF y los filtros en campos ocultos, para volver a la misma búsqueda. «Guardar»
-  aparece recién al elegir otro rol, con CSS. No se guarda solo al cambiar: con el teclado, las
-  flechas cambian la opción de un desplegable cerrado, y se cambiaría un rol sin querer. Al
-  moderador y al administrador no se los cambia desde la web: su desplegable está deshabilitado.
+  El rol de cada fila es un desplegable, como en el wireframe, y la tabla entera es un formulario:
+  al elegir otro rol aparece abajo la barra con «Guardar cambios» y «Descartar cambios» (con CSS,
+  sin JavaScript), y guardar manda en un POST los de toda la página, con el token CSRF y los
+  filtros en campos ocultos, para volver a la misma búsqueda. Junto a cada rol va el que tenía al
+  mostrarse (antes[id]): el servidor cambia sólo el que se tocó. Al moderador y al administrador no
+  se los cambia desde la web: su desplegable está deshabilitado y no se manda.
 
   Variables:
   - resumen: {usuarios, nuevos (este mes), organizadores (con la cuenta activa)}, sobre todas las
@@ -111,6 +112,12 @@
 {% else %}
   <p class="sr-only" role="status">{{ paginado.total_usuarios }} {{ paginado.total_usuarios == 1 ? 'usuario' : 'usuarios' }}</p>
 
+  <form class="tabla-admin-formulario" action="/cuenta/administracion/usuarios/roles" method="POST">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+  {% for nombre, valor in filtros %}
+    <input type="hidden" name="{{ nombre }}" value="{{ valor }}">
+  {% endfor %}
+
   {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
   <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Usuarios">
     <table class="tabla-admin">
@@ -135,17 +142,11 @@
             </td>
             <td>
               {% if usuario.rol in ['espectador', 'organizador'] %}
-                <form class="tabla-admin-rol" action="/cuenta/administracion/usuarios/{{ usuario.id }}/rol" method="POST">
-                  <input type="hidden" name="_csrf" value="{{ csrf }}">
-                  {% for nombre, valor in filtros %}
-                    <input type="hidden" name="{{ nombre }}" value="{{ valor }}">
-                  {% endfor %}
-                  <select name="nuevo_rol" class="campo-control control-select" aria-label="Rol de {{ usuario.nombre }}">
-                    <option value="espectador"{% if usuario.rol == 'espectador' %} selected{% endif %}>Espectador</option>
-                    <option value="organizador"{% if usuario.rol == 'organizador' %} selected{% endif %}>Organizador</option>
-                  </select>
-                  <button type="submit" class="boton boton-primario boton-chico" aria-label="Guardar el rol de {{ usuario.nombre }}">Guardar</button>
-                </form>
+                <input type="hidden" name="antes[{{ usuario.id }}]" value="{{ usuario.rol }}">
+                <select name="roles[{{ usuario.id }}]" class="campo-control control-select" aria-label="Rol de {{ usuario.nombre }}">
+                  <option value="espectador"{% if usuario.rol == 'espectador' %} selected{% endif %}>Espectador</option>
+                  <option value="organizador"{% if usuario.rol == 'organizador' %} selected{% endif %}>Organizador</option>
+                </select>
               {% else %}
                 <select class="campo-control control-select tabla-admin-rol-fijo" disabled aria-label="Rol de {{ usuario.nombre }}: no se cambia desde la web" title="Este rol no se cambia desde la web">
                   <option>{{ usuario.rol|capitalize }}</option>
@@ -158,6 +159,16 @@
       </tbody>
     </table>
   </div>
+
+  {# Aparece al elegir otro rol en alguna fila; «Descartar cambios» los vuelve a como estaban #}
+  <div class="tabla-admin-cambios">
+    <div class="tabla-admin-cambios-botones">
+      <button type="submit" class="boton boton-primario">Guardar cambios</button>
+      <button type="reset" class="boton boton-secundario">Descartar cambios</button>
+    </div>
+    <p class="tabla-admin-cambios-nota">Hay roles sin guardar. El rol nuevo se ve la próxima vez que el usuario ingrese.</p>
+  </div>
+  </form>
 
   {% if paginado.total_paginas > 1 %}
     <nav class="paginado-numerado" aria-label="Páginas de usuarios">
