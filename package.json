@@ -1,0 +1,12 @@
+{
+  "name": "frontend-indiecinema",
+  "private": true,
+  "description": "Sólo para el CI: revisar el CSS con stylelint.",
+  "scripts": {
+    "css": "stylelint \"estaticos/css/**/*.css\""
+  },
+  "devDependencies": {
+    "stylelint": "^16.0.0",
+    "stylelint-value-no-unknown-custom-properties": "^6.0.0"
+  }
+}

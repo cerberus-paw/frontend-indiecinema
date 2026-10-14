@@ -2824,16 +2824,6 @@ dd {
   overflow-wrap: anywhere;
 }
 
-/* Descripción de la sala */
-.ficha-sala-descripcion {
-  /* Texto secundario */
-  color: var(--color-texto-secundario);
-  /* Interlineado cómodo para leer */
-  line-height: 1.6;
-  /* Separación con los datos de arriba */
-  margin: var(--espacio-2) 0 0;
-}
-
 /* Título de la sección de funciones */
 .ficha-sala-funciones-titulo {
   /* Tipografía de títulos */
@@ -4962,15 +4952,6 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto-atenuado);
 }
 
-/* Cabecera del formulario con botón de acción lateral */
-.encabezado-formulario-solicitud {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--espacio-4);
-  flex-wrap: wrap;
-}
-
 /* El ancho mínimo va aparte y no como base del flex: en el celular el encabezado es una columna, y
    una base de 500px se volvía 500px de alto vacío */
 .solicitud-texto-cabecera {
@@ -5033,6 +5014,10 @@ a.tabla-admin-principal:focus-visible {
   gap: var(--espacio-3);
   margin: 0;
   padding: 0;
+  /* Va dentro de la tarjeta: sin la caja que el dl tiene en todo el sitio */
+  background: none;
+  border: none;
+  border-radius: 0;
 }
 
 .parametro-item {
@@ -5071,13 +5056,6 @@ a.tabla-admin-principal:focus-visible {
 .parametros-sala-nombre {
   margin: 0;
   font-size: var(--texto-sm);
-}
-
-/* La lista va dentro de la tarjeta: sin la caja que el dl tiene en todo el sitio */
-.parametros-sala-lista {
-  background: none;
-  border: none;
-  border-radius: 0;
 }
 
 /* «Programar función» y «Descartar», separados y con aire antes del pie */
