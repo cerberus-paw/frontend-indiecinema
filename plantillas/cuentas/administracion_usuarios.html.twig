@@ -4,8 +4,9 @@
   números, el buscador con los filtros de rol, estado y año de alta, la tabla y el paginado
   numerado. Queda afuera lo que todavía no existe: las tarjetas de funciones y recaudación, las
   columnas de conducta y funciones, «Acciones» (ver, suspender, dar de baja), exportar, invitar y
-  los parámetros. Los filtros son un formulario GET, así viajan en la URL y funcionan sin
-  JavaScript.
+  los parámetros. Los filtros son un formulario GET, así viajan en la URL. Como en el wireframe, no
+  hay «Buscar»: el texto se busca con Enter y los desplegables se aplican al elegir
+  (componentes/enviar-al-elegir.js). Sin JavaScript, «Buscar» vuelve, en el <noscript>.
 
   El rol de cada fila es un desplegable, como en el wireframe: elegir otro y «Guardar» es un POST
   con el token CSRF y los filtros en campos ocultos, para volver a la misma búsqueda. «Guardar»
@@ -49,7 +50,7 @@
   </div>
 </dl>
 
-<form class="panel-admin-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios">
+<form class="panel-admin-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios" data-enviar-al-elegir>
   <label class="panel-admin-busqueda">
     <span class="sr-only">Buscar por nombre o correo</span>
     <span class="panel-admin-busqueda-icono" aria-hidden="true">🔍</span>
@@ -82,12 +83,10 @@
       {% endfor %}
     </select>
   </label>
-  <div class="filtros-cartelera-acciones">
-    {% include 'parciales/boton.html.twig' with { texto: 'Buscar', variante: 'primario' } only %}
-    {% if filtros is not empty %}
-      {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/cuenta/administracion/usuarios', variante: 'fantasma' } only %}
-    {% endif %}
-  </div>
+  <noscript>{% include 'parciales/boton.html.twig' with { texto: 'Buscar', variante: 'primario' } only %}</noscript>
+  {% if filtros is not empty %}
+    {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/cuenta/administracion/usuarios', variante: 'fantasma' } only %}
+  {% endif %}
 </form>
 
 {% if mensaje_exito %}
