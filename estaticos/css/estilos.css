@@ -3574,6 +3574,12 @@ dd {
   font-weight: 500;
 }
 
+/* Acción en la tira de metadatos (ej. botón para editar función propia, IC-122) */
+.ficha-metadato-accion {
+  display: inline-flex;
+  align-items: center;
+}
+
 /* Sección estructural dentro de la ficha */
 .ficha-seccion {
   /* Ancho 100% */
@@ -4057,6 +4063,11 @@ dd {
   color: var(--color-texto-secundario);
   /* Un correo largo se corta en vez de ensanchar la columna */
   overflow-wrap: anywhere;
+}
+
+/* Columna de acciones en tablas administrativas y de gestión (IC-122) */
+.tabla-admin-acciones {
+  white-space: nowrap;
 }
 
 /* Las columnas de «Usuarios y roles», de ancho fijo: si no, el rol y el estado se corren de una

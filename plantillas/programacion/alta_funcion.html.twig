@@ -1,22 +1,24 @@
 {#
-  Formulario de alta para programar una función (IC-121 / E3-11.2).
+  Formulario de alta y edición para programar o modificar una función (IC-121 / IC-122 / E3-11.2 / E3-11.3).
   Permite al organizador seleccionar una de sus salas habilitadas, una o más obras
   del catálogo, la fecha y hora de la proyección, el precio de la entrada y el cupo.
   Una vez guardada con éxito, la función queda programada y aparece en la cartelera.
 
   Variables recibidas:
-  - accion: (string, opcional) URL de destino del POST (por defecto '/organizador/funciones/nueva').
+  - es_edicion: (bool, opcional, por defecto false) Si la pantalla corresponde a edición de una función.
+  - funcion_id: (string, opcional) Identificador UUID de la función a editar.
+  - accion: (string, opcional) URL de destino del POST (por defecto '/organizador/funciones/nueva' o '/organizador/funciones/{id}/editar').
   - csrf: (string, obligatorio) Token CSRF para validar el envío POST.
   - salas: (list, obligatorio) Lista de salas propias del organizador habilitadas para proyectar.
   - obras: (list, obligatorio) Obras disponibles en el catálogo de IndieCinema.
-  - valores: (map, opcional) Valores enviados por el usuario tras un error de validación.
+  - valores: (map, opcional) Valores enviados por el usuario tras un error de validación o existentes en edición.
   - errores: (map, opcional) Diccionario de mensajes de error de validación por campo.
   - error_general: (string, opcional) Mensaje de error general si falló la validación.
   - mensaje_exito: (string, opcional) Mensaje tras guardar exitosamente la función.
 #}
 {% extends 'base.html.twig' %}
 
-{% block titulo %}Programar una función{% endblock %}
+{% block titulo %}{{ es_edicion ?? false ? 'Editar función' : 'Programar una función' }}{% endblock %}
 
 {% block contenido %}
 <div class="contenedor">
@@ -27,16 +29,19 @@
       <li class="separador-miga" aria-hidden="true">/</li>
       <li class="item-miga"><a href="/organizador/funciones" class="enlace-miga">Mis funciones</a></li>
       <li class="separador-miga" aria-hidden="true">/</li>
-      <li class="item-miga miga-activa" aria-current="page">Programar función</li>
+      <li class="item-miga miga-activa" aria-current="page">{{ es_edicion ?? false ? 'Editar función' : 'Programar función' }}</li>
     </ol>
   </nav>
 
-  {# Encabezado descriptivo de la pantalla de alta #}
+  {# Encabezado descriptivo de la pantalla #}
   <header class="encabezado-formulario-solicitud">
     <div class="solicitud-texto-cabecera">
-      <h1 class="solicitud-titulo">Programar una función</h1>
+      <h1 class="solicitud-titulo">{{ es_edicion ?? false ? 'Editar función' : 'Programar una función' }}</h1>
       <p class="solicitud-bajada">
-        Elegí tu sala, las obras del catálogo, la fecha y horario, el precio de la entrada y el cupo disponible. Al guardarla, tu función aparecerá en la cartelera.
+        {{ es_edicion ?? false
+          ? 'Modificá la sala, las obras del catálogo, la fecha, el horario, el precio o el cupo de tu función.'
+          : 'Elegí tu sala, las obras del catálogo, la fecha y horario, el precio de la entrada y el cupo disponible. Al guardarla, tu función aparecerá en la cartelera.'
+        }}
       </p>
     </div>
     <div class="solicitud-accion-cabecera">
@@ -48,7 +53,7 @@
   {% if error_general is defined and error_general %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'error',
-      titulo: 'No se pudo programar la función',
+      titulo: es_edicion ?? false ? 'No se pudo guardar la función' : 'No se pudo programar la función',
       mensaje: error_general
     } only %}
   {% endif %}
@@ -57,7 +62,7 @@
   {% if mensaje_exito is defined and mensaje_exito %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
-      titulo: '¡Función programada con éxito!',
+      titulo: es_edicion ?? false ? '¡Función actualizada con éxito!' : '¡Función programada con éxito!',
       mensaje: mensaje_exito
     } only %}
   {% endif %}
@@ -81,8 +86,9 @@
     {# El formulario a la izquierda y los parámetros de la sala a la derecha, como en el wireframe #}
     <div class="panel-organizador-grid">
     <div class="panel-organizador-principal">
-    {# Formulario principal de alta de función. Sin novalidate: el navegador también valida #}
-    <form action="{{ accion ?? '/organizador/funciones/nueva' }}" method="POST" class="formulario-sala formulario-alta-funcion">
+    {# Formulario principal de alta o edición de función. Sin novalidate: el navegador también valida #}
+    {% set url_accion = accion ?? ((es_edicion ?? false and funcion_id is defined) ? ('/organizador/funciones/' ~ funcion_id ~ '/editar') : '/organizador/funciones/nueva') %}
+    <form action="{{ url_accion }}" method="POST" class="formulario-sala formulario-alta-funcion">
       {# Token de protección CSRF #}
       <input type="hidden" name="_csrf" value="{{ csrf }}">
 
@@ -250,19 +256,19 @@
       {# ==================================================================== #}
       {# ACCIONES FINALES                                                     #}
       {# ==================================================================== #}
-      {# Banner informativo de publicación como en Figma #}
+      {# Banner informativo de publicación o actualización como en Figma #}
       <div class="aviso-publicacion-funcion" role="status">
         <span class="aviso-icono" aria-hidden="true">💡</span>
         <div class="aviso-contenido">
-          <strong class="aviso-titulo">Publicación directa</strong>
-          <p class="aviso-texto">Al guardar la función, quedará en estado <strong>programada</strong> y aparecerá disponible inmediatamente en la cartelera para reservas.</p>
+          <strong class="aviso-titulo">{{ es_edicion ?? false ? 'Actualización directa' : 'Publicación directa' }}</strong>
+          <p class="aviso-texto">{{ es_edicion ?? false ? 'Al guardar los cambios, la función mantendrá sus datos actualizados en la cartelera y en su ficha para reservas.' : 'Al guardar la función, quedará en estado <strong>programada</strong> y aparecerá disponible inmediatamente en la cartelera para reservas.' }}</p>
         </div>
       </div>
 
       {# El principal primero, como en el wireframe #}
       <footer class="pie-formulario-acciones">
         {% include 'parciales/boton.html.twig' with {
-          texto: 'Programar función',
+          texto: es_edicion ?? false ? 'Guardar cambios' : 'Programar función',
           tipo: 'submit',
           variante: 'primario'
         } only %}
