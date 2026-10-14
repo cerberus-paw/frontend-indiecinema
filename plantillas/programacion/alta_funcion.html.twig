@@ -69,7 +69,7 @@
       titulo: 'No tenés salas habilitadas',
       mensaje: 'Para poder programar una función necesitás tener al menos una sala habilitada por un administrador.'
     } only %}
-    <div class="solicitud-acciones-inferior" style="margin-top: 1rem;">
+    <div class="solicitud-acciones-inferior">
       {% include 'parciales/boton.html.twig' with {
         texto: 'Publicar una sala',
         url: '/organizador/salas/nueva',
@@ -78,8 +78,11 @@
       <a href="/organizador/funciones" class="boton boton-secundario">Volver a mis funciones</a>
     </div>
   {% else %}
-    {# Formulario principal de alta de función #}
-    <form action="{{ accion ?? '/organizador/funciones/nueva' }}" method="POST" class="formulario-sala formulario-alta-funcion" novalidate>
+    {# El formulario a la izquierda y los parámetros de la sala a la derecha, como en el wireframe #}
+    <div class="panel-organizador-grid">
+    <div class="panel-organizador-principal">
+    {# Formulario principal de alta de función. Sin novalidate: el navegador también valida #}
+    <form action="{{ accion ?? '/organizador/funciones/nueva' }}" method="POST" class="formulario-sala formulario-alta-funcion">
       {# Token de protección CSRF #}
       <input type="hidden" name="_csrf" value="{{ csrf }}">
 
@@ -256,42 +259,49 @@
         </div>
       </div>
 
+      {# El principal primero, como en el wireframe #}
       <footer class="pie-formulario-acciones">
-        <a href="/organizador/funciones" class="boton boton-secundario">Descartar</a>
-
         {% include 'parciales/boton.html.twig' with {
           texto: 'Programar función',
           tipo: 'submit',
-          variante: 'primario',
-          tamano: 'grande'
+          variante: 'primario'
         } only %}
+        <a href="/organizador/funciones" class="boton boton-secundario">Descartar</a>
       </footer>
     </form>
     </div>
 
-    {# Parámetros heredados de la sala como en Figma #}
-    <aside class="panel-organizador-lateral" aria-labelledby="titulo-parametros-sala">
+    {# Los parámetros que la función hereda de la sala, al costado como en el wireframe. Hay una
+       lista por sala: con JavaScript se ve sólo la de la sala elegida
+       (componentes/parametros-de-sala.js); sin él, se ven todas, cada una con su nombre #}
+    <aside class="panel-organizador-lateral" aria-labelledby="titulo-parametros-sala" data-parametros-de-sala>
       <div class="tarjeta-parametros-sala">
         <h2 id="titulo-parametros-sala" class="parametros-sala-titulo">Parámetros heredados de la sala</h2>
-        <dl class="parametros-sala-lista">
-          <div class="parametro-item">
-            <dt>Capacidad</dt>
-            <dd>Hasta límite de la sala</dd>
-          </div>
-          <div class="parametro-item">
-            <dt>Tiempo entre funciones</dt>
-            <dd>45 min</dd>
-          </div>
-          <div class="parametro-item">
-            <dt>Mínimo de asistentes</dt>
-            <dd>1 persona</dd>
-          </div>
-          <div class="parametro-item">
-            <dt>Conducta mínima</dt>
-            <dd>No exige</dd>
-          </div>
-        </dl>
-        <p class="parametros-sala-pie">Los parámetros salen de la configuración de la sala. Al guardarla, tu función aparecerá en la cartelera.</p>
+        <p class="parametros-sala-pie" data-sin-sala hidden>Elegí una sala para ver sus parámetros.</p>
+        {% for s in salas %}
+          <section class="parametros-sala-grupo" data-sala="{{ s.id }}">
+            <h3 class="parametros-sala-nombre">{{ s.nombre }}</h3>
+            <dl class="parametros-sala-lista">
+              <div class="parametro-item">
+                <dt>Capacidad</dt>
+                <dd>{{ s.capacidad }}</dd>
+              </div>
+              <div class="parametro-item">
+                <dt>Películas por función</dt>
+                <dd>{{ s.peliculas_por_funcion }}</dd>
+              </div>
+              <div class="parametro-item">
+                <dt>Duración máxima</dt>
+                <dd>{{ s.duracion_funcion }} min</dd>
+              </div>
+              <div class="parametro-item">
+                <dt>Tiempo entre funciones</dt>
+                <dd>{{ s.tiempo_entre_funciones }} min</dd>
+              </div>
+            </dl>
+          </section>
+        {% endfor %}
+        <p class="parametros-sala-pie">Los parámetros salen de la configuración de la sala.</p>
       </div>
     </aside>
   </div>

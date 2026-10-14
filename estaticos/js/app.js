@@ -16,6 +16,10 @@ class App {
     if (document.querySelector('#menu-usuario')) {
       PAW.cargarScript('MenuUsuario', `${App.COMPONENTES}/menu-usuario.js`, () => new MenuUsuario('#menu-usuario'));
     }
+    // Los parámetros de la sala elegida, al lado del formulario de alta de función.
+    if (document.querySelector('[data-parametros-de-sala]')) {
+      PAW.cargarScript('ParametrosDeSala', `${App.COMPONENTES}/parametros-de-sala.js`, () => new ParametrosDeSala('[data-parametros-de-sala]', 'select[name="sala_id"]'));
+    }
     // La búsqueda en vivo, en la cartelera.
     if (document.querySelector('.filtros-cartelera') && document.querySelector('#resultados-cartelera')) {
       PAW.cargarScript('BuscadorDeCartelera', `${App.COMPONENTES}/buscador-de-cartelera.js`, () => new BuscadorDeCartelera('.filtros-cartelera', '#resultados-cartelera'));

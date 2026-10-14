@@ -4493,12 +4493,12 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .tarjeta-seleccion-obra:hover {
-  border-color: var(--color-dorado-acento);
-  background-color: rgba(230, 180, 80, 0.05);
+  border-color: var(--color-primario);
+  background-color: var(--color-superficie-hover);
 }
 
 .tarjeta-seleccion-obra input[type="checkbox"]:checked ~ .info-seleccion-obra .titulo-seleccion-obra {
-  color: var(--color-dorado-acento);
+  color: var(--color-primario);
 }
 
 .info-seleccion-obra {
@@ -4528,8 +4528,11 @@ a.tabla-admin-principal:focus-visible {
   flex-wrap: wrap;
 }
 
+/* El ancho mínimo va aparte y no como base del flex: en el celular el encabezado es una columna, y
+   una base de 500px se volvía 500px de alto vacío */
 .solicitud-texto-cabecera {
-  flex: 1 1 500px;
+  flex: 1 1 0;
+  min-width: min(100%, 20rem);
 }
 
 .solicitud-accion-cabecera {
@@ -4610,6 +4613,39 @@ a.tabla-admin-principal:focus-visible {
   text-align: right;
 }
 
+/* Los parámetros de cada sala, con su nombre: con JavaScript se ve sólo la de la sala elegida */
+.parametros-sala-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+/* El display de arriba le gana al atributo hidden: sin esto, la sala que no se eligió se ve igual */
+.parametros-sala-grupo[hidden] {
+  display: none;
+}
+
+.parametros-sala-nombre {
+  margin: 0;
+  font-size: var(--texto-sm);
+}
+
+/* La lista va dentro de la tarjeta: sin la caja que el dl tiene en todo el sitio */
+.parametros-sala-lista {
+  background: none;
+  border: none;
+  border-radius: 0;
+}
+
+/* «Programar función» y «Descartar», separados y con aire antes del pie */
+.pie-formulario-acciones {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-10);
+}
+
 .parametros-sala-pie {
   font-size: var(--texto-xs);
   color: var(--color-texto-atenuado);
@@ -4623,8 +4659,8 @@ a.tabla-admin-principal:focus-visible {
   gap: var(--espacio-3);
   align-items: flex-start;
   padding: var(--espacio-4);
-  background-color: rgba(240, 166, 59, 0.08);
-  border: 1px solid rgba(240, 166, 59, 0.3);
+  background-color: var(--color-primario-suave);
+  border: 1px solid var(--color-primario);
   border-radius: var(--radio-md);
   margin-top: var(--espacio-4);
   margin-bottom: var(--espacio-4);
@@ -4644,12 +4680,12 @@ a.tabla-admin-principal:focus-visible {
 .aviso-publicacion-funcion .aviso-titulo {
   font-size: var(--texto-sm);
   font-weight: 600;
-  color: var(--color-dorado-acento);
+  color: var(--color-primario);
 }
 
 .aviso-publicacion-funcion .aviso-texto {
   font-size: var(--texto-sm);
-  color: var(--color-texto-principal);
+  color: var(--color-texto);
   margin: 0;
   line-height: 1.5;
 }

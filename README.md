@@ -52,7 +52,8 @@ frontend-indiecinema/
     │   ├── app.js              # Clase App: en DOMContentLoaded carga e inicia los componentes de la página
     │   └── componentes/        # Una clase por archivo, cada una recibe su contenedor
     │       ├── buscador-de-cartelera.js # BuscadorDeCartelera: filtra la cartelera sin recargar, con el JSON de la misma URL
-    │       └── menu-usuario.js # MenuUsuario: cierra el menú del usuario con un clic afuera o con Escape
+    │       ├── menu-usuario.js # MenuUsuario: cierra el menú del usuario con un clic afuera o con Escape
+    │       └── parametros-de-sala.js # ParametrosDeSala: los parámetros de la sala elegida, en el alta de función
     └── img/
         ├── icon.svg            # Isotipo e icono oficial de IndieCinema (favicon)
         ├── logo-horizontal-dark.svg # Logotipo horizontal oficial sobre fondo oscuro
