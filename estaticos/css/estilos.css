@@ -4024,6 +4024,20 @@ dd {
   overflow-wrap: anywhere;
 }
 
+/* Las columnas de «Usuarios y roles», de ancho fijo: si no, el rol y el estado se corren de una
+   página a otra según el largo de los nombres y los correos. El usuario se queda con el resto */
+.tabla-admin-usuarios {
+  table-layout: fixed;
+}
+
+.tabla-admin-columna-rol {
+  width: 15rem;
+}
+
+.tabla-admin-columna-estado {
+  width: 10rem;
+}
+
 /* El desplegable del rol, del ancho del rol más largo y no de toda la columna, como el wireframe */
 .tabla-admin .control-select {
   width: 11rem;
