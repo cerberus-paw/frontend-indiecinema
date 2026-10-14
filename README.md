@@ -19,6 +19,9 @@ Siguiendo las decisiones arquitectónicas de la Entrega 2:
 frontend-indiecinema/
 ├── composer.json               # Definición del paquete cerberus-paw/frontend-indiecinema
 ├── README.md                   # Documentación técnica del paquete
+├── package.json                # Sólo para el CI: stylelint, con las reglas de .stylelintrc.json
+├── herramientas/
+│   └── compilar-plantillas.php # Compila todas las plantillas con el Twig del núcleo (lo corre el CI)
 ├── plantillas/                 # Plantillas Twig organizadas por jerarquía
 │   ├── base.html.twig          # Plantilla base compartida (esqueleto HTML, bloques titulo y contenido)
 │   ├── administracion.html.twig # Armado del panel del administrador: barra lateral, sin encabezado ni pie
@@ -275,3 +278,13 @@ Sin librerías y con una clase por archivo. La plantilla base carga, con `defer`
   - `menu-usuario.js`, `MenuUsuario` (`#menu-usuario`): cierra el menú del usuario con un clic afuera o con Escape, y devuelve el foco al botón. Sin JavaScript, el `<details>` se abre y se cierra igual.
 
 Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.iniciar()`, la carga condicionada a que su contenedor esté en la página.
+
+## 9. Integración continua
+
+En cada PR y en cada push a `main` (`.github/workflows/ci.yml`):
+
+- **Pruebas del back:** el back de `main` con el front del PR al lado, y las pruebas de cada subsistema. Es el espejo del CI del back: un PR del front que necesita uno del back pasa después de mergear el del back.
+- **Plantillas:** `herramientas/compilar-plantillas.php` compila todas con el Twig del núcleo; falla con un error de sintaxis o un filtro que no existe.
+- **CSS:** stylelint, sólo con reglas que encuentran errores (una variable que no existe, una propiedad mal escrita, un selector repetido). En local: `npm ci && npm run css`.
+- **JavaScript:** `node --check` sobre cada archivo de `estaticos/js`.
+- **Secretos:** gitleaks sobre todo el historial, como en el back.

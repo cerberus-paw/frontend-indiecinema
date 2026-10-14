@@ -1,0 +1,127 @@
+# Integración continua del front: en cada PR y en cada push a main. Las plantillas las usan los
+# subsistemas del back, así que lo más importante es correr sus pruebas con este front antes de
+# integrarlo, y no recién cuando falla el CI del back.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Sólo lee el código: ningún trabajo necesita escribir en el repositorio.
+permissions:
+  contents: read
+
+# Un push nuevo al mismo PR cancela la corrida anterior, que ya no sirve.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secretos:
+    name: Secretos (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      # Con todo el historial: un secreto que se agregó y después se borró sigue en un commit.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # Como en el back: la imagen y no gitleaks-action, que en una organización pide licencia, y
+      # --redact para que el log público no muestre lo que encuentre.
+      - name: Buscar secretos en todo el historial
+        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --no-banner --redact --verbose
+
+  javascript:
+    name: JavaScript (sintaxis)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # El Node que ya trae la máquina alcanza: sólo revisa que cada archivo se pueda leer.
+      - name: Revisar cada archivo
+        run: find estaticos/js -name '*.js' -print0 | xargs -0 -n1 node --check
+
+  css:
+    name: CSS (stylelint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Sólo reglas que encuentran errores (.stylelintrc.json), no de estilo: una variable que no
+      # existe, una propiedad mal escrita, un selector repetido.
+      - name: Instalar stylelint
+        run: npm ci --no-audit --no-fund
+      - name: Revisar el CSS
+        run: npm run css
+
+  plantillas:
+    name: Plantillas (compilan)
+    runs-on: ubuntu-latest
+    steps:
+      # Twig no es dependencia del front: lo trae el núcleo del back, con su misma versión.
+      - uses: actions/checkout@v7
+        with:
+          path: frontend-indiecinema
+      - uses: actions/checkout@v7
+        with:
+          repository: cerberus-paw/backend-indiecinema
+          ref: main
+          path: backend-indiecinema
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring
+          coverage: none
+          tools: composer:v2
+      - name: Instalar Twig con el núcleo
+        working-directory: backend-indiecinema/nucleo
+        run: composer install --no-dev --no-interaction --no-progress
+      - name: Compilar todas las plantillas
+        run: php frontend-indiecinema/herramientas/compilar-plantillas.php backend-indiecinema/nucleo/vendor/autoload.php
+
+  pruebas:
+    name: Pruebas del back de ${{ matrix.paquete }}
+    runs-on: ubuntu-latest
+    strategy:
+      # Que falle uno no corta los otros: se ve de una vez todo lo que está roto.
+      fail-fast: false
+      matrix:
+        paquete: [nucleo, cuentas, programacion, funciones]
+    # Las del back corren contra un MySQL de verdad, como en su CI.
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: pruebas
+          MYSQL_DATABASE: pruebas
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppruebas"
+          --health-interval=5s --health-timeout=5s --health-retries=24
+    env:
+      PRUEBAS_MYSQL_HOST: 127.0.0.1
+      PRUEBAS_MYSQL_PUERTO: 3306
+      PRUEBAS_MYSQL_CLAVE: pruebas
+    steps:
+      # El espejo del CI del back: el back de main con el front de este PR al lado, como en la
+      # máquina de cada uno (los subsistemas instalan el front desde ../../frontend-indiecinema).
+      # Si un PR del front necesita uno del back, pasa después de mergear el del back.
+      - uses: actions/checkout@v7
+        with:
+          path: frontend-indiecinema
+      - uses: actions/checkout@v7
+        with:
+          repository: cerberus-paw/backend-indiecinema
+          ref: main
+          path: backend-indiecinema
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: pdo_mysql, mbstring, fileinfo
+          coverage: none
+          tools: composer:v2
+      - name: Instalar dependencias
+        working-directory: backend-indiecinema/${{ matrix.paquete }}
+        run: composer install --no-interaction --no-progress
+      - name: Correr las pruebas
+        working-directory: backend-indiecinema/${{ matrix.paquete }}
+        run: composer pruebas
