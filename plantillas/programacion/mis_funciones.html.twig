@@ -38,6 +38,14 @@
     } only %}
   </header>
 
+  {# Al volver del alta: programada llega sólo después de programar una #}
+  {% if programada ?? false %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      mensaje: 'La función quedó programada y ya está en la cartelera.'
+    } only %}
+  {% endif %}
+
   {% if funciones is empty %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'info',
