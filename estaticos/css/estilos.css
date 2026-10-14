@@ -4030,12 +4030,13 @@ dd {
   table-layout: fixed;
 }
 
+/* En partes del ancho: el rol arranca cerca del medio de la tabla, no contra el borde derecho */
 .tabla-admin-columna-rol {
-  width: 15rem;
+  width: 35%;
 }
 
 .tabla-admin-columna-estado {
-  width: 10rem;
+  width: 20%;
 }
 
 /* El desplegable del rol, del ancho del rol más largo y no de toda la columna, como el wireframe */
