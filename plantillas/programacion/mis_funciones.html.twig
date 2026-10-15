@@ -6,11 +6,16 @@
   Usa la tabla del panel del administrador (tabla-admin), como «Salas»: es la misma forma de
   listar con estado, y así las pantallas de listado se ven igual en todo el sitio.
   Permite programar una función nueva (IC-121) mediante el botón en el encabezado.
-  La edición y la cancelación suman su columna de acciones cuando tengan pantalla (IC-122 a IC-123).
+  Suma la columna de acciones con el botón para editar la función (IC-122 / E3-11.3).
+  La cancelación suma su acción cuando tenga pantalla (IC-123).
 
   Variables:
   - funciones: lista de funciones con id, titulo, titulos_elegidos, sala, sala_id,
-    sala_habilitada, estado, estado_valor, es_final, fecha (o null), precio y cupo.
+    sala_habilitada, estado, estado_valor, es_final, editable, fecha (o null), precio y cupo.
+    editable dice si se puede editar: sólo una programada que todavía no se dio (en votación no
+    hay nada que editar, y una cancelada, finalizada o con la fecha ya pasada ya terminó).
+  - programada: (bool) aviso de que se acaba de programar una. El de la edición no va acá: al
+    guardar se vuelve a la ficha de la función, que es la que lo muestra.
 #}
 {% extends 'base.html.twig' %}
 
@@ -69,6 +74,7 @@
             <th scope="col">Fecha</th>
             <th scope="col">Estado</th>
             <th scope="col">Entrada</th>
+            <th scope="col">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -107,6 +113,18 @@
               <td>
                 <span class="tabla-admin-principal">{{ funcion.precio }}</span>
                 <span class="tabla-admin-secundario">{{ funcion.cupo }} lugares</span>
+              </td>
+              <td class="tabla-admin-acciones">
+                {% if funcion.editable|default(false) %}
+                  {% include 'parciales/boton.html.twig' with {
+                    texto: 'Editar',
+                    url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
+                    variante: 'secundario',
+                    tamano: 'chico'
+                  } only %}
+                {% else %}
+                  <span class="tabla-admin-secundario">—</span>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}
