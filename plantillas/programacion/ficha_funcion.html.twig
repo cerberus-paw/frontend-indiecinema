@@ -27,6 +27,10 @@
       - editable: (bool) si quien la mira es su organizador y todavía la puede editar.
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
+
+  Las dos llevan |default(false): el paquete front se mergea antes que el back, así que mientras
+  tanto esta plantilla la sirve un controlador que todavía no las manda, y con las variables
+  estrictas de Twig faltar no puede ser un error.
 #}
 {% extends 'base.html.twig' %}
 
@@ -40,7 +44,7 @@
 } %}
 <div class="contenedor ficha-funcion">
   {# Alerta informativa si se llega tras editar la función #}
-  {% if guardada %}
+  {% if guardada|default(false) %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       titulo: '¡Cambios guardados!',
@@ -83,7 +87,7 @@
             <span class="ficha-metadato-icono" aria-hidden="true">🎟️</span>
             <span class="ficha-metadato-texto">{{ funcion.precio }} · {{ funcion.cupo }} lugares</span>
           </div>
-          {% if funcion.editable %}
+          {% if funcion.editable|default(false) %}
             <div class="ficha-metadato-accion">
               {% include 'parciales/boton.html.twig' with {
                 texto: 'Editar función',
