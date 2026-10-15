@@ -24,8 +24,15 @@
       - obras: lista con titulo, sinopsis, anio, director, duracion (en minutos) y generos (lista
         de nombres). Todavía sin afiche, porque no hay una ruta que lo sirva: se muestra el
         marcador.
-      - editable: (bool, opcional) si quien visualiza la función es el organizador y puede editarla.
-  - guardada / editada: (string|bool|null, opcional) aviso de éxito al volver de editar la función.
+      - editable: (bool) si quien la mira es su organizador y la puede editar (sólo una programada que todavía no se dio).
+      - cancelable: (bool) si quien la mira es su organizador y la puede cancelar (en votación o
+        programada, mientras todavía no se dio).
+  - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
+    organizador: la ficha es pública y el aviso no es para cualquiera.
+
+  Las tres llevan |default(false): el paquete front se mergea antes que el back, así que mientras
+  tanto esta plantilla la sirve un controlador que todavía no las manda, y con las variables
+  estrictas de Twig faltar no puede ser un error.
 #}
 {% extends 'base.html.twig' %}
 
@@ -39,7 +46,7 @@
 } %}
 <div class="contenedor ficha-funcion">
   {# Alerta informativa si se llega tras editar la función #}
-  {% if guardada ?? (editada ?? false) %}
+  {% if guardada|default(false) %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       titulo: '¡Cambios guardados!',
@@ -82,23 +89,25 @@
             <span class="ficha-metadato-icono" aria-hidden="true">🎟️</span>
             <span class="ficha-metadato-texto">{{ funcion.precio }} · {{ funcion.cupo }} lugares</span>
           </div>
-          {% if funcion.editable ?? (editable ?? false) %}
-            {% if not (funcion.es_cancelada ?? false) %}
-              <div class="ficha-metadato-accion">
+          {% if funcion.editable|default(false) or funcion.cancelable|default(false) %}
+            <div class="ficha-metadato-accion">
+              {% if funcion.editable|default(false) %}
                 {% include 'parciales/boton.html.twig' with {
                   texto: 'Editar función',
                   url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
                   variante: 'secundario',
                   tamano: 'chico'
                 } only %}
+              {% endif %}
+              {% if funcion.cancelable|default(false) %}
                 {% include 'parciales/boton.html.twig' with {
                   texto: 'Cancelar función',
                   url: '/organizador/funciones/' ~ funcion.id ~ '/cancelar',
                   variante: 'peligro',
                   tamano: 'chico'
                 } only %}
-              </div>
-            {% endif %}
+              {% endif %}
+            </div>
           {% endif %}
         </div>
       </div>

@@ -10,10 +10,13 @@
 
   Variables:
   - funciones: lista de funciones con id, titulo, titulos_elegidos, sala, sala_id,
-    sala_habilitada, estado, estado_valor, es_final, fecha (o null), precio y cupo.
-  - programada: (string|null, opcional) ID de función recién programada para mensaje de éxito.
-  - guardada / editada: (string|bool|null, opcional) Aviso de éxito al guardar cambios de edición.
-  - cancelada: (string|bool|null, opcional) Aviso de confirmación tras cancelar la función (baja lógica).
+    sala_habilitada, estado, estado_valor, es_final, editable, cancelable, fecha (o null), precio y
+    cupo. editable dice si se puede editar: sólo una programada que todavía no se dio (en votación
+    no hay nada que editar, y una cancelada, finalizada o con la fecha ya pasada ya terminó).
+    cancelable dice si se puede cancelar: en votación o programada, mientras todavía no se dio.
+  - programada: (bool) aviso de que se acaba de programar una. El de la edición no va acá: al
+    guardar se vuelve a la ficha de la función, que es la que lo muestra.
+  - cancelada: (bool) aviso de que se acaba de cancelar una.
 #}
 {% extends 'base.html.twig' %}
 
@@ -49,16 +52,8 @@
     } only %}
   {% endif %}
 
-  {# Al volver de la edición: guardada o editada #}
-  {% if editada ?? (guardada ?? false) %}
-    {% include 'parciales/mensaje.html.twig' with {
-      tipo: 'exito',
-      mensaje: 'Los cambios en la función se guardaron con éxito.'
-    } only %}
-  {% endif %}
-
   {# Al volver de la cancelación (baja lógica) #}
-  {% if cancelada ?? false %}
+  {% if cancelada|default(false) %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       mensaje: 'La función fue cancelada. Ya no aparece en la cartelera pero permanece registrada en tu panel.'
@@ -129,20 +124,24 @@
                 <span class="tabla-admin-secundario">{{ funcion.cupo }} lugares</span>
               </td>
               <td class="tabla-admin-acciones">
-                {% if not funcion.es_final %}
+                {% if funcion.editable|default(false) or funcion.cancelable|default(false) %}
                   <div class="tabla-admin-acciones-grupo">
-                    {% include 'parciales/boton.html.twig' with {
-                      texto: 'Editar',
-                      url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
-                      variante: 'secundario',
-                      tamano: 'chico'
-                    } only %}
-                    {% include 'parciales/boton.html.twig' with {
-                      texto: 'Cancelar',
-                      url: '/organizador/funciones/' ~ funcion.id ~ '/cancelar',
-                      variante: 'peligro',
-                      tamano: 'chico'
-                    } only %}
+                    {% if funcion.editable|default(false) %}
+                      {% include 'parciales/boton.html.twig' with {
+                        texto: 'Editar',
+                        url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
+                        variante: 'secundario',
+                        tamano: 'chico'
+                      } only %}
+                    {% endif %}
+                    {% if funcion.cancelable|default(false) %}
+                      {% include 'parciales/boton.html.twig' with {
+                        texto: 'Cancelar',
+                        url: '/organizador/funciones/' ~ funcion.id ~ '/cancelar',
+                        variante: 'peligro',
+                        tamano: 'chico'
+                      } only %}
+                    {% endif %}
                   </div>
                 {% else %}
                   <span class="tabla-admin-secundario">—</span>
