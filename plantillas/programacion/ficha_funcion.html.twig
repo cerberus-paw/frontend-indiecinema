@@ -25,10 +25,12 @@
         de nombres). Todavía sin afiche, porque no hay una ruta que lo sirva: se muestra el
         marcador.
       - editable: (bool) si quien la mira es su organizador y la puede editar (sólo una programada que todavía no se dio).
+      - cancelable: (bool) si quien la mira es su organizador y la puede cancelar (en votación o
+        programada, mientras todavía no se dio).
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
 
-  Las dos llevan |default(false): el paquete front se mergea antes que el back, así que mientras
+  Las tres llevan |default(false): el paquete front se mergea antes que el back, así que mientras
   tanto esta plantilla la sirve un controlador que todavía no las manda, y con las variables
   estrictas de Twig faltar no puede ser un error.
 #}
@@ -87,14 +89,24 @@
             <span class="ficha-metadato-icono" aria-hidden="true">🎟️</span>
             <span class="ficha-metadato-texto">{{ funcion.precio }} · {{ funcion.cupo }} lugares</span>
           </div>
-          {% if funcion.editable|default(false) %}
+          {% if funcion.editable|default(false) or funcion.cancelable|default(false) %}
             <div class="ficha-metadato-accion">
-              {% include 'parciales/boton.html.twig' with {
-                texto: 'Editar función',
-                url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
-                variante: 'secundario',
-                tamano: 'chico'
-              } only %}
+              {% if funcion.editable|default(false) %}
+                {% include 'parciales/boton.html.twig' with {
+                  texto: 'Editar función',
+                  url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
+                  variante: 'secundario',
+                  tamano: 'chico'
+                } only %}
+              {% endif %}
+              {% if funcion.cancelable|default(false) %}
+                {% include 'parciales/boton.html.twig' with {
+                  texto: 'Cancelar función',
+                  url: '/organizador/funciones/' ~ funcion.id ~ '/cancelar',
+                  variante: 'peligro',
+                  tamano: 'chico'
+                } only %}
+              {% endif %}
             </div>
           {% endif %}
         </div>

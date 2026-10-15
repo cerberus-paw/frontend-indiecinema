@@ -3574,10 +3574,11 @@ dd {
   font-weight: 500;
 }
 
-/* Acción en la tira de metadatos (ej. botón para editar función propia, IC-122) */
+/* Acción en la tira de metadatos (ej. botón para editar o cancelar función propia, IC-122 / IC-123) */
 .ficha-metadato-accion {
   display: inline-flex;
   align-items: center;
+  gap: var(--espacio-2);
 }
 
 /* Sección estructural dentro de la ficha */
@@ -4068,6 +4069,13 @@ dd {
 /* Columna de acciones en tablas administrativas y de gestión (IC-122) */
 .tabla-admin-acciones {
   white-space: nowrap;
+}
+
+/* Grupo de botones en la columna de acciones (IC-123) */
+.tabla-admin-acciones-grupo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
 }
 
 /* Las columnas de «Usuarios y roles», de ancho fijo: si no, el rol y el estado se corren de una
@@ -5120,6 +5128,44 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto);
   margin: 0;
   line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   CONFIRMACIÓN DE CANCELACIÓN DE FUNCIÓN (IC-123 / E3-11.4)
+   Componentes para plantillas/programacion/cancelar_funcion.html.twig
+   -------------------------------------------------------------------------- */
+
+.contenedor-confirmacion-cancelacion {
+  max-width: 680px;
+}
+
+.tarjeta-resumen-cancelacion {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-5);
+  margin-top: var(--espacio-4);
+  margin-bottom: var(--espacio-6);
+}
+
+.resumen-cancelacion-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+  margin-top: 0;
+  margin-bottom: var(--espacio-4);
+}
+
+.resumen-cancelacion-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
 }
 
 /* --------------------------------------------------------------------------
