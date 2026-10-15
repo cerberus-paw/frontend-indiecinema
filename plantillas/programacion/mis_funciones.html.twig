@@ -11,7 +11,9 @@
 
   Variables:
   - funciones: lista de funciones con id, titulo, titulos_elegidos, sala, sala_id,
-    sala_habilitada, estado, estado_valor, es_final, fecha (o null), precio y cupo.
+    sala_habilitada, estado, estado_valor, es_final, editable, fecha (o null), precio y cupo.
+    editable dice si se puede editar: sólo una programada (en votación todavía no hay nada que
+    editar, y una cancelada o finalizada ya terminó).
   - programada: (bool) aviso de que se acaba de programar una. El de la edición no va acá: al
     guardar se vuelve a la ficha de la función, que es la que lo muestra.
 #}
@@ -113,7 +115,7 @@
                 <span class="tabla-admin-secundario">{{ funcion.cupo }} lugares</span>
               </td>
               <td class="tabla-admin-acciones">
-                {% if not funcion.es_final %}
+                {% if funcion.editable|default(false) %}
                   {% include 'parciales/boton.html.twig' with {
                     texto: 'Editar',
                     url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
