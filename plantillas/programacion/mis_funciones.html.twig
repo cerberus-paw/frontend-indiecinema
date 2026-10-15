@@ -12,8 +12,8 @@
   Variables:
   - funciones: lista de funciones con id, titulo, titulos_elegidos, sala, sala_id,
     sala_habilitada, estado, estado_valor, es_final, fecha (o null), precio y cupo.
-  - programada: (string|null, opcional) ID de función recién programada para mensaje de éxito.
-  - guardada / editada: (string|bool|null, opcional) Aviso de éxito al guardar cambios de edición.
+  - programada: (bool) aviso de que se acaba de programar una. El de la edición no va acá: al
+    guardar se vuelve a la ficha de la función, que es la que lo muestra.
 #}
 {% extends 'base.html.twig' %}
 
@@ -46,14 +46,6 @@
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       mensaje: 'La función quedó programada y ya está en la cartelera.'
-    } only %}
-  {% endif %}
-
-  {# Al volver de la edición: guardada o editada #}
-  {% if editada ?? (guardada ?? false) %}
-    {% include 'parciales/mensaje.html.twig' with {
-      tipo: 'exito',
-      mensaje: 'Los cambios en la función se guardaron con éxito.'
     } only %}
   {% endif %}
 
