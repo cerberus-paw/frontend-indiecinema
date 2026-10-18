@@ -289,3 +289,5 @@ En cada PR y en cada push a `main` (`.github/workflows/ci.yml`):
 - **CSS:** stylelint, sólo con reglas que encuentran errores (una variable que no existe, una propiedad mal escrita, un selector repetido). En local: `npm ci && npm run css`.
 - **JavaScript:** `node --check` sobre cada archivo de `estaticos/js`.
 - **Secretos:** gitleaks sobre todo el historial, como en el back.
+
+Cuando la CI pasa en un push a `main`, `.github/workflows/cd.yml` publica el cambio en el VPS con el mismo script que el back (README del back, «Despliegue continuo»).
