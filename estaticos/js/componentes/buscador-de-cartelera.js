@@ -32,7 +32,9 @@ class BuscadorDeCartelera {
   /** Los estados de la tarjeta, como en parciales/tarjeta_funcion.html.twig. */
   static ESTADOS = {
     PROGRAMADA: ['PROGRAMADA', 'insignia-programada'],
-    EN_VOTACION: ['EN VOTACIÓN', 'insignia-votacion'],
+    EN_VOTACION: ['EN VOTACIÓN DE TÍTULOS', 'insignia-votacion'],
+    EN_VOTACION_TITULOS: ['EN VOTACIÓN DE TÍTULOS', 'insignia-votacion'],
+    en_votacion_titulos: ['EN VOTACIÓN DE TÍTULOS', 'insignia-votacion'],
     ACUERDO_FECHA: ['ACUERDO DE FECHA', 'insignia-acuerdo'],
   };
 
@@ -305,7 +307,20 @@ class BuscadorDeCartelera {
    * @returns {HTMLElement}
    */
   tarjeta(funcion) {
-    const [etiqueta, insignia] = BuscadorDeCartelera.ESTADOS[funcion.estado] ?? BuscadorDeCartelera.ESTADOS.PROGRAMADA;
+    const estadoClave = String(funcion.estado || 'PROGRAMADA').toUpperCase();
+    const esVotacion = estadoClave === 'EN_VOTACION'
+      || estadoClave === 'EN_VOTACION_TITULOS'
+      || estadoClave === 'EN_VOTACION_DE_TITULOS';
+    const [etiqueta, insignia] = BuscadorDeCartelera.ESTADOS[estadoClave]
+      ?? BuscadorDeCartelera.ESTADOS[funcion.estado]
+      ?? (esVotacion ? ['EN VOTACIÓN DE TÍTULOS', 'insignia-votacion'] : BuscadorDeCartelera.ESTADOS.PROGRAMADA);
+    const textoBoton = esVotacion ? 'Votar títulos' : 'Ver función';
+    const textoFecha = esVotacion
+      ? (funcion.cierre_votacion || (funcion.fecha && funcion.fecha !== 'Fecha a confirmar' ? funcion.fecha : 'A definir tras la votación'))
+      : (funcion.fecha || 'Próximamente');
+    const claseBoton = esVotacion
+      ? 'boton boton-primario boton-chico boton-bloque boton-tarjeta-funcion'
+      : 'boton boton-secundario boton-chico boton-bloque boton-tarjeta-funcion';
 
     return this.nodo('article', { class: 'tarjeta-funcion' }, [
       this.nodo('div', { class: 'tarjeta-funcion-afiche' }, [
@@ -331,12 +346,12 @@ class BuscadorDeCartelera {
           ]),
           this.nodo('p', { class: 'tarjeta-funcion-dato meta-tiempo' }, [
             this.nodo('span', { class: 'meta-icono', 'aria-hidden': 'true' }, ['📅']),
-            this.nodo('span', { class: 'meta-texto' }, [funcion.fecha]),
+            this.nodo('span', { class: 'meta-texto' }, [textoFecha]),
           ]),
         ]),
         this.nodo('div', { class: 'tarjeta-funcion-acciones' }, [
-          this.nodo('a', { href: funcion.url, class: 'boton boton-secundario boton-chico boton-bloque boton-tarjeta-funcion' }, [
-            this.nodo('span', { class: 'boton-texto' }, ['Ver función']),
+          this.nodo('a', { href: funcion.url, class: claseBoton }, [
+            this.nodo('span', { class: 'boton-texto' }, [textoBoton]),
           ]),
         ]),
       ]),
