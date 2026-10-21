@@ -10,13 +10,15 @@
 
   Variables:
   - funciones: lista de funciones con id, titulo, titulos_elegidos, sala, sala_id,
-    sala_habilitada, estado, estado_valor, es_final, editable, cancelable, fecha (o null), precio y
+    sala_habilitada, estado, estado_valor, es_final, editable, cancelable, cerrable, fecha (o null), precio y
     cupo. editable dice si se puede editar: sólo una programada que todavía no se dio (en votación
     no hay nada que editar, y una cancelada, finalizada o con la fecha ya pasada ya terminó).
     cancelable dice si se puede cancelar: en votación o programada, mientras todavía no se dio.
+    cerrable dice si se puede cerrar la votación: sólo si está en votación de títulos (IC-150 / E3-12.4).
   - programada: (bool) aviso de que se acaba de programar una. El de la edición no va acá: al
     guardar se vuelve a la ficha de la función, que es la que lo muestra.
   - cancelada: (bool) aviso de que se acaba de cancelar una.
+  - votacion_cerrada: (bool) aviso de que se acaba de cerrar la votación de títulos de una función (IC-150 / E3-12.4).
 #}
 {% extends 'base.html.twig' %}
 
@@ -57,6 +59,15 @@
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       mensaje: 'La función fue cancelada. Ya no aparece en la cartelera pero permanece registrada en tu panel.'
+    } only %}
+  {% endif %}
+
+  {# Al volver de cerrar la votación de títulos (IC-150 / E3-12.4) #}
+  {% if votacion_cerrada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: '¡Votación cerrada!',
+      mensaje: 'La votación se cerró correctamente. La función pasó a acuerdo de fecha con la obra más votada.'
     } only %}
   {% endif %}
 
@@ -124,8 +135,19 @@
                 <span class="tabla-admin-secundario">{{ funcion.cupo }} lugares</span>
               </td>
               <td class="tabla-admin-acciones">
-                {% if funcion.editable|default(false) or funcion.cancelable|default(false) %}
+                {% if funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) %}
                   <div class="tabla-admin-acciones-grupo">
+                    {% if funcion.cerrable|default(false) %}
+                      <form action="/organizador/funciones/{{ funcion.id }}/cerrar-votacion" method="POST" class="formulario-accion-tabla">
+                        <input type="hidden" name="_csrf" value="{{ csrf }}">
+                        {% include 'parciales/boton.html.twig' with {
+                          texto: 'Cerrar votación',
+                          tipo: 'submit',
+                          variante: 'secundario',
+                          tamano: 'chico'
+                        } only %}
+                      </form>
+                    {% endif %}
                     {% if funcion.editable|default(false) %}
                       {% include 'parciales/boton.html.twig' with {
                         texto: 'Editar',

@@ -27,17 +27,20 @@
       - editable: (bool) si quien la mira es su organizador y la puede editar (sólo una programada que todavía no se dio).
       - cancelable: (bool) si quien la mira es su organizador y la puede cancelar (en votación o
         programada, mientras todavía no se dio).
+      - cerrable: (bool) si quien la mira es su organizador y la votación de títulos está abierta,
+        para cerrarla con la candidata ganadora (E3-12.4 / IC-150).
       - reservable: (bool) si todavía se puede reservar: no se canceló ni empezó. Con sesión se
         ve el formulario, que manda la reserva al subsistema funciones; sin sesión, el enlace
         para ingresar.
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
+  - votacion_cerrada: (bool) aviso de éxito al volver de cerrar la votación de títulos (IC-150 / E3-12.4).
   - voto_usuario: (string|null) UUID de la obra que votó el usuario autenticado (E3-12.2 / E3-12.3).
   - conteo_votos: (array<string, int>) mapa asociativo [obra_id => total_votos] con el conteo por candidata.
   - votado: (bool) si se redireccionó tras emitir o modificar el voto (?votado=1).
   - error_voto: (string|null) mensaje de error si falló el registro o cambio de voto.
 
-  editable, cancelable, reservable y guardada llevan |default(false): el paquete front se mergea
+  editable, cancelable, cerrable, reservable y guardada llevan |default(false): el paquete front se mergea
   antes que el back, así que mientras tanto esta plantilla la sirve un controlador que todavía no
   las manda, y con las variables estrictas de Twig faltar no puede ser un error.
 #}
@@ -58,6 +61,15 @@
       tipo: 'exito',
       titulo: '¡Cambios guardados!',
       mensaje: 'La función se actualizó correctamente y ya se visualiza con los nuevos datos.'
+    } only %}
+  {% endif %}
+
+  {# Alerta informativa al volver de cerrar la votación de títulos (IC-150 / E3-12.4) #}
+  {% if votacion_cerrada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: '¡Votación cerrada con éxito!',
+      mensaje: 'La votación de títulos fue cerrada correctamente. La obra más votada ha sido seleccionada y la función pasó al estado «En acuerdo de fecha».'
     } only %}
   {% endif %}
 
@@ -96,8 +108,20 @@
             <span class="ficha-metadato-icono" aria-hidden="true">🎟️</span>
             <span class="ficha-metadato-texto">{{ funcion.precio }} · {{ funcion.cupo }} lugares</span>
           </div>
-          {% if funcion.editable|default(false) or funcion.cancelable|default(false) %}
+          {% if funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) %}
             <div class="ficha-metadato-accion">
+              {% if funcion.cerrable|default(false) %}
+                <form action="/organizador/funciones/{{ funcion.id }}/cerrar-votacion" method="POST" class="ficha-form-cerrar-votacion">
+                  <input type="hidden" name="_csrf" value="{{ csrf }}">
+                  <input type="hidden" name="volver" value="ficha">
+                  {% include 'parciales/boton.html.twig' with {
+                    texto: 'Cerrar votación',
+                    tipo: 'submit',
+                    variante: 'secundario',
+                    tamano: 'chico'
+                  } only %}
+                </form>
+              {% endif %}
               {% if funcion.editable|default(false) %}
                 {% include 'parciales/boton.html.twig' with {
                   texto: 'Editar función',
@@ -175,6 +199,32 @@
             </p>
           </div>
         </div>
+
+        {# Panel de acción destacada para el organizador para cerrar la votación (IC-150 / E3-12.4) #}
+        {% if funcion.cerrable|default(false) %}
+          <div class="ficha-votacion-panel-organizador" role="region" aria-label="Gestión de votación para el organizador">
+            <div class="votacion-organizador-contenido">
+              <span class="votacion-organizador-icono" aria-hidden="true">⏱️</span>
+              <div class="votacion-organizador-texto">
+                <h3 class="votacion-organizador-titulo">Panel del organizador</h3>
+                <p class="votacion-organizador-bajada">
+                  Podés dar por finalizada la votación en cualquier momento. La candidata con más votos acumulados resultará ganadora y la función avanzará al acuerdo de fecha.
+                </p>
+              </div>
+            </div>
+            <form action="/organizador/funciones/{{ funcion.id }}/cerrar-votacion" method="POST" class="votacion-organizador-form">
+              <input type="hidden" name="_csrf" value="{{ csrf }}">
+              <input type="hidden" name="volver" value="ficha">
+              {% include 'parciales/boton.html.twig' with {
+                texto: 'Cerrar votación',
+                tipo: 'submit',
+                variante: 'primario',
+                icono: '🔒',
+                clase: 'boton-cerrar-votacion-destacado'
+              } only %}
+            </form>
+          </div>
+        {% endif %}
 
         {# Confirmación accesible de voto recién emitido o modificado #}
         {% if votado|default(false) or mensaje_exito|default(false) or mensaje_voto|default(false) %}

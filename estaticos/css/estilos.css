@@ -3581,6 +3581,12 @@ dd {
   gap: var(--espacio-2);
 }
 
+/* Formulario en línea para cerrar votación desde la cabecera (IC-150) */
+.ficha-form-cerrar-votacion {
+  display: inline-flex;
+  margin: 0;
+}
+
 /* Sección estructural dentro de la ficha */
 .ficha-seccion {
   /* Ancho 100% */
@@ -4343,6 +4349,71 @@ dd {
   align-items: center;
 }
 
+/* Panel de gestión y cierre de votación para el organizador (IC-150 / E3-12.4) */
+.ficha-votacion-panel-organizador {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding: var(--espacio-4);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-left: 4px solid var(--color-primario);
+  border-radius: var(--radio-md);
+  margin-bottom: var(--espacio-5);
+}
+
+@media (min-width: 640px) {
+  .ficha-votacion-panel-organizador {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--espacio-5);
+  }
+}
+
+.votacion-organizador-contenido {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+}
+
+.votacion-organizador-icono {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.votacion-organizador-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.votacion-organizador-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-md);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+  margin: 0;
+}
+
+.votacion-organizador-bajada {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.votacion-organizador-form {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.boton-cerrar-votacion-destacado {
+  white-space: nowrap;
+}
+
 /* --------------------------------------------------------------------------
    22. ADMINISTRACIÓN: TABLAS DEL PANEL (IC-106)
    Componentes de cuentas/administracion_usuarios.html.twig, y la tabla de «Mis funciones»
@@ -4440,6 +4511,12 @@ dd {
   display: flex;
   align-items: center;
   gap: var(--espacio-2);
+}
+
+/* Formulario en línea para acciones en la tabla de administración (IC-150) */
+.formulario-accion-tabla {
+  display: inline-flex;
+  margin: 0;
 }
 
 /* Las columnas de «Usuarios y roles», de ancho fijo: si no, el rol y el estado se corren de una
