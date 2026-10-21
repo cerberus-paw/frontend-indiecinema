@@ -1,0 +1,89 @@
+{#
+  La reserva de una función, en /funcion/reservar/{id} (E4-01.3). Es el paso «Lugares» del
+  wireframe reserva-pago-comprobante, sin el pago: la reserva se confirma sin cobrar. El
+  formulario de siempre está en la ficha; esta página es la misma con los errores, o la que se ve
+  si se llega escribiendo la dirección.
+
+  Variables:
+  - funcion: id, titulo, url (de su ficha), fecha (string ya escrito, o null si todavía no se
+    acordó), precio (por lugar, ya escrito), sala y localidad.
+  - motivo: (string|null) por qué ya no se puede reservar; entonces no hay formulario.
+  - reglas.cantidad: minimo y maximo, los mismos que controla el servidor.
+  - valores.cantidad: lo que mandó, para volver a mostrarlo.
+  - errores: (map) el error de cada campo.
+  - error_general: (string, opcional) la regla que no se cumplió, como «Quedan 3 lugares.».
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Reservar: {{ funcion.titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="contenedor contenedor-reserva">
+  <nav class="navegacion-migas" aria-label="Ruta de navegación">
+    <ol class="lista-migas">
+      <li><a href="/cartelera" class="enlace-miga">Cartelera</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li><a href="{{ funcion.url }}" class="enlace-miga">{{ funcion.titulo }}</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="miga-activa" aria-current="page">Reservar</li>
+    </ol>
+  </nav>
+
+  {% include 'funciones/pasos_reserva.html.twig' with { actual: 1 } only %}
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Reservá tus lugares</h1>
+      <p class="solicitud-bajada">La reserva se confirma en el momento y recibís un código para presentar en la puerta.</p>
+    </div>
+  </header>
+
+  <article class="tarjeta-resumen-cancelacion">
+    <h2 class="resumen-cancelacion-titulo">{{ funcion.titulo }}</h2>
+    <dl class="resumen-cancelacion-lista">
+      <div class="parametro-item">
+        <dt>Sala</dt>
+        <dd>{{ funcion.sala }} · {{ funcion.localidad }}</dd>
+      </div>
+      <div class="parametro-item">
+        <dt>Fecha y horario</dt>
+        <dd>{{ funcion.fecha ?? 'Fecha a confirmar' }}</dd>
+      </div>
+      <div class="parametro-item">
+        <dt>Entrada</dt>
+        <dd>{{ funcion.precio }}{% if funcion.precio starts with '$' %} por lugar{% endif %}</dd>
+      </div>
+    </dl>
+  </article>
+
+  {% if motivo %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: motivo } only %}
+    <div class="pie-formulario-acciones">
+      <a href="{{ funcion.url }}" class="boton boton-secundario">Volver a la función</a>
+    </div>
+  {% else %}
+    {% if error_general is defined %}
+      {% include 'parciales/mensaje.html.twig' with { tipo: 'error', mensaje: error_general } only %}
+    {% endif %}
+
+    <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="formulario-reserva">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'cantidad',
+        etiqueta: 'Cantidad de lugares',
+        tipo: 'number',
+        valor: valores.cantidad ?? '1',
+        errores: errores,
+        requerido: true,
+        valor_minimo: reglas.cantidad.minimo,
+        valor_maximo: reglas.cantidad.maximo
+      } only %}
+
+      <div class="pie-formulario-acciones">
+        {% include 'parciales/boton.html.twig' with { texto: 'Reservar mis lugares', tipo: 'submit' } only %}
+        <a href="{{ funcion.url }}" class="boton boton-fantasma">Volver a la función</a>
+      </div>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
