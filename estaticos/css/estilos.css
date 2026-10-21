@@ -2139,14 +2139,23 @@ dd {
   color: var(--color-texto-brillante);
 }
 
-/* Insignia función en votación (E3-12 / IC-148): distintiva con matiz índigo */
+/* Icono opcional dentro de insignias de estado (IC-151) */
+.insignia-estado .insignia-icono {
+  margin-right: 0.35rem;
+  font-size: 0.9em;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: -0.05em;
+}
+
+/* Insignia función en votación (E3-12 / IC-148 / IC-151): distintiva con matiz índigo y alto contraste */
 .insignia-votacion {
   /* Fondo índigo suave */
-  background-color: rgba(99, 102, 241, 0.2);
+  background-color: rgba(99, 102, 241, 0.22);
   /* Borde tenue con acento */
-  border: 1px solid rgba(129, 140, 248, 0.45);
-  /* Color texto claro lila */
-  color: #c7d2fe;
+  border: 1px solid rgba(129, 140, 248, 0.55);
+  /* Color texto claro lila de alta legibilidad (WCAG AAA) */
+  color: #e0e7ff;
 }
 
 /* Insignia acuerdo de fecha */
@@ -2241,6 +2250,34 @@ dd {
   margin-top: auto;
   /* Ancho completo */
   width: 100%;
+}
+
+/* Realce específico para funciones en votación de títulos en la cartelera (IC-151) */
+.tarjeta-funcion-votacion {
+  border-color: rgba(129, 140, 248, 0.3);
+}
+
+.tarjeta-funcion-votacion:hover,
+.tarjeta-funcion-votacion:focus-within {
+  border-color: rgba(129, 140, 248, 0.6);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.18);
+}
+
+.tarjeta-funcion-votacion .meta-tiempo .meta-texto-votacion {
+  color: #c7d2fe;
+  font-weight: 600;
+}
+
+.boton-tarjeta-votar {
+  background-color: var(--color-primario);
+  color: #17141c;
+  font-weight: 700;
+}
+
+.boton-tarjeta-votar:hover,
+.boton-tarjeta-votar:focus-visible {
+  background-color: var(--color-primario-hover);
+  color: #17141c;
 }
 
 /* --------------------------------------------------------------------------
