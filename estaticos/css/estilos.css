@@ -5607,6 +5607,169 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* --------------------------------------------------------------------------
+   RESERVA DE UNA FUNCIÓN (E4-01.3)
+   El panel de la ficha (programacion/ficha_funcion) y las páginas de funciones/
+   (reservar, reserva_confirmada), como el wireframe reserva-pago-comprobante.
+   -------------------------------------------------------------------------- */
+
+/* El panel de la ficha: el precio a la izquierda y el formulario a la derecha; en celular, apilados */
+.ficha-reserva {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-primario);
+  border-radius: var(--radio-lg);
+  padding: var(--espacio-6);
+}
+
+.ficha-reserva-titulo {
+  font-size: var(--texto-lg);
+  margin: 0 0 var(--espacio-2);
+}
+
+.ficha-reserva-monto {
+  margin: 0;
+  color: var(--color-texto-secundario);
+}
+
+.ficha-reserva-monto strong {
+  font-size: var(--texto-2xl);
+  color: var(--color-texto-brillante);
+}
+
+.ficha-reserva-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espacio-3);
+}
+
+/* El campo sin el margen de abajo de los formularios largos, para que quede alineado con el botón */
+.ficha-reserva-formulario .grupo-campo {
+  margin-bottom: 0;
+  width: 10rem;
+}
+
+.ficha-reserva-ayuda {
+  margin: 0;
+  color: var(--color-texto-secundario);
+}
+
+.contenedor-reserva {
+  max-width: 680px;
+}
+
+/* Los pasos: número en un círculo y el nombre, unidos por una línea */
+.pasos-reserva {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-4);
+  list-style: none;
+  margin: var(--espacio-4) 0 var(--espacio-6);
+  padding: 0;
+}
+
+.paso-reserva {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  color: var(--color-texto-apagado);
+}
+
+.paso-reserva + .paso-reserva::before {
+  content: '';
+  width: 3rem;
+  border-top: 1px solid var(--color-borde-medio);
+  margin-right: var(--espacio-2);
+}
+
+.paso-reserva-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-completo);
+  font-size: var(--texto-sm);
+}
+
+.paso-actual,
+.paso-hecho {
+  color: var(--color-texto);
+}
+
+.paso-actual .paso-reserva-numero {
+  background-color: var(--color-primario);
+  border-color: var(--color-primario);
+  color: var(--color-texto-inverso);
+}
+
+.formulario-reserva .grupo-campo {
+  max-width: 12rem;
+}
+
+/* El comprobante: el código grande, en monoespaciada, para leerlo en la puerta */
+.tarjeta-comprobante {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-6);
+  margin-bottom: var(--espacio-6);
+}
+
+.comprobante-titulo {
+  font-size: var(--texto-2xl);
+  margin: 0 0 var(--espacio-4);
+}
+
+.comprobante-titulo span {
+  color: var(--color-exito);
+}
+
+.comprobante-codigo-rotulo {
+  font-size: var(--texto-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-secundario);
+  margin: 0;
+}
+
+.comprobante-codigo {
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-3xl);
+  letter-spacing: 0.12em;
+  color: var(--color-texto-brillante);
+  margin: var(--espacio-1) 0 var(--espacio-6);
+}
+
+.comprobante-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--espacio-4);
+  margin: 0;
+}
+
+.comprobante-datos dt {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.comprobante-datos dd {
+  margin: var(--espacio-1) 0 0;
+  color: var(--color-texto-brillante);
+}
+
+.comprobante-acciones {
+  margin-top: var(--espacio-6);
+}
+
+/* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
    -------------------------------------------------------------------------- */

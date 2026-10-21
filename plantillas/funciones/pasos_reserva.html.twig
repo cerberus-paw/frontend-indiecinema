@@ -1,0 +1,14 @@
+{#
+  Los pasos de la reserva, como el wireframe reserva-pago-comprobante, sin el del pago.
+
+  Variables:
+  - actual: (int) 1 (lugares) o 2 (comprobante).
+#}
+<ol class="pasos-reserva" aria-label="Pasos de la reserva">
+  {% for numero, nombre in { 1: 'Lugares', 2: 'Comprobante' } %}
+    <li class="paso-reserva{% if numero == actual %} paso-actual{% elseif numero < actual %} paso-hecho{% endif %}"{% if numero == actual %} aria-current="step"{% endif %}>
+      <span class="paso-reserva-numero" aria-hidden="true">{{ numero }}</span>
+      <span class="paso-reserva-nombre">{{ nombre }}</span>
+    </li>
+  {% endfor %}
+</ol>

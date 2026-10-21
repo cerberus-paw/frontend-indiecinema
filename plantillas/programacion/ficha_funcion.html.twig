@@ -27,6 +27,9 @@
       - editable: (bool) si quien la mira es su organizador y la puede editar (sólo una programada que todavía no se dio).
       - cancelable: (bool) si quien la mira es su organizador y la puede cancelar (en votación o
         programada, mientras todavía no se dio).
+      - reservable: (bool) si todavía se puede reservar: no se canceló ni empezó. Con sesión se
+        ve el formulario, que manda la reserva al subsistema funciones; sin sesión, el enlace
+        para ingresar.
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
   - voto_usuario: (string|null) UUID de la obra que votó el usuario autenticado (E3-12.2 / E3-12.3).
@@ -34,7 +37,9 @@
   - votado: (bool) si se redireccionó tras emitir o modificar el voto (?votado=1).
   - error_voto: (string|null) mensaje de error si falló el registro o cambio de voto.
 
-  Llevan |default(false) o comprobaciones defensivas para asegurar compatibilidad.
+  editable, cancelable, reservable y guardada llevan |default(false): el paquete front se mergea
+  antes que el back, así que mientras tanto esta plantilla la sirve un controlador que todavía no
+  las manda, y con las variables estrictas de Twig faltar no puede ser un error.
 #}
 {% extends 'base.html.twig' %}
 
@@ -115,6 +120,44 @@
       </div>
     </header>
 
+    {# El panel de reserva del wireframe (funcion-programada). La ficha es de una columna: va
+       debajo de la cabecera y no al costado. Los lugares libres y el total en vivo llegan con
+       la ocupación y el componente de reserva. #}
+    {% if funcion.reservable|default(false) %}
+      <section class="ficha-seccion ficha-reserva" aria-labelledby="ficha-reserva-titulo">
+        <div class="ficha-reserva-precio">
+          <h2 id="ficha-reserva-titulo" class="ficha-reserva-titulo">Reservá tus lugares</h2>
+          {# «A la gorra» no es por lugar: sólo un precio con signo lo es. #}
+          <p class="ficha-reserva-monto"><strong>{{ funcion.precio }}</strong>{% if funcion.precio starts with '$' %} por lugar{% endif %}</p>
+        </div>
+        {% if usuario %}
+          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario">
+            <input type="hidden" name="_csrf" value="{{ csrf }}">
+            {% include 'parciales/campo.html.twig' with {
+              nombre: 'cantidad',
+              etiqueta: 'Cantidad de lugares',
+              tipo: 'number',
+              valor: '1',
+              requerido: true,
+              valor_minimo: 1,
+              valor_maximo: funcion.cupo
+            } only %}
+            {% include 'parciales/boton.html.twig' with {
+              texto: 'Reservar mis lugares',
+              tipo: 'submit'
+            } only %}
+          </form>
+        {% else %}
+          <div class="ficha-reserva-formulario">
+            <p class="ficha-reserva-ayuda">Ingresá con tu cuenta para reservar.</p>
+            {% include 'parciales/boton.html.twig' with {
+              texto: 'Ingresar',
+              url: '/cuenta/ingresar'
+            } only %}
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
     {# ==================================================================== #}
     {# BLOQUE INTERACTIVO: VOTACIÓN DE TÍTULOS (E3-12 / IC-148 / IC-149)   #}
     {# ==================================================================== #}

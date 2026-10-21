@@ -1,0 +1,79 @@
+{#
+  Confirmación para cancelar una reserva propia, en /funcion/reservas/{id}/cancelar (E4-01.5),
+  como la de cancelar una función. Al cancelarla, los lugares vuelven a quedar libres.
+
+  Variables:
+  - reserva: id, codigo, cantidad, total (ya escrito), estado y cancelable.
+  - funcion: titulo, url, fecha (o null), sala y localidad; null si programación ya no la muestra.
+  - error_general: (string, opcional) por qué no se pudo, por ejemplo si la función empezó con
+    la pantalla abierta. Entonces no hay formulario.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Cancelar la reserva {{ reserva.codigo }}{% endblock %}
+
+{% block contenido %}
+<div class="contenedor contenedor-confirmacion-cancelacion">
+  <nav class="navegacion-migas" aria-label="Ruta de navegación">
+    <ol class="lista-migas">
+      <li><a href="/funcion/reservas/{{ reserva.id }}" class="enlace-miga">Reserva {{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="miga-activa" aria-current="page">Cancelar</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Cancelar la reserva</h1>
+    </div>
+  </header>
+
+  {% if error_general is defined %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'error', mensaje: error_general } only %}
+  {% else %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      titulo: '¿Querés cancelar esta reserva?',
+      mensaje: 'Tus lugares vuelven a quedar libres y los puede reservar otro espectador. Si después querés ir, tenés que reservar de nuevo.'
+    } only %}
+  {% endif %}
+
+  <article class="tarjeta-resumen-cancelacion">
+    <h2 class="resumen-cancelacion-titulo">{{ funcion ? funcion.titulo : 'Función que ya no está en la cartelera' }}</h2>
+    <dl class="resumen-cancelacion-lista">
+      {% if funcion %}
+        <div class="parametro-item">
+          <dt>Sala</dt>
+          <dd>{{ funcion.sala }} · {{ funcion.localidad }}</dd>
+        </div>
+        <div class="parametro-item">
+          <dt>Fecha y horario</dt>
+          <dd>{{ funcion.fecha ?? 'Fecha a confirmar' }}</dd>
+        </div>
+      {% endif %}
+      <div class="parametro-item">
+        <dt>Lugares</dt>
+        <dd>{{ reserva.cantidad }}</dd>
+      </div>
+      <div class="parametro-item">
+        <dt>Total</dt>
+        <dd>{{ reserva.total }}</dd>
+      </div>
+    </dl>
+  </article>
+
+  {% if error_general is defined %}
+    <div class="pie-formulario-acciones">
+      <a href="/funcion/reservas/{{ reserva.id }}" class="boton boton-secundario">Ver la reserva</a>
+    </div>
+  {% else %}
+    <form action="/funcion/reservas/{{ reserva.id }}/cancelar" method="POST" class="formulario-confirmacion-cancelacion">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      <div class="pie-formulario-acciones">
+        {% include 'parciales/boton.html.twig' with { texto: 'Cancelar la reserva', tipo: 'submit', variante: 'peligro' } only %}
+        <a href="/funcion/reservas/{{ reserva.id }}" class="boton boton-secundario">Conservar la reserva</a>
+      </div>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
