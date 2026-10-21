@@ -1,8 +1,9 @@
 {#
-  Formulario de alta y edición para programar o modificar una función (IC-121 / IC-122 / E3-11.2 / E3-11.3).
-  Permite al organizador seleccionar una de sus salas habilitadas, una o más obras
-  del catálogo, la fecha y hora de la proyección, el precio de la entrada y el cupo.
-  Una vez guardada con éxito, la función queda programada y aparece en la cartelera.
+  Formulario de alta y edición para programar o modificar una función (IC-121 / IC-122 / IC-147 / E3-11.2 / E3-11.3 / E3-12.1).
+  Permite al organizador elegir entre función programada o abrir a votación de títulos.
+  Selecciona una de sus salas habilitadas, las obras del catálogo, la fecha y hora (en función programada),
+  el precio de la entrada y el cupo.
+  Una vez guardada con éxito, la función queda en estado programada o en votación de títulos.
 
   Variables recibidas:
   - es_edicion: (bool, opcional, por defecto false) Si la pantalla corresponde a edición de una función.
@@ -88,9 +89,58 @@
     <div class="panel-organizador-principal">
     {# Formulario principal de alta o edición de función. Sin novalidate: el navegador también valida #}
     {% set url_accion = accion ?? ((es_edicion ?? false and funcion_id is defined) ? ('/organizador/funciones/' ~ funcion_id ~ '/editar') : '/organizador/funciones/nueva') %}
+    {% set modo_actual = valores.modo|default('programada') %}
+    {% set es_votacion = not (es_edicion ?? false) and modo_actual == 'en_votacion_titulos' %}
     <form action="{{ url_accion }}" method="POST" class="formulario-sala formulario-alta-funcion">
       {# Token de protección CSRF #}
       <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+      {# ==================================================================== #}
+      {# MODO DE PUBLICACIÓN: PROGRAMADA VS VOTACIÓN (E3-12.1 / IC-147)       #}
+      {# ==================================================================== #}
+      {% if not (es_edicion ?? false) %}
+      <fieldset class="seccion-formulario seccion-modo-funcion" data-seccion-modo>
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Modo de publicación</span>
+          <span class="seccion-subtitulo">Elegí si la función ya tiene fecha fija o si abrís una votación de títulos.</span>
+        </legend>
+
+        <div class="selector-modo-funcion" role="radiogroup" aria-label="Modo de publicación">
+          <label class="opcion-modo-funcion{% if modo_actual == 'programada' %} seleccionada{% endif %}">
+            <input
+              type="radio"
+              name="modo"
+              value="programada"
+              class="opcion-modo-radio"
+              {% if modo_actual == 'programada' %}checked{% endif %}
+            >
+            <span class="opcion-modo-contenido">
+              <strong class="opcion-modo-titulo">Función programada</strong>
+              <span class="opcion-modo-descripcion">Definí sala, obras, fecha y horario. La función se publicará directamente en la cartelera.</span>
+            </span>
+          </label>
+
+          <label class="opcion-modo-funcion{% if modo_actual == 'en_votacion_titulos' %} seleccionada{% endif %}">
+            <input
+              type="radio"
+              name="modo"
+              value="en_votacion_titulos"
+              class="opcion-modo-radio"
+              {% if modo_actual == 'en_votacion_titulos' %}checked{% endif %}
+            >
+            <span class="opcion-modo-contenido">
+              <strong class="opcion-modo-titulo">Abrir a votación de títulos</strong>
+              <span class="opcion-modo-descripcion">Las obras seleccionadas serán candidatas a votación. La fecha y horario se definirán al finalizar la votación.</span>
+            </span>
+          </label>
+        </div>
+        {% if errores.modo is defined and errores.modo %}
+          <span class="campo-error" role="alert">
+            <span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.modo }}
+          </span>
+        {% endif %}
+      </fieldset>
+      {% endif %}
 
       {# ==================================================================== #}
       {# SECCIÓN 1: SALA PROPIA                                               #}
@@ -135,7 +185,7 @@
       <fieldset class="seccion-formulario">
         <legend class="seccion-leyenda">
           <span class="seccion-titulo">Obras del catálogo</span>
-          <span class="seccion-subtitulo">Elegí la obra o los títulos a proyectar en la función.</span>
+          <span class="seccion-subtitulo" data-obras-subtitulo>{{ es_votacion ? 'Elegí las obras candidatas que participarán de la votación.' : 'Elegí la obra o los títulos a proyectar en la función.' }}</span>
         </legend>
 
         {% if obras is empty %}
@@ -177,15 +227,14 @@
           <span class="campo-error" role="alert">
             <span class="error-icono" aria-hidden="true">⚠️</span> {{ error_obras }}
           </span>
-        {% else %}
-          <span class="campo-ayuda">Marcá al menos una obra del catálogo para esta función.</span>
         {% endif %}
+        <span class="campo-ayuda" data-obras-ayuda{% if error_obras %} hidden{% endif %}>{{ es_votacion ? 'Marcá las obras del catálogo que serán candidatas para la votación.' : 'Marcá al menos una obra del catálogo para esta función.' }}</span>
       </fieldset>
 
       {# ==================================================================== #}
       {# SECCIÓN 3: FECHA Y HORA                                              #}
       {# ==================================================================== #}
-      <fieldset class="seccion-formulario">
+      <fieldset class="seccion-formulario" data-seccion-fecha-hora>
         <legend class="seccion-leyenda">
           <span class="seccion-titulo">Fecha y horario</span>
           <span class="seccion-subtitulo">Día y hora pactados para la proyección en sala.</span>
@@ -198,7 +247,7 @@
             etiqueta: 'Fecha de proyección',
             tipo: 'date',
             valor: valores.fecha ?? '',
-            requerido: true,
+            requerido: (es_edicion ?? false) or not es_votacion,
             errores: errores,
             ayuda: 'La fecha debe ser a partir de hoy o futura.'
           } only %}
@@ -210,7 +259,7 @@
             tipo: 'time',
             valor: valores.hora ?? '',
             placeholder: 'Ej: 20:30',
-            requerido: true,
+            requerido: (es_edicion ?? false) or not es_votacion,
             errores: errores,
             ayuda: 'Hora estimada en la que comienza la función.'
           } only %}
@@ -257,20 +306,30 @@
       {# ACCIONES FINALES                                                     #}
       {# ==================================================================== #}
       {# Banner informativo de publicación o actualización como en Figma #}
-      <div class="aviso-publicacion-funcion" role="status">
+      <div class="aviso-publicacion-funcion" role="status" data-aviso-publicacion>
         <span class="aviso-icono" aria-hidden="true">💡</span>
         <div class="aviso-contenido">
-          <strong class="aviso-titulo">{{ es_edicion ?? false ? 'Actualización directa' : 'Publicación directa' }}</strong>
-          <p class="aviso-texto">{{ es_edicion ?? false ? 'Al guardar los cambios, la función mantendrá sus datos actualizados en la cartelera y en su ficha para reservas.' : 'Al guardar la función, quedará en estado <strong>programada</strong> y aparecerá disponible inmediatamente en la cartelera para reservas.' }}</p>
+          <strong class="aviso-titulo" data-aviso-titulo>{{ es_edicion ?? false ? 'Actualización directa' : (es_votacion ? 'Apertura de votación' : 'Publicación directa') }}</strong>
+          <p class="aviso-texto" data-aviso-texto>
+            {% if es_edicion ?? false %}
+              Al guardar los cambios, la función mantendrá sus datos actualizados en la cartelera y en su ficha para reservas.
+            {% elseif es_votacion %}
+              Al guardar la función, quedará en estado <strong>en votación de títulos</strong> con las obras seleccionadas como candidatas. La fecha y horario se definirán al finalizar la votación.
+            {% else %}
+              Al guardar la función, quedará en estado <strong>programada</strong> y aparecerá disponible inmediatamente en la cartelera para reservas.
+            {% endif %}
+          </p>
         </div>
       </div>
 
       {# El principal primero, como en el wireframe #}
       <footer class="pie-formulario-acciones">
+        {% set texto_boton = es_edicion ?? false ? 'Guardar cambios' : (es_votacion ? 'Abrir a votación' : 'Programar función') %}
         {% include 'parciales/boton.html.twig' with {
-          texto: es_edicion ?? false ? 'Guardar cambios' : 'Programar función',
+          texto: texto_boton,
           tipo: 'submit',
-          variante: 'primario'
+          variante: 'primario',
+          id: 'boton-enviar-funcion'
         } only %}
         <a href="/organizador/funciones" class="boton boton-secundario">Descartar</a>
       </footer>

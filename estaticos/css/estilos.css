@@ -4912,13 +4912,87 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* --------------------------------------------------------------------------
-   FORMULARIO DE ALTA DE FUNCIÓN (IC-121 / E3-11.2)
+   FORMULARIO DE ALTA DE FUNCIÓN (IC-121 / IC-147 / E3-11.2 / E3-12.1)
    Componentes para plantillas/programacion/alta_funcion.html.twig
    -------------------------------------------------------------------------- */
 
 /* Formulario principal de programación de función */
 .formulario-alta-funcion {
   width: 100%;
+}
+
+/* Selector de modo para alta de función: programada vs votación (IC-147 / E3-12.1) */
+.selector-modo-funcion {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-2);
+  margin-bottom: var(--espacio-2);
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .selector-modo-funcion {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.opcion-modo-funcion {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  padding: var(--espacio-4);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  cursor: pointer;
+  transition: border-color var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+.opcion-modo-funcion:hover {
+  border-color: var(--color-primario);
+  background-color: var(--color-superficie-hover);
+}
+
+.opcion-modo-funcion.seleccionada,
+.opcion-modo-funcion:has(input[type="radio"]:checked) {
+  border-color: var(--color-primario);
+  background-color: var(--color-superficie-hover);
+}
+
+.opcion-modo-radio {
+  margin-top: 0.2rem;
+  accent-color: var(--color-primario);
+  cursor: pointer;
+}
+
+.opcion-modo-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.opcion-modo-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-base);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.opcion-modo-funcion.seleccionada .opcion-modo-titulo,
+.opcion-modo-funcion:has(input[type="radio"]:checked) .opcion-modo-titulo {
+  color: var(--color-primario);
+}
+
+.opcion-modo-descripcion {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-atenuado);
+  line-height: 1.4;
+}
+
+/* Oculta la sección de fecha y hora cuando se elige votación de títulos con JS */
+.seccion-formulario[hidden] {
+  display: none;
 }
 
 /* Cuadrícula interactiva de selección de obras del catálogo */
