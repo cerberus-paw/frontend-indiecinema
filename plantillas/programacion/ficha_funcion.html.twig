@@ -113,6 +113,197 @@
       </div>
     </header>
 
+    {# ==================================================================== #}
+    {# BLOQUE INTERACTIVO: VOTACIÓN DE TÍTULOS (E3-12 / IC-148)             #}
+    {# ==================================================================== #}
+    {% if funcion.estado == 'en_votacion_titulos' %}
+      {% set voto_actual = voto_usuario ?? (funcion.voto_usuario ?? (obra_votada ?? null)) %}
+      {% set tiene_voto = voto_actual is not empty %}
+      <section class="ficha-seccion ficha-votacion" aria-labelledby="ficha-votacion-titulo">
+        <div class="ficha-votacion-cabecera">
+          <div class="ficha-votacion-intro">
+            <span class="insignia-estado insignia-votacion">VOTACIÓN ABIERTA</span>
+            <h2 id="ficha-votacion-titulo" class="ficha-votacion-titulo">Votación de títulos</h2>
+            <p id="ficha-funcion-obras-titulo" class="ficha-obras-etiqueta">Obras candidatas en votación</p>
+            <p class="ficha-votacion-bajada">
+              Esta función está abierta a votación de títulos por los espectadores. Elegí cuál de las siguientes películas candidatas querés ver en la sala: el título más votado por la comunidad será proyectado y la fecha definitiva se acordará al finalizar el plazo.
+            </p>
+          </div>
+        </div>
+
+        {# Confirmación accesible de voto recién emitido o modificado #}
+        {% if votado|default(false) or mensaje_exito|default(false) or mensaje_voto|default(false) %}
+          <div class="ficha-votacion-confirmacion" role="status">
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'exito',
+              titulo: '¡Voto registrado con éxito!',
+              mensaje: mensaje_voto|default(mensaje_exito|default('Tu voto fue computado para esta función. Podés cambiar tu elección en cualquier momento mientras la votación siga abierta.'))
+            } only %}
+          </div>
+        {% endif %}
+
+        {% if error_voto|default(false) %}
+          <div class="ficha-votacion-error" role="alert">
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'error',
+              titulo: 'No se pudo registrar el voto',
+              mensaje: error_voto
+            } only %}
+          </div>
+        {% endif %}
+
+        {% if usuario %}
+          {# Mensaje de estado si ya emitió un voto #}
+          {% if tiene_voto %}
+            <div class="ficha-votacion-aviso-voto" role="status">
+              <span class="aviso-icono" aria-hidden="true">✓</span>
+              <p class="aviso-texto">
+                Ya emitiste tu voto para esta función. Podés seleccionar otra obra candidata y presionar <strong>Cambiar mi voto</strong> para actualizar tu elección.
+              </p>
+            </div>
+          {% endif %}
+
+          <form action="{{ accion_voto|default('/cartelera/' ~ funcion.id ~ '/votar') }}" method="POST" class="formulario-votacion-titulos" data-formulario-votacion>
+            <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+            <fieldset class="seccion-formulario-votacion">
+              <legend class="sr-only">Seleccioná una obra candidata para votar</legend>
+              <div class="cuadricula-candidatas-votacion" role="radiogroup" aria-labelledby="ficha-votacion-titulo">
+                {% for obra in funcion.obras %}
+                  {% set obra_id = obra.id ?? loop.index0 %}
+                  {% set es_votada = tiene_voto and (voto_actual == obra_id or voto_actual == obra.titulo) %}
+                  <label class="tarjeta-candidata-votacion{% if es_votada %} votada seleccionada{% endif %}">
+                    <input
+                      type="radio"
+                      name="obra_id"
+                      value="{{ obra_id }}"
+                      class="candidata-radio"
+                      {% if es_votada %}checked aria-checked="true"{% else %}aria-checked="false"{% endif %}
+                      required
+                    >
+                    <div class="candidata-afiche-columna">
+                      {% if obra.afiche is defined and obra.afiche %}
+                        <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="candidata-afiche-img" loading="lazy">
+                      {% else %}
+                        <div class="candidata-afiche-placeholder" aria-hidden="true">
+                          <span class="afiche-placeholder-icono">🎬</span>
+                          <span class="afiche-placeholder-texto">AFICHE</span>
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div class="candidata-cuerpo">
+                      <div class="candidata-cabecera">
+                        <strong class="candidata-titulo">
+                          {{ obra.titulo }} <span class="candidata-anio">({{ obra.anio }})</span>
+                        </strong>
+                        {% if es_votada %}
+                          <span class="insignia-tu-voto" role="status">
+                            <span aria-hidden="true">✓</span> Tu voto actual
+                          </span>
+                        {% endif %}
+                      </div>
+                      <div class="candidata-metadatos">
+                        <span class="candidata-metadato">Dirección: <strong>{{ obra.director }}</strong></span>
+                        <span class="candidata-separador" aria-hidden="true">·</span>
+                        <span class="candidata-metadato">Duración: <strong>{{ obra.duracion }} min</strong></span>
+                      </div>
+                      {% if obra.generos is defined and obra.generos is not empty %}
+                        <div class="candidata-generos">
+                          {% for genero in obra.generos %}
+                            <span class="ficha-genero-chip">{{ genero }}</span>
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                      {% if obra.sinopsis is defined and obra.sinopsis %}
+                        <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
+                      {% endif %}
+                      {% if conteo_votos is defined and conteo_votos[obra_id] is defined %}
+                        <p class="candidata-conteo-votos" aria-label="Cantidad de votos acumulados">
+                          <span class="conteo-icono" aria-hidden="true">🗳️</span>
+                          <span>{{ conteo_votos[obra_id] }} {{ conteo_votos[obra_id] == 1 ? 'voto' : 'votos' }}</span>
+                        </p>
+                      {% endif %}
+                    </div>
+                  </label>
+                {% endfor %}
+              </div>
+            </fieldset>
+
+            <footer class="pie-votacion-acciones">
+              {% include 'parciales/boton.html.twig' with {
+                texto: tiene_voto ? 'Cambiar mi voto' : 'Votar por este título',
+                tipo: 'submit',
+                variante: 'primario',
+                icono: '🗳️',
+                clase: 'boton-emitir-voto'
+              } only %}
+            </footer>
+          </form>
+        {% else %}
+          {# Espectador no autenticado: invitación accesible a ingresar o registrarse #}
+          <div class="ficha-votacion-invitacion" role="region" aria-label="Ingresar para votar">
+            <div class="votacion-invitacion-contenido">
+              <span class="votacion-icono-invitacion" aria-hidden="true">🗳️</span>
+              <div class="votacion-texto-invitacion">
+                <h3 class="votacion-titulo-invitacion">Iniciá sesión para votar</h3>
+                <p class="votacion-bajada-invitacion">
+                  Para participar de la votación de títulos de esta función necesitás contar con una cuenta de espectador.
+                </p>
+              </div>
+            </div>
+            <div class="votacion-acciones-invitacion">
+              {% include 'parciales/boton.html.twig' with {
+                texto: 'Ingresar para votar',
+                url: '/cuenta/ingresar',
+                variante: 'primario'
+              } only %}
+              <a href="/cuenta/registro" class="boton boton-secundario">Crear una cuenta</a>
+            </div>
+          </div>
+
+          {# Lista visual de obras candidatas en exhibición para el usuario sin sesión #}
+          <div class="cuadricula-candidatas-votacion candidatas-modo-lectura" role="region" aria-label="Obras candidatas en votación">
+            {% for obra in funcion.obras %}
+              <article class="tarjeta-candidata-votacion lectura">
+                <div class="candidata-afiche-columna">
+                  {% if obra.afiche is defined and obra.afiche %}
+                    <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="candidata-afiche-img" loading="lazy">
+                  {% else %}
+                    <div class="candidata-afiche-placeholder" aria-hidden="true">
+                      <span class="afiche-placeholder-icono">🎬</span>
+                      <span class="afiche-placeholder-texto">AFICHE</span>
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="candidata-cuerpo">
+                  <div class="candidata-cabecera">
+                    <strong class="candidata-titulo">
+                      {{ obra.titulo }} <span class="candidata-anio">({{ obra.anio }})</span>
+                    </strong>
+                  </div>
+                  <div class="candidata-metadatos">
+                    <span class="candidata-metadato">Dirección: <strong>{{ obra.director }}</strong></span>
+                    <span class="candidata-separador" aria-hidden="true">·</span>
+                    <span class="candidata-metadato">Duración: <strong>{{ obra.duracion }} min</strong></span>
+                  </div>
+                  {% if obra.generos is defined and obra.generos is not empty %}
+                    <div class="candidata-generos">
+                      {% for genero in obra.generos %}
+                        <span class="ficha-genero-chip">{{ genero }}</span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                  {% if obra.sinopsis is defined and obra.sinopsis %}
+                    <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
+
     <section class="ficha-seccion ficha-seccion-sala" aria-labelledby="ficha-funcion-sala-titulo">
       <div class="ficha-sala-tarjeta">
         <div class="ficha-sala-detalles">
@@ -142,13 +333,12 @@
       </div>
     </section>
 
+    {% if funcion.estado != 'en_votacion_titulos' %}
     <section class="ficha-seccion ficha-seccion-obras" aria-labelledby="ficha-funcion-obras-titulo">
       <div class="ficha-obras-cabecera">
         <p id="ficha-funcion-obras-titulo" class="ficha-obras-etiqueta">
           {% if funcion.obras_elegidas %}
             {{ funcion.obras|length == 1 ? 'La obra' : 'Las obras' }}
-          {% elseif funcion.estado == 'en_votacion_titulos' %}
-            Obras candidatas en votación
           {% else %}
             Obras candidatas
           {% endif %}
@@ -191,6 +381,7 @@
         {% endfor %}
       </div>
     </section>
+    {% endif %}
   </article>
 </div>
 {% endblock %}
