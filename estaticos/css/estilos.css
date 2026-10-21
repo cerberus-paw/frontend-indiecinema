@@ -5327,6 +5327,10 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto-brillante);
 }
 
+.comprobante-acciones {
+  margin-top: var(--espacio-6);
+}
+
 /* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
