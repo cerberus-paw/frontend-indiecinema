@@ -1,0 +1,61 @@
+{#
+  La reserva recién hecha, en /funcion/reservas/{id} (E4-01.3): el paso «Comprobante» del
+  wireframe reserva-pago-comprobante, con el código para la puerta. Sólo la ve quien reservó.
+
+  Variables:
+  - reserva: codigo (8 caracteres; se muestra en dos grupos de 4 para dictarlo), cantidad, total
+    (ya escrito) y estado ('confirmada' | 'cancelada' | 'asistio').
+  - funcion: id, titulo, url, fecha (o null), sala y localidad; null si programación ya no la
+    muestra (su sala se dio de baja).
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Reserva {{ reserva.codigo }}{% endblock %}
+
+{% block contenido %}
+<div class="contenedor contenedor-reserva">
+  {% include 'funciones/pasos_reserva.html.twig' with { actual: 2 } only %}
+
+  <article class="tarjeta-comprobante">
+    {# Desde «Mis reservas» se puede volver a una que ya se canceló. #}
+    {% if reserva.estado == 'cancelada' %}
+      <h1 class="comprobante-titulo">Reserva cancelada</h1>
+    {% else %}
+      <h1 class="comprobante-titulo"><span aria-hidden="true">✓</span> Reserva confirmada</h1>
+    {% endif %}
+
+    <p class="comprobante-codigo-rotulo" id="comprobante-codigo">Código de la reserva</p>
+    <p class="comprobante-codigo" aria-labelledby="comprobante-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</p>
+
+    <dl class="comprobante-datos">
+      <div>
+        <dt>Función</dt>
+        <dd>{% if funcion %}<a href="{{ funcion.url }}">{{ funcion.titulo }}</a>{% else %}Ya no está en la cartelera{% endif %}</dd>
+      </div>
+      {% if funcion %}
+        <div>
+          <dt>Fecha</dt>
+          <dd>{{ funcion.fecha ?? 'A confirmar' }}</dd>
+        </div>
+        <div>
+          <dt>Sala</dt>
+          <dd>{{ funcion.sala }} · {{ funcion.localidad }}</dd>
+        </div>
+      {% endif %}
+      <div>
+        <dt>Lugares</dt>
+        <dd>{{ reserva.cantidad }}</dd>
+      </div>
+      <div>
+        <dt>Total</dt>
+        <dd>{{ reserva.total }}</dd>
+      </div>
+    </dl>
+  </article>
+
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'info',
+    mensaje: 'Presentá este código en la puerta: el organizador registra la asistencia con él.'
+  } only %}
+</div>
+{% endblock %}
