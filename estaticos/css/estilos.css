@@ -2139,14 +2139,14 @@ dd {
   color: var(--color-texto-brillante);
 }
 
-/* Insignia función en votación */
+/* Insignia función en votación (E3-12 / IC-148): distintiva con matiz índigo */
 .insignia-votacion {
-  /* Fondo tenue */
-  background-color: rgba(255, 255, 255, 0.08);
-  /* Borde tenue */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  /* Color texto claro */
-  color: var(--color-texto-brillante);
+  /* Fondo índigo suave */
+  background-color: rgba(99, 102, 241, 0.2);
+  /* Borde tenue con acento */
+  border: 1px solid rgba(129, 140, 248, 0.45);
+  /* Color texto claro lila */
+  color: #c7d2fe;
 }
 
 /* Insignia acuerdo de fecha */
@@ -3980,6 +3980,332 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
+   VOTACIÓN DE TÍTULOS (E3-12 / IC-148)
+   Bloque interactivo en la ficha de la función (ficha_funcion.html.twig)
+   -------------------------------------------------------------------------- */
+
+.ficha-votacion {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-lg);
+  padding: var(--espacio-5);
+  margin-bottom: var(--espacio-6);
+}
+
+.ficha-votacion-cabecera {
+  margin-bottom: var(--espacio-4);
+}
+
+.ficha-votacion-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.ficha-votacion-intro .insignia-estado {
+  align-self: flex-start;
+  margin-bottom: var(--espacio-1);
+}
+
+.ficha-votacion-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-xl);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0;
+}
+
+.ficha-votacion-bajada {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-base);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.ficha-votacion-confirmacion,
+.ficha-votacion-error {
+  margin-bottom: var(--espacio-4);
+}
+
+.ficha-votacion-aviso-voto {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-4);
+  background-color: var(--color-primario-suave);
+  border: 1px solid var(--color-primario);
+  border-radius: var(--radio-md);
+  margin-bottom: var(--espacio-4);
+}
+
+.ficha-votacion-aviso-voto .aviso-icono {
+  font-weight: 700;
+  color: var(--color-primario);
+  font-size: var(--texto-md);
+}
+
+.ficha-votacion-aviso-voto .aviso-texto {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto);
+  line-height: 1.4;
+}
+
+.seccion-formulario-votacion {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Cuadrícula de obras candidatas en votación */
+.cuadricula-candidatas-votacion {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espacio-4);
+  margin-top: var(--espacio-3);
+  margin-bottom: var(--espacio-5);
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .cuadricula-candidatas-votacion {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tarjeta individual de obra candidata para votación */
+.tarjeta-candidata-votacion {
+  display: flex;
+  position: relative;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  cursor: pointer;
+  transition: border-color var(--transicion-rapida), background-color var(--transicion-rapida), box-shadow var(--transicion-rapida);
+}
+
+.tarjeta-candidata-votacion.lectura {
+  cursor: default;
+}
+
+.tarjeta-candidata-votacion:not(.lectura):hover {
+  border-color: var(--color-primario);
+  background-color: var(--color-superficie-hover);
+}
+
+.tarjeta-candidata-votacion:focus-within {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+.tarjeta-candidata-votacion.seleccionada,
+.tarjeta-candidata-votacion:has(.candidata-radio:checked) {
+  border-color: var(--color-primario);
+  background-color: rgba(240, 166, 59, 0.08);
+}
+
+/* Obra ya votada previamente por el espectador */
+.tarjeta-candidata-votacion.votada {
+  border-color: var(--color-primario);
+  box-shadow: 0 0 0 1px var(--color-primario);
+}
+
+.candidata-radio {
+  position: absolute;
+  top: var(--espacio-3);
+  right: var(--espacio-3);
+  accent-color: var(--color-primario);
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.candidata-afiche-columna {
+  width: 80px;
+  min-width: 80px;
+  height: 115px;
+  border-radius: var(--radio-sm);
+  overflow: hidden;
+  background-color: var(--color-fondo);
+  flex-shrink: 0;
+}
+
+.candidata-afiche-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.candidata-afiche-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  background-color: var(--color-fondo);
+  border: 1px dashed var(--color-borde-medio);
+  border-radius: var(--radio-sm);
+  color: var(--color-texto-apagado);
+}
+
+.candidata-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+  padding-right: var(--espacio-6);
+}
+
+.candidata-cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.candidata-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-base);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+  line-height: 1.3;
+}
+
+.tarjeta-candidata-votacion.seleccionada .candidata-titulo,
+.tarjeta-candidata-votacion:has(.candidata-radio:checked) .candidata-titulo {
+  color: var(--color-primario);
+}
+
+.candidata-anio {
+  font-weight: 400;
+  color: var(--color-texto-apagado);
+}
+
+.insignia-tu-voto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  border-radius: var(--radio-sm);
+  background-color: var(--color-primario-suave);
+  border: 1px solid var(--color-primario);
+  color: var(--color-primario);
+  width: fit-content;
+}
+
+.candidata-metadatos {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.candidata-separador {
+  color: var(--color-texto-apagado);
+}
+
+.candidata-generos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+}
+
+.candidata-sinopsis {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+  line-height: 1.4;
+  margin: 0.2rem 0 0;
+}
+
+.candidata-conteo-votos {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--color-primario);
+}
+
+.pie-votacion-acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-3);
+}
+
+/* Invitación accesible a registrarse o ingresar */
+.ficha-votacion-invitacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding: var(--espacio-4);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-left: 4px solid var(--color-primario);
+  border-radius: var(--radio-md);
+  margin-bottom: var(--espacio-5);
+}
+
+@media (min-width: 640px) {
+  .ficha-votacion-invitacion {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--espacio-5);
+  }
+}
+
+.votacion-invitacion-contenido {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+}
+
+.votacion-icono-invitacion {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.votacion-texto-invitacion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.votacion-titulo-invitacion {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-md);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+  margin: 0;
+}
+
+.votacion-bajada-invitacion {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.votacion-acciones-invitacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
    22. ADMINISTRACIÓN: TABLAS DEL PANEL (IC-106)
    Componentes de cuentas/administracion_usuarios.html.twig, y la tabla de «Mis funciones»
    -------------------------------------------------------------------------- */
@@ -4912,13 +5238,87 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* --------------------------------------------------------------------------
-   FORMULARIO DE ALTA DE FUNCIÓN (IC-121 / E3-11.2)
+   FORMULARIO DE ALTA DE FUNCIÓN (IC-121 / IC-147 / E3-11.2 / E3-12.1)
    Componentes para plantillas/programacion/alta_funcion.html.twig
    -------------------------------------------------------------------------- */
 
 /* Formulario principal de programación de función */
 .formulario-alta-funcion {
   width: 100%;
+}
+
+/* Selector de modo para alta de función: programada vs votación (IC-147 / E3-12.1) */
+.selector-modo-funcion {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-2);
+  margin-bottom: var(--espacio-2);
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .selector-modo-funcion {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.opcion-modo-funcion {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  padding: var(--espacio-4);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  cursor: pointer;
+  transition: border-color var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+.opcion-modo-funcion:hover {
+  border-color: var(--color-primario);
+  background-color: var(--color-superficie-hover);
+}
+
+.opcion-modo-funcion.seleccionada,
+.opcion-modo-funcion:has(input[type="radio"]:checked) {
+  border-color: var(--color-primario);
+  background-color: var(--color-superficie-hover);
+}
+
+.opcion-modo-radio {
+  margin-top: 0.2rem;
+  accent-color: var(--color-primario);
+  cursor: pointer;
+}
+
+.opcion-modo-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.opcion-modo-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-base);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.opcion-modo-funcion.seleccionada .opcion-modo-titulo,
+.opcion-modo-funcion:has(input[type="radio"]:checked) .opcion-modo-titulo {
+  color: var(--color-primario);
+}
+
+.opcion-modo-descripcion {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-atenuado);
+  line-height: 1.4;
+}
+
+/* Oculta la sección de fecha y hora cuando se elige votación de títulos con JS */
+.seccion-formulario[hidden] {
+  display: none;
 }
 
 /* Cuadrícula interactiva de selección de obras del catálogo */

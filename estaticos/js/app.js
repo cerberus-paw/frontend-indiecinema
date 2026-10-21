@@ -20,6 +20,10 @@ class App {
     if (document.querySelector('[data-parametros-de-sala]')) {
       PAW.cargarScript('ParametrosDeSala', `${App.COMPONENTES}/parametros-de-sala.js`, () => new ParametrosDeSala('[data-parametros-de-sala]', 'select[name="sala_id"]'));
     }
+    // El modo de publicación (programada vs abrir a votación, IC-147).
+    if (document.querySelector('[data-seccion-modo]')) {
+      PAW.cargarScript('ModoFuncion', `${App.COMPONENTES}/modo-funcion.js`, () => new ModoFuncion('.formulario-alta-funcion'));
+    }
     // Los formularios que se mandan al elegir una opción, en el panel del administrador.
     const alElegir = document.querySelectorAll('form[data-enviar-al-elegir]');
     if (alElegir.length > 0) {
@@ -28,6 +32,10 @@ class App {
     // La búsqueda en vivo, en la cartelera.
     if (document.querySelector('.filtros-cartelera') && document.querySelector('#resultados-cartelera')) {
       PAW.cargarScript('BuscadorDeCartelera', `${App.COMPONENTES}/buscador-de-cartelera.js`, () => new BuscadorDeCartelera('.filtros-cartelera', '#resultados-cartelera'));
+    }
+    // La votación de títulos en la ficha de la función (E3-12 / IC-148).
+    if (document.querySelector('[data-formulario-votacion]')) {
+      PAW.cargarScript('VotacionTitulos', `${App.COMPONENTES}/votacion-titulos.js`, () => new VotacionTitulos('[data-formulario-votacion]'));
     }
   }
 }

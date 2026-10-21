@@ -23,14 +23,15 @@
 {% set funcion_id = funcion.id ?? '0' %}
 {# Normaliza el código de estado en mayúsculas sin tildes ni espacios para evaluar condicionales de estilo #}
 {% set estado_codigo = (funcion.estado ?? 'PROGRAMADA')|upper|replace({' ': '_', 'Ó': 'O'}) %}
+{% set es_votacion = estado_codigo == 'EN_VOTACION' or estado_codigo == 'EN_VOTACION_TITULOS' or estado_codigo == 'EN_VOTACION_DE_TITULOS' %}
 {# Caso de estado: si la función se encuentra en fase de votación popular por los espectadores #}
-{% if estado_codigo == 'EN_VOTACION' %}
+{% if es_votacion %}
   {# Asigna la etiqueta visual con tilde para lectura del usuario #}
-  {% set etiqueta_estado = 'EN VOTACIÓN' %}
+  {% set etiqueta_estado = 'EN VOTACIÓN DE TÍTULOS' %}
   {# Asigna la clase CSS con borde tenue y fondo translúcido #}
   {% set clase_insignia = 'insignia-votacion' %}
 {# Caso de estado: si la sala y el organizador están coordinando franjas horarias #}
-{% elseif estado_codigo == 'ACUERDO_FECHA' or estado_codigo == 'ACUERDO_DE_FECHA' %}
+{% elseif estado_codigo == 'ACUERDO_FECHA' or estado_codigo == 'ACUERDO_DE_FECHA' or estado_codigo == 'EN_ACUERDO_FECHA' %}
   {# Asigna la etiqueta descriptiva del acuerdo en curso #}
   {% set etiqueta_estado = 'ACUERDO DE FECHA' %}
   {# Asigna la clase CSS para el badge de acuerdo de fecha #}
@@ -123,12 +124,11 @@
         <span class="meta-icono" aria-hidden="true">📅</span>
         {# Muestra el texto correspondiente según el estado de la función #}
         <span class="meta-texto">
-          {# Caso 1: En votación muestra el cierre de la votación #}
-          {% if estado_codigo == 'EN_VOTACION' and funcion.cierre_votacion is defined %}
-            {# Fecha límite en la que finaliza la votación comunitaria #}
-            {{ funcion.cierre_votacion }}
+          {# Caso 1: En votación muestra el cierre o fecha a definir tras la votación #}
+          {% if es_votacion %}
+            {{ funcion.cierre_votacion ?? (funcion.fecha and funcion.fecha != 'Fecha a confirmar' ? funcion.fecha : 'A definir tras la votación') }}
           {# Caso 2: Acuerdo de fecha muestra las franjas propuestas #}
-          {% elseif (estado_codigo == 'ACUERDO_FECHA' or estado_codigo == 'ACUERDO_DE_FECHA') and funcion.franjas_propuestas is defined %}
+          {% elseif (estado_codigo == 'ACUERDO_FECHA' or estado_codigo == 'ACUERDO_DE_FECHA' or estado_codigo == 'EN_ACUERDO_FECHA') and funcion.franjas_propuestas is defined %}
             {# Cantidad de opciones de fecha y hora disponibles #}
             {{ funcion.franjas_propuestas }}
           {# Caso 3: Función programada con fecha y hora #}
@@ -145,12 +145,11 @@
     </div>
     {# Pie de la tarjeta con el botón de llamado a la acción #}
     <div class="tarjeta-funcion-acciones">
-      {# Inclusión del botón reutilizable con variante secundaria de contorno #}
-      {# Configura el botón: texto visible 'Ver función', enlace de detalle, aspecto secundario, tamaño chico para tarjeta y ancho de bloque #}
+      {% set texto_boton = es_votacion ? 'Votar títulos' : 'Ver función' %}
       {% include 'parciales/boton.html.twig' with {
-        texto: 'Ver función',
+        texto: texto_boton,
         url: url_detalle,
-        variante: 'secundario',
+        variante: es_votacion ? 'primario' : 'secundario',
         tamano: 'chico',
         bloque: true,
         clase: 'boton-tarjeta-funcion'
