@@ -3,10 +3,14 @@
   wireframe reserva-pago-comprobante, con el código para la puerta. Sólo la ve quien reservó.
 
   Variables:
-  - reserva: codigo (8 caracteres; se muestra en dos grupos de 4 para dictarlo), cantidad, total
-    (ya escrito) y estado ('confirmada' | 'cancelada' | 'asistio').
+  - reserva: id, codigo (8 caracteres; se muestra en dos grupos de 4 para dictarlo), cantidad,
+    total (ya escrito), estado ('confirmada' | 'cancelada' | 'asistio') y cancelable (si todavía
+    se puede cancelar: confirmada y antes de que empiece la función).
   - funcion: id, titulo, url, fecha (o null), sala y localidad; null si programación ya no la
     muestra (su sala se dio de baja).
+  - cancelada: (bool) aviso al volver de cancelarla.
+
+  cancelable y cancelada llevan |default(false): el paquete front se mergea antes que el back.
 #}
 {% extends 'base.html.twig' %}
 
@@ -14,7 +18,15 @@
 
 {% block contenido %}
 <div class="contenedor contenedor-reserva">
-  {% include 'funciones/pasos_reserva.html.twig' with { actual: 2 } only %}
+  {% if cancelada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: 'Cancelaste la reserva',
+      mensaje: 'Tus lugares quedaron libres para otros espectadores.'
+    } only %}
+  {% else %}
+    {% include 'funciones/pasos_reserva.html.twig' with { actual: 2 } only %}
+  {% endif %}
 
   <article class="tarjeta-comprobante">
     {# Desde «Mis reservas» se puede volver a una que ya se canceló. #}
@@ -51,11 +63,23 @@
         <dd>{{ reserva.total }}</dd>
       </div>
     </dl>
+
+    {% if reserva.cancelable|default(false) %}
+      <div class="comprobante-acciones">
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Cancelar reserva',
+          url: '/funcion/reservas/' ~ reserva.id ~ '/cancelar',
+          variante: 'secundario'
+        } only %}
+      </div>
+    {% endif %}
   </article>
 
-  {% include 'parciales/mensaje.html.twig' with {
-    tipo: 'info',
-    mensaje: 'Presentá este código en la puerta: el organizador registra la asistencia con él.'
-  } only %}
+  {% if reserva.estado == 'confirmada' %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'Presentá este código en la puerta: el organizador registra la asistencia con él.'
+    } only %}
+  {% endif %}
 </div>
 {% endblock %}
