@@ -29,10 +29,12 @@
         programada, mientras todavía no se dio).
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
+  - voto_usuario: (string|null) UUID de la obra que votó el usuario autenticado (E3-12.2 / E3-12.3).
+  - conteo_votos: (array<string, int>) mapa asociativo [obra_id => total_votos] con el conteo por candidata.
+  - votado: (bool) si se redireccionó tras emitir o modificar el voto (?votado=1).
+  - error_voto: (string|null) mensaje de error si falló el registro o cambio de voto.
 
-  Las tres llevan |default(false): el paquete front se mergea antes que el back, así que mientras
-  tanto esta plantilla la sirve un controlador que todavía no las manda, y con las variables
-  estrictas de Twig faltar no puede ser un error.
+  Llevan |default(false) o comprobaciones defensivas para asegurar compatibilidad.
 #}
 {% extends 'base.html.twig' %}
 
@@ -114,12 +116,12 @@
     </header>
 
     {# ==================================================================== #}
-    {# BLOQUE INTERACTIVO: VOTACIÓN DE TÍTULOS (E3-12 / IC-148)             #}
+    {# BLOQUE INTERACTIVO: VOTACIÓN DE TÍTULOS (E3-12 / IC-148 / IC-149)   #}
     {# ==================================================================== #}
     {% if funcion.estado == 'en_votacion_titulos' %}
       {% set voto_actual = voto_usuario ?? (funcion.voto_usuario ?? (obra_votada ?? null)) %}
       {% set tiene_voto = voto_actual is not empty %}
-      <section class="ficha-seccion ficha-votacion" aria-labelledby="ficha-votacion-titulo">
+      <section class="ficha-seccion ficha-votacion" aria-labelledby="ficha-votacion-titulo" data-seccion-votacion>
         <div class="ficha-votacion-cabecera">
           <div class="ficha-votacion-intro">
             <span class="insignia-estado insignia-votacion">VOTACIÓN ABIERTA</span>
@@ -137,7 +139,7 @@
             {% include 'parciales/mensaje.html.twig' with {
               tipo: 'exito',
               titulo: '¡Voto registrado con éxito!',
-              mensaje: mensaje_voto|default(mensaje_exito|default('Tu voto fue computado para esta función. Podés cambiar tu elección en cualquier momento mientras la votación siga abierta.'))
+              mensaje: mensaje_voto|default(mensaje_exito|default('Tu voto fue registrado correctamente. Podés cambiar tu elección en cualquier momento mientras la votación siga abierta.'))
             } only %}
           </div>
         {% endif %}
@@ -158,87 +160,79 @@
             <div class="ficha-votacion-aviso-voto" role="status">
               <span class="aviso-icono" aria-hidden="true">✓</span>
               <p class="aviso-texto">
-                Ya emitiste tu voto para esta función. Podés seleccionar otra obra candidata y presionar <strong>Cambiar mi voto</strong> para actualizar tu elección.
+                Ya emitiste tu voto para esta función. Podés cambiar tu elección seleccionando otra de las obras candidatas a continuación.
               </p>
             </div>
           {% endif %}
 
-          <form action="{{ accion_voto|default('/cartelera/' ~ funcion.id ~ '/votar') }}" method="POST" class="formulario-votacion-titulos" data-formulario-votacion>
-            <input type="hidden" name="_csrf" value="{{ csrf }}">
-
-            <fieldset class="seccion-formulario-votacion">
-              <legend class="sr-only">Seleccioná una obra candidata para votar</legend>
-              <div class="cuadricula-candidatas-votacion" role="radiogroup" aria-labelledby="ficha-votacion-titulo">
-                {% for obra in funcion.obras %}
-                  {% set obra_id = obra.id ?? loop.index0 %}
-                  {% set es_votada = tiene_voto and (voto_actual == obra_id or voto_actual == obra.titulo) %}
-                  <label class="tarjeta-candidata-votacion{% if es_votada %} votada seleccionada{% endif %}">
-                    <input
-                      type="radio"
-                      name="obra_id"
-                      value="{{ obra_id }}"
-                      class="candidata-radio"
-                      {% if es_votada %}checked aria-checked="true"{% else %}aria-checked="false"{% endif %}
-                      required
-                    >
-                    <div class="candidata-afiche-columna">
-                      {% if obra.afiche is defined and obra.afiche %}
-                        <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="candidata-afiche-img" loading="lazy">
-                      {% else %}
-                        <div class="candidata-afiche-placeholder" aria-hidden="true">
-                          <span class="afiche-placeholder-icono">🎬</span>
-                          <span class="afiche-placeholder-texto">AFICHE</span>
-                        </div>
-                      {% endif %}
+          <div class="cuadricula-candidatas-votacion" role="region" aria-label="Obras candidatas para votar" data-formulario-votacion>
+            {% for obra in funcion.obras %}
+              {% set obra_id = obra.id ?? loop.index0 %}
+              {% set es_votada = tiene_voto and (voto_actual == obra_id or voto_actual == obra.titulo) %}
+              {% set votos_obra = conteo_votos[obra_id] ?? 0 %}
+              <article class="tarjeta-candidata-votacion{% if es_votada %} votada seleccionada{% endif %}">
+                <div class="candidata-afiche-columna">
+                  {% if obra.afiche is defined and obra.afiche %}
+                    <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="candidata-afiche-img" loading="lazy">
+                  {% else %}
+                    <div class="candidata-afiche-placeholder" aria-hidden="true">
+                      <span class="afiche-placeholder-icono">🎬</span>
+                      <span class="afiche-placeholder-texto">AFICHE</span>
                     </div>
-                    <div class="candidata-cuerpo">
-                      <div class="candidata-cabecera">
-                        <strong class="candidata-titulo">
-                          {{ obra.titulo }} <span class="candidata-anio">({{ obra.anio }})</span>
-                        </strong>
-                        {% if es_votada %}
-                          <span class="insignia-tu-voto" role="status">
-                            <span aria-hidden="true">✓</span> Tu voto actual
-                          </span>
-                        {% endif %}
-                      </div>
-                      <div class="candidata-metadatos">
-                        <span class="candidata-metadato">Dirección: <strong>{{ obra.director }}</strong></span>
-                        <span class="candidata-separador" aria-hidden="true">·</span>
-                        <span class="candidata-metadato">Duración: <strong>{{ obra.duracion }} min</strong></span>
-                      </div>
-                      {% if obra.generos is defined and obra.generos is not empty %}
-                        <div class="candidata-generos">
-                          {% for genero in obra.generos %}
-                            <span class="ficha-genero-chip">{{ genero }}</span>
-                          {% endfor %}
-                        </div>
-                      {% endif %}
-                      {% if obra.sinopsis is defined and obra.sinopsis %}
-                        <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
-                      {% endif %}
-                      {% if conteo_votos is defined and conteo_votos[obra_id] is defined %}
-                        <p class="candidata-conteo-votos" aria-label="Cantidad de votos acumulados">
-                          <span class="conteo-icono" aria-hidden="true">🗳️</span>
-                          <span>{{ conteo_votos[obra_id] }} {{ conteo_votos[obra_id] == 1 ? 'voto' : 'votos' }}</span>
-                        </p>
-                      {% endif %}
+                  {% endif %}
+                </div>
+                <div class="candidata-cuerpo">
+                  <div class="candidata-cabecera">
+                    <h3 class="candidata-titulo">
+                      {{ obra.titulo }} {% if obra.anio is defined and obra.anio %}<span class="candidata-anio">({{ obra.anio }})</span>{% endif %}
+                    </h3>
+                    {% if es_votada %}
+                      <span class="insignia-tu-voto" role="status">
+                        <span aria-hidden="true">✓</span> Tu voto actual
+                      </span>
+                    {% endif %}
+                  </div>
+                  <div class="candidata-metadatos">
+                    {% if obra.director is defined and obra.director %}
+                      <span class="candidata-metadato">Dirección: <strong>{{ obra.director }}</strong></span>
+                      <span class="candidata-separador" aria-hidden="true">·</span>
+                    {% endif %}
+                    <span class="candidata-metadato">Duración: <strong>{{ obra.duracion_minutos ?? obra.duracion }} min</strong></span>
+                  </div>
+                  {% if obra.generos is defined and obra.generos is not empty %}
+                    <div class="candidata-generos">
+                      {% for genero in obra.generos %}
+                        <span class="ficha-genero-chip">{{ genero }}</span>
+                      {% endfor %}
                     </div>
-                  </label>
-                {% endfor %}
-              </div>
-            </fieldset>
-
-            <footer class="pie-votacion-acciones">
-              {% include 'parciales/boton.html.twig' with {
-                texto: tiene_voto ? 'Cambiar mi voto' : 'Votar por este título',
-                tipo: 'submit',
-                variante: 'primario',
-                icono: '🗳️',
-                clase: 'boton-emitir-voto'
-              } only %}
-            </footer>
-          </form>
+                  {% endif %}
+                  {% if obra.sinopsis is defined and obra.sinopsis %}
+                    <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
+                  {% endif %}
+                  <p class="candidata-conteo-votos" aria-label="Cantidad de votos acumulados">
+                    <span class="conteo-icono" aria-hidden="true">🗳️</span>
+                    <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
+                  </p>
+                  <div class="candidata-accion">
+                    {% if es_votada %}
+                      <div class="candidata-voto-registrado" role="status">
+                        <span class="voto-registrado-texto">Esta es tu elección actual. Podés cambiarla votando por otra candidata.</span>
+                      </div>
+                    {% else %}
+                      <form action="{{ accion_voto|default('/cartelera/' ~ funcion.id ~ '/votar') }}" method="POST" class="formulario-voto-obra" data-formulario-voto>
+                        <input type="hidden" name="_csrf" value="{{ csrf }}">
+                        <input type="hidden" name="obra_id" value="{{ obra_id }}">
+                        <button type="submit" class="boton boton-primario boton-votar-obra">
+                          <span class="icono-votar" aria-hidden="true">🗳️</span>
+                          {{ tiene_voto ? 'Cambiar mi voto' : 'Votar por este título' }}
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
         {% else %}
           {# Espectador no autenticado: invitación accesible a ingresar o registrarse #}
           <div class="ficha-votacion-invitacion" role="region" aria-label="Ingresar para votar">
@@ -252,11 +246,7 @@
               </div>
             </div>
             <div class="votacion-acciones-invitacion">
-              {% include 'parciales/boton.html.twig' with {
-                texto: 'Ingresar para votar',
-                url: '/cuenta/ingresar',
-                variante: 'primario'
-              } only %}
+              <a href="/iniciar-sesion" class="boton boton-primario">Iniciá sesión para votar</a>
               <a href="/cuenta/registro" class="boton boton-secundario">Crear una cuenta</a>
             </div>
           </div>
@@ -264,6 +254,8 @@
           {# Lista visual de obras candidatas en exhibición para el usuario sin sesión #}
           <div class="cuadricula-candidatas-votacion candidatas-modo-lectura" role="region" aria-label="Obras candidatas en votación">
             {% for obra in funcion.obras %}
+              {% set obra_id = obra.id ?? loop.index0 %}
+              {% set votos_obra = conteo_votos[obra_id] ?? 0 %}
               <article class="tarjeta-candidata-votacion lectura">
                 <div class="candidata-afiche-columna">
                   {% if obra.afiche is defined and obra.afiche %}
@@ -277,14 +269,16 @@
                 </div>
                 <div class="candidata-cuerpo">
                   <div class="candidata-cabecera">
-                    <strong class="candidata-titulo">
-                      {{ obra.titulo }} <span class="candidata-anio">({{ obra.anio }})</span>
-                    </strong>
+                    <h3 class="candidata-titulo">
+                      {{ obra.titulo }} {% if obra.anio is defined and obra.anio %}<span class="candidata-anio">({{ obra.anio }})</span>{% endif %}
+                    </h3>
                   </div>
                   <div class="candidata-metadatos">
-                    <span class="candidata-metadato">Dirección: <strong>{{ obra.director }}</strong></span>
-                    <span class="candidata-separador" aria-hidden="true">·</span>
-                    <span class="candidata-metadato">Duración: <strong>{{ obra.duracion }} min</strong></span>
+                    {% if obra.director is defined and obra.director %}
+                      <span class="candidata-metadato">Dirección: <strong>{{ obra.director }}</strong></span>
+                      <span class="candidata-separador" aria-hidden="true">·</span>
+                    {% endif %}
+                    <span class="candidata-metadato">Duración: <strong>{{ obra.duracion_minutos ?? obra.duracion }} min</strong></span>
                   </div>
                   {% if obra.generos is defined and obra.generos is not empty %}
                     <div class="candidata-generos">
@@ -296,6 +290,13 @@
                   {% if obra.sinopsis is defined and obra.sinopsis %}
                     <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
                   {% endif %}
+                  <p class="candidata-conteo-votos" aria-label="Cantidad de votos acumulados">
+                    <span class="conteo-icono" aria-hidden="true">🗳️</span>
+                    <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
+                  </p>
+                  <div class="candidata-accion">
+                    <a href="/iniciar-sesion" class="boton boton-secundario boton-chico">Iniciá sesión para votar</a>
+                  </div>
                 </div>
               </article>
             {% endfor %}

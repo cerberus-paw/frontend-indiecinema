@@ -4082,17 +4082,11 @@ dd {
   background-color: var(--color-superficie-elevada);
   border: 1px solid var(--color-superficie-borde);
   border-radius: var(--radio-md);
-  cursor: pointer;
   transition: border-color var(--transicion-rapida), background-color var(--transicion-rapida), box-shadow var(--transicion-rapida);
 }
 
-.tarjeta-candidata-votacion.lectura {
-  cursor: default;
-}
-
-.tarjeta-candidata-votacion:not(.lectura):hover {
+.tarjeta-candidata-votacion:hover {
   border-color: var(--color-primario);
-  background-color: var(--color-superficie-hover);
 }
 
 .tarjeta-candidata-votacion:focus-within {
@@ -4109,7 +4103,8 @@ dd {
 /* Obra ya votada previamente por el espectador */
 .tarjeta-candidata-votacion.votada {
   border-color: var(--color-primario);
-  box-shadow: 0 0 0 1px var(--color-primario);
+  background-color: rgba(240, 166, 59, 0.05);
+  box-shadow: 0 0 0 1px var(--color-primario), 0 4px 14px rgba(240, 166, 59, 0.12);
 }
 
 .candidata-radio {
@@ -4124,9 +4119,9 @@ dd {
 }
 
 .candidata-afiche-columna {
-  width: 80px;
-  min-width: 80px;
-  height: 115px;
+  width: 85px;
+  min-width: 85px;
+  height: 125px;
   border-radius: var(--radio-sm);
   overflow: hidden;
   background-color: var(--color-fondo);
@@ -4157,16 +4152,17 @@ dd {
 .candidata-cuerpo {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
   flex: 1;
   min-width: 0;
-  padding-right: var(--espacio-6);
 }
 
 .candidata-cabecera {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
 }
 
 .candidata-titulo {
@@ -4175,6 +4171,7 @@ dd {
   font-weight: 600;
   color: var(--color-texto-brillante);
   line-height: 1.3;
+  margin: 0;
 }
 
 .tarjeta-candidata-votacion.seleccionada .candidata-titulo,
@@ -4191,7 +4188,7 @@ dd {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.15rem 0.45rem;
+  padding: 0.15rem 0.5rem;
   font-size: var(--texto-xs);
   font-weight: 600;
   border-radius: var(--radio-sm);
@@ -4199,6 +4196,7 @@ dd {
   border: 1px solid var(--color-primario);
   color: var(--color-primario);
   width: fit-content;
+  white-space: nowrap;
 }
 
 .candidata-metadatos {
@@ -4217,24 +4215,64 @@ dd {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
 }
 
 .candidata-sinopsis {
   font-size: var(--texto-xs);
   color: var(--color-texto-secundario);
   line-height: 1.4;
-  margin: 0.2rem 0 0;
+  margin: 0.15rem 0 0;
 }
 
 .candidata-conteo-votos {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  margin-top: 0.35rem;
+  margin-top: 0.25rem;
   font-size: var(--texto-xs);
   font-weight: 600;
   color: var(--color-primario);
+}
+
+.candidata-accion {
+  margin-top: auto;
+  padding-top: var(--espacio-2);
+}
+
+.formulario-voto-obra {
+  display: inline-flex;
+  margin: 0;
+}
+
+.boton-votar-obra {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: var(--texto-xs);
+  padding: 0.35rem 0.75rem;
+  font-weight: 600;
+}
+
+.boton-votar-obra .icono-votar {
+  font-size: 0.95em;
+}
+
+.boton-votar-obra.cargando {
+  opacity: 0.75;
+  cursor: wait;
+}
+
+.candidata-voto-registrado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  background-color: rgba(240, 166, 59, 0.1);
+  border: 1px dashed var(--color-primario);
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-brillante);
 }
 
 .pie-votacion-acciones {

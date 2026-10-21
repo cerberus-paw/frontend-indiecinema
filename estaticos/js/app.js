@@ -33,9 +33,9 @@ class App {
     if (document.querySelector('.filtros-cartelera') && document.querySelector('#resultados-cartelera')) {
       PAW.cargarScript('BuscadorDeCartelera', `${App.COMPONENTES}/buscador-de-cartelera.js`, () => new BuscadorDeCartelera('.filtros-cartelera', '#resultados-cartelera'));
     }
-    // La votación de títulos en la ficha de la función (E3-12 / IC-148).
-    if (document.querySelector('[data-formulario-votacion]')) {
-      PAW.cargarScript('VotacionTitulos', `${App.COMPONENTES}/votacion-titulos.js`, () => new VotacionTitulos('[data-formulario-votacion]'));
+    // La votación de títulos en la ficha de la función (E3-12 / IC-148 / IC-149).
+    if (document.querySelector('[data-seccion-votacion]') || document.querySelector('[data-formulario-votacion]')) {
+      PAW.cargarScript('VotacionTitulos', `${App.COMPONENTES}/votacion-titulos.js`, () => new VotacionTitulos('[data-seccion-votacion], [data-formulario-votacion]'));
     }
   }
 }
