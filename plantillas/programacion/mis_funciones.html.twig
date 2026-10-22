@@ -154,7 +154,7 @@
                 {% elseif funcion.estado_valor == 'cancelada' %}
                   <span class="estado-cuenta estado-cuenta-cancelada">{{ funcion.estado }}</span>
                 {% elseif funcion.estado_valor == 'en_acuerdo_fecha' %}
-                  <span class="estado-cuenta estado-cuenta-acuerdo"><span aria-hidden="true">🤝</span> En acuerdo de fecha</span>
+                  <span class="estado-cuenta estado-cuenta-acuerdo"><span aria-hidden="true">🤝</span> {{ funcion.estado|default('en acuerdo de fecha') }}</span>
                 {% elseif funcion.estado_valor == 'acuerdo_sin_minimo' or funcion.acuerdo_sin_minimo|default(false) %}
                   <span class="estado-cuenta estado-cuenta-sin-quorum"><span aria-hidden="true">⚠️</span> Sin quórum</span>
                 {% else %}
