@@ -609,7 +609,7 @@
                   <strong style="color: var(--color-texto-destacado, #f6e8ea); font-size: 1rem;">Gestión del acuerdo de fecha</strong>
                   <p style="margin: 0.25rem 0 0 0; color: var(--color-texto-secundario, #ab9ea2); font-size: 0.875rem;">Si el acuerdo no reúne el interés esperado o finalizó el plazo, podés cerrarlo para decidir si reproponer o cancelar.</p>
                 </div>
-                <form action="{{ accion_cerrar_sin_minimo|default('/organizador/funciones/' ~ funcion.id ~ '/cerrar-sin-minimo') }}" method="POST" class="formulario-cerrar-sin-minimo" onsubmit="return confirm('¿Deseás cerrar el acuerdo de fecha sin alcanzar el mínimo? La función no se programará.');">
+                <form action="{{ accion_cerrar_sin_minimo|default('/organizador/funciones/' ~ funcion.id ~ '/cerrar-sin-minimo') }}" method="POST" class="formulario-cerrar-sin-minimo" >
                   <input type="hidden" name="_csrf" value="{{ csrf }}">
                   <input type="hidden" name="volver" value="ficha">
                   <button type="submit" class="boton boton-secundario boton-chico">
