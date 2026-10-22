@@ -127,7 +127,7 @@
                 {% elseif funcion.estado_valor == 'cancelada' %}
                   <span class="estado-cuenta estado-cuenta-cancelada">{{ funcion.estado }}</span>
                 {% elseif funcion.estado_valor == 'en_acuerdo_fecha' %}
-                  <span class="estado-cuenta estado-cuenta-acuerdo"><span aria-hidden="true">🤝</span> En acuerdo de fecha</span>
+                  <span class="estado-cuenta estado-cuenta-acuerdo"><span aria-hidden="true">🤝</span> {{ funcion.estado|default('en acuerdo de fecha') }}</span>
                 {% else %}
                   <span class="estado-cuenta">{{ funcion.estado }}</span>
                 {% endif %}
