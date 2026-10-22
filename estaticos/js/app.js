@@ -41,6 +41,10 @@ class App {
     if (document.querySelector('[data-gestor-franjas]')) {
       PAW.cargarScript('GestorFranjas', `${App.COMPONENTES}/gestor-franjas.js`, () => new GestorFranjas('[data-gestor-franjas]'));
     }
+    // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
+    if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
+      PAW.cargarScript('AcuerdoFecha', `${App.COMPONENTES}/acuerdo-fecha.js`, () => new AcuerdoFecha('[data-seccion-acuerdo-fecha]'));
+    }
   }
 }
 

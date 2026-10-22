@@ -5874,6 +5874,302 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* --------------------------------------------------------------------------
+   ACUERDO DE FECHA CON ESPECTADORES - BOTÓN «ME SIRVE» Y FRANJAS (IC-155 / E3-13.3)
+   Componentes para plantillas/programacion/ficha_funcion.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Sección del acuerdo de fecha en la ficha */
+.ficha-acuerdo-fecha {
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-lg);
+  padding: var(--espacio-6);
+  margin-top: var(--espacio-6);
+  margin-bottom: var(--espacio-6);
+}
+
+.ficha-acuerdo-cabecera {
+  margin-bottom: var(--espacio-4);
+}
+
+.ficha-acuerdo-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.ficha-acuerdo-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-2xl);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0;
+}
+
+.ficha-acuerdo-bajada {
+  font-size: var(--texto-base);
+  color: var(--color-texto-secundario);
+  margin: 0;
+  max-width: 760px;
+  line-height: 1.5;
+}
+
+/* Banner de aviso para el usuario que ya votó */
+.ficha-acuerdo-aviso-voto {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-4);
+  background-color: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: var(--radio-md);
+  margin-top: var(--espacio-4);
+  margin-bottom: var(--espacio-4);
+  color: #a7f3d0;
+}
+
+.ficha-acuerdo-aviso-voto .aviso-icono {
+  font-size: 1.25rem;
+  color: var(--color-exito);
+  font-weight: 700;
+}
+
+.ficha-acuerdo-aviso-voto .aviso-texto {
+  font-size: var(--texto-sm);
+  margin: 0;
+  color: #d1fae5;
+}
+
+/* Lista de tarjetas de franjas horarias */
+.lista-tarjetas-franjas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin-top: var(--espacio-4);
+}
+
+/* Tarjeta individual de franja horaria */
+.tarjeta-franja-acuerdo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding: var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  transition: border-color var(--transicion-rapida), box-shadow var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+@media (min-width: 768px) {
+  .tarjeta-franja-acuerdo {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--espacio-6);
+  }
+}
+
+.tarjeta-franja-acuerdo:hover {
+  border-color: var(--color-borde-medio);
+}
+
+/* Franja seleccionada / votada por el usuario actual */
+.tarjeta-franja-acuerdo.franja-seleccionada,
+.tarjeta-franja-acuerdo.franja-votada {
+  border-color: var(--color-primario);
+  background-color: rgba(240, 166, 59, 0.05);
+  box-shadow: 0 0 16px rgba(240, 166, 59, 0.12);
+}
+
+/* Franja con quórum alcanzado */
+.tarjeta-franja-acuerdo.franja-quorom-alcanzado {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+/* Contenido principal de la franja (textos + barra de progreso) */
+.franja-contenido-principal {
+  flex: 1;
+  min-width: 0;
+}
+
+.franja-cabecera-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-2);
+}
+
+.franja-icono-calendario {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.franja-textos-tiempo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.franja-fecha-texto {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.franja-horario-texto {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-atenuado);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Contenedor y barra de progreso de compromisos */
+.franja-progreso-contenedor {
+  width: 100%;
+  max-width: 520px;
+  margin-top: var(--espacio-3);
+}
+
+.franja-progreso-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  font-size: var(--texto-xs);
+  margin-bottom: var(--espacio-2);
+}
+
+.progreso-conteo {
+  color: var(--color-texto-secundario);
+}
+
+.progreso-conteo strong {
+  color: var(--color-texto-brillante);
+}
+
+.progreso-estado-texto {
+  color: var(--color-primario);
+  font-weight: 500;
+}
+
+.progreso-estado-texto.estado-exito {
+  color: var(--color-exito);
+  font-weight: 600;
+}
+
+/* Barra de progreso con estilo track */
+.barra-progreso-compromisos {
+  width: 100%;
+  height: 10px;
+  background-color: var(--color-superficie-elevada);
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid var(--color-superficie-borde);
+  position: relative;
+}
+
+.barra-progreso-relleno {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primario) 0%, #fbbf24 100%);
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.barra-progreso-relleno.relleno-exito {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+}
+
+/* Columna de acción de la franja (botón o voto actual) */
+.franja-accion-columna {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.boton-me-sirve {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.icono-me-sirve {
+  font-size: 1.1rem;
+}
+
+.franja-voto-registrado {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--espacio-2) var(--espacio-4);
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: var(--radio-md);
+  color: #a7f3d0;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+/* Invitación accesible para espectadores sin sesión */
+.ficha-acuerdo-invitacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding: var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px dashed var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  margin-top: var(--espacio-4);
+  margin-bottom: var(--espacio-4);
+}
+
+@media (min-width: 640px) {
+  .ficha-acuerdo-invitacion {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.acuerdo-invitacion-contenido {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+}
+
+.acuerdo-icono-invitacion {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.acuerdo-titulo-invitacion {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+  margin: 0;
+}
+
+.acuerdo-bajada-invitacion {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+  margin: 0.2rem 0 0 0;
+}
+
+.acuerdo-acciones-invitacion {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+}
+
+/* --------------------------------------------------------------------------
    CONFIRMACIÓN DE CANCELACIÓN DE FUNCIÓN (IC-123 / E3-11.4)
    Componentes para plantillas/programacion/cancelar_funcion.html.twig
    -------------------------------------------------------------------------- */
