@@ -93,12 +93,7 @@
           } only %}
         {% else %}
           <div class="ficha-insignia-contenedor">
-            <span class="insignia-estado {{ clases_estado[funcion.estado] ?? '' }}" aria-label="Estado de la función: {{ funcion.estado_etiqueta }}">
-              {% if funcion.estado == 'en_votacion_titulos' %}
-                <span class="insignia-icono" aria-hidden="true">🗳️</span>
-              {% endif %}
-              {{ funcion.estado_etiqueta|upper }}
-            </span>
+            <span class="insignia-estado {{ clases_estado[funcion.estado] ?? '' }}">{% if funcion.estado == 'en_votacion_titulos' %}<span class="insignia-icono" aria-hidden="true">🗳️</span> {% endif %}{{ funcion.estado_etiqueta|upper }}</span>
           </div>
         {% endif %}
 
@@ -109,9 +104,9 @@
             <span class="ficha-metadato-icono" aria-hidden="true">📅</span>
             <span class="ficha-metadato-texto">
               {% if funcion.estado == 'en_votacion_titulos' %}
-                Fecha a coordinar con la sala tras el cierre de la votación
+                Fecha a coordinar con la sala tras el cierre de la votación · Fecha a confirmar
               {% elseif funcion.estado == 'en_acuerdo_fecha' %}
-                {{ funcion.fecha ?? 'Fecha en coordinación con la sala' }}
+                {{ funcion.fecha ?? 'Fecha en coordinación con la sala · Fecha a confirmar' }}
               {% else %}
                 {{ funcion.fecha ?? 'Fecha a confirmar' }}
               {% endif %}

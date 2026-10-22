@@ -53,7 +53,7 @@
 {# Resuelve la representación textual del precio de la función predeterminando 'A la gorra' si no se indicó #}
 {% set texto_precio = funcion.precio ?? 'A la gorra' %}
 {# Contenedor principal de la tarjeta con semántica de artículo independiente #}
-<article class="tarjeta-funcion{% if es_votacion %} tarjeta-funcion-votacion{% endif %}{% if clase is defined %} {{ clase }}{% endif %}" aria-label="{{ funcion.titulo }} - {{ etiqueta_estado }}">
+<article class="tarjeta-funcion{% if es_votacion %} tarjeta-funcion-votacion{% endif %}{% if clase is defined %} {{ clase }}{% endif %}">
   {# Contenedor superior para el afiche gráfico de la obra #}
   <div class="tarjeta-funcion-afiche">
     {# Enlace que envuelve el afiche para permitir navegar al hacer clic en la imagen #}
