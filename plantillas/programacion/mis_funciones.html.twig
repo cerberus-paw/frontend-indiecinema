@@ -71,6 +71,15 @@
     } only %}
   {% endif %}
 
+  {# Al volver de confirmar el acuerdo de fecha (IC-156 / E3-13.4) #}
+  {% if acuerdo_confirmado|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: '¡Función programada!',
+      mensaje: 'El acuerdo de fecha concluyó exitosamente. La función quedó programada con su fecha definitiva.'
+    } only %}
+  {% endif %}
+
   {% if funciones is empty %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'info',
@@ -151,12 +160,24 @@
                       </form>
                     {% endif %}
                     {% if funcion.estado_valor == 'en_acuerdo_fecha' %}
-                      {% include 'parciales/boton.html.twig' with {
-                        texto: 'Gestionar franjas',
-                        url: '/cartelera/' ~ funcion.id,
-                        variante: 'secundario',
-                        tamano: 'chico'
-                      } only %}
+                      {% if funcion.quorom_alcanzado|default(false) or funcion.confirmable|default(false) %}
+                        <form action="/organizador/funciones/{{ funcion.id }}/confirmar-acuerdo" method="POST" class="formulario-accion-tabla">
+                          <input type="hidden" name="_csrf" value="{{ csrf }}">
+                          {% include 'parciales/boton.html.twig' with {
+                            texto: 'Confirmar fecha',
+                            tipo: 'submit',
+                            variante: 'primario',
+                            tamano: 'chico'
+                          } only %}
+                        </form>
+                      {% else %}
+                        {% include 'parciales/boton.html.twig' with {
+                          texto: 'Gestionar franjas',
+                          url: '/cartelera/' ~ funcion.id,
+                          variante: 'secundario',
+                          tamano: 'chico'
+                        } only %}
+                      {% endif %}
                     {% endif %}
                     {% if funcion.editable|default(false) %}
                       {% include 'parciales/boton.html.twig' with {
