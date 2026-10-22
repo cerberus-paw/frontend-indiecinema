@@ -80,6 +80,24 @@
     } only %}
   {% endif %}
 
+  {# Al reproponer nuevas franjas horarias (IC-157 / E3-13.5) #}
+  {% if franjas_repropuestas|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: '¡Nuevas franjas propuestas!',
+      mensaje: 'Se abrió un nuevo período de acuerdo de fecha para la función con las opciones propuestas.'
+    } only %}
+  {% endif %}
+
+  {# Al cancelar una función sin quórum (IC-157 / E3-13.5) #}
+  {% if funcion_cancelada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      titulo: 'Función cancelada',
+      mensaje: 'La función fue cancelada correctamente y ya no se encuentra activa en cartelera.'
+    } only %}
+  {% endif %}
+
   {% if funciones is empty %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'info',
@@ -137,6 +155,8 @@
                   <span class="estado-cuenta estado-cuenta-cancelada">{{ funcion.estado }}</span>
                 {% elseif funcion.estado_valor == 'en_acuerdo_fecha' %}
                   <span class="estado-cuenta estado-cuenta-acuerdo"><span aria-hidden="true">🤝</span> En acuerdo de fecha</span>
+                {% elseif funcion.estado_valor == 'acuerdo_sin_minimo' or funcion.acuerdo_sin_minimo|default(false) %}
+                  <span class="estado-cuenta estado-cuenta-sin-quorum"><span aria-hidden="true">⚠️</span> Sin quórum</span>
                 {% else %}
                   <span class="estado-cuenta">{{ funcion.estado }}</span>
                 {% endif %}
@@ -146,7 +166,7 @@
                 <span class="tabla-admin-secundario">{{ funcion.cupo }} lugares</span>
               </td>
               <td class="tabla-admin-acciones">
-                {% if funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) or funcion.estado_valor == 'en_acuerdo_fecha' %}
+                {% if funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) or funcion.estado_valor == 'en_acuerdo_fecha' or funcion.estado_valor == 'acuerdo_sin_minimo' or funcion.acuerdo_sin_minimo|default(false) %}
                   <div class="tabla-admin-acciones-grupo">
                     {% if funcion.cerrable|default(false) %}
                       <form action="/organizador/funciones/{{ funcion.id }}/cerrar-votacion" method="POST" class="formulario-accion-tabla">
@@ -179,6 +199,24 @@
                         } only %}
                       {% endif %}
                     {% endif %}
+                    {% if funcion.estado_valor == 'acuerdo_sin_minimo' or funcion.acuerdo_sin_minimo|default(false) %}
+                      {% include 'parciales/boton.html.twig' with {
+                        texto: 'Nuevas fechas',
+                        url: '/organizador/funciones/' ~ funcion.id ~ '/proponer-franjas',
+                        variante: 'primario',
+                        tamano: 'chico'
+                      } only %}
+                      <form action="/organizador/funciones/{{ funcion.id }}/cancelar" method="POST" class="formulario-accion-tabla" onsubmit="return confirm('¿Cancelar función definitivamente?');">
+                        <input type="hidden" name="_csrf" value="{{ csrf }}">
+                        <input type="hidden" name="volver" value="mis_funciones">
+                        {% include 'parciales/boton.html.twig' with {
+                          texto: 'Cancelar',
+                          tipo: 'submit',
+                          variante: 'peligro',
+                          tamano: 'chico'
+                        } only %}
+                      </form>
+                    {% endif %}
                     {% if funcion.editable|default(false) %}
                       {% include 'parciales/boton.html.twig' with {
                         texto: 'Editar',
@@ -187,7 +225,7 @@
                         tamano: 'chico'
                       } only %}
                     {% endif %}
-                    {% if funcion.cancelable|default(false) %}
+                    {% if funcion.cancelable|default(false) and funcion.estado_valor != 'acuerdo_sin_minimo' and not funcion.acuerdo_sin_minimo|default(false) %}
                       {% include 'parciales/boton.html.twig' with {
                         texto: 'Cancelar',
                         url: '/organizador/funciones/' ~ funcion.id ~ '/cancelar',

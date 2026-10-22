@@ -2168,6 +2168,16 @@ dd {
   color: var(--color-texto-brillante);
 }
 
+/* Insignia acuerdo sin mínimo / sin quórum (E3-13.5 / IC-157) */
+.insignia-sin-quorum {
+  /* Fondo ámbar translúcido */
+  background-color: rgba(240, 166, 59, 0.18);
+  /* Borde ámbar */
+  border: 1px solid rgba(240, 166, 59, 0.5);
+  /* Color de advertencia */
+  color: var(--color-advertencia);
+}
+
 /* Precio en la cabecera de la tarjeta */
 .tarjeta-funcion-precio {
   /* Tipografía */
@@ -6091,6 +6101,76 @@ a.tabla-admin-principal:focus-visible {
   box-shadow: 0 4px 14px rgba(240, 166, 59, 0.35);
 }
 
+/* Panel del organizador cuando no se alcanzó el quórum mínimo (E3-13.5 / IC-157) */
+.ficha-acuerdo-panel-sin-minimo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding: var(--espacio-5);
+  background: linear-gradient(135deg, rgba(240, 166, 59, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%);
+  border: 2px solid var(--color-advertencia);
+  border-radius: var(--radio-lg);
+  margin-bottom: var(--espacio-6);
+  box-shadow: 0 4px 20px rgba(240, 166, 59, 0.12);
+}
+
+@media (min-width: 768px) {
+  .ficha-acuerdo-panel-sin-minimo {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.panel-sin-minimo-contenido {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-4);
+}
+
+.panel-sin-minimo-icono {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.panel-sin-minimo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.panel-sin-minimo-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-xl);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0;
+}
+
+.panel-sin-minimo-bajada {
+  font-size: var(--texto-sm);
+  color: var(--color-texto);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.panel-sin-minimo-bajada strong {
+  color: var(--color-advertencia);
+}
+
+.panel-sin-minimo-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-3);
+  flex-shrink: 0;
+}
+
+.formulario-cancelar-funcion {
+  display: inline-flex;
+  margin: 0;
+}
+
 /* Contenido principal de la franja (textos + barra de progreso) */
 .franja-contenido-principal {
   flex: 1;
@@ -6622,6 +6702,75 @@ a.tabla-admin-principal:focus-visible {
   margin: 0;
 }
 
+/* Callout lateral de sin mínimo (E3-13.5 / IC-157) */
+.lateral-callout-sin-minimo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-4);
+  background-color: rgba(240, 166, 59, 0.1);
+  border-left: 3px solid var(--color-advertencia);
+  border-radius: var(--radio-sm);
+}
+
+.lateral-callout-sin-minimo .callout-icono {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.lateral-callout-sin-minimo .callout-texto {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.lateral-callout-sin-minimo .callout-texto strong {
+  color: var(--color-advertencia);
+}
+
+/* Tarjetas de franjas horarias en modo cerrado (E3-13.5 / IC-157) */
+.tarjeta-franja-acuerdo.cerrado {
+  opacity: 0.92;
+  background-color: var(--color-superficie);
+  border-color: var(--color-borde);
+}
+
+.tarjeta-franja-acuerdo.cerrado:hover {
+  border-color: var(--color-borde-medio);
+}
+
+.estado-incompleto {
+  color: var(--color-texto-secundario);
+}
+
+.barra-progreso-relleno.relleno-incompleto {
+  background: linear-gradient(90deg, var(--color-superficie-interactiva), var(--color-advertencia));
+}
+
+.franja-estado-cerrado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.franja-estado-cerrado-texto {
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--espacio-2) var(--espacio-3);
+  border-radius: var(--radio-sm);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto-apagado);
+}
+
+.alerta-sin-minimo {
+  margin-bottom: var(--espacio-6);
+}
+
 /* ── Cartelera y tabla del organizador para acuerdo de fecha ────────────── */
 .tarjeta-funcion.tarjeta-funcion-acuerdo {
   border-color: rgba(240, 166, 59, 0.35);
@@ -6640,6 +6789,28 @@ a.tabla-admin-principal:focus-visible {
   background-color: rgba(240, 166, 59, 0.18);
   border-color: rgba(240, 166, 59, 0.5);
   color: #fef3c7;
+}
+
+/* ── Cartelera y tabla del organizador para acuerdo sin mínimo (E3-13.5 / IC-157) ── */
+.tarjeta-funcion.tarjeta-funcion-sin-quorum {
+  border-color: rgba(240, 166, 59, 0.25);
+  opacity: 0.9;
+}
+
+.tarjeta-funcion.tarjeta-funcion-sin-quorum:hover {
+  border-color: var(--color-advertencia);
+  opacity: 1;
+}
+
+.meta-texto-destacado.meta-texto-sin-quorum {
+  color: var(--color-advertencia);
+  font-weight: 600;
+}
+
+.estado-cuenta-sin-quorum {
+  background-color: rgba(240, 166, 59, 0.15);
+  border-color: rgba(240, 166, 59, 0.4);
+  color: var(--color-advertencia);
 }
 
 /* ── Responsive Acuerdo de Fecha ────────────────────────────────────────── */

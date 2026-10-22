@@ -102,7 +102,11 @@
           } only %}
         {% else %}
           <div class="ficha-insignia-contenedor">
-            <span class="insignia-estado {{ clases_estado[funcion.estado] ?? '' }}">{% if funcion.estado == 'en_votacion_titulos' %}<span class="insignia-icono" aria-hidden="true">🗳️</span> {% endif %}{{ funcion.estado_etiqueta|upper }}</span>
+            {% if funcion.estado == 'acuerdo_sin_minimo' or funcion.acuerdo_sin_minimo|default(false) %}
+              <span class="insignia-estado insignia-sin-quorum"><span class="insignia-icono" aria-hidden="true">⚠️</span> ACUERDO SIN MÍNIMO</span>
+            {% else %}
+              <span class="insignia-estado {{ clases_estado[funcion.estado] ?? '' }}">{% if funcion.estado == 'en_votacion_titulos' %}<span class="insignia-icono" aria-hidden="true">🗳️</span> {% elseif funcion.estado == 'en_acuerdo_fecha' %}<span class="insignia-icono" aria-hidden="true">🤝</span> {% endif %}{{ funcion.estado_etiqueta|upper }}</span>
+            {% endif %}
           </div>
         {% endif %}
 
@@ -116,6 +120,8 @@
                 Fecha a coordinar con la sala tras el cierre de la votación · Fecha a confirmar
               {% elseif funcion.estado == 'en_acuerdo_fecha' %}
                 {{ funcion.fecha ?? 'Fecha en coordinación con la sala · Fecha a confirmar' }}
+              {% elseif funcion.estado == 'acuerdo_sin_minimo' or funcion.acuerdo_sin_minimo|default(false) %}
+                Sin fecha acordada · Acuerdo cerrado
               {% else %}
                 {{ funcion.fecha ?? 'Fecha a confirmar' }}
               {% endif %}
@@ -125,7 +131,7 @@
             <span class="ficha-metadato-icono" aria-hidden="true">🎟️</span>
             <span class="ficha-metadato-texto">{{ funcion.precio }} · {{ funcion.cupo }} lugares</span>
           </div>
-          {% if funcion.estado == 'en_acuerdo_fecha' %}
+          {% if funcion.estado == 'en_acuerdo_fecha' or funcion.estado == 'acuerdo_sin_minimo' or funcion.acuerdo_sin_minimo|default(false) %}
             {% set minimo_asistentes_requerido = funcion.minimo_asistentes|default(20) %}
             <div class="ficha-metadato-chip ficha-metadato-minimo" aria-label="Mínimo de asistentes requerido para confirmar: {{ minimo_asistentes_requerido }}">
               <span class="ficha-metadato-icono" aria-hidden="true">👥</span>
@@ -193,15 +199,18 @@
 
           <li class="etapa-separador" aria-hidden="true"></li>
 
-          <li class="etapa-estado{% if funcion.estado == 'en_acuerdo_fecha' %} etapa-activa{% elseif funcion.estado == 'programada' or funcion.estado == 'finalizada' %} etapa-completada{% else %} etapa-pendiente{% endif %}">
+          {% set es_sin_quorum = (funcion.estado == 'acuerdo_sin_minimo') or funcion.acuerdo_sin_minimo|default(false) %}
+          <li class="etapa-estado{% if funcion.estado == 'en_acuerdo_fecha' or es_sin_quorum %} etapa-activa{% elseif funcion.estado == 'programada' or funcion.estado == 'finalizada' %} etapa-completada{% else %} etapa-pendiente{% endif %}">
             <div class="etapa-indicador">
-              <span class="etapa-numero">{% if funcion.estado == 'programada' or funcion.estado == 'finalizada' %}<span aria-hidden="true">✓</span>{% else %}2{% endif %}</span>
+              <span class="etapa-numero">{% if es_sin_quorum %}!{% elseif funcion.estado == 'programada' or funcion.estado == 'finalizada' %}<span aria-hidden="true">✓</span>{% else %}2{% endif %}</span>
             </div>
             <div class="etapa-cuerpo">
               <span class="etapa-rotulo">Etapa 2</span>
               <strong class="etapa-nombre">Acuerdo de fecha</strong>
               <span class="etapa-estado-texto">
-                {% if funcion.estado == 'en_acuerdo_fecha' %}
+                {% if es_sin_quorum %}
+                  <span class="insignia-estado insignia-sin-quorum">SIN QUÓRUM</span>
+                {% elseif funcion.estado == 'en_acuerdo_fecha' %}
                   <span class="insignia-estado insignia-acuerdo">EN CURSO</span>
                 {% elseif funcion.estado == 'programada' or funcion.estado == 'finalizada' %}
                   Acordada
@@ -222,7 +231,9 @@
               <span class="etapa-rotulo">Etapa 3</span>
               <strong class="etapa-nombre">Programada</strong>
               <span class="etapa-estado-texto">
-                {% if funcion.estado == 'programada' %}
+                {% if es_sin_quorum %}
+                  No programada
+                {% elseif funcion.estado == 'programada' %}
                   <span class="insignia-estado insignia-programada">CONFIRMADA</span>
                 {% elseif funcion.estado == 'finalizada' %}
                   Finalizada
@@ -496,7 +507,9 @@
     {# ==================================================================== #}
     {# BLOQUE INTERACTIVO: ACUERDO DE FECHA CON ESPECTADORES (E3-13)       #}
     {# ==================================================================== #}
-    {% if funcion.estado == 'en_acuerdo_fecha' %}
+    {% set es_acuerdo_activo = (funcion.estado == 'en_acuerdo_fecha') %}
+    {% set es_acuerdo_sin_minimo = (funcion.estado == 'acuerdo_sin_minimo') or funcion.acuerdo_sin_minimo|default(false) %}
+    {% if es_acuerdo_activo or es_acuerdo_sin_minimo %}
       {% set voto_franja_actual = voto_franja ?? (funcion.voto_franja ?? (franja_votada ?? null)) %}
       {% set tiene_voto_franja = voto_franja_actual is not empty %}
       {% set franjas_disponibles = funcion.franjas|default([
@@ -522,19 +535,30 @@
           <div class="ficha-acuerdo-columna-principal">
             <div class="ficha-acuerdo-cabecera">
               <div class="ficha-acuerdo-intro">
-                <span class="insignia-estado insignia-acuerdo" aria-label="Fase de la función: Acuerdo de fecha abierto">
-                  <span class="insignia-icono" aria-hidden="true">🤝</span>
-                  ACUERDO DE FECHA ABIERTO
-                </span>
-                <h2 id="ficha-acuerdo-titulo" class="ficha-acuerdo-titulo">Franjas horarias propuestas</h2>
-                <p class="ficha-acuerdo-bajada">
-                  Podés marcar tu disponibilidad seleccionando la franja que te convenga. Tu elección se computa como un compromiso de asistencia para confirmar la función. Podés cambiar tu voto en cualquier momento mientras el acuerdo siga abierto.
-                </p>
+                {% if es_acuerdo_sin_minimo %}
+                  <span class="insignia-estado insignia-sin-quorum" aria-label="Fase de la función: Acuerdo cerrado sin quórum">
+                    <span class="insignia-icono" aria-hidden="true">⚠️</span>
+                    ACUERDO CERRADO SIN QUÓRUM
+                  </span>
+                  <h2 id="ficha-acuerdo-titulo" class="ficha-acuerdo-titulo">Resultado del acuerdo de fecha</h2>
+                  <p class="ficha-acuerdo-bajada">
+                    El período de acuerdo de fecha finalizó sin alcanzar el mínimo de <strong>{{ minimo_asistentes_requerido }} compromisos de asistencia requeridos</strong>. Por este motivo, la función no ha sido programada con ninguna de las franjas propuestas.
+                  </p>
+                {% else %}
+                  <span class="insignia-estado insignia-acuerdo" aria-label="Fase de la función: Acuerdo de fecha abierto">
+                    <span class="insignia-icono" aria-hidden="true">🤝</span>
+                    ACUERDO DE FECHA ABIERTO
+                  </span>
+                  <h2 id="ficha-acuerdo-titulo" class="ficha-acuerdo-titulo">Franjas horarias propuestas</h2>
+                  <p class="ficha-acuerdo-bajada">
+                    Podés marcar tu disponibilidad seleccionando la franja que te convenga. Tu elección se computa como un compromiso de asistencia para confirmar la función. Podés cambiar tu voto en cualquier momento mientras el acuerdo siga abierto.
+                  </p>
+                {% endif %}
               </div>
             </div>
 
-            {# Confirmación accesible de voto registrado o cambiado #}
-            {% if franja_votada|default(false) or mensaje_exito_franja|default(false) or mensaje_acuerdo|default(false) %}
+            {# Confirmación accesible de voto registrado o cambiado (solo en acuerdo abierto) #}
+            {% if not es_acuerdo_sin_minimo and (franja_votada|default(false) or mensaje_exito_franja|default(false) or mensaje_acuerdo|default(false)) %}
               <div class="ficha-acuerdo-confirmacion" role="status">
                 {% include 'parciales/mensaje.html.twig' with {
                   tipo: 'exito',
@@ -556,7 +580,8 @@
 
             {# Panel de confirmación del organizador si se alcanzó el mínimo (E3-13.4 / IC-156) #}
             {% set quorom_alcanzado = max_votos >= minimo_asistentes_requerido %}
-            {% set puede_confirmar = funcion.confirmable|default(quorom_alcanzado and (funcion.editable|default(false) or funcion.cerrable|default(false) or funcion.es_organizador|default(false) or usuario.es_organizador|default(false))) %}
+            {% set es_organizador = funcion.editable|default(false) or funcion.cerrable|default(false) or funcion.es_organizador|default(false) or usuario.es_organizador|default(false) %}
+            {% set puede_confirmar = not es_acuerdo_sin_minimo and funcion.confirmable|default(quorom_alcanzado and es_organizador) %}
             {% if puede_confirmar and franja_lider is not null %}
               <div class="ficha-acuerdo-panel-confirmacion" role="region" aria-label="Confirmación de acuerdo para el organizador">
                 <div class="acuerdo-confirmacion-contenido">
@@ -580,7 +605,114 @@
               </div>
             {% endif %}
 
-            {% if usuario %}
+            {# Panel del organizador cuando no se alcanzó el mínimo (E3-13.5 / IC-157) #}
+            {% if es_acuerdo_sin_minimo and es_organizador %}
+              <div class="ficha-acuerdo-panel-sin-minimo" role="region" aria-label="Acciones de gestión para el organizador tras no alcanzar el quórum">
+                <div class="panel-sin-minimo-contenido">
+                  <span class="panel-sin-minimo-icono" aria-hidden="true">⚠️</span>
+                  <div class="panel-sin-minimo-texto">
+                    <h3 class="panel-sin-minimo-titulo">No se alcanzó el quórum de asistentes requerido</h3>
+                    <p class="panel-sin-minimo-bajada">
+                      Ninguna de las franjas horarias propuestas alcanzó el mínimo de <strong>{{ minimo_asistentes_requerido }} compromisos</strong> al momento del cierre. Como organizador, podés proponer un nuevo conjunto de franjas horarias o cancelar definitivamente la función.
+                    </p>
+                  </div>
+                </div>
+                <div class="panel-sin-minimo-acciones">
+                  <a href="{{ accion_reproponer_franjas|default('/organizador/funciones/' ~ funcion.id ~ '/proponer-franjas') }}" class="boton boton-primario">
+                    <span class="boton-icono boton-icono-antes" aria-hidden="true">📅</span>
+                    <span class="boton-texto">Proponer nuevas franjas horarias</span>
+                  </a>
+                  <form action="{{ accion_cancelar_funcion|default('/organizador/funciones/' ~ funcion.id ~ '/cancelar') }}" method="POST" class="formulario-cancelar-funcion" onsubmit="return confirm('¿Estás seguro de que deseás cancelar esta función? Esta acción dará de baja la función definitivamente.');">
+                    <input type="hidden" name="_csrf" value="{{ csrf }}">
+                    <input type="hidden" name="volver" value="ficha">
+                    <button type="submit" class="boton boton-peligro">
+                      <span class="boton-icono boton-icono-antes" aria-hidden="true">✕</span>
+                      <span class="boton-texto">Cancelar función</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% endif %}
+
+            {# Explicación para los espectadores que participaron (E3-13.5 / IC-157) #}
+            {% if es_acuerdo_sin_minimo %}
+              <div class="alerta alerta-advertencia alerta-sin-minimo" role="status">
+                <span class="alerta-icono" aria-hidden="true">⚠️</span>
+                <div class="alerta-contenido">
+                  <strong class="alerta-titulo">La función no se programa por falta de quórum</strong>
+                  <p class="alerta-descripcion">
+                    Agradecemos a todos los espectadores que marcaron su disponibilidad. Como ninguna de las franjas propuestas alcanzó los <strong>{{ minimo_asistentes_requerido }} compromisos necesarios</strong> para coordinar con la sala, la función no ha sido programada. El organizador decidirá en breve si abre nuevas fechas de acuerdo o da de baja la función.
+                  </p>
+                </div>
+              </div>
+            {% endif %}
+
+            {% if es_acuerdo_sin_minimo %}
+              <div class="lista-tarjetas-franjas franjas-modo-cerrado" role="region" aria-label="Resultado final de las franjas horarias propuestas">
+                {% for franja in franjas_disponibles %}
+                  {% set franja_id = franja.id|default(loop.index) %}
+                  {% set es_franja_votada = tiene_voto_franja and (voto_franja_actual == franja_id or voto_franja_actual == (franja.fecha ~ ' · ' ~ franja.hora_inicio)) %}
+                  {% set votos_franja = franja.votos|default(conteo_votos_franjas[franja_id]|default(0)) %}
+                  {% set porcentaje = ((votos_franja / minimo_asistentes_requerido) * 100)|round %}
+                  {% set faltan_votos = minimo_asistentes_requerido - votos_franja %}
+
+                  <article class="tarjeta-franja-acuerdo cerrado{% if es_franja_votada %} franja-seleccionada franja-votada{% endif %}">
+                    <div class="franja-contenido-principal">
+                      <div class="franja-cabecera-info">
+                        <span class="franja-icono-calendario" aria-hidden="true">📅</span>
+                        <div class="franja-textos-tiempo">
+                          <h3 class="franja-fecha-texto">{{ franja.fecha }}</h3>
+                          <p class="franja-horario-texto">
+                            <span class="horario-icono" aria-hidden="true">⏰</span>
+                            {{ franja.hora_inicio|default(franja.desde|default('20:00')) }} a {{ franja.hora_fin|default(franja.hasta|default('22:30')) }} hs
+                          </p>
+                        </div>
+                        <span class="insignia-estado insignia-sin-quorum" role="status">
+                          No alcanzó el mínimo
+                        </span>
+                        {% if es_franja_votada %}
+                          <span class="insignia-tu-voto" role="status">
+                            <span aria-hidden="true">✓</span> Tu voto registrado
+                          </span>
+                        {% endif %}
+                      </div>
+
+                      <div class="franja-progreso-contenedor">
+                        <div class="franja-progreso-info">
+                          <span class="progreso-conteo">
+                            <strong>{{ votos_franja }} de {{ minimo_asistentes_requerido }}</strong> compromisos obtenidos
+                          </span>
+                          <span class="progreso-estado-texto estado-incompleto">
+                            Quedaron faltantes <strong>{{ faltan_votos > 0 ? faltan_votos : 0 }}</strong> compromisos
+                          </span>
+                        </div>
+
+                        <div
+                          class="barra-progreso-compromisos"
+                          role="progressbar"
+                          aria-valuenow="{{ votos_franja }}"
+                          aria-valuemin="0"
+                          aria-valuemax="{{ minimo_asistentes_requerido }}"
+                          aria-label="Resultado de compromisos para {{ franja.fecha }}: {{ votos_franja }} de {{ minimo_asistentes_requerido }}"
+                        >
+                          <div
+                            class="barra-progreso-relleno relleno-incompleto"
+                            data-progreso-porcentaje="{{ porcentaje }}"
+                            style="width: {{ porcentaje > 100 ? 100 : porcentaje }}%;"
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="franja-accion-columna">
+                      <div class="franja-estado-cerrado" role="status">
+                        <span class="franja-estado-cerrado-texto">Acuerdo cerrado</span>
+                      </div>
+                    </div>
+                  </article>
+                {% endfor %}
+              </div>
+            {% elseif usuario %}
               {# Mensaje de estado si ya emitió un voto #}
               {% if tiene_voto_franja %}
                 <div class="ficha-acuerdo-aviso-voto" role="status">
@@ -857,12 +989,21 @@
                 </li>
               </ul>
 
-              <div class="lateral-callout-advertencia" role="note">
-                <span class="callout-icono" aria-hidden="true">💡</span>
-                <p class="callout-texto">
-                  Marcar «Me sirve» compromete tu voto para esta fecha. Si la franja ganadora alcanza el mínimo, la función pasa a programada con esa fecha. Si no lo alcanza, la función no se programa y el organizador decide qué hacer.
-                </p>
-              </div>
+              {% if es_acuerdo_sin_minimo %}
+                <div class="lateral-callout-sin-minimo" role="note">
+                  <span class="callout-icono" aria-hidden="true">⚠️</span>
+                  <p class="callout-texto">
+                    Este acuerdo finalizó sin alcanzar el quórum mínimo de <strong>{{ minimo_asistentes_requerido }} asistentes</strong>. La función no ha sido programada y el organizador decidirá si propone nuevas fechas o cancela la función.
+                  </p>
+                </div>
+              {% else %}
+                <div class="lateral-callout-advertencia" role="note">
+                  <span class="callout-icono" aria-hidden="true">💡</span>
+                  <p class="callout-texto">
+                    Marcar «Me sirve» compromete tu voto para esta fecha. Si la franja ganadora alcanza el mínimo, la función pasa a programada con esa fecha. Si no lo alcanza, la función no se programa y el organizador decide qué hacer.
+                  </p>
+                </div>
+              {% endif %}
             </article>
           </aside>
         </div>
