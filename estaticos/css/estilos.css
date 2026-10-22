@@ -5411,7 +5411,7 @@ a.tabla-admin-principal:focus-visible {
 
 @media (min-width: 640px) {
   .selector-modo-funcion {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 }
 
@@ -5680,6 +5680,197 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto);
   margin: 0;
   line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   PROPUESTA Y GESTIÓN DE FRANJAS HORARIAS Y QUÓRUM DE ACUERDO (IC-154 / E3-13.2)
+   Componentes para plantillas/programacion/proponer_franjas.html.twig y alta_funcion.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Formulario principal de propuesta de franjas */
+.formulario-proponer-franjas {
+  width: 100%;
+}
+
+/* Contenedor general de proponer franjas */
+.contenedor-proponer-franjas {
+  width: 100%;
+}
+
+/* Sección de quórum mínimo */
+.seccion-quorum {
+  margin-bottom: var(--espacio-6);
+}
+
+/* Sección de franjas horarias del acuerdo */
+.seccion-franjas-acuerdo {
+  margin-bottom: var(--espacio-6);
+}
+
+/* Lista dinámica de filas de franjas */
+.lista-franjas-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin-top: var(--espacio-3);
+  margin-bottom: var(--espacio-4);
+}
+
+/* Fila individual de franja horaria */
+.fila-franja-horaria {
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-4);
+  transition: border-color var(--transicion-rapida), box-shadow var(--transicion-rapida);
+}
+
+.fila-franja-horaria:focus-within {
+  border-color: var(--color-borde-fuerte);
+  box-shadow: 0 0 0 2px rgba(240, 166, 59, 0.12);
+}
+
+/* Cabecera de la fila con número de opción y botón de eliminar */
+.franja-cabecera-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--espacio-3);
+  padding-bottom: var(--espacio-2);
+  border-bottom: 1px dashed var(--color-superficie-borde);
+}
+
+/* Etiqueta del número de opción («Opción 1», «Opción 2») */
+.franja-numero-etiqueta {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  color: var(--color-primario);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Botón accesible para eliminar franja */
+.boton-eliminar-franja {
+  background: transparent;
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto-apagado);
+  border-radius: var(--radio-sm);
+  padding: var(--espacio-1) var(--espacio-2);
+  font-size: var(--texto-xs);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: color var(--transicion-rapida), border-color var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+.boton-eliminar-franja:hover:not(:disabled) {
+  color: var(--color-error);
+  border-color: var(--color-error);
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.boton-eliminar-franja:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Cuadrícula de inputs por franja (fecha, inicio, fin) */
+.franja-campos-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espacio-3);
+}
+
+@media (min-width: 640px) {
+  .franja-campos-grid {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+}
+
+/* Mensaje de error de rango horario inválido */
+.franja-alerta-rango {
+  margin-top: var(--espacio-2);
+  font-size: var(--texto-xs);
+  color: var(--color-error);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.franja-alerta-rango[hidden] {
+  display: none;
+}
+
+/* Acciones para agregar franjas */
+.franja-acciones-agregar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-3);
+}
+
+.boton-agregar-franja {
+  cursor: pointer;
+}
+
+.franja-ayuda-agregar {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-atenuado);
+}
+
+/* Tarjeta lateral con resumen de la función en acuerdo */
+.tarjeta-resumen-funcion-acuerdo {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.resumen-obra-acuerdo {
+  border-bottom: 1px dashed var(--color-superficie-borde);
+  padding-bottom: var(--espacio-3);
+}
+
+.resumen-rotulo {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  color: var(--color-texto-atenuado);
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.resumen-titulo-pelicula {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0.25rem 0 0 0;
+  line-height: 1.3;
+}
+
+/* Tarjeta de recordatorio / consejo en la barra lateral */
+.tarjeta-recordatorio-acuerdo {
+  background-color: rgba(240, 166, 59, 0.08);
+  border: 1px solid rgba(240, 166, 59, 0.22);
+  border-radius: var(--radio-sm);
+  padding: var(--espacio-3);
+}
+
+.recordatorio-texto {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.recordatorio-texto strong {
+  color: var(--color-primario);
 }
 
 /* --------------------------------------------------------------------------
