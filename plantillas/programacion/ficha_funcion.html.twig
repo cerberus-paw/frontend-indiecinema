@@ -93,16 +93,24 @@
           } only %}
         {% else %}
           <div class="ficha-insignia-contenedor">
-            <span class="insignia-estado {{ clases_estado[funcion.estado] ?? '' }}">{{ funcion.estado_etiqueta|upper }}</span>
+            <span class="insignia-estado {{ clases_estado[funcion.estado] ?? '' }}">{% if funcion.estado == 'en_votacion_titulos' %}<span class="insignia-icono" aria-hidden="true">🗳️</span> {% endif %}{{ funcion.estado_etiqueta|upper }}</span>
           </div>
         {% endif %}
 
         <h1 class="ficha-funcion-titulo">{{ funcion.titulo }}</h1>
 
         <div class="ficha-funcion-metadatos">
-          <div class="ficha-metadato-chip ficha-metadato-fecha">
+          <div class="ficha-metadato-chip ficha-metadato-fecha" aria-label="Información de fecha: {{ funcion.estado == 'en_votacion_titulos' ? 'Fecha a coordinar con la sala tras el cierre de la votación' : (funcion.fecha ?? 'Fecha a confirmar') }}">
             <span class="ficha-metadato-icono" aria-hidden="true">📅</span>
-            <span class="ficha-metadato-texto">{{ funcion.fecha ?? 'Fecha a confirmar' }}</span>
+            <span class="ficha-metadato-texto">
+              {% if funcion.estado == 'en_votacion_titulos' %}
+                Fecha a coordinar con la sala tras el cierre de la votación · Fecha a confirmar
+              {% elseif funcion.estado == 'en_acuerdo_fecha' %}
+                {{ funcion.fecha ?? 'Fecha en coordinación con la sala · Fecha a confirmar' }}
+              {% else %}
+                {{ funcion.fecha ?? 'Fecha a confirmar' }}
+              {% endif %}
+            </span>
           </div>
           <div class="ficha-metadato-chip ficha-metadato-precio">
             <span class="ficha-metadato-icono" aria-hidden="true">🎟️</span>
@@ -146,8 +154,8 @@
 
     {# El panel de reserva del wireframe (funcion-programada). La ficha es de una columna: va
        debajo de la cabecera y no al costado. Los lugares libres y el total en vivo llegan con
-       la ocupación y el componente de reserva. #}
-    {% if funcion.reservable|default(false) %}
+       la ocupación y el componente de reserva. En votación de títulos no aplica reserva. #}
+    {% if funcion.reservable|default(false) and funcion.estado != 'en_votacion_titulos' %}
       <section class="ficha-seccion ficha-reserva" aria-labelledby="ficha-reserva-titulo">
         <div class="ficha-reserva-precio">
           <h2 id="ficha-reserva-titulo" class="ficha-reserva-titulo">Reservá tus lugares</h2>
@@ -191,7 +199,10 @@
       <section class="ficha-seccion ficha-votacion" aria-labelledby="ficha-votacion-titulo" data-seccion-votacion>
         <div class="ficha-votacion-cabecera">
           <div class="ficha-votacion-intro">
-            <span class="insignia-estado insignia-votacion">VOTACIÓN ABIERTA</span>
+            <span class="insignia-estado insignia-votacion" aria-label="Fase de la función: Votación de títulos abierta">
+              <span class="insignia-icono" aria-hidden="true">🗳️</span>
+              VOTACIÓN ABIERTA
+            </span>
             <h2 id="ficha-votacion-titulo" class="ficha-votacion-titulo">Votación de títulos</h2>
             <p id="ficha-funcion-obras-titulo" class="ficha-obras-etiqueta">Obras candidatas en votación</p>
             <p class="ficha-votacion-bajada">

@@ -23,7 +23,11 @@
 {% set funcion_id = funcion.id ?? '0' %}
 {# Normaliza el código de estado en mayúsculas sin tildes ni espacios para evaluar condicionales de estilo #}
 {% set estado_codigo = (funcion.estado ?? 'PROGRAMADA')|upper|replace({' ': '_', 'Ó': 'O'}) %}
-{% set es_votacion = estado_codigo == 'EN_VOTACION' or estado_codigo == 'EN_VOTACION_TITULOS' or estado_codigo == 'EN_VOTACION_DE_TITULOS' %}
+{% set es_votacion = funcion.en_votacion|default(false)
+  or estado_codigo == 'EN_VOTACION'
+  or estado_codigo == 'EN_VOTACION_TITULOS'
+  or estado_codigo == 'EN_VOTACION_DE_TITULOS'
+  or (funcion.estado_valor is defined and funcion.estado_valor == 'en_votacion_titulos') %}
 {# Caso de estado: si la función se encuentra en fase de votación popular por los espectadores #}
 {% if es_votacion %}
   {# Asigna la etiqueta visual con tilde para lectura del usuario #}
@@ -49,7 +53,7 @@
 {# Resuelve la representación textual del precio de la función predeterminando 'A la gorra' si no se indicó #}
 {% set texto_precio = funcion.precio ?? 'A la gorra' %}
 {# Contenedor principal de la tarjeta con semántica de artículo independiente #}
-<article class="tarjeta-funcion{% if clase is defined %} {{ clase }}{% endif %}">
+<article class="tarjeta-funcion{% if es_votacion %} tarjeta-funcion-votacion{% endif %}{% if clase is defined %} {{ clase }}{% endif %}">
   {# Contenedor superior para el afiche gráfico de la obra #}
   <div class="tarjeta-funcion-afiche">
     {# Enlace que envuelve el afiche para permitir navegar al hacer clic en la imagen #}
@@ -89,7 +93,10 @@
     {# Barra superior con la insignia de estado y el precio #}
     <div class="tarjeta-funcion-cabecera">
       {# Insignia de píldora que indica el estado del ciclo o función #}
-      <span class="insignia-estado {{ clase_insignia }}">{{ etiqueta_estado }}</span>
+      <span class="insignia-estado {{ clase_insignia }}" aria-label="Estado: {{ etiqueta_estado }}">
+        {% if es_votacion %}<span class="insignia-icono" aria-hidden="true">🗳️</span>{% endif %}
+        {{ etiqueta_estado }}
+      </span>
       {# Valor monetario o modalidad de cobro de la entrada #}
       <span class="tarjeta-funcion-precio">{{ texto_precio }}</span>
     {# Cierre de la cabecera de la tarjeta #}
@@ -126,7 +133,7 @@
         <span class="meta-texto">
           {# Caso 1: En votación muestra el cierre o fecha a definir tras la votación #}
           {% if es_votacion %}
-            {{ funcion.cierre_votacion ?? (funcion.fecha and funcion.fecha != 'Fecha a confirmar' ? funcion.fecha : 'A definir tras la votación') }}
+            <span class="meta-texto-destacado meta-texto-votacion">{{ funcion.cierre_votacion ?? 'Fecha a definir tras la votación' }}</span>
           {# Caso 2: Acuerdo de fecha muestra las franjas propuestas #}
           {% elseif (estado_codigo == 'ACUERDO_FECHA' or estado_codigo == 'ACUERDO_DE_FECHA' or estado_codigo == 'EN_ACUERDO_FECHA') and funcion.franjas_propuestas is defined %}
             {# Cantidad de opciones de fecha y hora disponibles #}
@@ -152,7 +159,9 @@
         variante: es_votacion ? 'primario' : 'secundario',
         tamano: 'chico',
         bloque: true,
-        clase: 'boton-tarjeta-funcion'
+        icono: es_votacion ? '🗳️' : null,
+        clase: 'boton-tarjeta-funcion' ~ (es_votacion ? ' boton-tarjeta-votar' : ''),
+        aria_label: es_votacion ? 'Votar títulos para ' ~ funcion.titulo : 'Ver función ' ~ funcion.titulo
       } %}
     {# Cierre del contenedor de acciones #}
     </div>

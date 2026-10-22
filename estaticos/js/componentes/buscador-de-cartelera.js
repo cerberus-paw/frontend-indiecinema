@@ -308,21 +308,29 @@ class BuscadorDeCartelera {
    */
   tarjeta(funcion) {
     const estadoClave = String(funcion.estado || 'PROGRAMADA').toUpperCase();
-    const esVotacion = estadoClave === 'EN_VOTACION'
+    const esVotacion = Boolean(funcion.en_votacion)
+      || estadoClave === 'EN_VOTACION'
       || estadoClave === 'EN_VOTACION_TITULOS'
-      || estadoClave === 'EN_VOTACION_DE_TITULOS';
+      || estadoClave === 'EN_VOTACION_DE_TITULOS'
+      || String(funcion.estado_valor || '').toLowerCase() === 'en_votacion_titulos';
     const [etiqueta, insignia] = BuscadorDeCartelera.ESTADOS[estadoClave]
       ?? BuscadorDeCartelera.ESTADOS[funcion.estado]
       ?? (esVotacion ? ['EN VOTACIÓN DE TÍTULOS', 'insignia-votacion'] : BuscadorDeCartelera.ESTADOS.PROGRAMADA);
     const textoBoton = esVotacion ? 'Votar títulos' : 'Ver función';
     const textoFecha = esVotacion
-      ? (funcion.cierre_votacion || (funcion.fecha && funcion.fecha !== 'Fecha a confirmar' ? funcion.fecha : 'A definir tras la votación'))
+      ? (funcion.cierre_votacion || 'Fecha a definir tras la votación')
       : (funcion.fecha || 'Próximamente');
     const claseBoton = esVotacion
-      ? 'boton boton-primario boton-chico boton-bloque boton-tarjeta-funcion'
+      ? 'boton boton-primario boton-chico boton-bloque boton-tarjeta-funcion boton-tarjeta-votar'
       : 'boton boton-secundario boton-chico boton-bloque boton-tarjeta-funcion';
+    const ariaLabelBoton = esVotacion
+      ? `Votar títulos para ${funcion.titulo}`
+      : `Ver función ${funcion.titulo}`;
 
-    return this.nodo('article', { class: 'tarjeta-funcion' }, [
+    return this.nodo('article', {
+      class: `tarjeta-funcion${esVotacion ? ' tarjeta-funcion-votacion' : ''}`,
+      'aria-label': `${funcion.titulo} - ${etiqueta}`,
+    }, [
       this.nodo('div', { class: 'tarjeta-funcion-afiche' }, [
         this.nodo('a', { href: funcion.url, class: 'tarjeta-funcion-afiche-enlace', tabindex: '-1', 'aria-hidden': 'true' }, [
           this.nodo('div', { class: 'tarjeta-funcion-afiche-placeholder' }, [
@@ -333,7 +341,10 @@ class BuscadorDeCartelera {
       ]),
       this.nodo('div', { class: 'tarjeta-funcion-cuerpo' }, [
         this.nodo('div', { class: 'tarjeta-funcion-cabecera' }, [
-          this.nodo('span', { class: `insignia-estado ${insignia}` }, [etiqueta]),
+          this.nodo('span', { class: `insignia-estado ${insignia}`, 'aria-label': `Estado: ${etiqueta}` }, [
+            ...(esVotacion ? [this.nodo('span', { class: 'insignia-icono', 'aria-hidden': 'true' }, ['🗳️'])] : []),
+            etiqueta,
+          ]),
           this.nodo('span', { class: 'tarjeta-funcion-precio' }, [funcion.precio]),
         ]),
         this.nodo('h3', { class: 'tarjeta-funcion-titulo' }, [
@@ -346,11 +357,16 @@ class BuscadorDeCartelera {
           ]),
           this.nodo('p', { class: 'tarjeta-funcion-dato meta-tiempo' }, [
             this.nodo('span', { class: 'meta-icono', 'aria-hidden': 'true' }, ['📅']),
-            this.nodo('span', { class: 'meta-texto' }, [textoFecha]),
+            this.nodo('span', { class: 'meta-texto' }, [
+              esVotacion
+                ? this.nodo('span', { class: 'meta-texto-destacado meta-texto-votacion' }, [textoFecha])
+                : textoFecha,
+            ]),
           ]),
         ]),
         this.nodo('div', { class: 'tarjeta-funcion-acciones' }, [
-          this.nodo('a', { href: funcion.url, class: claseBoton }, [
+          this.nodo('a', { href: funcion.url, class: claseBoton, 'aria-label': ariaLabelBoton }, [
+            ...(esVotacion ? [this.nodo('span', { class: 'boton-icono boton-icono-antes', 'aria-hidden': 'true' }, ['🗳️'])] : []),
             this.nodo('span', { class: 'boton-texto' }, [textoBoton]),
           ]),
         ]),
