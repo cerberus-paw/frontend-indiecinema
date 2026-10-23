@@ -5411,7 +5411,7 @@ a.tabla-admin-principal:focus-visible {
 
 @media (min-width: 640px) {
   .selector-modo-funcion {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 }
 
@@ -5680,6 +5680,894 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto);
   margin: 0;
   line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   PROPUESTA Y GESTIÓN DE FRANJAS HORARIAS Y QUÓRUM DE ACUERDO (IC-154 / E3-13.2)
+   Componentes para plantillas/programacion/proponer_franjas.html.twig y alta_funcion.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Formulario principal de propuesta de franjas */
+.formulario-proponer-franjas {
+  width: 100%;
+}
+
+/* Contenedor general de proponer franjas */
+.contenedor-proponer-franjas {
+  width: 100%;
+}
+
+/* Sección de quórum mínimo */
+.seccion-quorum {
+  margin-bottom: var(--espacio-6);
+}
+
+/* Sección de franjas horarias del acuerdo */
+.seccion-franjas-acuerdo {
+  margin-bottom: var(--espacio-6);
+}
+
+/* Lista dinámica de filas de franjas */
+.lista-franjas-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin-top: var(--espacio-3);
+  margin-bottom: var(--espacio-4);
+}
+
+/* Fila individual de franja horaria */
+.fila-franja-horaria {
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-4);
+  transition: border-color var(--transicion-rapida), box-shadow var(--transicion-rapida);
+}
+
+.fila-franja-horaria:focus-within {
+  border-color: var(--color-borde-fuerte);
+  box-shadow: 0 0 0 2px rgba(240, 166, 59, 0.12);
+}
+
+/* Cabecera de la fila con número de opción y botón de eliminar */
+.franja-cabecera-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--espacio-3);
+  padding-bottom: var(--espacio-2);
+  border-bottom: 1px dashed var(--color-superficie-borde);
+}
+
+/* Etiqueta del número de opción («Opción 1», «Opción 2») */
+.franja-numero-etiqueta {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  color: var(--color-primario);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Botón accesible para eliminar franja */
+.boton-eliminar-franja {
+  background: transparent;
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto-apagado);
+  border-radius: var(--radio-sm);
+  padding: var(--espacio-1) var(--espacio-2);
+  font-size: var(--texto-xs);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: color var(--transicion-rapida), border-color var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+.boton-eliminar-franja:hover:not(:disabled) {
+  color: var(--color-error);
+  border-color: var(--color-error);
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.boton-eliminar-franja:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Cuadrícula de inputs por franja (fecha, inicio, fin) */
+.franja-campos-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espacio-3);
+}
+
+@media (min-width: 640px) {
+  .franja-campos-grid {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+}
+
+/* Mensaje de error de rango horario inválido */
+.franja-alerta-rango {
+  margin-top: var(--espacio-2);
+  font-size: var(--texto-xs);
+  color: var(--color-error);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.franja-alerta-rango[hidden] {
+  display: none;
+}
+
+/* Acciones para agregar franjas */
+.franja-acciones-agregar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-3);
+}
+
+.boton-agregar-franja {
+  cursor: pointer;
+}
+
+.franja-ayuda-agregar {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-atenuado);
+}
+
+/* Tarjeta lateral con resumen de la función en acuerdo */
+.tarjeta-resumen-funcion-acuerdo {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.resumen-obra-acuerdo {
+  border-bottom: 1px dashed var(--color-superficie-borde);
+  padding-bottom: var(--espacio-3);
+}
+
+.resumen-rotulo {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  color: var(--color-texto-atenuado);
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.resumen-titulo-pelicula {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0.25rem 0 0 0;
+  line-height: 1.3;
+}
+
+/* Tarjeta de recordatorio / consejo en la barra lateral */
+.tarjeta-recordatorio-acuerdo {
+  background-color: rgba(240, 166, 59, 0.08);
+  border: 1px solid rgba(240, 166, 59, 0.22);
+  border-radius: var(--radio-sm);
+  padding: var(--espacio-3);
+}
+
+.recordatorio-texto {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.recordatorio-texto strong {
+  color: var(--color-primario);
+}
+
+/* --------------------------------------------------------------------------
+   ACUERDO DE FECHA CON ESPECTADORES - BOTÓN «ME SIRVE» Y FRANJAS (IC-155 / E3-13.3)
+   Componentes para plantillas/programacion/ficha_funcion.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Sección del acuerdo de fecha en la ficha */
+.ficha-acuerdo-fecha {
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-lg);
+  padding: var(--espacio-6);
+  margin-top: var(--espacio-6);
+  margin-bottom: var(--espacio-6);
+}
+
+.ficha-acuerdo-cabecera {
+  margin-bottom: var(--espacio-4);
+}
+
+.ficha-acuerdo-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.ficha-acuerdo-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-2xl);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0;
+}
+
+.ficha-acuerdo-bajada {
+  font-size: var(--texto-base);
+  color: var(--color-texto-secundario);
+  margin: 0;
+  max-width: 760px;
+  line-height: 1.5;
+}
+
+/* Banner de aviso para el usuario que ya votó */
+.ficha-acuerdo-aviso-voto {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-4);
+  background-color: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: var(--radio-md);
+  margin-top: var(--espacio-4);
+  margin-bottom: var(--espacio-4);
+  color: #a7f3d0;
+}
+
+.ficha-acuerdo-aviso-voto .aviso-icono {
+  font-size: 1.25rem;
+  color: var(--color-exito);
+  font-weight: 700;
+}
+
+.ficha-acuerdo-aviso-voto .aviso-texto {
+  font-size: var(--texto-sm);
+  margin: 0;
+  color: #d1fae5;
+}
+
+/* Lista de tarjetas de franjas horarias */
+.lista-tarjetas-franjas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin-top: var(--espacio-4);
+}
+
+/* Tarjeta individual de franja horaria */
+.tarjeta-franja-acuerdo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding: var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  transition: border-color var(--transicion-rapida), box-shadow var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+@media (min-width: 768px) {
+  .tarjeta-franja-acuerdo {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--espacio-6);
+  }
+}
+
+.tarjeta-franja-acuerdo:hover {
+  border-color: var(--color-borde-medio);
+}
+
+/* Franja seleccionada / votada por el usuario actual */
+.tarjeta-franja-acuerdo.franja-seleccionada,
+.tarjeta-franja-acuerdo.franja-votada {
+  border-color: var(--color-primario);
+  background-color: rgba(240, 166, 59, 0.05);
+  box-shadow: 0 0 16px rgba(240, 166, 59, 0.12);
+}
+
+/* Franja con quórum alcanzado */
+.tarjeta-franja-acuerdo.franja-quorom-alcanzado {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+/* Contenido principal de la franja (textos + barra de progreso) */
+.franja-contenido-principal {
+  flex: 1;
+  min-width: 0;
+}
+
+.franja-cabecera-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-2);
+}
+
+.franja-icono-calendario {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.franja-textos-tiempo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.franja-fecha-texto {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.franja-horario-texto {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-atenuado);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Contenedor y barra de progreso de compromisos */
+.franja-progreso-contenedor {
+  width: 100%;
+  max-width: 520px;
+  margin-top: var(--espacio-3);
+}
+
+.franja-progreso-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  font-size: var(--texto-xs);
+  margin-bottom: var(--espacio-2);
+}
+
+.progreso-conteo {
+  color: var(--color-texto-secundario);
+}
+
+.progreso-conteo strong {
+  color: var(--color-texto-brillante);
+}
+
+.progreso-estado-texto {
+  color: var(--color-primario);
+  font-weight: 500;
+}
+
+.progreso-estado-texto.estado-exito {
+  color: var(--color-exito);
+  font-weight: 600;
+}
+
+/* Barra de progreso con estilo track */
+.barra-progreso-compromisos {
+  width: 100%;
+  height: 10px;
+  background-color: var(--color-superficie-elevada);
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid var(--color-superficie-borde);
+  position: relative;
+}
+
+.barra-progreso-relleno {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primario) 0%, #fbbf24 100%);
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.barra-progreso-relleno.relleno-exito {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+}
+
+/* Columna de acción de la franja (botón o voto actual) */
+.franja-accion-columna {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.boton-me-sirve {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.icono-me-sirve {
+  font-size: 1.1rem;
+}
+
+.franja-voto-registrado {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--espacio-2) var(--espacio-4);
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: var(--radio-md);
+  color: #a7f3d0;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+/* Invitación accesible para espectadores sin sesión */
+.ficha-acuerdo-invitacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding: var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px dashed var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  margin-top: var(--espacio-4);
+  margin-bottom: var(--espacio-4);
+}
+
+@media (min-width: 640px) {
+  .ficha-acuerdo-invitacion {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.acuerdo-invitacion-contenido {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+}
+
+.acuerdo-icono-invitacion {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.acuerdo-titulo-invitacion {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+  margin: 0;
+}
+
+.acuerdo-bajada-invitacion {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+  margin: 0.2rem 0 0 0;
+}
+
+.acuerdo-acciones-invitacion {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+}
+
+/* --------------------------------------------------------------------------
+   ACUERDO DE FECHA CON ESPECTADORES - FICHA Y WIREFRAME (E3-13 / IC-158)
+   Línea de estados (stepper), panel complementario lateral y adaptación
+   -------------------------------------------------------------------------- */
+
+/* Chip destacado para mínimo de asistentes en acuerdo de fecha */
+.ficha-metadato-chip.ficha-metadato-minimo {
+  background-color: rgba(240, 166, 59, 0.15);
+  border-color: rgba(240, 166, 59, 0.45);
+  color: #fef3c7;
+}
+
+.ficha-metadato-chip.ficha-metadato-minimo strong {
+  color: var(--color-primario);
+}
+
+/* ── Línea de estados (Timeline de progreso secuencial) ─────────────────── */
+.linea-estados-contenedor {
+  margin-bottom: var(--espacio-6);
+}
+
+.linea-estados-funcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+  padding: var(--espacio-4) var(--espacio-6);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  list-style: none;
+  margin: 0;
+}
+
+.etapa-estado {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  flex: 1;
+  min-width: 0;
+}
+
+.etapa-indicador {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radio-completo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--texto-sm);
+  background-color: var(--color-superficie-elevada);
+  border: 2px solid var(--color-borde-fuerte);
+  color: var(--color-texto-atenuado);
+  flex-shrink: 0;
+  transition: all var(--transicion-rapida);
+}
+
+.etapa-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.etapa-rotulo {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-texto-atenuado);
+  font-weight: 600;
+}
+
+.etapa-nombre {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-base);
+  font-weight: 700;
+  color: var(--color-texto);
+  line-height: 1.2;
+}
+
+.etapa-estado-texto {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+.etapa-separador {
+  flex: 0 0 32px;
+  height: 2px;
+  background-color: var(--color-borde);
+}
+
+/* Etapa completada */
+.etapa-estado.etapa-completada .etapa-indicador {
+  background-color: rgba(16, 185, 129, 0.15);
+  border-color: var(--color-exito);
+  color: var(--color-exito);
+}
+
+.etapa-estado.etapa-completada .etapa-nombre {
+  color: var(--color-texto-secundario);
+}
+
+/* Etapa activa */
+.etapa-estado.etapa-activa .etapa-indicador {
+  background-color: var(--color-primario);
+  border-color: var(--color-primario);
+  color: var(--color-texto-inverso);
+  box-shadow: 0 0 14px rgba(240, 166, 59, 0.4);
+}
+
+.etapa-estado.etapa-activa .etapa-nombre {
+  color: var(--color-texto-brillante);
+}
+
+/* Etapa pendiente */
+.etapa-estado.etapa-pendiente .etapa-indicador {
+  opacity: 0.7;
+}
+
+.etapa-estado.etapa-pendiente .etapa-nombre {
+  color: var(--color-texto-atenuado);
+}
+
+/* ── Disposición de 2 Columnas de Acuerdo (Figma Wireframe) ──────────────── */
+.ficha-acuerdo-disposicion {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: var(--espacio-8);
+  align-items: start;
+}
+
+.ficha-acuerdo-columna-principal {
+  min-width: 0;
+}
+
+.ficha-acuerdo-barra-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-6);
+}
+
+/* ── Tarjetas Laterales del Acuerdo ─────────────────────────────────────── */
+.tarjeta-acuerdo-lateral {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  padding: var(--espacio-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.lateral-cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.lateral-badge-elegido {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  padding: 0.2rem 0.6rem;
+  background-color: rgba(240, 166, 59, 0.18);
+  border: 1px solid rgba(240, 166, 59, 0.45);
+  border-radius: var(--radio-sm);
+  color: #fef3c7;
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lateral-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lateral-anio {
+  color: var(--color-texto-atenuado);
+  font-weight: 400;
+  font-size: var(--texto-base);
+}
+
+.lateral-afiche-contenedor {
+  width: 100%;
+  border-radius: var(--radio-md);
+  overflow: hidden;
+  background-color: var(--color-superficie-elevada);
+}
+
+.lateral-afiche-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.lateral-afiche-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-2);
+  background: linear-gradient(135deg, var(--color-superficie-elevada) 0%, rgba(240, 166, 59, 0.08) 100%);
+  border: 1px dashed var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  color: var(--color-texto-atenuado);
+}
+
+.lateral-obra-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.lateral-obra-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+.lateral-obra-metadato strong {
+  color: var(--color-texto-brillante);
+}
+
+.lateral-separador {
+  color: var(--color-texto-atenuado);
+}
+
+.lateral-generos-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1);
+}
+
+.lateral-sinopsis {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lateral-votos-ganadora {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: var(--espacio-2) var(--espacio-3);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-xs);
+  color: var(--color-texto);
+}
+
+.lateral-votos-ganadora strong {
+  color: var(--color-primario);
+}
+
+/* ── Tarjeta «Cómo se confirma» ─────────────────────────────────────────── */
+.lateral-requisitos-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.lateral-requisito-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  padding-bottom: var(--espacio-3);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.lateral-requisito-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.requisito-icono {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.requisito-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.requisito-etiqueta {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-atenuado);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.requisito-valor {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-brillante);
+}
+
+.lateral-callout-advertencia {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-4);
+  background-color: rgba(240, 166, 59, 0.08);
+  border: 1px solid rgba(240, 166, 59, 0.25);
+  border-radius: var(--radio-md);
+}
+
+.lateral-callout-advertencia .callout-icono {
+  font-size: 1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.lateral-callout-advertencia .callout-texto {
+  font-size: var(--texto-xs);
+  color: var(--color-texto);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ── Cartelera y tabla del organizador para acuerdo de fecha ────────────── */
+.tarjeta-funcion.tarjeta-funcion-acuerdo {
+  border-color: rgba(240, 166, 59, 0.35);
+}
+
+.tarjeta-funcion.tarjeta-funcion-acuerdo:hover {
+  border-color: var(--color-primario);
+}
+
+.meta-texto-destacado.meta-texto-acuerdo {
+  color: var(--color-primario);
+  font-weight: 600;
+}
+
+.estado-cuenta-acuerdo {
+  background-color: rgba(240, 166, 59, 0.18);
+  border-color: rgba(240, 166, 59, 0.5);
+  color: #fef3c7;
+}
+
+/* ── Responsive Acuerdo de Fecha ────────────────────────────────────────── */
+@media (max-width: 992px) {
+  .ficha-acuerdo-disposicion {
+    grid-template-columns: 1fr;
+    gap: var(--espacio-6);
+  }
+
+  .ficha-acuerdo-barra-lateral {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--espacio-5);
+  }
+}
+
+@media (max-width: 768px) {
+  .linea-estados-funcion {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--espacio-4);
+    padding: var(--espacio-4);
+  }
+
+  .etapa-separador {
+    width: 2px;
+    height: 16px;
+    margin-left: 17px;
+  }
+
+  .ficha-acuerdo-barra-lateral {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* --------------------------------------------------------------------------

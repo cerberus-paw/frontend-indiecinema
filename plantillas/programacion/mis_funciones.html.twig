@@ -126,6 +126,8 @@
                   <span class="estado-cuenta estado-cuenta-activa">{{ funcion.estado }}</span>
                 {% elseif funcion.estado_valor == 'cancelada' %}
                   <span class="estado-cuenta estado-cuenta-cancelada">{{ funcion.estado }}</span>
+                {% elseif funcion.estado_valor == 'en_acuerdo_fecha' %}
+                  <span class="estado-cuenta estado-cuenta-acuerdo"><span aria-hidden="true">🤝</span> {{ funcion.estado|default('en acuerdo de fecha') }}</span>
                 {% else %}
                   <span class="estado-cuenta">{{ funcion.estado }}</span>
                 {% endif %}
@@ -135,7 +137,7 @@
                 <span class="tabla-admin-secundario">{{ funcion.cupo }} lugares</span>
               </td>
               <td class="tabla-admin-acciones">
-                {% if funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) %}
+                {% if funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) or funcion.estado_valor == 'en_acuerdo_fecha' %}
                   <div class="tabla-admin-acciones-grupo">
                     {% if funcion.cerrable|default(false) %}
                       <form action="/organizador/funciones/{{ funcion.id }}/cerrar-votacion" method="POST" class="formulario-accion-tabla">
@@ -147,6 +149,14 @@
                           tamano: 'chico'
                         } only %}
                       </form>
+                    {% endif %}
+                    {% if funcion.estado_valor == 'en_acuerdo_fecha' %}
+                      {% include 'parciales/boton.html.twig' with {
+                        texto: 'Gestionar franjas',
+                        url: '/cartelera/' ~ funcion.id,
+                        variante: 'secundario',
+                        tamano: 'chico'
+                      } only %}
                     {% endif %}
                     {% if funcion.editable|default(false) %}
                       {% include 'parciales/boton.html.twig' with {
