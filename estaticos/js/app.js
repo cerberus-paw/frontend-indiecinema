@@ -37,6 +37,14 @@ class App {
     if (document.querySelector('[data-seccion-votacion]') || document.querySelector('[data-formulario-votacion]')) {
       PAW.cargarScript('VotacionTitulos', `${App.COMPONENTES}/votacion-titulos.js`, () => new VotacionTitulos('[data-seccion-votacion], [data-formulario-votacion]'));
     }
+    // El gestor de franjas horarias y mínimo de asistentes (IC-154 / E3-13.2).
+    if (document.querySelector('[data-gestor-franjas]')) {
+      PAW.cargarScript('GestorFranjas', `${App.COMPONENTES}/gestor-franjas.js`, () => new GestorFranjas('[data-gestor-franjas]'));
+    }
+    // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
+    if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
+      PAW.cargarScript('AcuerdoFecha', `${App.COMPONENTES}/acuerdo-fecha.js`, () => new AcuerdoFecha('[data-seccion-acuerdo-fecha]'));
+    }
   }
 }
 

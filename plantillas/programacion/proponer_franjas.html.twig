@@ -1,0 +1,346 @@
+{#
+  Formulario para que el organizador proponga franjas horarias y defina el mínimo de asistentes (IC-154 / E3-13.2).
+  Permite definir el quórum requerido (asistentes comprometidos) y agregar dinámicamente opciones de fecha y horario
+  para que los espectadores voten con «Me sirve».
+
+  Variables recibidas:
+  - funcion: (objeto/array, obligatorio) Datos de la función (id, titulo, cupo, precio, sala, obras).
+  - accion: (string, opcional) Destino del POST (por defecto '/organizador/funciones/{id}/franjas').
+  - csrf: (string, obligatorio) Token CSRF para validar el envío.
+  - valores: (map, opcional) Valores previos del formulario en caso de error de validación.
+  - errores: (map, opcional) Diccionario de errores por campo.
+  - error_general: (string, opcional) Mensaje de error general si falló la validación.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Proponer franjas horarias · {{ funcion.titulo }} · IndieCinema{% endblock %}
+
+{% block contenido %}
+<div class="contenedor contenedor-proponer-franjas">
+  {# Migas de pan de navegación #}
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga"><a href="/organizador/funciones" class="enlace-miga">Mis funciones</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga"><a href="/cartelera/{{ funcion.id }}" class="enlace-miga">{{ funcion.titulo }}</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Proponer franjas horarias</li>
+    </ol>
+  </nav>
+
+  {# Cabecera descriptiva #}
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <div class="ficha-insignia-contenedor">
+        <span class="insignia-estado insignia-acuerdo">
+          <span class="insignia-icono" aria-hidden="true">🤝</span> ACUERDO DE FECHA
+        </span>
+      </div>
+      <h1 class="solicitud-titulo">Proponer franjas horarias</h1>
+      <p class="solicitud-bajada">
+        Definí el mínimo de asistentes requeridos y las alternativas de fecha y horario para «{{ funcion.titulo }}».
+        Los espectadores podrán marcar qué franja les sirve y, al alcanzar el quórum, podrás programar la función definitivamente.
+      </p>
+    </div>
+    <div class="solicitud-accion-cabecera">
+      <a href="/cartelera/{{ funcion.id }}" class="boton boton-secundario">Volver a la función</a>
+    </div>
+  </header>
+
+  {# Mensaje de error general si falló la validación #}
+  {% if error_general is defined and error_general %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'error',
+      titulo: 'No se pudieron guardar las franjas',
+      mensaje: error_general
+    } only %}
+  {% endif %}
+
+  <div class="panel-organizador-grid">
+    <div class="panel-organizador-principal">
+      {% set url_accion = accion|default('/organizador/funciones/' ~ funcion.id ~ '/franjas') %}
+      <form action="{{ url_accion }}" method="POST" class="formulario-sala formulario-proponer-franjas" data-gestor-franjas data-cupo-maximo="{{ funcion.cupo|default(100) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+        {# ================================================================== #}
+        {# SECCIÓN 1: MÍNIMO DE ASISTENTES (QUÓRUM REQUERIDO)                  #}
+        {# ================================================================== #}
+        <fieldset class="seccion-formulario seccion-quorum">
+          <legend class="seccion-leyenda">
+            <span class="seccion-titulo">Mínimo de asistentes requeridos</span>
+            <span class="seccion-subtitulo">Cantidad de compromisos ("Me sirve") necesaria para que la función pueda confirmarse.</span>
+          </legend>
+
+          <div class="fila-campos-simple">
+            {% set cupo_max = funcion.cupo|default(80) %}
+            {% set valor_minimo = valores.minimo_asistentes|default(valores.minimo|default(20)) %}
+            {% include 'parciales/campo.html.twig' with {
+              nombre: 'minimo_asistentes',
+              etiqueta: 'Mínimo de asistentes',
+              tipo: 'number',
+              valor: valor_minimo,
+              valor_minimo: 1,
+              valor_maximo: cupo_max,
+              requerido: true,
+              errores: errores,
+              ayuda: 'Debe ser al menos 1 persona y no superar el cupo total de la sala (' ~ cupo_max ~ ' butacas).'
+            } only %}
+          </div>
+        </fieldset>
+
+        {# ================================================================== #}
+        {# SECCIÓN 2: FRANJAS HORARIAS PROPUESTAS                              #}
+        {# ================================================================== #}
+        <fieldset class="seccion-formulario seccion-franjas-acuerdo">
+          <legend class="seccion-leyenda">
+            <span class="seccion-titulo">Franjas horarias a votación</span>
+            <span class="seccion-subtitulo">Proponé al menos dos alternativas de fecha y horario para que los espectadores elijan.</span>
+          </legend>
+
+          {# Contenedor dinámico de opciones de franjas #}
+          <div class="lista-franjas-formulario" data-contenedor-franjas role="list" aria-label="Lista de franjas horarias propuestas">
+            {% set franjas_iniciales = valores.franjas|default([
+              { fecha: '', hora_inicio: '20:00', hora_fin: '22:30' },
+              { fecha: '', hora_inicio: '21:00', hora_fin: '23:30' }
+            ]) %}
+
+            {% for franja in franjas_iniciales %}
+              {% set idx = loop.index0 %}
+              <div class="fila-franja-horaria" data-indice-franja="{{ idx }}" role="listitem">
+                <div class="franja-cabecera-fila">
+                  <span class="franja-numero-etiqueta" data-etiqueta-franja>Opción {{ loop.index }}</span>
+                  <button
+                    type="button"
+                    class="boton-eliminar-franja"
+                    data-eliminar-franja
+                    aria-label="Eliminar opción {{ loop.index }}"
+                    {% if loop.length <= 1 %}disabled title="Debe haber al menos una franja propuesta"{% endif %}
+                  >
+                    <span aria-hidden="true">🗑️</span> Quitar
+                  </button>
+                </div>
+
+                <div class="franja-campos-grid">
+                  <div class="grupo-campo">
+                    <label for="franja-fecha-{{ idx }}" class="campo-etiqueta">
+                      Fecha <span class="campo-requerido" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      id="franja-fecha-{{ idx }}"
+                      name="franjas[{{ idx }}][fecha]"
+                      value="{{ franja.fecha|default('') }}"
+                      class="campo-control"
+                      data-campo-fecha
+                      required
+                      aria-required="true"
+                    >
+                  </div>
+
+                  <div class="grupo-campo">
+                    <label for="franja-inicio-{{ idx }}" class="campo-etiqueta">
+                      Horario desde <span class="campo-requerido" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      type="time"
+                      id="franja-inicio-{{ idx }}"
+                      name="franjas[{{ idx }}][hora_inicio]"
+                      value="{{ franja.hora_inicio|default(franja.desde|default('20:00')) }}"
+                      class="campo-control"
+                      data-campo-inicio
+                      required
+                      aria-required="true"
+                    >
+                  </div>
+
+                  <div class="grupo-campo">
+                    <label for="franja-fin-{{ idx }}" class="campo-etiqueta">
+                      Horario hasta <span class="campo-requerido" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      type="time"
+                      id="franja-fin-{{ idx }}"
+                      name="franjas[{{ idx }}][hora_fin]"
+                      value="{{ franja.hora_fin|default(franja.hasta|default('22:30')) }}"
+                      class="campo-control"
+                      data-campo-fin
+                      required
+                      aria-required="true"
+                    >
+                  </div>
+                </div>
+
+                <span class="franja-alerta-rango campo-error" data-error-rango hidden role="alert">
+                  <span class="error-icono" aria-hidden="true">⚠️</span> La hora de finalización debe ser posterior a la de inicio.
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+
+          {# Mensajes de error específicos de franjas #}
+          {% if errores.franjas is defined and errores.franjas %}
+            <span class="campo-error" role="alert">
+              <span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.franjas }}
+            </span>
+          {% endif %}
+
+          {# Botón interactivo para añadir franjas #}
+          <div class="franja-acciones-agregar">
+            <button
+              type="button"
+              class="boton boton-secundario boton-chico boton-agregar-franja"
+              id="boton-agregar-franja"
+              data-agregar-franja
+            >
+              <span class="icono-mas" aria-hidden="true">➕</span> Agregar otra opción de fecha y hora
+            </button>
+            <span class="franja-ayuda-agregar">Podés proponer hasta 5 alternativas para facilitar la concurrencia.</span>
+          </div>
+
+          {# Región accesible en vivo para notificar cambios dinámicos a tecnologías asistivas #}
+          <div class="sr-only" role="status" aria-live="polite" data-anuncio-franjas></div>
+        </fieldset>
+
+        {# Callout informativo de funcionamiento del acuerdo #}
+        <div class="aviso-publicacion-funcion" role="status">
+          <span class="aviso-icono" aria-hidden="true">💡</span>
+          <div class="aviso-contenido">
+            <strong class="aviso-titulo">¿Cómo funciona el acuerdo de fecha?</strong>
+            <p class="aviso-texto">
+              Al guardar las franjas, la función quedará visible en la cartelera con el estado <strong>en acuerdo de fecha</strong>.
+              Los espectadores registrados podrán marcar «Me sirve» en la opción que prefieran. Si la franja ganadora alcanza el quórum
+              de <strong><span data-quorom-preview>{{ valor_minimo }}</span> asistentes</strong>, podrás confirmarla y la función pasará a estar
+              programada definitivamente.
+            </p>
+          </div>
+        </div>
+
+        {# Pie de acciones #}
+        <footer class="pie-formulario-acciones">
+          {% include 'parciales/boton.html.twig' with {
+            texto: 'Publicar franjas y abrir acuerdo',
+            tipo: 'submit',
+            variante: 'primario',
+            icono: '🤝',
+            id: 'boton-publicar-franjas'
+          } only %}
+          <a href="/cartelera/{{ funcion.id }}" class="boton boton-secundario">Descartar</a>
+        </footer>
+      </form>
+    </div>
+
+    {# Barra lateral contextual con los datos de la función #}
+    <aside class="panel-organizador-lateral" aria-labelledby="titulo-resumen-acuerdo">
+      <div class="tarjeta-parametros-sala tarjeta-resumen-funcion-acuerdo">
+        <h2 id="titulo-resumen-acuerdo" class="parametros-sala-titulo">Detalles de la función</h2>
+
+        <div class="resumen-obra-acuerdo">
+          <span class="resumen-rotulo">Título elegido</span>
+          <h3 class="resumen-titulo-pelicula">{{ funcion.titulo }}</h3>
+        </div>
+
+        <dl class="parametros-sala-lista">
+          <div class="parametro-item">
+            <dt>Sala</dt>
+            <dd>{{ funcion.sala.nombre|default(funcion.sala|default('Sala indie')) }}</dd>
+          </div>
+          <div class="parametro-item">
+            <dt>Capacidad / Cupo</dt>
+            <dd>{{ funcion.cupo|default(80) }} butacas</dd>
+          </div>
+          <div class="parametro-item">
+            <dt>Precio de entrada</dt>
+            <dd>{{ funcion.precio|default('$ 2.500') }}</dd>
+          </div>
+          <div class="parametro-item">
+            <dt>Estado actual</dt>
+            <dd>
+              <span class="insignia-estado insignia-acuerdo">En acuerdo de fecha</span>
+            </dd>
+          </div>
+        </dl>
+
+        <div class="tarjeta-recordatorio-acuerdo">
+          <p class="recordatorio-texto">
+            <strong>Consejo:</strong> Proponer horarios en días de fin de semana o en distintas franjas (tarde y noche)
+            suele aumentar la tasa de participación y ayuda a alcanzar el mínimo más rápido.
+          </p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+{# Plantilla HTML para clonar nuevas filas de franjas horarias desde JavaScript #}
+<template id="plantilla-fila-franja">
+  <div class="fila-franja-horaria" data-indice-franja="__INDICE__" role="listitem">
+    <div class="franja-cabecera-fila">
+      <span class="franja-numero-etiqueta" data-etiqueta-franja>Opción __NUMERO__</span>
+      <button
+        type="button"
+        class="boton-eliminar-franja"
+        data-eliminar-franja
+        aria-label="Eliminar opción __NUMERO__"
+      >
+        <span aria-hidden="true">🗑️</span> Quitar
+      </button>
+    </div>
+
+    <div class="franja-campos-grid">
+      <div class="grupo-campo">
+        <label for="franja-fecha-__INDICE__" class="campo-etiqueta">
+          Fecha <span class="campo-requerido" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="date"
+          id="franja-fecha-__INDICE__"
+          name="franjas[__INDICE__][fecha]"
+          value=""
+          class="campo-control"
+          data-campo-fecha
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <div class="grupo-campo">
+        <label for="franja-inicio-__INDICE__" class="campo-etiqueta">
+          Horario desde <span class="campo-requerido" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="time"
+          id="franja-inicio-__INDICE__"
+          name="franjas[__INDICE__][hora_inicio]"
+          value="20:00"
+          class="campo-control"
+          data-campo-inicio
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <div class="grupo-campo">
+        <label for="franja-fin-__INDICE__" class="campo-etiqueta">
+          Horario hasta <span class="campo-requerido" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="time"
+          id="franja-fin-__INDICE__"
+          name="franjas[__INDICE__][hora_fin]"
+          value="22:30"
+          class="campo-control"
+          data-campo-fin
+          required
+          aria-required="true"
+        >
+      </div>
+    </div>
+
+    <span class="franja-alerta-rango campo-error" data-error-rango hidden role="alert">
+      <span class="error-icono" aria-hidden="true">⚠️</span> La hora de finalización debe ser posterior a la de inicio.
+    </span>
+  </div>
+</template>
+{% endblock %}
