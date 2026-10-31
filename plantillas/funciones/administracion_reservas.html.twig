@@ -1,0 +1,124 @@
+{#
+  Todas las reservas para el administrador, en /funcion/administracion/reservas (E4-03), con el
+  armado de «Usuarios y roles» (administracion-usuarios-parametros): la barra lateral, el filtro en
+  fila, la tabla y el paginado numerado. Desde acá se anula una reserva confirmada, y sus lugares
+  quedan libres. El filtro es un formulario GET que se aplica al elegir, como el de usuarios.
+
+  Variables:
+  - reservas: lista de {id, codigo, cantidad, total, estado, estado_etiqueta, creada (ya escrita),
+    anulable, funcion: {titulo, url, fecha} o null si programación no respondió}.
+  - estados: lista de {valor, etiqueta}, para el filtro.
+  - filtro: (string|null) el estado elegido.
+  - paginado: numero, total_paginas, total, anterior y siguiente (URL o null) y paginas: lista de
+    {numero, url, actual}.
+  - anulada: (string|null) el código de la reserva que se acaba de anular.
+  - error_general: (string, opcional) por qué no se anuló.
+#}
+{% extends 'administracion.html.twig' %}
+
+{% block titulo %}Reservas{% endblock %}
+
+{% block seccion %}reservas{% endblock %}
+
+{% block panel %}
+{% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
+<header class="panel-admin-cabecera">
+  <h1 class="panel-admin-titulo">Reservas</h1>
+  <p class="panel-admin-bajada">Las reservas de todas las funciones. Anular una la cancela y libera sus lugares.</p>
+</header>
+
+<form class="panel-admin-filtros" action="/funcion/administracion/reservas" method="get" role="search" aria-label="Filtrar reservas" data-enviar-al-elegir>
+  <label>
+    <span class="sr-only">Estado</span>
+    <select name="estado" class="campo-control control-select">
+      <option value="">Estado: todos</option>
+      {% for estado in estados %}
+        <option value="{{ estado.valor }}"{% if filtro == estado.valor %} selected{% endif %}>{{ estado.etiqueta|capitalize }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <noscript>{% include 'parciales/boton.html.twig' with { texto: 'Filtrar', variante: 'primario' } only %}</noscript>
+  {% if filtro %}
+    {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/funcion/administracion/reservas', variante: 'fantasma' } only %}
+  {% endif %}
+</form>
+
+{% if anulada %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'La reserva ' ~ anulada ~ ' quedó anulada y sus lugares, libres.' } only %}
+{% endif %}
+{% if error_general is defined %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se anuló la reserva', mensaje: error_general } only %}
+{% endif %}
+
+{% if reservas is empty %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'info',
+    mensaje: filtro ? 'No hay reservas en ese estado.' : 'Todavía no hay reservas.'
+  } only %}
+{% else %}
+  <p class="sr-only" role="status">{{ paginado.total }} {{ paginado.total == 1 ? 'reserva' : 'reservas' }}</p>
+  <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Reservas">
+    <table class="tabla-admin">
+      <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Función</th>
+          <th scope="col">Lugares</th>
+          <th scope="col">Total</th>
+          <th scope="col">Reservada</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reserva in reservas %}
+          <tr data-reserva="{{ reserva.id }}">
+            <td><span class="tabla-admin-principal panel-reservas-codigo">{{ reserva.codigo }}</span></td>
+            <td>
+              {% if reserva.funcion %}
+                <a href="{{ reserva.funcion.url }}" class="tabla-admin-principal">{{ reserva.funcion.titulo }}</a>
+                <span class="tabla-admin-secundario">{{ reserva.funcion.fecha ?? 'Sin fecha' }}</span>
+              {% else %}
+                <span class="tabla-admin-secundario">No se pudo cargar la función</span>
+              {% endif %}
+            </td>
+            <td>{{ reserva.cantidad }}</td>
+            <td>{{ reserva.total }}</td>
+            <td>{{ reserva.creada }}</td>
+            <td><span class="estado-cuenta {{ clases_estado[reserva.estado] }}">{{ reserva.estado_etiqueta }}</span></td>
+            <td>
+              {% if reserva.anulable %}
+                <form action="/funcion/administracion/reservas/{{ reserva.id }}/anular" method="POST" class="formulario-accion-tabla">
+                  <input type="hidden" name="_csrf" value="{{ csrf }}">
+                  {% include 'parciales/boton.html.twig' with {
+                    texto: 'Anular',
+                    tipo: 'submit',
+                    variante: 'peligro',
+                    tamano: 'chico',
+                    aria_label: 'Anular la reserva ' ~ reserva.codigo
+                  } only %}
+                </form>
+              {% else %}
+                <span class="tabla-admin-secundario">—</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if paginado.total_paginas > 1 %}
+    <nav class="paginado-numerado" aria-label="Páginas de reservas">
+      <ul>
+        {% for pagina in paginado.paginas %}
+          {% if pagina.actual %}
+            <li><a href="{{ pagina.url }}" class="paginado-numero actual" aria-current="page">{{ pagina.numero }}</a></li>
+          {% else %}
+            <li><a href="{{ pagina.url }}" class="paginado-numero"{% if pagina.url == paginado.anterior %} rel="prev"{% elseif pagina.url == paginado.siguiente %} rel="next"{% endif %} aria-label="Página {{ pagina.numero }}">{{ pagina.numero }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </nav>
+  {% endif %}
+{% endif %}
+{% endblock %}

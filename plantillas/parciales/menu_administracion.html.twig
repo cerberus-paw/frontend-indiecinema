@@ -6,7 +6,7 @@
   «Moderación» (moderacion-solicitudes), que mientras no haya moderador resuelve el administrador.
 
   Parámetros recibidos:
-  - activa: (string) la sección actual: 'usuarios' o 'solicitudes'.
+  - activa: (string) la sección actual: 'usuarios', 'reservas' o 'solicitudes'.
   - usuario: el usuario en sesión.
   - csrf: el token del formulario para salir.
 #}
@@ -21,6 +21,9 @@
     <ul class="panel-admin-menu-lista">
       <li>
         <a href="/cuenta/administracion/usuarios" class="panel-admin-menu-enlace{% if activa == 'usuarios' %} activo{% endif %}"{% if activa == 'usuarios' %} aria-current="page"{% endif %}>Usuarios y roles</a>
+      </li>
+      <li>
+        <a href="/funcion/administracion/reservas" class="panel-admin-menu-enlace{% if activa == 'reservas' %} activo{% endif %}"{% if activa == 'reservas' %} aria-current="page"{% endif %}>Reservas</a>
       </li>
     </ul>
   </nav>

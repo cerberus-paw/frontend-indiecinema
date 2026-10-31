@@ -1,0 +1,142 @@
+{#
+  Las reservas de una función para su organizador, en /funcion/organizador/funciones/{id}/reservas
+  (E4-03), como la sección «Reservas de la función» del wireframe de la E2 (panel-organizador):
+  las tarjetas de números, el registro de la asistencia, la tabla con el botón de cada fila y
+  «Exportar listado» (el CSV). Sin la barra lateral del panel, que todavía no existe: el armado es el
+  de «Mis funciones», de donde se llega. Queda afuera lo que todavía no hay: el nombre del
+  espectador (cuentas no tiene una consulta de varios usuarios juntos), el pago y el reparto.
+
+  Variables:
+  - funcion: id, titulo, url (de su ficha), fecha (o null), sala, estado y cupo.
+  - resumen: reservados y libres (lugares), asistentes (lugares ya registrados), recaudado (ya
+    escrito) y reservas (cuántas siguen en pie).
+  - reservas: lista de {id, codigo, cantidad, total, estado ('confirmada' | 'cancelada' |
+    'asistio'), estado_etiqueta, creada (ya escrita), registrable}.
+  - registra_asistencia: (bool) si se puede registrar: la función no se canceló.
+  - codigo: (string) lo que se había escrito, al volver con un error.
+  - registrada: (string|null) el código que se acaba de registrar.
+  - error_general: (string, opcional) por qué no se registró la asistencia.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Reservas · {{ funcion.titulo }}{% endblock %}
+
+{% block contenido %}
+{% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
+<div class="contenedor panel-reservas">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/organizador/funciones" class="enlace-miga">Mis funciones</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Reservas</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Reservas de <a href="{{ funcion.url }}">{{ funcion.titulo }}</a></h1>
+      <p class="solicitud-bajada">{{ funcion.sala }} · {{ funcion.fecha ?? 'Sin fecha todavía' }}{% if funcion.estado == 'cancelada' %} · <strong>función cancelada</strong>{% endif %}</p>
+    </div>
+    {% include 'parciales/boton.html.twig' with {
+      texto: 'Exportar listado',
+      url: '/funcion/organizador/funciones/' ~ funcion.id ~ '/reservas.csv',
+      variante: 'secundario',
+      icono: '⬇'
+    } only %}
+  </header>
+
+  <dl class="panel-admin-resumen">
+    <div class="panel-admin-dato">
+      <dt>Lugares reservados</dt>
+      <dd class="panel-admin-dato-valor">{{ resumen.reservados }}</dd>
+      <dd class="panel-admin-dato-nota">de {{ funcion.cupo }} · {{ resumen.reservas }} {{ resumen.reservas == 1 ? 'reserva' : 'reservas' }}</dd>
+    </div>
+    <div class="panel-admin-dato">
+      <dt>Lugares libres</dt>
+      <dd class="panel-admin-dato-valor">{{ resumen.libres }}</dd>
+      <dd class="panel-admin-dato-nota">{{ resumen.libres == 0 ? 'agotada' : 'para reservar' }}</dd>
+    </div>
+    <div class="panel-admin-dato">
+      <dt>Asistentes registrados</dt>
+      <dd class="panel-admin-dato-valor">{{ resumen.asistentes }}</dd>
+      <dd class="panel-admin-dato-nota">de {{ resumen.reservados }} lugares reservados</dd>
+    </div>
+    <div class="panel-admin-dato">
+      <dt>Total de las reservas</dt>
+      <dd class="panel-admin-dato-valor">{{ resumen.recaudado }}</dd>
+      <dd class="panel-admin-dato-nota">sin las canceladas</dd>
+    </div>
+  </dl>
+
+  {% if registrada %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Se registró la asistencia de la reserva ' ~ registrada ~ '.' } only %}
+  {% endif %}
+  {% if error_general is defined %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se registró la asistencia', mensaje: error_general } only %}
+  {% endif %}
+
+  {# En la puerta: el espectador dicta el código de su comprobante #}
+  {% if registra_asistencia %}
+    <form action="/funcion/organizador/funciones/{{ funcion.id }}/asistencia" method="POST" class="panel-reservas-asistencia">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'codigo',
+        etiqueta: 'Código de la reserva',
+        valor: codigo,
+        requerido: true,
+        ayuda: 'El que muestra el espectador en su comprobante, como 7KQ2M9XA.'
+      } only %}
+      {% include 'parciales/boton.html.twig' with { texto: 'Registrar asistencia', tipo: 'submit', variante: 'primario' } only %}
+    </form>
+  {% endif %}
+
+  {% if reservas is empty %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Todavía nadie reservó lugares para esta función.' } only %}
+  {% else %}
+    <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Reservas de la función">
+      <table class="tabla-admin">
+        <thead>
+          <tr>
+            <th scope="col">Código</th>
+            <th scope="col">Lugares</th>
+            <th scope="col">Total</th>
+            <th scope="col">Reservada</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Asistencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for reserva in reservas %}
+            <tr data-reserva="{{ reserva.id }}">
+              <td><span class="tabla-admin-principal panel-reservas-codigo">{{ reserva.codigo }}</span></td>
+              <td>{{ reserva.cantidad }}</td>
+              <td>{{ reserva.total }}</td>
+              <td>{{ reserva.creada }}</td>
+              <td><span class="estado-cuenta {{ clases_estado[reserva.estado] }}">{{ reserva.estado_etiqueta }}</span></td>
+              <td>
+                {% if reserva.estado == 'asistio' %}
+                  <span class="tabla-admin-secundario">Registrada</span>
+                {% elseif reserva.registrable and registra_asistencia %}
+                  <form action="/funcion/organizador/funciones/{{ funcion.id }}/asistencia" method="POST" class="formulario-accion-tabla">
+                    <input type="hidden" name="_csrf" value="{{ csrf }}">
+                    <input type="hidden" name="codigo" value="{{ reserva.codigo }}">
+                    {% include 'parciales/boton.html.twig' with {
+                      texto: 'Registrar asistencia',
+                      tipo: 'submit',
+                      variante: 'secundario',
+                      tamano: 'chico',
+                      aria_label: 'Registrar la asistencia de la reserva ' ~ reserva.codigo
+                    } only %}
+                  </form>
+                {% else %}
+                  <span class="tabla-admin-secundario">—</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
