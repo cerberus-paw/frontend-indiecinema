@@ -132,6 +132,10 @@
             <a href="/cuenta/" class="menu-item" role="menuitem">
               <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
             </a>
+            {# Las reservas del espectador, con el comprobante de cada una (E4-04.1) #}
+            <a href="/funcion/reservas" class="menu-item" role="menuitem">
+              <span class="menu-icono" aria-hidden="true">🎟️</span> Mis reservas
+            </a>
             {% endif %}
             {# Quien todavía no es organizador puede pedirlo con la solicitud #}
             {% if not usr.alcanza('organizador') %}

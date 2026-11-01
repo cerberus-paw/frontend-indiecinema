@@ -5955,6 +5955,13 @@ a.tabla-admin-principal:focus-visible {
   margin-top: var(--espacio-6);
 }
 
+/* «Mis reservas» (E4-04.1): los dos botones de cada fila, uno al lado del otro */
+.mis-reservas-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
 /* El comprobante en papel (E4-04.2): sólo el código y los datos de la reserva, en negro sobre
    blanco y sin el resto del sitio, para que entre en una hoja y se lea en la puerta */
 @media print {
