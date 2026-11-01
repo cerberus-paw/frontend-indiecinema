@@ -5949,7 +5949,76 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .comprobante-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
   margin-top: var(--espacio-6);
+}
+
+/* El comprobante en papel (E4-04.2): sólo el código y los datos de la reserva, en negro sobre
+   blanco y sin el resto del sitio, para que entre en una hoja y se lea en la puerta */
+@media print {
+  .encabezado,
+  .pie-pagina,
+  .pasos-reserva,
+  .contenedor-reserva > .alerta,
+  .comprobante-acciones {
+    display: none !important;
+  }
+
+  @page {
+    margin: 1.5cm;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html,
+  body.cuerpo-app,
+  .contenido-principal {
+    background: #fff;
+    color: #000;
+  }
+
+  .comprobante-datos {
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .contenedor-reserva {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .tarjeta-comprobante {
+    background: #fff;
+    border: 1px solid #000;
+    border-radius: 0;
+    margin: 0;
+    break-inside: avoid;
+  }
+
+  .comprobante-titulo,
+  .comprobante-titulo span,
+  .comprobante-codigo,
+  .comprobante-codigo-rotulo,
+  .comprobante-datos dt,
+  .comprobante-datos dd,
+  .comprobante-datos a {
+    color: #000;
+  }
+
+  .comprobante-datos a {
+    text-decoration: none;
+  }
+
+  .comprobante-codigo {
+    font-size: 3rem;
+    letter-spacing: 0.2em;
+  }
 }
 
 /* --------------------------------------------------------------------------
