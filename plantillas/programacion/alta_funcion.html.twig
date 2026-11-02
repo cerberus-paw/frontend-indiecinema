@@ -133,6 +133,20 @@
               <span class="opcion-modo-descripcion">Las obras seleccionadas serán candidatas a votación. La fecha y horario se definirán al finalizar la votación.</span>
             </span>
           </label>
+
+          <label class="opcion-modo-funcion{% if modo_actual == 'en_acuerdo_fecha' %} seleccionada{% endif %}">
+            <input
+              type="radio"
+              name="modo"
+              value="en_acuerdo_fecha"
+              class="opcion-modo-radio"
+              {% if modo_actual == 'en_acuerdo_fecha' %}checked{% endif %}
+            >
+            <span class="opcion-modo-contenido">
+              <strong class="opcion-modo-titulo">Abrir acuerdo de fecha</strong>
+              <span class="opcion-modo-descripcion">Proponé franjas horarias y quórum mínimo para que los espectadores elijan fecha y horario con «Me sirve».</span>
+            </span>
+          </label>
         </div>
         {% if errores.modo is defined and errores.modo %}
           <span class="campo-error" role="alert">
@@ -267,6 +281,72 @@
       </fieldset>
 
       {# ==================================================================== #}
+      {# SECCIÓN 3B: ACUERDO DE FECHA Y QUÓRUM (E3-13.2 / IC-154)             #}
+      {# ==================================================================== #}
+      {% set es_acuerdo = not (es_edicion ?? false) and modo_actual == 'en_acuerdo_fecha' %}
+      <fieldset class="seccion-formulario seccion-acuerdo-alta" data-seccion-acuerdo-alta{% if not es_acuerdo %} hidden{% endif %} data-gestor-franjas data-cupo-maximo="500">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Franjas y quórum del acuerdo</span>
+          <span class="seccion-subtitulo">Definí el mínimo de compromisos («Me sirve») requerido y las alternativas horarias.</span>
+        </legend>
+
+        <div class="fila-campos-simple">
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'minimo_asistentes',
+            etiqueta: 'Mínimo de asistentes requeridos',
+            tipo: 'number',
+            valor: valores.minimo_asistentes|default(20),
+            valor_minimo: 1,
+            requerido: es_acuerdo,
+            errores: errores,
+            ayuda: 'Cantidad de personas que deben marcar «Me sirve» para confirmar la función.'
+          } only %}
+        </div>
+
+        <div class="lista-franjas-formulario" data-contenedor-franjas role="list" aria-label="Franjas propuestas en alta">
+          {% set franjas_alta = valores.franjas|default([
+            { fecha: '', hora_inicio: '20:00', hora_fin: '22:30' },
+            { fecha: '', hora_inicio: '21:00', hora_fin: '23:30' }
+          ]) %}
+          {% for franja in franjas_alta %}
+            {% set idx = loop.index0 %}
+            <div class="fila-franja-horaria" data-indice-franja="{{ idx }}" role="listitem">
+              <div class="franja-cabecera-fila">
+                <span class="franja-numero-etiqueta" data-etiqueta-franja>Opción {{ loop.index }}</span>
+                <button type="button" class="boton-eliminar-franja" data-eliminar-franja aria-label="Eliminar opción {{ loop.index }}" {% if loop.length <= 1 %}disabled{% endif %}>
+                  <span aria-hidden="true">🗑️</span> Quitar
+                </button>
+              </div>
+              <div class="franja-campos-grid">
+                <div class="grupo-campo">
+                  <label for="alta-franja-fecha-{{ idx }}" class="campo-etiqueta">Fecha <span class="campo-requerido" aria-hidden="true">*</span></label>
+                  <input type="date" id="alta-franja-fecha-{{ idx }}" name="franjas[{{ idx }}][fecha]" value="{{ franja.fecha|default('') }}" class="campo-control" data-campo-fecha {% if es_acuerdo %}required{% endif %}>
+                </div>
+                <div class="grupo-campo">
+                  <label for="alta-franja-inicio-{{ idx }}" class="campo-etiqueta">Desde <span class="campo-requerido" aria-hidden="true">*</span></label>
+                  <input type="time" id="alta-franja-inicio-{{ idx }}" name="franjas[{{ idx }}][hora_inicio]" value="{{ franja.hora_inicio|default('20:00') }}" class="campo-control" data-campo-inicio {% if es_acuerdo %}required{% endif %}>
+                </div>
+                <div class="grupo-campo">
+                  <label for="alta-franja-fin-{{ idx }}" class="campo-etiqueta">Hasta <span class="campo-requerido" aria-hidden="true">*</span></label>
+                  <input type="time" id="alta-franja-fin-{{ idx }}" name="franjas[{{ idx }}][hora_fin]" value="{{ franja.hora_fin|default('22:30') }}" class="campo-control" data-campo-fin {% if es_acuerdo %}required{% endif %}>
+                </div>
+              </div>
+              <span class="franja-alerta-rango campo-error" data-error-rango hidden role="alert">
+                <span class="error-icono" aria-hidden="true">⚠️</span> La hora de fin debe ser posterior a la de inicio.
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="franja-acciones-agregar">
+          <button type="button" class="boton boton-secundario boton-chico boton-agregar-franja" data-agregar-franja>
+            <span class="icono-mas" aria-hidden="true">➕</span> Agregar otra opción de fecha y hora
+          </button>
+        </div>
+        <div class="sr-only" role="status" aria-live="polite" data-anuncio-franjas></div>
+      </fieldset>
+
+      {# ==================================================================== #}
       {# SECCIÓN 4: PRECIO Y CUPO                                             #}
       {# ==================================================================== #}
       <fieldset class="seccion-formulario">
@@ -372,4 +452,75 @@
   </div>
   {% endif %}
 </div>
+
+{# Plantilla HTML para clonar nuevas filas de franjas horarias desde JavaScript #}
+<template id="plantilla-fila-franja">
+  <div class="fila-franja-horaria" data-indice-franja="__INDICE__" role="listitem">
+    <div class="franja-cabecera-fila">
+      <span class="franja-numero-etiqueta" data-etiqueta-franja>Opción __NUMERO__</span>
+      <button
+        type="button"
+        class="boton-eliminar-franja"
+        data-eliminar-franja
+        aria-label="Eliminar opción __NUMERO__"
+      >
+        <span aria-hidden="true">🗑️</span> Quitar
+      </button>
+    </div>
+
+    <div class="franja-campos-grid">
+      <div class="grupo-campo">
+        <label for="franja-fecha-__INDICE__" class="campo-etiqueta">
+          Fecha <span class="campo-requerido" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="date"
+          id="franja-fecha-__INDICE__"
+          name="franjas[__INDICE__][fecha]"
+          value=""
+          class="campo-control"
+          data-campo-fecha
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <div class="grupo-campo">
+        <label for="franja-inicio-__INDICE__" class="campo-etiqueta">
+          Horario desde <span class="campo-requerido" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="time"
+          id="franja-inicio-__INDICE__"
+          name="franjas[__INDICE__][hora_inicio]"
+          value="20:00"
+          class="campo-control"
+          data-campo-inicio
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <div class="grupo-campo">
+        <label for="franja-fin-__INDICE__" class="campo-etiqueta">
+          Horario hasta <span class="campo-requerido" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="time"
+          id="franja-fin-__INDICE__"
+          name="franjas[__INDICE__][hora_fin]"
+          value="22:30"
+          class="campo-control"
+          data-campo-fin
+          required
+          aria-required="true"
+        >
+      </div>
+    </div>
+
+    <span class="franja-alerta-rango campo-error" data-error-rango hidden role="alert">
+      <span class="error-icono" aria-hidden="true">⚠️</span> La hora de finalización debe ser posterior a la de inicio.
+    </span>
+  </div>
+</template>
 {% endblock %}
