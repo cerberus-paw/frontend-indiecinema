@@ -541,7 +541,11 @@
       {% set franjas_marcadas = franjas_del_usuario|default(funcion.franjas_del_usuario|default([])) %}
       {% set tiene_voto_franja = franjas_marcadas is not empty %}
       {# El organizador no marca sus propias franjas: el mínimo lo junta el público (E3-13.F7). #}
-      {% set marca_franjas = usuario and not funcion.es_organizador|default(false) %}
+      {# Pasada la fecha límite no se marca más, aunque el acuerdo siga abierto porque una franja
+         llegó al mínimo y falta que el organizador la confirme (E3-13.F8). #}
+      {# Con ?? y no con default: default toma el false como vacío y lo cambia por true. #}
+      {% set votacion_abierta = funcion.votacion_abierta ?? true %}
+      {% set marca_franjas = usuario and not funcion.es_organizador|default(false) and votacion_abierta %}
       {# Sólo lo que viene del acuerdo: antes, sin datos, se mostraban franjas, un mínimo y votos
          de ejemplo como si fueran reales (E3-13.F3). El mínimo nunca es 0: divide los porcentajes. #}
       {% set franjas_disponibles = funcion.franjas|default([]) %}
@@ -602,6 +606,13 @@
                   mensaje: 'Quitaste «Me sirve» de esa franja.'
                 } only %}
               </div>
+            {% endif %}
+
+            {% if not es_acuerdo_sin_minimo and not votacion_abierta %}
+              {% include 'parciales/mensaje.html.twig' with {
+                tipo: 'info',
+                mensaje: 'Ya pasó la fecha límite para marcar «Me sirve». Falta que el organizador confirme la franja que llegó al mínimo.'
+              } only %}
             {% endif %}
 
             {% if error_franja|default(false) %}
@@ -1024,7 +1035,7 @@
                   <span class="requisito-icono" aria-hidden="true">⏳</span>
                   <div class="requisito-datos">
                     <span class="requisito-etiqueta">Fecha límite</span>
-                    <strong class="requisito-valor">{{ funcion.cierre_acuerdo|default('Hasta completar el mínimo') }}</strong>
+                    <strong class="requisito-valor">{{ funcion.fecha_limite|default('Sin franjas todavía') }}</strong>
                   </div>
                 </li>
 
@@ -1048,7 +1059,7 @@
                 <div class="lateral-callout-advertencia" role="note">
                   <span class="callout-icono" aria-hidden="true">💡</span>
                   <p class="callout-texto">
-                    Marcar «Me sirve» compromete tu voto para esta fecha. Si la franja ganadora alcanza el mínimo, la función pasa a programada con esa fecha. Si no lo alcanza, la función no se programa y el organizador decide qué hacer.
+                    Marcar «Me sirve» es comprometerte a ir, pero no reserva ni cobra nada. Si ninguna franja llega al mínimo antes de la fecha límite, la función no se programa y el organizador decide si propone otras fechas o la cancela.
                   </p>
                 </div>
               {% endif %}
