@@ -35,7 +35,14 @@ class BuscadorDeCartelera {
     EN_VOTACION: ['EN VOTACIÓN DE TÍTULOS', 'insignia-votacion'],
     EN_VOTACION_TITULOS: ['EN VOTACIÓN DE TÍTULOS', 'insignia-votacion'],
     en_votacion_titulos: ['EN VOTACIÓN DE TÍTULOS', 'insignia-votacion'],
-    ACUERDO_FECHA: ['ACUERDO DE FECHA', 'insignia-acuerdo'],
+    ACUERDO_FECHA: ['EN ACUERDO DE FECHA', 'insignia-acuerdo'],
+    ACUERDO_DE_FECHA: ['EN ACUERDO DE FECHA', 'insignia-acuerdo'],
+    EN_ACUERDO_FECHA: ['EN ACUERDO DE FECHA', 'insignia-acuerdo'],
+    en_acuerdo_fecha: ['EN ACUERDO DE FECHA', 'insignia-acuerdo'],
+    ACUERDO_SIN_MINIMO: ['ACUERDO SIN MÍNIMO', 'insignia-sin-quorum'],
+    acuerdo_sin_minimo: ['ACUERDO SIN MÍNIMO', 'insignia-sin-quorum'],
+    SIN_QUORUM: ['ACUERDO SIN MÍNIMO', 'insignia-sin-quorum'],
+    sin_quorum: ['ACUERDO SIN MÍNIMO', 'insignia-sin-quorum'],
   };
 
   /**
@@ -313,22 +320,51 @@ class BuscadorDeCartelera {
       || estadoClave === 'EN_VOTACION_TITULOS'
       || estadoClave === 'EN_VOTACION_DE_TITULOS'
       || String(funcion.estado_valor || '').toLowerCase() === 'en_votacion_titulos';
+    const esAcuerdo = Boolean(funcion.en_acuerdo)
+      || estadoClave === 'ACUERDO_FECHA'
+      || estadoClave === 'ACUERDO_DE_FECHA'
+      || estadoClave === 'EN_ACUERDO_FECHA'
+      || String(funcion.estado_valor || '').toLowerCase() === 'en_acuerdo_fecha';
+    const esSinQuorum = Boolean(funcion.acuerdo_sin_minimo)
+      || estadoClave === 'ACUERDO_SIN_MINIMO'
+      || estadoClave === 'SIN_QUORUM'
+      || String(funcion.estado_valor || '').toLowerCase() === 'acuerdo_sin_minimo';
     const [etiqueta, insignia] = BuscadorDeCartelera.ESTADOS[estadoClave]
       ?? BuscadorDeCartelera.ESTADOS[funcion.estado]
-      ?? (esVotacion ? ['EN VOTACIÓN DE TÍTULOS', 'insignia-votacion'] : BuscadorDeCartelera.ESTADOS.PROGRAMADA);
-    const textoBoton = esVotacion ? 'Votar títulos' : 'Ver función';
+      ?? (esVotacion
+        ? ['EN VOTACIÓN DE TÍTULOS', 'insignia-votacion']
+        : (esAcuerdo
+          ? ['EN ACUERDO DE FECHA', 'insignia-acuerdo']
+          : (esSinQuorum
+            ? ['ACUERDO SIN MÍNIMO', 'insignia-sin-quorum']
+            : BuscadorDeCartelera.ESTADOS.PROGRAMADA)));
+    const textoBoton = esVotacion
+      ? 'Votar títulos'
+      : (esAcuerdo
+        ? 'Votar fecha'
+        : (esSinQuorum ? 'Ver resultado' : 'Ver función'));
     const textoFecha = esVotacion
       ? (funcion.cierre_votacion || 'Fecha a definir tras la votación')
-      : (funcion.fecha || 'Próximamente');
+      : (esAcuerdo
+        ? (funcion.compromisos && funcion.minimo_asistentes
+          ? `Acuerdo de fecha · ${funcion.compromisos} / ${funcion.minimo_asistentes} compromisos`
+          : (funcion.franjas_propuestas || 'Acuerdo de fecha · Franjas en debate'))
+        : (esSinQuorum
+          ? 'Sin quórum · No programada'
+          : (funcion.fecha || 'Próximamente')));
     const claseBoton = esVotacion
       ? 'boton boton-primario boton-chico boton-bloque boton-tarjeta-funcion boton-tarjeta-votar'
-      : 'boton boton-secundario boton-chico boton-bloque boton-tarjeta-funcion';
+      : (esAcuerdo
+        ? 'boton boton-primario boton-chico boton-bloque boton-tarjeta-funcion boton-tarjeta-acuerdo'
+        : 'boton boton-secundario boton-chico boton-bloque boton-tarjeta-funcion');
     const ariaLabelBoton = esVotacion
       ? `Votar títulos para ${funcion.titulo}`
-      : `Ver función ${funcion.titulo}`;
+      : (esAcuerdo
+        ? `Votar fecha para ${funcion.titulo}`
+        : (esSinQuorum ? `Ver resultado de ${funcion.titulo}` : `Ver función ${funcion.titulo}`));
 
     return this.nodo('article', {
-      class: `tarjeta-funcion${esVotacion ? ' tarjeta-funcion-votacion' : ''}`,
+      class: `tarjeta-funcion${esVotacion ? ' tarjeta-funcion-votacion' : (esAcuerdo ? ' tarjeta-funcion-acuerdo' : (esSinQuorum ? ' tarjeta-funcion-sin-quorum' : ''))}`,
       'aria-label': `${funcion.titulo} - ${etiqueta}`,
     }, [
       this.nodo('div', { class: 'tarjeta-funcion-afiche' }, [
@@ -343,6 +379,8 @@ class BuscadorDeCartelera {
         this.nodo('div', { class: 'tarjeta-funcion-cabecera' }, [
           this.nodo('span', { class: `insignia-estado ${insignia}`, 'aria-label': `Estado: ${etiqueta}` }, [
             ...(esVotacion ? [this.nodo('span', { class: 'insignia-icono', 'aria-hidden': 'true' }, ['🗳️'])] : []),
+            ...(esAcuerdo ? [this.nodo('span', { class: 'insignia-icono', 'aria-hidden': 'true' }, ['🤝'])] : []),
+            ...(esSinQuorum ? [this.nodo('span', { class: 'insignia-icono', 'aria-hidden': 'true' }, ['⚠️'])] : []),
             etiqueta,
           ]),
           this.nodo('span', { class: 'tarjeta-funcion-precio' }, [funcion.precio]),
@@ -360,13 +398,19 @@ class BuscadorDeCartelera {
             this.nodo('span', { class: 'meta-texto' }, [
               esVotacion
                 ? this.nodo('span', { class: 'meta-texto-destacado meta-texto-votacion' }, [textoFecha])
-                : textoFecha,
+                : (esAcuerdo
+                  ? this.nodo('span', { class: 'meta-texto-destacado meta-texto-acuerdo' }, [textoFecha])
+                  : (esSinQuorum
+                    ? this.nodo('span', { class: 'meta-texto-destacado meta-texto-sin-quorum' }, [textoFecha])
+                    : textoFecha)),
             ]),
           ]),
         ]),
         this.nodo('div', { class: 'tarjeta-funcion-acciones' }, [
           this.nodo('a', { href: funcion.url, class: claseBoton, 'aria-label': ariaLabelBoton }, [
             ...(esVotacion ? [this.nodo('span', { class: 'boton-icono boton-icono-antes', 'aria-hidden': 'true' }, ['🗳️'])] : []),
+            ...(esAcuerdo ? [this.nodo('span', { class: 'boton-icono boton-icono-antes', 'aria-hidden': 'true' }, ['🤝'])] : []),
+            ...(esSinQuorum ? [this.nodo('span', { class: 'boton-icono boton-icono-antes', 'aria-hidden': 'true' }, ['ℹ️'])] : []),
             this.nodo('span', { class: 'boton-texto' }, [textoBoton]),
           ]),
         ]),

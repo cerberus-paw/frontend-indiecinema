@@ -2168,6 +2168,16 @@ dd {
   color: var(--color-texto-brillante);
 }
 
+/* Insignia acuerdo sin mínimo / sin quórum (E3-13.5 / IC-157) */
+.insignia-sin-quorum {
+  /* Fondo ámbar translúcido */
+  background-color: rgba(240, 166, 59, 0.18);
+  /* Borde ámbar */
+  border: 1px solid rgba(240, 166, 59, 0.5);
+  /* Color de advertencia */
+  color: var(--color-advertencia);
+}
+
 /* Precio en la cabecera de la tarjeta */
 .tarjeta-funcion-precio {
   /* Tipografía */
@@ -2238,10 +2248,23 @@ dd {
   color: var(--color-texto-atenuado);
 }
 
-/* Icono del dato */
+/* Icono del dato: de línea y del color del texto atenuado, como los del wireframe */
 .meta-icono {
-  /* Tamaño fijo */
-  font-size: 0.85rem;
+  /* Tamaño fijo, un poco menor que el texto */
+  width: 0.9rem;
+  height: 0.9rem;
+  /* Color atenuado */
+  color: var(--color-texto-apagado);
+}
+
+/* Íconos de línea (parciales/icono): en línea con el texto y sin achicarse dentro de una fila flexible */
+.icono {
+  /* Se alinea con la línea de texto */
+  display: inline-block;
+  /* Bajado apenas, para quedar centrado con las minúsculas */
+  vertical-align: -0.15em;
+  /* No se deforma si falta lugar */
+  flex-shrink: 0;
 }
 
 /* Pie con botón de llamado a la acción */
@@ -3489,8 +3512,9 @@ dd {
 .ficha-funcion {
   /* Ancho completo */
   width: 100%;
-  /* Límite de ancho para legibilidad óptima */
-  max-width: 960px;
+  /* El del sitio: los wireframes de la función usan todo el ancho, con el acuerdo en dos
+     columnas (E3-13.F10) */
+  max-width: var(--ancho-maximo);
   /* Centrado horizontal */
   margin: 0 auto;
 }
@@ -3505,28 +3529,511 @@ dd {
   gap: var(--espacio-6);
 }
 
-/* Cabecera hero de la función */
-.ficha-funcion-cabecera {
-  /* Fondo oscuro carbón */
-  background-color: var(--color-superficie);
-  /* Borde tenue */
-  border: 1px solid var(--color-superficie-borde);
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-lg);
-  /* Relleno interno generoso */
-  padding: var(--espacio-6);
-  /* Sombra sutil de elevación */
-  box-shadow: var(--sombra-sm);
+/* --------------------------------------------------------------------------
+   Ficha de la función como los wireframes (E3-13.F10): la cabecera con la sala
+   y las píldoras, la línea de estados y el acuerdo de fecha en dos columnas.
+   Los colores son los del sitio: lo negro del wireframe es el ámbar.
+   -------------------------------------------------------------------------- */
+
+/* Título a la izquierda y «Compartir» (y las acciones del organizador) a la derecha */
+.ficha-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--espacio-4) var(--espacio-6);
 }
 
-/* Información principal de la cabecera */
-.ficha-funcion-info-principal {
-  /* Disposición flex */
+/* Aviso de cancelada, título y la fila de la sala, uno debajo del otro */
+.ficha-cabecera-texto {
   display: flex;
-  /* Dirección vertical */
   flex-direction: column;
-  /* Separación interna */
   gap: var(--espacio-3);
+  min-width: 0;
+}
+
+/* La sala con su pin y las píldoras, en una fila que baja si no entra */
+.ficha-cabecera-datos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-3) var(--espacio-4);
+}
+
+/* «Cineclub La Perla · Luján»: lleva a la ficha de la sala */
+.ficha-cabecera-sala {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.ficha-cabecera-sala:hover,
+.ficha-cabecera-sala:focus-visible {
+  color: var(--color-primario);
+}
+
+/* Las píldoras de datos («2 títulos elegidos», «Mínimo 20 asistentes») */
+.ficha-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* En versalitas y monoespaciada, con borde, como en el wireframe */
+.ficha-chip {
+  padding: 0.2rem 0.75rem;
+  border: 1px solid var(--color-borde-medio);
+  border-radius: 999px;
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-secundario);
+}
+
+/* Botones de la derecha de la cabecera */
+.ficha-cabecera-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.ficha-cabecera-acciones form {
+  margin: 0;
+}
+
+/* La caja de la línea de estados */
+.ficha-estados {
+  padding: var(--espacio-4) var(--espacio-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* Los cuatro estados en fila; en pantallas angostas bajan */
+.ficha-estados-lista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-3) 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cada estado es una píldora */
+.ficha-estado {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: 0.4rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* El tramo de línea entre un estado y el anterior */
+.ficha-estado:not(:first-child) {
+  margin-left: 2.75rem;
+}
+
+.ficha-estado:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 1.75rem;
+  margin-right: 0.5rem;
+  border-top: 1px solid var(--color-borde-medio);
+}
+
+/* Ya pasó: con borde y el tilde */
+.ficha-estado-hecho {
+  border-color: var(--color-borde-fuerte);
+  color: var(--color-texto-secundario);
+}
+
+/* El actual: lleno */
+.ficha-estado-actual {
+  background: var(--color-primario);
+  border-color: var(--color-primario);
+  color: var(--color-texto-inverso);
+  font-weight: 600;
+}
+
+/* El acuerdo que cerró sin quórum: lleno, pero en rojo */
+.ficha-estado-alerta {
+  background: var(--color-error);
+  border-color: var(--color-error);
+  color: var(--color-texto-brillante);
+}
+
+/* Todavía no: punteado y apagado */
+.ficha-estado-pendiente {
+  border: 1px dashed var(--color-borde-medio);
+  color: var(--color-texto-apagado);
+}
+
+/* El acuerdo en dos columnas: las franjas y, al costado, el lateral */
+.ficha-acuerdo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  align-items: start;
+  gap: var(--espacio-8);
+}
+
+/* La columna de las franjas */
+.ficha-acuerdo-principal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  min-width: 0;
+}
+
+/* «Franjas horarias propuestas» con «Podés marcar más de una» a la derecha */
+.ficha-seccion-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espacio-2) var(--espacio-4);
+}
+
+.ficha-seccion-titulo {
+  margin: 0;
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-xl);
+  color: var(--color-texto-brillante);
+}
+
+.ficha-seccion-ayuda {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* «Ingresá para marcar…», para quien no tiene sesión */
+.ficha-acuerdo-ingresar {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.ficha-acuerdo-ingresar a {
+  color: var(--color-primario);
+}
+
+/* Lo que puede hacer el organizador con el acuerdo */
+.ficha-panel-organizador {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  padding: var(--espacio-5);
+  background: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+.ficha-panel-titulo {
+  margin: 0;
+  font-size: var(--texto-md);
+  color: var(--color-texto-brillante);
+}
+
+.ficha-panel-texto {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.ficha-panel-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+.ficha-panel-acciones form {
+  margin: 0;
+}
+
+/* La lista de franjas */
+.ficha-franjas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Una franja: cuándo, cuántos se comprometieron y el botón, en una fila */
+.ficha-franja {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--espacio-6);
+  padding: var(--espacio-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+/* La que marcó quien mira: con el borde grueso, como en el wireframe */
+.ficha-franja-marcada {
+  border: 2px solid var(--color-primario);
+  padding: calc(var(--espacio-5) - 1px);
+}
+
+.ficha-franja-fecha {
+  margin: 0;
+  font-size: var(--texto-md);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.ficha-franja-horario {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.ficha-franja-progreso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+/* La barra de compromisos contra el mínimo */
+.ficha-barra {
+  height: 6px;
+  overflow: hidden;
+  background: var(--color-superficie-interactiva);
+  border-radius: 999px;
+}
+
+.ficha-barra-relleno {
+  display: block;
+  height: 100%;
+  background: var(--color-primario);
+  border-radius: inherit;
+}
+
+/* «11 de 20 comprometidos» a la izquierda y lo que falta a la derecha */
+.ficha-franja-conteo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espacio-1) var(--espacio-3);
+  margin: 0;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+.ficha-franja-conteo strong {
+  color: var(--color-texto);
+}
+
+.ficha-franja-accion form {
+  margin: 0;
+}
+
+/* «Me sirve»: el mismo ancho marcado o no, para que la fila no salte. Uno solo: estaba dos veces
+   (stylelint, no-duplicate-selectors) y ganaba lo de la segunda, que queda acá. */
+.boton-me-sirve {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 7.5rem;
+  white-space: nowrap;
+}
+
+.boton-me-sirve[aria-pressed="true"] {
+  border-color: var(--color-primario);
+  color: var(--color-primario);
+}
+
+/* El lateral: títulos elegidos, cómo se confirma y el aviso */
+.ficha-acuerdo-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-5);
+}
+
+.ficha-caja {
+  padding: var(--espacio-6);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+/* «TÍTULOS YA ELEGIDOS», «CÓMO SE CONFIRMA»: rótulos chicos y espaciados */
+.ficha-caja-rotulo {
+  margin: 0 0 var(--espacio-4);
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+.ficha-titulos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Un título: el afiche chico y, al lado, el nombre con el año y la duración */
+.ficha-titulo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-4);
+}
+
+.ficha-titulo-afiche {
+  flex-shrink: 0;
+  width: 4rem;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+}
+
+/* Sin afiche: el marcador del wireframe */
+.ficha-titulo-afiche-vacio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde);
+  font-family: var(--fuente-codigo);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+.ficha-titulo-nombre {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.ficha-titulo-datos {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* «Ganó la votación con…», separado por una línea */
+.ficha-caja-nota {
+  margin: var(--espacio-4) 0 0;
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--color-borde);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* Los datos de «Cómo se confirma»: el nombre a la izquierda y el valor a la derecha */
+.ficha-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  width: auto;
+  margin: 0;
+  /* Sin la caja que el dl tiene en todo el sitio: ya está adentro de la suya */
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.ficha-dato {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  font-size: var(--texto-sm);
+}
+
+.ficha-dato dt {
+  font-weight: 400;
+  color: var(--color-texto-secundario);
+}
+
+.ficha-dato dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+  color: var(--color-texto);
+}
+
+/* El aviso de abajo del lateral, con el borde izquierdo de color como en el wireframe */
+.ficha-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  padding: var(--espacio-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-left: 3px solid var(--color-primario);
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.ficha-aviso p {
+  margin: 0;
+}
+
+.ficha-aviso strong {
+  color: var(--color-texto);
+}
+
+.ficha-aviso .icono {
+  margin-top: 0.15rem;
+  color: var(--color-texto);
+}
+
+/* En tablet el lateral pasa abajo, y en celular cada franja se apila */
+@media (max-width: 900px) {
+  .ficha-acuerdo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ficha-franja {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-3);
+  }
+
+  /* Los estados bajan de a uno: sin el tramo de línea, que quedaría suelto al principio */
+  .ficha-estados-lista {
+    gap: var(--espacio-2);
+  }
+
+  .ficha-estado:not(:first-child) {
+    margin-left: 0;
+  }
+
+  .ficha-estado:not(:first-child)::before {
+    display: none;
+  }
 }
 
 /* Contenedor para alinear insignia de estado */
@@ -3559,63 +4066,6 @@ dd {
   line-height: 1.2;
   /* Rompe palabras largas para evitar scroll horizontal en móvil */
   word-break: break-word;
-}
-
-/* Tira de metadatos de la función (fecha, precio, cupo) */
-.ficha-funcion-metadatos {
-  /* Disposición flex */
-  display: flex;
-  /* Envoltorio responsivo */
-  flex-wrap: wrap;
-  /* Separación */
-  gap: var(--espacio-3);
-  /* Margen superior */
-  margin-top: var(--espacio-2);
-}
-
-/* Chip individual de metadato */
-.ficha-metadato-chip {
-  /* Disposición en línea flexible */
-  display: inline-flex;
-  /* Alineación centrada */
-  align-items: center;
-  /* Separación */
-  gap: var(--espacio-2);
-  /* Fondo elevado */
-  background-color: var(--color-superficie-elevada);
-  /* Borde tenue */
-  border: 1px solid var(--color-superficie-borde);
-  /* Relleno interno */
-  padding: var(--espacio-2) var(--espacio-4);
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-md);
-  /* Tamaño chico */
-  font-size: var(--texto-sm);
-  /* Color texto */
-  color: var(--color-texto);
-  /* Tipografía */
-  font-family: var(--fuente-cuerpo);
-}
-
-/* Icono dentro del chip de metadato */
-.ficha-metadato-icono {
-  /* Tamaño de icono */
-  font-size: 1.1rem;
-  /* Altura de línea compacta */
-  line-height: 1;
-}
-
-/* Texto del chip de metadato */
-.ficha-metadato-texto {
-  /* Peso seminegrita */
-  font-weight: 500;
-}
-
-/* Acción en la tira de metadatos (ej. botón para editar o cancelar función propia, IC-122 / IC-123) */
-.ficha-metadato-accion {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--espacio-2);
 }
 
 /* Formulario en línea para cerrar votación desde la cabecera (IC-150) */
@@ -5417,7 +5867,7 @@ a.tabla-admin-principal:focus-visible {
 
 @media (min-width: 640px) {
   .selector-modo-funcion {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 }
 
@@ -5689,6 +6139,297 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* --------------------------------------------------------------------------
+   PROPUESTA Y GESTIÓN DE FRANJAS HORARIAS Y QUÓRUM DE ACUERDO (IC-154 / E3-13.2)
+   Componentes para plantillas/programacion/proponer_franjas.html.twig y alta_funcion.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Formulario principal de propuesta de franjas */
+.formulario-proponer-franjas {
+  width: 100%;
+}
+
+/* Contenedor general de proponer franjas */
+.contenedor-proponer-franjas {
+  width: 100%;
+}
+
+/* Sección de quórum mínimo */
+.seccion-quorum {
+  margin-bottom: var(--espacio-6);
+}
+
+/* Sección de franjas horarias del acuerdo */
+.seccion-franjas-acuerdo {
+  margin-bottom: var(--espacio-6);
+}
+
+/* Lista dinámica de filas de franjas */
+.lista-franjas-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin-top: var(--espacio-3);
+  margin-bottom: var(--espacio-4);
+}
+
+/* Fila individual de franja horaria */
+.fila-franja-horaria {
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-4);
+  transition: border-color var(--transicion-rapida), box-shadow var(--transicion-rapida);
+}
+
+.fila-franja-horaria:focus-within {
+  border-color: var(--color-borde-fuerte);
+  box-shadow: 0 0 0 2px rgba(240, 166, 59, 0.12);
+}
+
+/* Cabecera de la fila con número de opción y botón de eliminar */
+.franja-cabecera-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--espacio-3);
+  padding-bottom: var(--espacio-2);
+  border-bottom: 1px dashed var(--color-superficie-borde);
+}
+
+/* Etiqueta del número de opción («Opción 1», «Opción 2») */
+.franja-numero-etiqueta {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  color: var(--color-primario);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Botón accesible para eliminar franja */
+.boton-eliminar-franja {
+  background: transparent;
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto-apagado);
+  border-radius: var(--radio-sm);
+  padding: var(--espacio-1) var(--espacio-2);
+  font-size: var(--texto-xs);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: color var(--transicion-rapida), border-color var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+.boton-eliminar-franja:hover:not(:disabled) {
+  color: var(--color-error);
+  border-color: var(--color-error);
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.boton-eliminar-franja:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Cuadrícula de inputs por franja (fecha, inicio, fin) */
+.franja-campos-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espacio-3);
+}
+
+@media (min-width: 640px) {
+  .franja-campos-grid {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+}
+
+/* Mensaje de error de rango horario inválido */
+.franja-alerta-rango {
+  margin-top: var(--espacio-2);
+  font-size: var(--texto-xs);
+  color: var(--color-error);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.franja-alerta-rango[hidden] {
+  display: none;
+}
+
+/* Acciones para agregar franjas */
+.franja-acciones-agregar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-3);
+}
+
+.boton-agregar-franja {
+  cursor: pointer;
+}
+
+.franja-ayuda-agregar {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-atenuado);
+}
+
+/* Tarjeta lateral con resumen de la función en acuerdo */
+.tarjeta-resumen-funcion-acuerdo {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.resumen-obra-acuerdo {
+  border-bottom: 1px dashed var(--color-superficie-borde);
+  padding-bottom: var(--espacio-3);
+}
+
+.resumen-rotulo {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  color: var(--color-texto-atenuado);
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.resumen-titulo-pelicula {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0.25rem 0 0 0;
+  line-height: 1.3;
+}
+
+/* Tarjeta de recordatorio / consejo en la barra lateral */
+.tarjeta-recordatorio-acuerdo {
+  background-color: rgba(240, 166, 59, 0.08);
+  border: 1px solid rgba(240, 166, 59, 0.22);
+  border-radius: var(--radio-sm);
+  padding: var(--espacio-3);
+}
+
+.recordatorio-texto {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.recordatorio-texto strong {
+  color: var(--color-primario);
+}
+
+/* --------------------------------------------------------------------------
+   ACUERDO DE FECHA CON ESPECTADORES - BOTÓN «ME SIRVE» Y FRANJAS (IC-155 / E3-13.3)
+   Componentes para plantillas/programacion/ficha_funcion.html.twig
+   -------------------------------------------------------------------------- */
+
+.ficha-acuerdo-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-2xl);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+  margin: 0;
+}
+
+@keyframes pulso-ganadora {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(240, 166, 59, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 4px rgba(240, 166, 59, 0);
+  }
+}
+
+.formulario-confirmar-acuerdo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.boton-confirmar-acuerdo-destacado {
+  font-weight: 700;
+  font-size: var(--texto-base);
+  padding: var(--espacio-3) var(--espacio-5);
+  box-shadow: 0 4px 14px rgba(240, 166, 59, 0.35);
+}
+
+.formulario-cancelar-funcion {
+  display: inline-flex;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   ACUERDO DE FECHA CON ESPECTADORES - FICHA Y WIREFRAME (E3-13 / IC-158)
+   Línea de estados (stepper), panel complementario lateral y adaptación
+   -------------------------------------------------------------------------- */
+
+/* ── Tarjetas Laterales del Acuerdo ─────────────────────────────────────── */
+.tarjeta-acuerdo-lateral {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  padding: var(--espacio-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+/* ── Cartelera y tabla del organizador para acuerdo de fecha ────────────── */
+.tarjeta-funcion.tarjeta-funcion-acuerdo {
+  border-color: rgba(240, 166, 59, 0.35);
+}
+
+.tarjeta-funcion.tarjeta-funcion-acuerdo:hover {
+  border-color: var(--color-primario);
+}
+
+.meta-texto-destacado.meta-texto-acuerdo {
+  color: var(--color-primario);
+  font-weight: 600;
+}
+
+.estado-cuenta-acuerdo {
+  background-color: rgba(240, 166, 59, 0.18);
+  border-color: rgba(240, 166, 59, 0.5);
+  color: #fef3c7;
+}
+
+/* ── Cartelera y tabla del organizador para acuerdo sin mínimo (E3-13.5 / IC-157) ── */
+.tarjeta-funcion.tarjeta-funcion-sin-quorum {
+  border-color: rgba(240, 166, 59, 0.25);
+  opacity: 0.9;
+}
+
+.tarjeta-funcion.tarjeta-funcion-sin-quorum:hover {
+  border-color: var(--color-advertencia);
+  opacity: 1;
+}
+
+.meta-texto-destacado.meta-texto-sin-quorum {
+  color: var(--color-advertencia);
+  font-weight: 600;
+}
+
+.estado-cuenta-sin-quorum {
+  background-color: rgba(240, 166, 59, 0.15);
+  border-color: rgba(240, 166, 59, 0.4);
+  color: var(--color-advertencia);
+}
+
+/* --------------------------------------------------------------------------
    CONFIRMACIÓN DE CANCELACIÓN DE FUNCIÓN (IC-123 / E3-11.4)
    Componentes para plantillas/programacion/cancelar_funcion.html.twig
    -------------------------------------------------------------------------- */
@@ -5829,8 +6570,8 @@ a.tabla-admin-principal:focus-visible {
   border-color: var(--color-borde-medio);
 }
 
-/* El chip de los lugares, y en rojo cuando no queda ninguno */
-.ficha-metadato-agotada {
+/* El chip de los lugares de la cabecera, en rojo cuando no queda ninguno */
+.ficha-chip-agotada {
   border-color: var(--color-error);
   color: var(--color-error);
 }
@@ -6206,20 +6947,6 @@ a.tabla-admin-principal:focus-visible {
     margin: 0 auto var(--espacio-2) auto;
   }
 
-  /* Metadatos de la función apilados en móvil */
-  .ficha-funcion-metadatos {
-    /* Disposición en columna */
-    flex-direction: column;
-    /* Separación */
-    gap: var(--espacio-2);
-  }
-
-  /* Chips de metadatos al 100% de ancho */
-  .ficha-metadato-chip {
-    /* Ancho completo */
-    width: 100%;
-  }
-
   /* Título de la función ajustado en móvil */
   .ficha-funcion-titulo {
     /* Tamaño 30px */
@@ -6381,7 +7108,6 @@ a.tabla-admin-principal:focus-visible {
     width: 100%;
   }
   /* Ficha de la función en celulares angostos a 360 px (IC-87 / E3-04.3) */
-  .ficha-funcion-cabecera,
   .ficha-sala-tarjeta,
   .ficha-obra-tarjeta {
     /* Relleno compacto */

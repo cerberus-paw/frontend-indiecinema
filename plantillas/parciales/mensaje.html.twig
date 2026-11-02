@@ -31,7 +31,7 @@
       {# Icono de advertencia triangular para avisos y precauciones #}
       {% elseif tipo_alerta == 'advertencia' %}
         {# Símbolo de advertencia para llamados de atención #}
-        <span class="icono-simbolo">⚠️</span>
+        {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'icono-simbolo' } only %}
       {# Icono de peligro o error para operaciones fallidas #}
       {% elseif tipo_alerta == 'error' %}
         {# Cruz o signo de exclamación para errores #}
