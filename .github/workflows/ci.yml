@@ -58,13 +58,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Twig no es dependencia del front: lo trae el núcleo del back, con su misma versión.
+      # La rama del back con el mismo nombre que ésta, si existe; si no, main. Así un cambio
+      # que toca los dos repositorios (las ramas IC-… se llaman igual en los dos) se prueba entero
+      # antes de mergear ninguno. La rama va por env y no en el script, por si trae algo raro.
+      - name: Elegir la rama del back
+        id: back
+        env:
+          RAMA: ${{ github.head_ref || github.ref_name }}
+        run: |
+          if git ls-remote --exit-code --heads https://github.com/cerberus-paw/backend-indiecinema.git "refs/heads/$RAMA" >/dev/null; then
+            echo "ref=$RAMA" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+          fi
+          grep ref= "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
         with:
           path: frontend-indiecinema
       - uses: actions/checkout@v7
         with:
           repository: cerberus-paw/backend-indiecinema
-          ref: main
+          ref: ${{ steps.back.outputs.ref }}
           path: backend-indiecinema
       - uses: shivammathur/setup-php@v2
         with:
@@ -102,16 +116,29 @@ jobs:
       PRUEBAS_MYSQL_PUERTO: 3306
       PRUEBAS_MYSQL_CLAVE: pruebas
     steps:
-      # El espejo del CI del back: el back de main con el front de este PR al lado, como en la
-      # máquina de cada uno (los subsistemas instalan el front desde ../../frontend-indiecinema).
-      # Si un PR del front necesita uno del back, pasa después de mergear el del back.
+      # El espejo del CI del back: el back con el front de este PR al lado, como en la máquina de
+      # cada uno (los subsistemas instalan el front desde ../../frontend-indiecinema).
+      # La rama del back con el mismo nombre que ésta, si existe; si no, main. Así un cambio
+      # que toca los dos repositorios (las ramas IC-… se llaman igual en los dos) se prueba entero
+      # antes de mergear ninguno. La rama va por env y no en el script, por si trae algo raro.
+      - name: Elegir la rama del back
+        id: back
+        env:
+          RAMA: ${{ github.head_ref || github.ref_name }}
+        run: |
+          if git ls-remote --exit-code --heads https://github.com/cerberus-paw/backend-indiecinema.git "refs/heads/$RAMA" >/dev/null; then
+            echo "ref=$RAMA" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+          fi
+          grep ref= "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
         with:
           path: frontend-indiecinema
       - uses: actions/checkout@v7
         with:
           repository: cerberus-paw/backend-indiecinema
-          ref: main
+          ref: ${{ steps.back.outputs.ref }}
           path: backend-indiecinema
       - uses: shivammathur/setup-php@v2
         with:

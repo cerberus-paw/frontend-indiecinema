@@ -43,6 +43,11 @@
   - votado: (bool) si se redireccionó tras emitir o modificar el voto (?votado=1).
   - error_voto: (string|null) mensaje de error si falló el registro o cambio de voto.
 
+  - En acuerdo de fecha (E3-13), funcion trae además: sin_franjas, minimo_asistentes, franjas
+    (id, fecha, fecha_corta, hora_inicio, hora_fin y votos), franja_ganadora (la que lidera),
+    confirmable, acuerdo_sin_minimo, fecha_limite (ya escrita), votacion_abierta y votos_emitidos
+    (los de la votación de títulos). franjas_del_usuario son las franjas que marcó quien mira.
+
   editable, cancelable, cerrable, reservable y guardada llevan |default(false): el paquete front se mergea
   antes que el back, así que mientras tanto esta plantilla la sirve un controlador que todavía no
   las manda, y con las variables estrictas de Twig faltar no puede ser un error.
@@ -76,8 +81,19 @@
     } only %}
   {% endif %}
 
+  {# Alerta informativa al volver de confirmar el acuerdo de fecha (IC-156 / E3-13.4) #}
+  {% if acuerdo_confirmado|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: '¡Función programada con éxito!',
+      mensaje: 'El acuerdo de fecha concluyó exitosamente. La función ya se encuentra programada con su fecha definitiva y disponible para reservas en la cartelera.'
+    } only %}
+  {% endif %}
+
   <nav class="navegacion-migas" aria-label="Ruta de navegación">
     <ol class="lista-migas">
+      <li><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
       <li><a href="/cartelera" class="enlace-miga">Cartelera</a></li>
       <li class="separador-miga" aria-hidden="true">/</li>
       <li class="miga-activa" aria-current="page">{{ funcion.titulo }}</li>
@@ -85,8 +101,12 @@
   </nav>
 
   <article class="ficha-funcion-contenido">
-    <header class="ficha-funcion-cabecera">
-      <div class="ficha-funcion-info-principal">
+    {# La cabecera de los wireframes de la función (las tres pantallas la comparten): el título
+       con «Compartir» a la derecha y, abajo, la sala con su localidad y dos o tres datos en
+       píldoras, que cambian según el estado (E3-13.F10). #}
+    {% set es_sin_quorum = funcion.acuerdo_sin_minimo|default(false) %}
+    <header class="ficha-cabecera">
+      <div class="ficha-cabecera-texto">
         {% if funcion.es_cancelada %}
           {% include 'parciales/mensaje.html.twig' with {
             tipo: 'error',
@@ -94,74 +114,96 @@
             mensaje: 'Esta función fue cancelada.',
             clase: 'ficha-alerta-cancelada'
           } only %}
-        {% else %}
-          <div class="ficha-insignia-contenedor">
-            <span class="insignia-estado {{ clases_estado[funcion.estado] ?? '' }}">{% if funcion.estado == 'en_votacion_titulos' %}<span class="insignia-icono" aria-hidden="true">🗳️</span> {% endif %}{{ funcion.estado_etiqueta|upper }}</span>
-          </div>
         {% endif %}
-
         <h1 class="ficha-funcion-titulo">{{ funcion.titulo }}</h1>
-
-        <div class="ficha-funcion-metadatos">
-          <div class="ficha-metadato-chip ficha-metadato-fecha" aria-label="Información de fecha: {{ funcion.estado == 'en_votacion_titulos' ? 'Fecha a coordinar con la sala tras el cierre de la votación' : (funcion.fecha ?? 'Fecha a confirmar') }}">
-            <span class="ficha-metadato-icono" aria-hidden="true">📅</span>
-            <span class="ficha-metadato-texto">
-              {% if funcion.estado == 'en_votacion_titulos' %}
-                Fecha a coordinar con la sala tras el cierre de la votación · Fecha a confirmar
-              {% elseif funcion.estado == 'en_acuerdo_fecha' %}
-                {{ funcion.fecha ?? 'Fecha en coordinación con la sala · Fecha a confirmar' }}
+        <div class="ficha-cabecera-datos">
+          <a href="{{ funcion.sala.url }}" class="ficha-cabecera-sala">
+            {% include 'parciales/icono.html.twig' with { nombre: 'ubicacion' } only %}
+            <span>{{ funcion.sala.nombre }} · {{ funcion.sala.localidad }}</span>
+          </a>
+          <ul class="ficha-chips">
+            {% if funcion.estado == 'en_votacion_titulos' %}
+              <li class="ficha-chip">{{ funcion.cupo }} lugares</li>
+              <li class="ficha-chip">{{ funcion.obras|length }} {{ funcion.obras|length == 1 ? 'título candidato' : 'títulos candidatos' }}</li>
+              <li class="ficha-chip">Fecha a confirmar</li>
+            {% elseif funcion.estado == 'en_acuerdo_fecha' %}
+              <li class="ficha-chip">{{ funcion.obras|length }} {{ funcion.obras|length == 1 ? 'título elegido' : 'títulos elegidos' }}</li>
+              {# El mínimo lo fija el organizador al proponer las franjas: antes no hay ninguno. #}
+              {% if funcion.minimo_asistentes is defined %}
+                <li class="ficha-chip">Mínimo {{ funcion.minimo_asistentes }} {{ funcion.minimo_asistentes == 1 ? 'asistente' : 'asistentes' }}</li>
               {% else %}
-                {{ funcion.fecha ?? 'Fecha a confirmar' }}
+                <li class="ficha-chip">{{ funcion.cupo }} lugares</li>
               {% endif %}
-            </span>
-          </div>
-          {# Los lugares libres junto a la fecha, como el wireframe «funcion-programada» (E4-02) #}
-          {% if funcion.lugares_libres|default(null) is not null %}
-            <div class="ficha-metadato-chip ficha-metadato-lugares{% if funcion.agotada|default(false) %} ficha-metadato-agotada{% endif %}">
-              <span class="ficha-metadato-icono" aria-hidden="true">💺</span>
-              <span class="ficha-metadato-texto">{{ funcion.agotada|default(false) ? 'Agotada' : (funcion.lugares_libres == 1 ? 'Queda 1 lugar libre' : funcion.lugares_libres ~ ' lugares libres') }}</span>
-            </div>
-          {% endif %}
-          <div class="ficha-metadato-chip ficha-metadato-precio">
-            <span class="ficha-metadato-icono" aria-hidden="true">🎟️</span>
-            <span class="ficha-metadato-texto">{{ funcion.precio }} · {{ funcion.cupo }} lugares</span>
-          </div>
-          {% if funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) %}
-            <div class="ficha-metadato-accion">
-              {% if funcion.cerrable|default(false) %}
-                <form action="/organizador/funciones/{{ funcion.id }}/cerrar-votacion" method="POST" class="ficha-form-cerrar-votacion">
-                  <input type="hidden" name="_csrf" value="{{ csrf }}">
-                  <input type="hidden" name="volver" value="ficha">
-                  {% include 'parciales/boton.html.twig' with {
-                    texto: 'Cerrar votación',
-                    tipo: 'submit',
-                    variante: 'secundario',
-                    tamano: 'chico'
-                  } only %}
-                </form>
+            {% else %}
+              {% if funcion.fecha %}
+                <li class="ficha-chip">{{ funcion.fecha }}</li>
               {% endif %}
-              {% if funcion.editable|default(false) %}
-                {% include 'parciales/boton.html.twig' with {
-                  texto: 'Editar función',
-                  url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
-                  variante: 'secundario',
-                  tamano: 'chico'
-                } only %}
+              {# Los lugares libres en vez del cupo, como el wireframe «funcion-programada» (E4-02):
+                 el cupo ya lo dice la barra de la reserva. Sin el dato de funciones, el cupo. #}
+              {% if funcion.lugares_libres|default(null) is not null %}
+                <li class="ficha-chip ficha-chip-lugares{% if funcion.agotada|default(false) %} ficha-chip-agotada{% endif %}">
+                  {{- funcion.agotada|default(false) ? 'Agotada' : (funcion.lugares_libres == 1 ? 'Queda 1 lugar libre' : funcion.lugares_libres ~ ' lugares libres') -}}
+                </li>
+              {% else %}
+                <li class="ficha-chip">{{ funcion.cupo }} lugares</li>
               {% endif %}
-              {% if funcion.cancelable|default(false) %}
-                {% include 'parciales/boton.html.twig' with {
-                  texto: 'Cancelar función',
-                  url: '/organizador/funciones/' ~ funcion.id ~ '/cancelar',
-                  variante: 'peligro',
-                  tamano: 'chico'
-                } only %}
-              {% endif %}
-            </div>
-          {% endif %}
+            {% endif %}
+          </ul>
         </div>
+      </div>
+      <div class="ficha-cabecera-acciones">
+        {# Copia el enlace o abre el menú de compartir del sistema. Sin JavaScript no puede hacer
+           nada, así que el componente lo muestra recién cuando funciona. #}
+        <button type="button" class="boton boton-secundario" data-compartir hidden>Compartir</button>
+        {% if funcion.cerrable|default(false) %}
+          <form action="/organizador/funciones/{{ funcion.id }}/cerrar-votacion" method="POST" class="ficha-form-cerrar-votacion">
+            <input type="hidden" name="_csrf" value="{{ csrf }}">
+            <input type="hidden" name="volver" value="ficha">
+            {% include 'parciales/boton.html.twig' with {
+              texto: 'Cerrar votación',
+              tipo: 'submit',
+              variante: 'secundario'
+            } only %}
+          </form>
+        {% endif %}
+        {% if funcion.editable|default(false) %}
+          {% include 'parciales/boton.html.twig' with {
+            texto: 'Editar función',
+            url: '/organizador/funciones/' ~ funcion.id ~ '/editar',
+            variante: 'secundario'
+          } only %}
+        {% endif %}
+        {% if funcion.cancelable|default(false) %}
+          {% include 'parciales/boton.html.twig' with {
+            texto: 'Cancelar función',
+            url: '/organizador/funciones/' ~ funcion.id ~ '/cancelar',
+            variante: 'peligro'
+          } only %}
+        {% endif %}
       </div>
     </header>
 
+    {# La línea de estados del wireframe: los cuatro, con los ya pasados tildados, el actual lleno
+       y los que faltan punteados. Una cancelada no la lleva: el aviso de arriba ya lo dice. #}
+    {% if not funcion.es_cancelada %}
+      {% set paso_actual = { en_votacion_titulos: 0, en_acuerdo_fecha: 1, programada: 2, finalizada: 3 }[funcion.estado] ?? 2 %}
+      {% set pasos = ['EN VOTACIÓN DE TÍTULOS', es_sin_quorum ? 'ACUERDO SIN QUÓRUM' : 'EN ACUERDO DE FECHA', 'PROGRAMADA', 'FINALIZADA'] %}
+      <nav class="ficha-estados" aria-label="Estado de la función">
+        <ol class="ficha-estados-lista">
+          {% for paso in pasos %}
+            {% set momento = loop.index0 < paso_actual ? 'hecho' : (loop.index0 == paso_actual ? 'actual' : 'pendiente') %}
+            <li class="ficha-estado ficha-estado-{{ momento }}{% if momento == 'actual' and es_sin_quorum %} ficha-estado-alerta{% endif %}"{% if momento == 'actual' %} aria-current="step"{% endif %}>
+              {% if momento == 'hecho' %}
+                {% include 'parciales/icono.html.twig' with { nombre: 'check' } only %}
+              {% endif %}
+              <span>{{ paso }}</span>
+            </li>
+          {% endfor %}
+        </ol>
+      </nav>
+    {% endif %}
+
+    {% set bloque_reserva %}
     {# El panel de reserva del wireframe (funcion-programada). La ficha es de una columna: va
        debajo de la cabecera y no al costado. Los lugares libres y el total en vivo llegan con
        la ocupación y el componente de reserva. En votación de títulos no aplica reserva. #}
@@ -172,7 +214,8 @@
           {# «A la gorra» no es por lugar: sólo un precio con signo lo es. #}
           <p class="ficha-reserva-monto"><strong>{{ funcion.precio }}</strong>{% if funcion.precio starts with '$' %} por lugar{% endif %}</p>
           {# La barra de lo que ya se reservó, como el recuadro de reserva del wireframe #}
-          {% if funcion.lugares_libres|default(null) is not null %}
+          {# cupo > 0 lo asegura la base; igual se mira, porque un <progress> con max 0 es inválido #}
+          {% if funcion.lugares_libres|default(null) is not null and funcion.cupo > 0 %}
             <div class="ficha-reserva-disponibles">
               <progress class="ficha-reserva-barra" max="{{ funcion.cupo }}" value="{{ funcion.cupo - funcion.lugares_libres }}" aria-label="Lugares ya reservados: {{ funcion.cupo - funcion.lugares_libres }} de {{ funcion.cupo }}"></progress>
               <p class="ficha-reserva-disponibles-texto">
@@ -218,6 +261,9 @@
         </div>
       </section>
     {% endif %}
+    {% endset %}
+    {% if funcion.estado != 'en_acuerdo_fecha' %}{{ bloque_reserva }}{% endif %}
+
     {# ==================================================================== #}
     {# BLOQUE INTERACTIVO: VOTACIÓN DE TÍTULOS (E3-12 / IC-148 / IC-149)   #}
     {# ==================================================================== #}
@@ -228,7 +274,6 @@
         <div class="ficha-votacion-cabecera">
           <div class="ficha-votacion-intro">
             <span class="insignia-estado insignia-votacion" aria-label="Fase de la función: Votación de títulos abierta">
-              <span class="insignia-icono" aria-hidden="true">🗳️</span>
               VOTACIÓN ABIERTA
             </span>
             <h2 id="ficha-votacion-titulo" class="ficha-votacion-titulo">Votación de títulos</h2>
@@ -243,7 +288,6 @@
         {% if funcion.cerrable|default(false) %}
           <div class="ficha-votacion-panel-organizador" role="region" aria-label="Gestión de votación para el organizador">
             <div class="votacion-organizador-contenido">
-              <span class="votacion-organizador-icono" aria-hidden="true">⏱️</span>
               <div class="votacion-organizador-texto">
                 <h3 class="votacion-organizador-titulo">Panel del organizador</h3>
                 <p class="votacion-organizador-bajada">
@@ -258,7 +302,6 @@
                 texto: 'Cerrar votación',
                 tipo: 'submit',
                 variante: 'primario',
-                icono: '🔒',
                 clase: 'boton-cerrar-votacion-destacado'
               } only %}
             </form>
@@ -290,7 +333,7 @@
           {# Mensaje de estado si ya emitió un voto #}
           {% if tiene_voto %}
             <div class="ficha-votacion-aviso-voto" role="status">
-              <span class="aviso-icono" aria-hidden="true">✓</span>
+              {% include 'parciales/icono.html.twig' with { nombre: 'check', clase: 'aviso-icono' } only %}
               <p class="aviso-texto">
                 Ya emitiste tu voto para esta función. Podés cambiar tu elección seleccionando otra de las obras candidatas a continuación.
               </p>
@@ -308,7 +351,6 @@
                     <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="candidata-afiche-img" loading="lazy">
                   {% else %}
                     <div class="candidata-afiche-placeholder" aria-hidden="true">
-                      <span class="afiche-placeholder-icono">🎬</span>
                       <span class="afiche-placeholder-texto">AFICHE</span>
                     </div>
                   {% endif %}
@@ -320,7 +362,7 @@
                     </h3>
                     {% if es_votada %}
                       <span class="insignia-tu-voto" role="status">
-                        <span aria-hidden="true">✓</span> Tu voto actual
+                        {% include 'parciales/icono.html.twig' with { nombre: 'check' } only %} Tu voto actual
                       </span>
                     {% endif %}
                   </div>
@@ -342,7 +384,6 @@
                     <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
                   {% endif %}
                   <p class="candidata-conteo-votos" aria-label="Cantidad de votos acumulados">
-                    <span class="conteo-icono" aria-hidden="true">🗳️</span>
                     <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
                   </p>
                   <div class="candidata-accion">
@@ -355,7 +396,6 @@
                         <input type="hidden" name="_csrf" value="{{ csrf }}">
                         <input type="hidden" name="obra_id" value="{{ obra_id }}">
                         <button type="submit" class="boton boton-primario boton-votar-obra">
-                          <span class="icono-votar" aria-hidden="true">🗳️</span>
                           {{ tiene_voto ? 'Cambiar mi voto' : 'Votar por este título' }}
                         </button>
                       </form>
@@ -369,7 +409,6 @@
           {# Espectador no autenticado: invitación accesible a ingresar o registrarse #}
           <div class="ficha-votacion-invitacion" role="region" aria-label="Ingresar para votar">
             <div class="votacion-invitacion-contenido">
-              <span class="votacion-icono-invitacion" aria-hidden="true">🗳️</span>
               <div class="votacion-texto-invitacion">
                 <h3 class="votacion-titulo-invitacion">Iniciá sesión para votar</h3>
                 <p class="votacion-bajada-invitacion">
@@ -394,7 +433,6 @@
                     <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="candidata-afiche-img" loading="lazy">
                   {% else %}
                     <div class="candidata-afiche-placeholder" aria-hidden="true">
-                      <span class="afiche-placeholder-icono">🎬</span>
                       <span class="afiche-placeholder-texto">AFICHE</span>
                     </div>
                   {% endif %}
@@ -423,7 +461,6 @@
                     <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
                   {% endif %}
                   <p class="candidata-conteo-votos" aria-label="Cantidad de votos acumulados">
-                    <span class="conteo-icono" aria-hidden="true">🗳️</span>
                     <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
                   </p>
                   <div class="candidata-accion">
@@ -437,6 +474,244 @@
       </section>
     {% endif %}
 
+    {# ==================================================================== #}
+    {# ACUERDO DE FECHA CON LOS ESPECTADORES (E3-13), como el wireframe      #}
+    {# «funcion-acuerdo-de-fecha»: las franjas a la izquierda y, al costado, #}
+    {# los títulos elegidos, cómo se confirma y el aviso (E3-13.F10).        #}
+    {# ==================================================================== #}
+    {% if funcion.estado == 'en_acuerdo_fecha' %}
+      {% set sin_franjas = funcion.sin_franjas|default(false) %}
+      {% set es_organizador = funcion.es_organizador|default(false) %}
+      {# Sólo lo que viene del acuerdo (E3-13.F3). El mínimo nunca es 0: divide el porcentaje. #}
+      {% set franjas_disponibles = funcion.franjas|default([]) %}
+      {% set minimo = max(funcion.minimo_asistentes|default(1), 1) %}
+      {# Las franjas que marcó quien mira: pueden ser varias (E3-13.F7). #}
+      {% set franjas_marcadas = franjas_del_usuario|default(funcion.franjas_del_usuario|default([])) %}
+      {# Con ?? y no con default: default toma el false como vacío y lo cambia por true. #}
+      {% set votacion_abierta = funcion.votacion_abierta ?? true %}
+      {# El organizador no marca sus propias franjas: el mínimo lo junta el público (E3-13.F7). Pasada
+         la fecha límite no se marca más, aunque falte que el organizador confirme (E3-13.F8). #}
+      {% set se_vota = not sin_franjas and not es_sin_quorum and votacion_abierta %}
+      {% set marca_franjas = usuario and not es_organizador and se_vota %}
+      {% set franja_lider = funcion.franja_ganadora|default(null) %}
+      {% set max_votos = franja_lider.votos|default(0) %}
+
+      <section class="ficha-acuerdo" aria-labelledby="ficha-acuerdo-titulo" data-seccion-acuerdo-fecha>
+        <div class="ficha-acuerdo-principal">
+          <div class="ficha-seccion-cabecera">
+            <h2 id="ficha-acuerdo-titulo" class="ficha-seccion-titulo">Franjas horarias propuestas</h2>
+            {% if marca_franjas %}
+              <p class="ficha-seccion-ayuda">Podés marcar más de una</p>
+            {% endif %}
+          </div>
+
+          {% if franja_votada|default(false) and not es_sin_quorum %}
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'exito',
+              mensaje: 'Marcaste «Me sirve» en esa franja. Podés marcar otras, o quitarla, mientras el acuerdo siga abierto.'
+            } only %}
+          {% endif %}
+          {% if franja_quitada|default(false) and not es_sin_quorum %}
+            {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Quitaste «Me sirve» de esa franja.' } only %}
+          {% endif %}
+          {% if error_franja|default(false) %}
+            {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se pudo registrar tu elección', mensaje: error_franja } only %}
+          {% endif %}
+          {# Lo que no salió al confirmar o cerrar el acuerdo (E3-13.F4): es del organizador, no del voto. #}
+          {% if error_acuerdo|default(false) %}
+            {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se pudo actualizar el acuerdo', mensaje: error_acuerdo } only %}
+          {% endif %}
+          {% if not sin_franjas and not es_sin_quorum and not votacion_abierta %}
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'info',
+              mensaje: 'Ya pasó la fecha límite para marcar «Me sirve». Falta que el organizador confirme la franja que llegó al mínimo.'
+            } only %}
+          {% endif %}
+          {% if es_sin_quorum %}
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'advertencia',
+              titulo: 'La función no se programa por falta de quórum',
+              mensaje: 'Ninguna franja llegó a los ' ~ minimo ~ ' compromisos que hacían falta. El organizador va a decidir si propone otras fechas o cancela la función.'
+            } only %}
+          {% endif %}
+
+          {% if sin_franjas %}
+            {# Recién cerrada la votación de títulos, el organizador todavía no propuso las franjas
+               (E3-13.F1): se dice eso, y no se muestran franjas ni un mínimo que no existen. #}
+            {% if es_organizador %}
+              {% include 'parciales/mensaje.html.twig' with {
+                tipo: 'info',
+                mensaje: 'Ya están elegidos los títulos. Falta que propongas las franjas de fecha y horario, y el mínimo de asistentes, para que el público marque las que le sirven.'
+              } only %}
+              {% include 'parciales/boton.html.twig' with {
+                texto: 'Proponer franjas',
+                url: '/organizador/funciones/' ~ funcion.id ~ '/proponer-franjas',
+                variante: 'primario'
+              } only %}
+            {% else %}
+              {% include 'parciales/mensaje.html.twig' with {
+                tipo: 'info',
+                mensaje: 'Ya están elegidos los títulos. El organizador todavía no propuso las franjas de fecha y horario: cuando las publique, vas a poder marcar las que te sirven.'
+              } only %}
+            {% endif %}
+          {% else %}
+            {% if es_organizador %}
+              <div class="ficha-panel-organizador" role="region" aria-labelledby="ficha-panel-organizador-titulo">
+                {% if es_sin_quorum %}
+                  {# E3-13.5 / IC-157: proponer otras franjas o cancelar. Cancelar va a la página
+                     de confirmación de siempre (E3-13.F5), no a un cuadro del navegador. #}
+                  <h3 id="ficha-panel-organizador-titulo" class="ficha-panel-titulo">No se alcanzó el quórum de asistentes requerido</h3>
+                  <p class="ficha-panel-texto">Ninguna franja llegó a {{ minimo }} {{ minimo == 1 ? 'compromiso' : 'compromisos' }}. Podés proponer otras franjas o cancelar la función.</p>
+                  <div class="ficha-panel-acciones">
+                    <a href="{{ accion_reproponer_franjas|default('/organizador/funciones/' ~ funcion.id ~ '/proponer-franjas') }}" class="boton boton-primario">Proponer nuevas franjas horarias</a>
+                    <a href="/organizador/funciones/{{ funcion.id }}/cancelar" class="boton boton-peligro">Cancelar función</a>
+                  </div>
+                {% else %}
+                  {% set confirmable = funcion.confirmable|default(false) and franja_lider is not null %}
+                  {% if confirmable %}
+                    <h3 id="ficha-panel-organizador-titulo" class="ficha-panel-titulo">¡La franja ganadora alcanzó el mínimo requerido!</h3>
+                    <p class="ficha-panel-texto">La del {{ franja_lider.fecha }}, de {{ franja_lider.hora_inicio }} a {{ franja_lider.hora_fin }}, tiene {{ max_votos }} {{ max_votos == 1 ? 'compromiso' : 'compromisos' }} y el mínimo es {{ minimo }}. Al confirmarla, la función queda programada con esa fecha.</p>
+                  {% else %}
+                    <h3 id="ficha-panel-organizador-titulo" class="ficha-panel-titulo">Gestión del acuerdo de fecha</h3>
+                    <p class="ficha-panel-texto">Cuando una franja llegue al mínimo la vas a poder confirmar desde acá. Si el acuerdo no reúne el interés esperado, podés cerrarlo y decidir si proponés otras franjas o cancelás la función.</p>
+                  {% endif %}
+                  <div class="ficha-panel-acciones">
+                    {% if confirmable %}
+                      <form action="{{ accion_confirmar_acuerdo|default('/organizador/funciones/' ~ funcion.id ~ '/confirmar-acuerdo') }}" method="POST" data-formulario-confirmar-acuerdo>
+                        <input type="hidden" name="_csrf" value="{{ csrf }}">
+                        <input type="hidden" name="franja_id" value="{{ franja_lider.id }}">
+                        <input type="hidden" name="volver" value="ficha">
+                        <button type="submit" class="boton boton-primario">Confirmar franja ganadora y programar función</button>
+                      </form>
+                    {% endif %}
+                    {# Cerrar va siempre que el acuerdo esté abierto, también con el mínimo alcanzado:
+                       si la franja ganadora ya empezó no se puede confirmar, y cerrarlo es la salida
+                       que propone el aviso (E3-13.F4). #}
+                    <form action="{{ accion_cerrar_sin_minimo|default('/organizador/funciones/' ~ funcion.id ~ '/cerrar-sin-minimo') }}" method="POST" data-formulario-cerrar-acuerdo>
+                      <input type="hidden" name="_csrf" value="{{ csrf }}">
+                      <input type="hidden" name="volver" value="ficha">
+                      <button type="submit" class="boton boton-secundario">Cerrar acuerdo sin mínimo</button>
+                    </form>
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+
+            {% if not usuario and se_vota %}
+              <p class="ficha-acuerdo-ingresar"><a href="/cuenta/ingresar">Ingresá</a> para marcar «Me sirve» en las franjas a las que podés ir.</p>
+            {% endif %}
+
+            <ul class="ficha-franjas">
+              {% for franja in franjas_disponibles %}
+                {% set votos_franja = franja.votos|default(0) %}
+                {% set marcada = franja.id in franjas_marcadas %}
+                {% set al_minimo = votos_franja >= minimo %}
+                {% set faltan = minimo - votos_franja %}
+                <li class="ficha-franja{% if marcada %} ficha-franja-marcada{% endif %}">
+                  <div class="ficha-franja-cuando">
+                    <h3 class="ficha-franja-fecha">{{ franja.fecha }}</h3>
+                    <p class="ficha-franja-horario">
+                      {% include 'parciales/icono.html.twig' with { nombre: 'reloj' } only %}
+                      <span>{{ franja.hora_inicio }} a {{ franja.hora_fin }}</span>
+                    </p>
+                  </div>
+                  <div class="ficha-franja-progreso">
+                    <div class="ficha-barra" role="progressbar" aria-valuemin="0" aria-valuemax="{{ minimo }}" aria-valuenow="{{ min(votos_franja, minimo) }}" aria-label="Compromisos para el {{ franja.fecha }}">
+                      <span class="ficha-barra-relleno" style="width: {{ min(100, (votos_franja * 100 / minimo)|round) }}%"></span>
+                    </div>
+                    <p class="ficha-franja-conteo">
+                      <span><strong>{{ votos_franja }}</strong> de {{ minimo }} {{ minimo == 1 ? 'comprometido' : 'comprometidos' }}</span>
+                      <span>
+                        {%- if es_sin_quorum -%}
+                          No alcanzó el mínimo
+                        {%- elseif al_minimo -%}
+                          Llegó al mínimo
+                        {%- else -%}
+                          {{ faltan == 1 ? 'Falta 1 compromiso' : 'Faltan ' ~ faltan ~ ' compromisos' }} para confirmar
+                        {%- endif -%}
+                      </span>
+                    </p>
+                  </div>
+                  <div class="ficha-franja-accion">
+                    {% if marca_franjas %}
+                      {# Marcada, el mismo botón la quita: aria-pressed dice en qué estado está. #}
+                      <form action="{{ accion_votar_franja|default('/cartelera/' ~ funcion.id ~ '/votar') }}" method="POST" data-formulario-votar-franja>
+                        <input type="hidden" name="_csrf" value="{{ csrf }}">
+                        <input type="hidden" name="franja_id" value="{{ franja.id }}">
+                        {% if marcada %}
+                          <input type="hidden" name="quitar" value="1">
+                        {% endif %}
+                        <button type="submit" class="boton boton-secundario boton-me-sirve" aria-pressed="{{ marcada ? 'true' : 'false' }}">
+                          {% if marcada %}
+                            {% include 'parciales/icono.html.twig' with { nombre: 'check' } only %}
+                          {% endif %}
+                          <span>Me sirve</span>
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          <div class="sr-only" role="status" aria-live="polite" data-anuncio-acuerdo></div>
+        </div>
+
+        <aside class="ficha-acuerdo-lateral" aria-label="Sobre el acuerdo de fecha">
+          <section class="ficha-caja" aria-labelledby="ficha-titulos-rotulo">
+            <h2 id="ficha-titulos-rotulo" class="ficha-caja-rotulo">{{ funcion.obras|length == 1 ? 'Título ya elegido' : 'Títulos ya elegidos' }}</h2>
+            <ul class="ficha-titulos">
+              {% for obra in funcion.obras %}
+                <li class="ficha-titulo">
+                  {# Todavía no hay una ruta que sirva el afiche: va el marcador, como en las obras. #}
+                  <span class="ficha-titulo-afiche ficha-titulo-afiche-vacio" aria-hidden="true">Afiche</span>
+                  <div>
+                    <p class="ficha-titulo-nombre">{{ obra.titulo }}</p>
+                    <p class="ficha-titulo-datos">{{ obra.anio }} · {{ obra.duracion }} min</p>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+            {# Los votos reales de la votación de títulos (E3-13.F3), como dice el wireframe. #}
+            {% set votos_emitidos = funcion.votos_emitidos|default(0) %}
+            {% if votos_emitidos > 0 %}
+              {% set votos_titulos = funcion.obras|map(obra => conteo_votos[obra.id] ?? 0) %}
+              {% set suma_titulos = votos_titulos|reduce((suma, votos) => suma + votos, 0) %}
+              <p class="ficha-caja-nota">{{ funcion.obras|length == 1 ? 'Ganó' : 'Ganaron' }} la votación con {{ votos_titulos|join(', ', ' y ') }} {{ suma_titulos == 1 ? 'voto' : 'votos' }} sobre {{ votos_emitidos }} {{ votos_emitidos == 1 ? 'emitido' : 'emitidos' }}.</p>
+            {% endif %}
+          </section>
+
+          {% if not sin_franjas %}
+            <section class="ficha-caja" aria-labelledby="ficha-confirma-rotulo">
+              <h2 id="ficha-confirma-rotulo" class="ficha-caja-rotulo">Cómo se confirma</h2>
+              <dl class="ficha-datos">
+                <div class="ficha-dato"><dt>Mínimo de asistentes</dt><dd>{{ minimo }}</dd></div>
+                <div class="ficha-dato"><dt>Franja más votada</dt><dd>{{ max_votos > 0 ? franja_lider.fecha_corta ~ ' · ' ~ max_votos : 'Sin votos todavía' }}</dd></div>
+                <div class="ficha-dato"><dt>Fecha límite</dt><dd>{{ funcion.fecha_limite|default('—') }}</dd></div>
+                <div class="ficha-dato"><dt>Precio estimado</dt><dd>{{ funcion.precio }}</dd></div>
+              </dl>
+            </section>
+          {% endif %}
+
+          <div class="ficha-aviso" role="note">
+            {% include 'parciales/icono.html.twig' with { nombre: 'advertencia' } only %}
+            <p>
+              {% if es_sin_quorum %}
+                Este acuerdo cerró sin llegar al mínimo de {{ minimo }} {{ minimo == 1 ? 'asistente' : 'asistentes' }}: la función no se programa, y el organizador decide si propone otras fechas o la cancela.
+              {% else %}
+                Marcar <strong>Me sirve</strong> es comprometerte a ir, pero no reserva ni cobra nada. Si ninguna franja llega al mínimo antes de la fecha límite, la función no se programa y el organizador decide si propone otras fechas o la cancela.
+              {% endif %}
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      {# La reserva de E4-01 va después del acuerdo: arriba, el wireframe tiene las franjas. #}
+      {{ bloque_reserva }}
+    {% endif %}
+
+    {# En acuerdo de fecha no va: el wireframe nombra la sala en la cabecera (E3-13.F10). #}
+    {% if funcion.estado != 'en_acuerdo_fecha' %}
     <section class="ficha-seccion ficha-seccion-sala" aria-labelledby="ficha-funcion-sala-titulo">
       <div class="ficha-sala-tarjeta">
         <div class="ficha-sala-detalles">
@@ -444,14 +719,13 @@
             Sala: <a href="{{ funcion.sala.url }}" class="ficha-sala-enlace">{{ funcion.sala.nombre }}</a>
           </h2>
           <p class="ficha-sala-ubicacion">
-            <span class="ficha-sala-icono" aria-hidden="true">📍</span>
+            {% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'ficha-sala-icono' } only %}
             <span>{{ funcion.sala.direccion }} · {{ funcion.sala.localidad }}</span>
           </p>
           {% if funcion.sala.descripcion %}
             <p class="ficha-sala-descripcion">{{ funcion.sala.descripcion }}</p>
           {% endif %}
           <p class="ficha-sala-capacidad">
-            <span class="ficha-sala-icono" aria-hidden="true">💺</span>
             <span>{{ funcion.sala.capacidad }} butacas</span>
           </p>
           <div class="ficha-sala-acciones">
@@ -465,8 +739,9 @@
         {% endif %}
       </div>
     </section>
+    {% endif %}
 
-    {% if funcion.estado != 'en_votacion_titulos' %}
+    {% if funcion.estado != 'en_votacion_titulos' and funcion.estado != 'en_acuerdo_fecha' %}
     <section class="ficha-seccion ficha-seccion-obras" aria-labelledby="ficha-funcion-obras-titulo">
       <div class="ficha-obras-cabecera">
         <p id="ficha-funcion-obras-titulo" class="ficha-obras-etiqueta">
@@ -483,7 +758,6 @@
           <article class="ficha-obra-tarjeta">
             <div class="ficha-obra-afiche-columna">
               <div class="ficha-obra-afiche-placeholder" aria-hidden="true">
-                <span class="afiche-placeholder-icono">🎬</span>
                 <span class="afiche-placeholder-texto">AFICHE</span>
               </div>
             </div>

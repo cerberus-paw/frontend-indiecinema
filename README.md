@@ -293,8 +293,8 @@ Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.inici
 
 En cada PR y en cada push a `main` (`.github/workflows/ci.yml`):
 
-- **Pruebas del back:** el back de `main` con el front del PR al lado, y las pruebas de cada subsistema. Es el espejo del CI del back: un PR del front que necesita uno del back pasa después de mergear el del back.
-- **Plantillas:** `herramientas/compilar-plantillas.php` compila todas con el Twig del núcleo; falla con un error de sintaxis o un filtro que no existe.
+- **Pruebas del back:** el back con el front del PR al lado, y las pruebas de cada subsistema. El back es el de la rama del mismo nombre si existe allá, y si no el de `main`: un cambio que toca los dos repositorios va en ramas que se llaman igual, y sus dos PR pasan sin esperar al otro. Es el espejo del CI del back.
+- **Plantillas:** `herramientas/compilar-plantillas.php` compila todas con el Twig del núcleo (del back de la misma rama, como las pruebas); falla con un error de sintaxis o un filtro que no existe.
 - **CSS:** stylelint, sólo con reglas que encuentran errores (una variable que no existe, una propiedad mal escrita, un selector repetido). En local: `npm ci && npm run css`.
 - **JavaScript:** `node --check` sobre cada archivo de `estaticos/js`.
 - **Secretos:** gitleaks sobre todo el historial, como en el back.
