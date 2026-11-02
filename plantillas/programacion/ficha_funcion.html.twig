@@ -131,8 +131,9 @@
             <span class="ficha-metadato-icono" aria-hidden="true">🎟️</span>
             <span class="ficha-metadato-texto">{{ funcion.precio }} · {{ funcion.cupo }} lugares</span>
           </div>
-          {% if funcion.estado == 'en_acuerdo_fecha' or funcion.estado == 'acuerdo_sin_minimo' or funcion.acuerdo_sin_minimo|default(false) %}
-            {% set minimo_asistentes_requerido = funcion.minimo_asistentes|default(20) %}
+          {# El mínimo lo fija el organizador al proponer las franjas: antes no hay ninguno que mostrar. #}
+          {% if funcion.minimo_asistentes is defined and (funcion.estado == 'en_acuerdo_fecha' or funcion.acuerdo_sin_minimo|default(false)) %}
+            {% set minimo_asistentes_requerido = funcion.minimo_asistentes %}
             <div class="ficha-metadato-chip ficha-metadato-minimo" aria-label="Mínimo de asistentes requerido para confirmar: {{ minimo_asistentes_requerido }}">
               <span class="ficha-metadato-icono" aria-hidden="true">👥</span>
               <span class="ficha-metadato-texto">MÍNIMO <strong>{{ minimo_asistentes_requerido }} ASISTENTES</strong></span>
@@ -509,7 +510,30 @@
     {# ==================================================================== #}
     {% set es_acuerdo_activo = (funcion.estado == 'en_acuerdo_fecha') %}
     {% set es_acuerdo_sin_minimo = (funcion.estado == 'acuerdo_sin_minimo') or funcion.acuerdo_sin_minimo|default(false) %}
-    {% if es_acuerdo_activo or es_acuerdo_sin_minimo %}
+    {% if es_acuerdo_activo and funcion.sin_franjas|default(false) %}
+      {# Recién cerrada la votación de títulos, el organizador todavía no propuso las franjas
+         (E3-13.F1): se dice eso, y no se muestran franjas ni un mínimo que no existen. #}
+      <section class="ficha-seccion ficha-acuerdo-fecha" aria-labelledby="ficha-acuerdo-titulo">
+        <h2 id="ficha-acuerdo-titulo" class="ficha-acuerdo-titulo">Acuerdo de fecha</h2>
+        {% if funcion.es_organizador|default(false) %}
+          {% include 'parciales/mensaje.html.twig' with {
+            tipo: 'info',
+            mensaje: 'Ya están elegidos los títulos. Falta que propongas las franjas de fecha y horario, y el mínimo de asistentes, para que el público marque las que le sirven.'
+          } only %}
+          {% include 'parciales/boton.html.twig' with {
+            texto: 'Proponer franjas',
+            url: '/organizador/funciones/' ~ funcion.id ~ '/proponer-franjas',
+            variante: 'primario',
+            icono: '🗓️'
+          } only %}
+        {% else %}
+          {% include 'parciales/mensaje.html.twig' with {
+            tipo: 'info',
+            mensaje: 'Ya están elegidos los títulos. El organizador todavía no propuso las franjas de fecha y horario: cuando las publique, vas a poder marcar las que te sirven.'
+          } only %}
+        {% endif %}
+      </section>
+    {% elseif es_acuerdo_activo or es_acuerdo_sin_minimo %}
       {% set voto_franja_actual = voto_franja ?? (funcion.voto_franja ?? (franja_votada ?? null)) %}
       {% set tiene_voto_franja = voto_franja_actual is not empty %}
       {% set franjas_disponibles = funcion.franjas|default([

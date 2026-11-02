@@ -10,6 +10,7 @@
   - valores: (map, opcional) Valores previos del formulario en caso de error de validación.
   - errores: (map, opcional) Diccionario de errores por campo.
   - error_general: (string, opcional) Mensaje de error general si falló la validación.
+  - votacion_cerrada: (bool, opcional) si llega recién cerrada la votación de títulos (E3-13.F1).
 #}
 {% extends 'base.html.twig' %}
 
@@ -48,6 +49,15 @@
       <a href="/cartelera/{{ funcion.id }}" class="boton boton-secundario">Volver a la función</a>
     </div>
   </header>
+
+  {# Al llegar desde «Cerrar votación»: lo que sigue es esto (E3-13.F1) #}
+  {% if votacion_cerrada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: 'Se cerró la votación de títulos',
+      mensaje: 'Ya están elegidos los títulos de «' ~ funcion.titulo ~ '». Ahora proponé las franjas de fecha y horario, y el mínimo de asistentes, para abrir el acuerdo de fecha.'
+    } only %}
+  {% endif %}
 
   {# Mensaje de error general si falló la validación #}
   {% if error_general is defined and error_general %}
