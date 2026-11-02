@@ -131,8 +131,9 @@
             <span class="ficha-metadato-icono" aria-hidden="true">🎟️</span>
             <span class="ficha-metadato-texto">{{ funcion.precio }} · {{ funcion.cupo }} lugares</span>
           </div>
-          {% if funcion.estado == 'en_acuerdo_fecha' or funcion.estado == 'acuerdo_sin_minimo' or funcion.acuerdo_sin_minimo|default(false) %}
-            {% set minimo_asistentes_requerido = funcion.minimo_asistentes|default(20) %}
+          {# El mínimo lo fija el organizador al proponer las franjas: antes no hay ninguno que mostrar. #}
+          {% if funcion.minimo_asistentes is defined and (funcion.estado == 'en_acuerdo_fecha' or funcion.acuerdo_sin_minimo|default(false)) %}
+            {% set minimo_asistentes_requerido = funcion.minimo_asistentes %}
             <div class="ficha-metadato-chip ficha-metadato-minimo" aria-label="Mínimo de asistentes requerido para confirmar: {{ minimo_asistentes_requerido }}">
               <span class="ficha-metadato-icono" aria-hidden="true">👥</span>
               <span class="ficha-metadato-texto">MÍNIMO <strong>{{ minimo_asistentes_requerido }} ASISTENTES</strong></span>
@@ -509,17 +510,41 @@
     {# ==================================================================== #}
     {% set es_acuerdo_activo = (funcion.estado == 'en_acuerdo_fecha') %}
     {% set es_acuerdo_sin_minimo = (funcion.estado == 'acuerdo_sin_minimo') or funcion.acuerdo_sin_minimo|default(false) %}
-    {% if es_acuerdo_activo or es_acuerdo_sin_minimo %}
+    {% if es_acuerdo_activo and funcion.sin_franjas|default(false) %}
+      {# Recién cerrada la votación de títulos, el organizador todavía no propuso las franjas
+         (E3-13.F1): se dice eso, y no se muestran franjas ni un mínimo que no existen. #}
+      <section class="ficha-seccion ficha-acuerdo-fecha" aria-labelledby="ficha-acuerdo-titulo">
+        <h2 id="ficha-acuerdo-titulo" class="ficha-acuerdo-titulo">Acuerdo de fecha</h2>
+        {% if error_acuerdo|default(false) %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se pudo actualizar el acuerdo', mensaje: error_acuerdo } only %}
+        {% endif %}
+        {% if funcion.es_organizador|default(false) %}
+          {% include 'parciales/mensaje.html.twig' with {
+            tipo: 'info',
+            mensaje: 'Ya están elegidos los títulos. Falta que propongas las franjas de fecha y horario, y el mínimo de asistentes, para que el público marque las que le sirven.'
+          } only %}
+          {% include 'parciales/boton.html.twig' with {
+            texto: 'Proponer franjas',
+            url: '/organizador/funciones/' ~ funcion.id ~ '/proponer-franjas',
+            variante: 'primario',
+            icono: '🗓️'
+          } only %}
+        {% else %}
+          {% include 'parciales/mensaje.html.twig' with {
+            tipo: 'info',
+            mensaje: 'Ya están elegidos los títulos. El organizador todavía no propuso las franjas de fecha y horario: cuando las publique, vas a poder marcar las que te sirven.'
+          } only %}
+        {% endif %}
+      </section>
+    {% elseif es_acuerdo_activo or es_acuerdo_sin_minimo %}
       {% set voto_franja_actual = voto_franja ?? (funcion.voto_franja ?? (franja_votada ?? null)) %}
       {% set tiene_voto_franja = voto_franja_actual is not empty %}
-      {% set franjas_disponibles = funcion.franjas|default([
-        { id: 'franja-1', fecha: 'Viernes 18 de septiembre', hora_inicio: '20:30', hora_fin: '23:30', votos: 11 },
-        { id: 'franja-2', fecha: 'Sábado 19 de septiembre', hora_inicio: '18:00', hora_fin: '21:00', votos: 17 },
-        { id: 'franja-3', fecha: 'Domingo 20 de septiembre', hora_inicio: '19:30', hora_fin: '22:30', votos: 6 }
-      ]) %}
-      {% set minimo_asistentes_requerido = funcion.minimo_asistentes|default(20) %}
+      {# Sólo lo que viene del acuerdo: antes, sin datos, se mostraban franjas, un mínimo y votos
+         de ejemplo como si fueran reales (E3-13.F3). El mínimo nunca es 0: divide los porcentajes. #}
+      {% set franjas_disponibles = funcion.franjas|default([]) %}
+      {% set minimo_asistentes_requerido = max(funcion.minimo_asistentes|default(1), 1) %}
       {% set obra_ganadora = funcion.obra_ganadora|default(funcion.obras[0]|default(null)) %}
-      {% set votos_ganadora = funcion.votos_obra_ganadora|default(obra_ganadora.votos|default(34)) %}
+      {% set votos_ganadora = funcion.votos_obra_ganadora ?? 0 %}
       {% set max_votos = -1 %}
       {% set franja_lider = null %}
       {% for f in franjas_disponibles %}
@@ -577,6 +602,16 @@
                 } only %}
               </div>
             {% endif %}
+            {# Lo que no salió al confirmar o cerrar el acuerdo (E3-13.F4): es del organizador, no del voto. #}
+            {% if error_acuerdo|default(false) %}
+              <div class="ficha-acuerdo-error" role="alert">
+                {% include 'parciales/mensaje.html.twig' with {
+                  tipo: 'error',
+                  titulo: 'No se pudo actualizar el acuerdo',
+                  mensaje: error_acuerdo
+                } only %}
+              </div>
+            {% endif %}
 
             {# Panel de confirmación del organizador si se alcanzó el mínimo (E3-13.4 / IC-156) #}
             {% set quorom_alcanzado = max_votos >= minimo_asistentes_requerido %}
@@ -603,7 +638,11 @@
                   </button>
                 </form>
               </div>
-            {% elseif es_organizador and not es_acuerdo_sin_minimo %}
+            {% endif %}
+            {# Cerrar va siempre que el acuerdo esté abierto, también con el mínimo alcanzado: si la
+               franja ganadora ya empezó no se puede confirmar, y cerrarlo es la salida que propone
+               el aviso (E3-13.F4). Sin esto, la función quedaba trabada en el acuerdo. #}
+            {% if es_organizador and not es_acuerdo_sin_minimo %}
               <div class="ficha-acuerdo-panel-gestion-organizador" role="region" aria-label="Gestión de acuerdo para el organizador" style="margin-bottom: var(--espacio-m, 1.5rem); padding: var(--espacio-m, 1.25rem); background: var(--color-fondo-panel, #201a1c); border: 1px solid var(--color-borde, #44383c); border-radius: var(--radio-borde-m, 8px); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                 <div>
                   <strong style="color: var(--color-texto-destacado, #f6e8ea); font-size: 1rem;">Gestión del acuerdo de fecha</strong>
@@ -637,14 +676,12 @@
                     <span class="boton-icono boton-icono-antes" aria-hidden="true">📅</span>
                     <span class="boton-texto">Proponer nuevas franjas horarias</span>
                   </a>
-                  <form action="{{ accion_cancelar_funcion|default('/organizador/funciones/' ~ funcion.id ~ '/cancelar') }}" method="POST" class="formulario-cancelar-funcion" onsubmit="return confirm('¿Estás seguro de que deseás cancelar esta función? Esta acción dará de baja la función definitivamente.');">
-                    <input type="hidden" name="_csrf" value="{{ csrf }}">
-                    <input type="hidden" name="volver" value="ficha">
-                    <button type="submit" class="boton boton-peligro">
-                      <span class="boton-icono boton-icono-antes" aria-hidden="true">✕</span>
-                      <span class="boton-texto">Cancelar función</span>
-                    </button>
-                  </form>
+                  {# A la página de confirmación de siempre (E3-13.F5): el confirm() del navegador
+                     no se puede leer ni probar, y el resto del sitio confirma así. #}
+                  <a href="/organizador/funciones/{{ funcion.id }}/cancelar" class="boton boton-peligro">
+                    <span class="boton-icono boton-icono-antes" aria-hidden="true">✕</span>
+                    <span class="boton-texto">Cancelar función</span>
+                  </a>
                 </div>
               </div>
             {% endif %}
@@ -781,7 +818,7 @@
                             {% if alcanza_minimo %}
                               <span aria-hidden="true">🎉</span> ¡Alcanzó el mínimo requerido!
                             {% else %}
-                              Faltan <strong>{{ faltan_votos }}</strong> {{ faltan_votos == 1 ? 'compromiso' : 'compromisos' }} para confirmar
+                              {{ faltan_votos == 1 ? 'Falta' : 'Faltan' }} <strong>{{ faltan_votos }}</strong> {{ faltan_votos == 1 ? 'compromiso' : 'compromisos' }} para confirmar
                             {% endif %}
                           </span>
                         </div>
@@ -874,7 +911,7 @@
                             {% if alcanza_minimo %}
                               ¡Alcanzó el mínimo requerido!
                             {% else %}
-                              Faltan <strong>{{ faltan_votos }}</strong> para confirmar
+                              {{ faltan_votos == 1 ? 'Falta' : 'Faltan' }} <strong>{{ faltan_votos }}</strong> {{ faltan_votos == 1 ? 'compromiso' : 'compromisos' }} para confirmar
                             {% endif %}
                           </span>
                         </div>
@@ -949,7 +986,7 @@
 
                   <div class="lateral-votos-ganadora">
                     <span class="icono-votos-ganadora" aria-hidden="true">🗳️</span>
-                    <span>Ganadora con <strong>{{ votos_ganadora }} votos</strong> en la votación previa</span>
+                    <span>Ganadora con <strong>{{ votos_ganadora }} {{ votos_ganadora == 1 ? 'voto' : 'votos' }}</strong> en la votación previa</span>
                   </div>
                 </div>
               </article>

@@ -25,12 +25,6 @@ class ModoFuncion {
       avisoTitulo: 'Apertura de votación',
       boton: 'Abrir a votación',
     },
-    en_acuerdo_fecha: {
-      obrasSubtitulo: 'Elegí la obra o películas a proyectar en la fecha acordada con el público.',
-      obrasAyuda: 'Marcá al menos una obra del catálogo para someter sus franjas a votación.',
-      avisoTitulo: 'Acuerdo de fecha con espectadores',
-      boton: 'Abrir acuerdo de fecha',
-    },
   };
 
   /**
@@ -48,7 +42,6 @@ class ModoFuncion {
     }
 
     this.seccionFechaHora = this.formulario.querySelector('[data-seccion-fecha-hora]');
-    this.seccionAcuerdoAlta = this.formulario.querySelector('[data-seccion-acuerdo-alta]');
     this.campoFecha = this.formulario.querySelector('input[name="fecha"]');
     this.campoHora = this.formulario.querySelector('input[name="hora"]');
     this.subtituloObras = this.formulario.querySelector('[data-obras-subtitulo]');
@@ -67,12 +60,11 @@ class ModoFuncion {
   }
 
   /**
-   * @param {string} modo 'programada' | 'en_votacion_titulos' | 'en_acuerdo_fecha'
+   * @param {string} modo 'programada' | 'en_votacion_titulos'
    */
   cambiarModo(modo) {
     const esVotacion = modo === 'en_votacion_titulos';
-    const esAcuerdo = modo === 'en_acuerdo_fecha';
-    const textos = ModoFuncion.TEXTOS[modo] || ModoFuncion.TEXTOS.programada;
+    const textos = esVotacion ? ModoFuncion.TEXTOS.en_votacion_titulos : ModoFuncion.TEXTOS.programada;
 
     // Resaltado visual en las tarjetas de opción
     for (const radio of this.radios) {
@@ -82,27 +74,17 @@ class ModoFuncion {
       }
     }
 
-    // Ocultar/mostrar y deshabilitar/habilitar fecha y horario fijo
-    const requiereFechaFija = modo === 'programada';
+    // Ocultar/mostrar y deshabilitar/habilitar fecha y horario
     if (this.seccionFechaHora) {
-      this.seccionFechaHora.hidden = !requiereFechaFija;
+      this.seccionFechaHora.hidden = esVotacion;
     }
     if (this.campoFecha) {
-      this.campoFecha.disabled = !requiereFechaFija;
-      this.campoFecha.required = requiereFechaFija;
+      this.campoFecha.disabled = esVotacion;
+      this.campoFecha.required = !esVotacion;
     }
     if (this.campoHora) {
-      this.campoHora.disabled = !requiereFechaFija;
-      this.campoHora.required = requiereFechaFija;
-    }
-
-    // Ocultar/mostrar sección de acuerdo en alta si existe
-    if (this.seccionAcuerdoAlta) {
-      this.seccionAcuerdoAlta.hidden = !esAcuerdo;
-      const camposAcuerdo = this.seccionAcuerdoAlta.querySelectorAll('input');
-      for (const campo of camposAcuerdo) {
-        campo.disabled = !esAcuerdo;
-      }
+      this.campoHora.disabled = esVotacion;
+      this.campoHora.required = !esVotacion;
     }
 
     // Subtítulo y ayuda de la selección de obras
@@ -123,12 +105,6 @@ class ModoFuncion {
           'Al guardar la función, quedará en estado ',
           PAW.nuevoElemento('strong', 'en votación de títulos'),
           ' con las obras seleccionadas como candidatas. La fecha y horario se definirán al finalizar la votación.',
-        );
-      } else if (esAcuerdo) {
-        this.avisoTexto.replaceChildren(
-          'Al guardar la función, quedará en estado ',
-          PAW.nuevoElemento('strong', 'en acuerdo de fecha'),
-          ' con las alternativas horarias propuestas. Los espectadores podrán votar qué franja les sirve y, al alcanzar el quórum, podrás programarla con la fecha ganadora.',
         );
       } else {
         this.avisoTexto.replaceChildren(

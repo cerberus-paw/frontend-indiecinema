@@ -10,6 +10,10 @@
  * - Notifica dinámicamente a lectores de pantalla mediante regiones aria-live.
  */
 class GestorFranjas {
+  /** Lo mismo que controla el servidor (E3-13.F2) y dice el formulario: de 2 a 5 opciones. */
+  static MINIMO = 2;
+  static MAXIMO = 5;
+
   /**
    * @param {Element|string} pContenedor Formulario o contenedor con [data-gestor-franjas]
    */
@@ -166,8 +170,8 @@ class GestorFranjas {
     }
 
     const filasActuales = this.obtenerFilas();
-    if (filasActuales.length >= 6) {
-      this.anunciar('Límite alcanzado: podés proponer hasta 6 franjas horarias.');
+    if (filasActuales.length >= GestorFranjas.MAXIMO) {
+      this.anunciar(`Límite alcanzado: podés proponer hasta ${GestorFranjas.MAXIMO} franjas horarias.`);
       return;
     }
 
@@ -206,8 +210,8 @@ class GestorFranjas {
    */
   eliminarFranja(fila) {
     const filas = this.obtenerFilas();
-    if (filas.length <= 1) {
-      this.anunciar('No se puede eliminar: debe existir al menos una franja horaria propuesta.');
+    if (filas.length <= GestorFranjas.MINIMO) {
+      this.anunciar(`No se puede eliminar: tiene que haber al menos ${GestorFranjas.MINIMO} franjas propuestas.`);
       return;
     }
 
@@ -266,14 +270,14 @@ class GestorFranjas {
    */
   actualizarEstadosBotones() {
     const filas = this.obtenerFilas();
-    const soloUna = filas.length <= 1;
+    const enElMinimo = filas.length <= GestorFranjas.MINIMO;
 
     for (const fila of filas) {
       const botonEliminar = fila.querySelector('[data-eliminar-franja]');
       if (botonEliminar) {
-        botonEliminar.disabled = soloUna;
-        if (soloUna) {
-          botonEliminar.setAttribute('title', 'Debe haber al menos una franja horaria propuesta');
+        botonEliminar.disabled = enElMinimo;
+        if (enElMinimo) {
+          botonEliminar.setAttribute('title', `Tiene que haber al menos ${GestorFranjas.MINIMO} franjas propuestas`);
         } else {
           botonEliminar.removeAttribute('title');
         }
@@ -281,7 +285,7 @@ class GestorFranjas {
     }
 
     if (this.botonAgregar) {
-      this.botonAgregar.disabled = filas.length >= 6;
+      this.botonAgregar.disabled = filas.length >= GestorFranjas.MAXIMO;
     }
   }
 
