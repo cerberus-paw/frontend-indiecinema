@@ -409,6 +409,219 @@
       </section>
     {% endif %}
 
+    {# ==================================================================== #}
+    {# BLOQUE INTERACTIVO: ACUERDO DE FECHA CON ESPECTADORES (E3-13)       #}
+    {# ==================================================================== #}
+    {% if funcion.estado == 'en_acuerdo_fecha' %}
+      {% set voto_franja_actual = voto_franja ?? (funcion.voto_franja ?? (franja_votada ?? null)) %}
+      {% set tiene_voto_franja = voto_franja_actual is not empty %}
+      {% set franjas_disponibles = funcion.franjas|default([
+        { id: 'franja-1', fecha: 'Viernes 18 de septiembre', hora_inicio: '20:30', hora_fin: '23:30', votos: 11 },
+        { id: 'franja-2', fecha: 'Sábado 19 de septiembre', hora_inicio: '18:00', hora_fin: '21:00', votos: 17 },
+        { id: 'franja-3', fecha: 'Domingo 20 de septiembre', hora_inicio: '19:30', hora_fin: '22:30', votos: 6 }
+      ]) %}
+      {% set minimo_asistentes_requerido = funcion.minimo_asistentes|default(20) %}
+
+      <section class="ficha-seccion ficha-acuerdo-fecha" aria-labelledby="ficha-acuerdo-titulo" data-seccion-acuerdo-fecha>
+        <div class="ficha-acuerdo-cabecera">
+          <div class="ficha-acuerdo-intro">
+            <span class="insignia-estado insignia-acuerdo" aria-label="Fase de la función: Acuerdo de fecha abierto">
+              <span class="insignia-icono" aria-hidden="true">🤝</span>
+              ACUERDO DE FECHA ABIERTO
+            </span>
+            <h2 id="ficha-acuerdo-titulo" class="ficha-acuerdo-titulo">Franjas horarias propuestas</h2>
+            <p class="ficha-acuerdo-bajada">
+              Podés marcar tu disponibilidad seleccionando la franja que te convenga. Tu elección se computa como un compromiso de asistencia para confirmar la función. Podés cambiar tu voto en cualquier momento mientras el acuerdo siga abierto.
+            </p>
+          </div>
+        </div>
+
+        {# Confirmación accesible de voto registrado o cambiado #}
+        {% if franja_votada|default(false) or mensaje_exito_franja|default(false) or mensaje_acuerdo|default(false) %}
+          <div class="ficha-acuerdo-confirmacion" role="status">
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'exito',
+              titulo: '¡Compromiso registrado con éxito!',
+              mensaje: mensaje_acuerdo|default(mensaje_exito_franja|default('Marcaste «Me sirve» en esta franja. Tu voto fue computado y podés cambiarlo en cualquier momento.'))
+            } only %}
+          </div>
+        {% endif %}
+
+        {% if error_franja|default(false) %}
+          <div class="ficha-acuerdo-error" role="alert">
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'error',
+              titulo: 'No se pudo registrar tu elección',
+              mensaje: error_franja
+            } only %}
+          </div>
+        {% endif %}
+
+        {% if usuario %}
+          {# Mensaje de estado si ya emitió un voto #}
+          {% if tiene_voto_franja %}
+            <div class="ficha-acuerdo-aviso-voto" role="status">
+              <span class="aviso-icono" aria-hidden="true">✓</span>
+              <p class="aviso-texto">
+                Ya marcaste tu disponibilidad para esta función. Podés cambiar tu voto seleccionando otra franja horaria a continuación.
+              </p>
+            </div>
+          {% endif %}
+
+          <div class="lista-tarjetas-franjas" role="region" aria-label="Franjas horarias disponibles para votar" data-franjas-acuerdo>
+            {% for franja in franjas_disponibles %}
+              {% set franja_id = franja.id|default(loop.index) %}
+              {% set es_franja_votada = tiene_voto_franja and (voto_franja_actual == franja_id or voto_franja_actual == (franja.fecha ~ ' · ' ~ franja.hora_inicio)) %}
+              {% set votos_franja = franja.votos|default(conteo_votos_franjas[franja_id]|default(0)) %}
+              {% set porcentaje = ((votos_franja / minimo_asistentes_requerido) * 100)|round %}
+              {% set alcanza_minimo = votos_franja >= minimo_asistentes_requerido %}
+              {% set faltan_votos = minimo_asistentes_requerido - votos_franja %}
+
+              <article class="tarjeta-franja-acuerdo{% if es_franja_votada %} franja-seleccionada franja-votada{% endif %}{% if alcanza_minimo %} franja-quorom-alcanzado{% endif %}">
+                <div class="franja-contenido-principal">
+                  <div class="franja-cabecera-info">
+                    <span class="franja-icono-calendario" aria-hidden="true">📅</span>
+                    <div class="franja-textos-tiempo">
+                      <h3 class="franja-fecha-texto">{{ franja.fecha }}</h3>
+                      <p class="franja-horario-texto">
+                        <span class="horario-icono" aria-hidden="true">⏰</span>
+                        {{ franja.hora_inicio|default(franja.desde|default('20:00')) }} a {{ franja.hora_fin|default(franja.hasta|default('22:30')) }} hs
+                      </p>
+                    </div>
+                    {% if es_franja_votada %}
+                      <span class="insignia-tu-voto" role="status">
+                        <span aria-hidden="true">✓</span> Te sirve · Tu voto actual
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  {# Barra y contadores de compromisos #}
+                  <div class="franja-progreso-contenedor">
+                    <div class="franja-progreso-info">
+                      <span class="progreso-conteo">
+                        <strong>{{ votos_franja }} de {{ minimo_asistentes_requerido }}</strong> comprometidos
+                      </span>
+                      <span class="progreso-estado-texto{% if alcanza_minimo %} estado-exito{% endif %}">
+                        {% if alcanza_minimo %}
+                          <span aria-hidden="true">🎉</span> ¡Alcanzó el mínimo requerido!
+                        {% else %}
+                          Faltan <strong>{{ faltan_votos }}</strong> {{ faltan_votos == 1 ? 'compromiso' : 'compromisos' }} para confirmar
+                        {% endif %}
+                      </span>
+                    </div>
+
+                    <div
+                      class="barra-progreso-compromisos"
+                      role="progressbar"
+                      aria-valuenow="{{ votos_franja }}"
+                      aria-valuemin="0"
+                      aria-valuemax="{{ minimo_asistentes_requerido }}"
+                      aria-label="Progreso de compromisos para {{ franja.fecha }}: {{ votos_franja }} de {{ minimo_asistentes_requerido }}"
+                    >
+                      <div
+                        class="barra-progreso-relleno{% if alcanza_minimo %} relleno-exito{% endif %}"
+                        data-progreso-porcentaje="{{ porcentaje }}"
+                        style="width: {{ porcentaje > 100 ? 100 : porcentaje }}%;"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="franja-accion-columna">
+                  {% if es_franja_votada %}
+                    <div class="franja-voto-registrado" role="status">
+                      <span class="voto-registrado-texto">✓ Marcaste «Me sirve» en esta opción</span>
+                    </div>
+                  {% else %}
+                    <form action="{{ accion_votar_franja|default('/cartelera/' ~ funcion.id ~ '/votar-franja') }}" method="POST" class="formulario-votar-franja" data-formulario-votar-franja>
+                      <input type="hidden" name="_csrf" value="{{ csrf }}">
+                      <input type="hidden" name="franja_id" value="{{ franja_id }}">
+                      <button type="submit" class="boton {{ tiene_voto_franja ? 'boton-secundario' : 'boton-primario' }} boton-me-sirve">
+                        <span class="icono-me-sirve" aria-hidden="true">🤝</span>
+                        {{ tiene_voto_franja ? 'Cambiar mi voto a esta franja' : 'Me sirve' }}
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          {# Espectador sin sesión: invitación accesible #}
+          <div class="ficha-acuerdo-invitacion" role="region" aria-label="Ingresar para marcar franja">
+            <div class="acuerdo-invitacion-contenido">
+              <span class="acuerdo-icono-invitacion" aria-hidden="true">🤝</span>
+              <div class="acuerdo-texto-invitacion">
+                <h3 class="acuerdo-titulo-invitacion">Iniciá sesión para marcar «Me sirve»</h3>
+                <p class="acuerdo-bajada-invitacion">
+                  Para comprometer tu asistencia y acordar la fecha de esta función necesitás contar con una cuenta de espectador.
+                </p>
+              </div>
+            </div>
+            <div class="acuerdo-acciones-invitacion">
+              <a href="/cuenta/ingresar" class="boton boton-primario">Iniciá sesión para votar</a>
+              <a href="/cuenta/registro" class="boton boton-secundario">Crear una cuenta</a>
+            </div>
+          </div>
+
+          <div class="lista-tarjetas-franjas franjas-modo-lectura" role="region" aria-label="Franjas propuestas en acuerdo">
+            {% for franja in franjas_disponibles %}
+              {% set votos_franja = franja.votos|default(0) %}
+              {% set porcentaje = ((votos_franja / minimo_asistentes_requerido) * 100)|round %}
+              {% set alcanza_minimo = votos_franja >= minimo_asistentes_requerido %}
+              {% set faltan_votos = minimo_asistentes_requerido - votos_franja %}
+              <article class="tarjeta-franja-acuerdo lectura{% if alcanza_minimo %} franja-quorom-alcanzado{% endif %}">
+                <div class="franja-contenido-principal">
+                  <div class="franja-cabecera-info">
+                    <span class="franja-icono-calendario" aria-hidden="true">📅</span>
+                    <div class="franja-textos-tiempo">
+                      <h3 class="franja-fecha-texto">{{ franja.fecha }}</h3>
+                      <p class="franja-horario-texto">
+                        <span class="horario-icono" aria-hidden="true">⏰</span>
+                        {{ franja.hora_inicio|default(franja.desde|default('20:00')) }} a {{ franja.hora_fin|default(franja.hasta|default('22:30')) }} hs
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="franja-progreso-contenedor">
+                    <div class="franja-progreso-info">
+                      <span class="progreso-conteo">
+                        <strong>{{ votos_franja }} de {{ minimo_asistentes_requerido }}</strong> comprometidos
+                      </span>
+                      <span class="progreso-estado-texto{% if alcanza_minimo %} estado-exito{% endif %}">
+                        {% if alcanza_minimo %}
+                          ¡Alcanzó el mínimo requerido!
+                        {% else %}
+                          Faltan <strong>{{ faltan_votos }}</strong> para confirmar
+                        {% endif %}
+                      </span>
+                    </div>
+
+                    <div
+                      class="barra-progreso-compromisos"
+                      role="progressbar"
+                      aria-valuenow="{{ votos_franja }}"
+                      aria-valuemin="0"
+                      aria-valuemax="{{ minimo_asistentes_requerido }}"
+                      aria-label="Progreso de compromisos: {{ votos_franja }} de {{ minimo_asistentes_requerido }}"
+                    >
+                      <div class="barra-progreso-relleno{% if alcanza_minimo %} relleno-exito{% endif %}" style="width: {{ porcentaje > 100 ? 100 : porcentaje }}%;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="franja-accion-columna">
+                  <a href="/cuenta/ingresar" class="boton boton-secundario boton-chico">Iniciá sesión para marcar Me sirve</a>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="sr-only" role="status" aria-live="polite" data-anuncio-acuerdo></div>
+      </section>
+    {% endif %}
+
     <section class="ficha-seccion ficha-seccion-sala" aria-labelledby="ficha-funcion-sala-titulo">
       <div class="ficha-sala-tarjeta">
         <div class="ficha-sala-detalles">
