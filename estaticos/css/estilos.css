@@ -5119,6 +5119,12 @@ dd {
   color: var(--color-fondo);
 }
 
+/* La reserva de quien ya entró (E4-03): en verde, el estado al que se llega en la puerta */
+.estado-cuenta-asistio {
+  border-color: var(--color-exito);
+  color: var(--color-exito);
+}
+
 /* Cuenta suspendida, y la función cancelada en «Mis funciones»: las dos son la baja */
 .estado-cuenta-suspendida,
 .estado-cuenta-cancelada {
@@ -7082,4 +7088,30 @@ a.tabla-admin-principal:focus-visible {
     /* Separación superior amplia */
     padding-top: var(--espacio-12);
   }
+}
+
+/* --------------------------------------------------------------------------
+   Panel de reservas del organizador (E4-03): el registro de la asistencia en la puerta, arriba
+   de la tabla, y el código en letra de ancho fijo, para leerlo y dictarlo sin confundir letras
+   -------------------------------------------------------------------------- */
+.panel-reservas-asistencia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--espacio-3);
+  margin: 0 0 var(--espacio-6);
+  padding: var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-lg);
+}
+
+.panel-reservas-asistencia .grupo-campo {
+  margin-bottom: 0;
+  flex: 1 1 16rem;
+}
+
+.panel-reservas-codigo {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  letter-spacing: 0.08em;
 }

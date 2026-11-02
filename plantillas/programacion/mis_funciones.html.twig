@@ -21,6 +21,8 @@
   - programada: (bool) aviso de que se acaba de programar una. El de la edición no va acá: al
     guardar se vuelve a la ficha de la función, que es la que lo muestra.
   - cancelada: (bool) aviso de que se acaba de cancelar una.
+  - reservas_pendientes: (bool) se canceló, pero el subsistema funciones no respondió y sus
+    reservas siguen confirmadas (E4-03.4).
   - votacion_cerrada: (bool) aviso de que se acaba de cerrar la votación de títulos de una función (IC-150 / E3-12.4).
 #}
 {% extends 'base.html.twig' %}
@@ -62,6 +64,15 @@
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       mensaje: 'La función fue cancelada. Ya no aparece en la cartelera pero permanece registrada en tu panel.'
+    } only %}
+  {% endif %}
+
+  {# Se canceló, pero el subsistema funciones no respondió: sus reservas siguen en pie (E4-03.4) #}
+  {% if reservas_pendientes|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      titulo: 'Las reservas de la función no se cancelaron',
+      mensaje: 'La función quedó cancelada, pero no pudimos cancelar sus reservas ni avisarles a los espectadores. Avisale al equipo de IndieCinema para que lo resuelva.'
     } only %}
   {% endif %}
 
@@ -171,8 +182,18 @@
                 <span class="tabla-admin-secundario">{{ funcion.cupo }} lugares</span>
               </td>
               <td class="tabla-admin-acciones">
-                {% if funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) or funcion.estado_valor == 'en_acuerdo_fecha' %}
+                {# Las reservas se ven desde que la función queda programada, también después de cancelarla o de que se dio #}
+                {% set con_reservas = funcion.estado_valor in ['programada', 'cancelada', 'finalizada'] %}
+                {% if con_reservas or funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) or funcion.estado_valor == 'en_acuerdo_fecha' %}
                   <div class="tabla-admin-acciones-grupo">
+                    {% if con_reservas %}
+                      {% include 'parciales/boton.html.twig' with {
+                        texto: 'Reservas',
+                        url: '/funcion/organizador/funciones/' ~ funcion.id ~ '/reservas',
+                        variante: 'secundario',
+                        tamano: 'chico'
+                      } only %}
+                    {% endif %}
                     {% if funcion.cerrable|default(false) %}
                       <form action="/organizador/funciones/{{ funcion.id }}/cerrar-votacion" method="POST" class="formulario-accion-tabla">
                         <input type="hidden" name="_csrf" value="{{ csrf }}">
