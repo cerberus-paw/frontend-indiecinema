@@ -159,9 +159,9 @@
                 {# Sin quórum antes que en acuerdo: la función sigue en acuerdo de fecha, y lo que
                    cerró sin mínimo es su acuerdo, que viene de funciones (E3-13.5). #}
                 {% elseif funcion.acuerdo_sin_minimo|default(false) %}
-                  <span class="estado-cuenta estado-cuenta-sin-quorum"><span aria-hidden="true">⚠️</span> Sin quórum</span>
+                  <span class="estado-cuenta estado-cuenta-sin-quorum">Sin quórum</span>
                 {% elseif funcion.estado_valor == 'en_acuerdo_fecha' %}
-                  <span class="estado-cuenta estado-cuenta-acuerdo"><span aria-hidden="true">🤝</span> {{ funcion.estado|default('en acuerdo de fecha') }}</span>
+                  <span class="estado-cuenta estado-cuenta-acuerdo">{{ funcion.estado|default('en acuerdo de fecha') }}</span>
                 {% else %}
                   <span class="estado-cuenta">{{ funcion.estado }}</span>
                 {% endif %}

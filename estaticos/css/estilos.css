@@ -3512,8 +3512,9 @@ dd {
 .ficha-funcion {
   /* Ancho completo */
   width: 100%;
-  /* Límite de ancho para legibilidad óptima */
-  max-width: 960px;
+  /* El del sitio: los wireframes de la función usan todo el ancho, con el acuerdo en dos
+     columnas (E3-13.F10) */
+  max-width: var(--ancho-maximo);
   /* Centrado horizontal */
   margin: 0 auto;
 }
@@ -3528,28 +3529,507 @@ dd {
   gap: var(--espacio-6);
 }
 
-/* Cabecera hero de la función */
-.ficha-funcion-cabecera {
-  /* Fondo oscuro carbón */
-  background-color: var(--color-superficie);
-  /* Borde tenue */
-  border: 1px solid var(--color-superficie-borde);
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-lg);
-  /* Relleno interno generoso */
-  padding: var(--espacio-6);
-  /* Sombra sutil de elevación */
-  box-shadow: var(--sombra-sm);
+/* --------------------------------------------------------------------------
+   Ficha de la función como los wireframes (E3-13.F10): la cabecera con la sala
+   y las píldoras, la línea de estados y el acuerdo de fecha en dos columnas.
+   Los colores son los del sitio: lo negro del wireframe es el ámbar.
+   -------------------------------------------------------------------------- */
+
+/* Título a la izquierda y «Compartir» (y las acciones del organizador) a la derecha */
+.ficha-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--espacio-4) var(--espacio-6);
 }
 
-/* Información principal de la cabecera */
-.ficha-funcion-info-principal {
-  /* Disposición flex */
+/* Aviso de cancelada, título y la fila de la sala, uno debajo del otro */
+.ficha-cabecera-texto {
   display: flex;
-  /* Dirección vertical */
   flex-direction: column;
-  /* Separación interna */
   gap: var(--espacio-3);
+  min-width: 0;
+}
+
+/* La sala con su pin y las píldoras, en una fila que baja si no entra */
+.ficha-cabecera-datos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-3) var(--espacio-4);
+}
+
+/* «Cineclub La Perla · Luján»: lleva a la ficha de la sala */
+.ficha-cabecera-sala {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.ficha-cabecera-sala:hover,
+.ficha-cabecera-sala:focus-visible {
+  color: var(--color-primario);
+}
+
+/* Las píldoras de datos («2 títulos elegidos», «Mínimo 20 asistentes») */
+.ficha-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* En versalitas y monoespaciada, con borde, como en el wireframe */
+.ficha-chip {
+  padding: 0.2rem 0.75rem;
+  border: 1px solid var(--color-borde-medio);
+  border-radius: 999px;
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-secundario);
+}
+
+/* Botones de la derecha de la cabecera */
+.ficha-cabecera-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.ficha-cabecera-acciones form {
+  margin: 0;
+}
+
+/* La caja de la línea de estados */
+.ficha-estados {
+  padding: var(--espacio-4) var(--espacio-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* Los cuatro estados en fila; en pantallas angostas bajan */
+.ficha-estados-lista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-3) 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cada estado es una píldora */
+.ficha-estado {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: 0.4rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* El tramo de línea entre un estado y el anterior */
+.ficha-estado:not(:first-child) {
+  margin-left: 2.75rem;
+}
+
+.ficha-estado:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 1.75rem;
+  margin-right: 0.5rem;
+  border-top: 1px solid var(--color-borde-medio);
+}
+
+/* Ya pasó: con borde y el tilde */
+.ficha-estado-hecho {
+  border-color: var(--color-borde-fuerte);
+  color: var(--color-texto-secundario);
+}
+
+/* El actual: lleno */
+.ficha-estado-actual {
+  background: var(--color-primario);
+  border-color: var(--color-primario);
+  color: var(--color-texto-inverso);
+  font-weight: 600;
+}
+
+/* El acuerdo que cerró sin quórum: lleno, pero en rojo */
+.ficha-estado-alerta {
+  background: var(--color-error);
+  border-color: var(--color-error);
+  color: var(--color-texto-brillante);
+}
+
+/* Todavía no: punteado y apagado */
+.ficha-estado-pendiente {
+  border: 1px dashed var(--color-borde-medio);
+  color: var(--color-texto-apagado);
+}
+
+/* El acuerdo en dos columnas: las franjas y, al costado, el lateral */
+.ficha-acuerdo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  align-items: start;
+  gap: var(--espacio-8);
+}
+
+/* La columna de las franjas */
+.ficha-acuerdo-principal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  min-width: 0;
+}
+
+/* «Franjas horarias propuestas» con «Podés marcar más de una» a la derecha */
+.ficha-seccion-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espacio-2) var(--espacio-4);
+}
+
+.ficha-seccion-titulo {
+  margin: 0;
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-xl);
+  color: var(--color-texto-brillante);
+}
+
+.ficha-seccion-ayuda {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* «Ingresá para marcar…», para quien no tiene sesión */
+.ficha-acuerdo-ingresar {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.ficha-acuerdo-ingresar a {
+  color: var(--color-primario);
+}
+
+/* Lo que puede hacer el organizador con el acuerdo */
+.ficha-panel-organizador {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  padding: var(--espacio-5);
+  background: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+.ficha-panel-titulo {
+  margin: 0;
+  font-size: var(--texto-md);
+  color: var(--color-texto-brillante);
+}
+
+.ficha-panel-texto {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.ficha-panel-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+.ficha-panel-acciones form {
+  margin: 0;
+}
+
+/* La lista de franjas */
+.ficha-franjas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Una franja: cuándo, cuántos se comprometieron y el botón, en una fila */
+.ficha-franja {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--espacio-6);
+  padding: var(--espacio-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+/* La que marcó quien mira: con el borde grueso, como en el wireframe */
+.ficha-franja-marcada {
+  border: 2px solid var(--color-primario);
+  padding: calc(var(--espacio-5) - 1px);
+}
+
+.ficha-franja-fecha {
+  margin: 0;
+  font-size: var(--texto-md);
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.ficha-franja-horario {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.ficha-franja-progreso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+/* La barra de compromisos contra el mínimo */
+.ficha-barra {
+  height: 6px;
+  overflow: hidden;
+  background: var(--color-superficie-interactiva);
+  border-radius: 999px;
+}
+
+.ficha-barra-relleno {
+  display: block;
+  height: 100%;
+  background: var(--color-primario);
+  border-radius: inherit;
+}
+
+/* «11 de 20 comprometidos» a la izquierda y lo que falta a la derecha */
+.ficha-franja-conteo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espacio-1) var(--espacio-3);
+  margin: 0;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+.ficha-franja-conteo strong {
+  color: var(--color-texto);
+}
+
+.ficha-franja-accion form {
+  margin: 0;
+}
+
+/* «Me sirve»: el mismo ancho marcado o no, para que la fila no salte */
+.boton-me-sirve {
+  min-width: 7.5rem;
+  justify-content: center;
+  gap: var(--espacio-2);
+}
+
+.boton-me-sirve[aria-pressed="true"] {
+  border-color: var(--color-primario);
+  color: var(--color-primario);
+}
+
+/* El lateral: títulos elegidos, cómo se confirma y el aviso */
+.ficha-acuerdo-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-5);
+}
+
+.ficha-caja {
+  padding: var(--espacio-6);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+/* «TÍTULOS YA ELEGIDOS», «CÓMO SE CONFIRMA»: rótulos chicos y espaciados */
+.ficha-caja-rotulo {
+  margin: 0 0 var(--espacio-4);
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+.ficha-titulos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Un título: el afiche chico y, al lado, el nombre con el año y la duración */
+.ficha-titulo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-4);
+}
+
+.ficha-titulo-afiche {
+  flex-shrink: 0;
+  width: 4rem;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+}
+
+/* Sin afiche: el marcador del wireframe */
+.ficha-titulo-afiche-vacio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde);
+  font-family: var(--fuente-codigo);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+.ficha-titulo-nombre {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.ficha-titulo-datos {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* «Ganó la votación con…», separado por una línea */
+.ficha-caja-nota {
+  margin: var(--espacio-4) 0 0;
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--color-borde);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* Los datos de «Cómo se confirma»: el nombre a la izquierda y el valor a la derecha */
+.ficha-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  width: auto;
+  margin: 0;
+  /* Sin la caja que el dl tiene en todo el sitio: ya está adentro de la suya */
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.ficha-dato {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  font-size: var(--texto-sm);
+}
+
+.ficha-dato dt {
+  font-weight: 400;
+  color: var(--color-texto-secundario);
+}
+
+.ficha-dato dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+  color: var(--color-texto);
+}
+
+/* El aviso de abajo del lateral, con el borde izquierdo de color como en el wireframe */
+.ficha-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  padding: var(--espacio-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-left: 3px solid var(--color-primario);
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.ficha-aviso p {
+  margin: 0;
+}
+
+.ficha-aviso strong {
+  color: var(--color-texto);
+}
+
+.ficha-aviso .icono {
+  margin-top: 0.15rem;
+  color: var(--color-texto);
+}
+
+/* En tablet el lateral pasa abajo, y en celular cada franja se apila */
+@media (max-width: 900px) {
+  .ficha-acuerdo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ficha-franja {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-3);
+  }
+
+  /* Los estados bajan de a uno: sin el tramo de línea, que quedaría suelto al principio */
+  .ficha-estados-lista {
+    gap: var(--espacio-2);
+  }
+
+  .ficha-estado:not(:first-child) {
+    margin-left: 0;
+  }
+
+  .ficha-estado:not(:first-child)::before {
+    display: none;
+  }
 }
 
 /* Contenedor para alinear insignia de estado */
@@ -3582,63 +4062,6 @@ dd {
   line-height: 1.2;
   /* Rompe palabras largas para evitar scroll horizontal en móvil */
   word-break: break-word;
-}
-
-/* Tira de metadatos de la función (fecha, precio, cupo) */
-.ficha-funcion-metadatos {
-  /* Disposición flex */
-  display: flex;
-  /* Envoltorio responsivo */
-  flex-wrap: wrap;
-  /* Separación */
-  gap: var(--espacio-3);
-  /* Margen superior */
-  margin-top: var(--espacio-2);
-}
-
-/* Chip individual de metadato */
-.ficha-metadato-chip {
-  /* Disposición en línea flexible */
-  display: inline-flex;
-  /* Alineación centrada */
-  align-items: center;
-  /* Separación */
-  gap: var(--espacio-2);
-  /* Fondo elevado */
-  background-color: var(--color-superficie-elevada);
-  /* Borde tenue */
-  border: 1px solid var(--color-superficie-borde);
-  /* Relleno interno */
-  padding: var(--espacio-2) var(--espacio-4);
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-md);
-  /* Tamaño chico */
-  font-size: var(--texto-sm);
-  /* Color texto */
-  color: var(--color-texto);
-  /* Tipografía */
-  font-family: var(--fuente-cuerpo);
-}
-
-/* Icono dentro del chip de metadato */
-.ficha-metadato-icono {
-  /* Tamaño de icono */
-  font-size: 1.1rem;
-  /* Altura de línea compacta */
-  line-height: 1;
-}
-
-/* Texto del chip de metadato */
-.ficha-metadato-texto {
-  /* Peso seminegrita */
-  font-weight: 500;
-}
-
-/* Acción en la tira de metadatos (ej. botón para editar o cancelar función propia, IC-122 / IC-123) */
-.ficha-metadato-accion {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--espacio-2);
 }
 
 /* Formulario en línea para cerrar votación desde la cabecera (IC-150) */
@@ -5901,136 +6324,12 @@ a.tabla-admin-principal:focus-visible {
    Componentes para plantillas/programacion/ficha_funcion.html.twig
    -------------------------------------------------------------------------- */
 
-/* Sección del acuerdo de fecha en la ficha */
-.ficha-acuerdo-fecha {
-  background-color: var(--color-superficie-elevada);
-  border: 1px solid var(--color-superficie-borde);
-  border-radius: var(--radio-lg);
-  padding: var(--espacio-6);
-  margin-top: var(--espacio-6);
-  margin-bottom: var(--espacio-6);
-}
-
-.ficha-acuerdo-cabecera {
-  margin-bottom: var(--espacio-4);
-}
-
-.ficha-acuerdo-intro {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-2);
-}
-
 .ficha-acuerdo-titulo {
   font-family: var(--fuente-titulos);
   font-size: var(--texto-2xl);
   font-weight: 700;
   color: var(--color-texto-brillante);
   margin: 0;
-}
-
-.ficha-acuerdo-bajada {
-  font-size: var(--texto-base);
-  color: var(--color-texto-secundario);
-  margin: 0;
-  max-width: 760px;
-  line-height: 1.5;
-}
-
-/* Banner de aviso para el usuario que ya votó */
-.ficha-acuerdo-aviso-voto {
-  display: flex;
-  align-items: center;
-  gap: var(--espacio-3);
-  padding: var(--espacio-3) var(--espacio-4);
-  background-color: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  border-radius: var(--radio-md);
-  margin-top: var(--espacio-4);
-  margin-bottom: var(--espacio-4);
-  color: #a7f3d0;
-}
-
-.ficha-acuerdo-aviso-voto .aviso-icono {
-  font-size: 1.25rem;
-  color: var(--color-exito);
-  font-weight: 700;
-}
-
-.ficha-acuerdo-aviso-voto .aviso-texto {
-  font-size: var(--texto-sm);
-  margin: 0;
-  color: #d1fae5;
-}
-
-/* Lista de tarjetas de franjas horarias */
-.lista-tarjetas-franjas {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-4);
-  margin-top: var(--espacio-4);
-}
-
-/* Tarjeta individual de franja horaria */
-.tarjeta-franja-acuerdo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-4);
-  padding: var(--espacio-5);
-  background-color: var(--color-superficie);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-md);
-  transition: border-color var(--transicion-rapida), box-shadow var(--transicion-rapida), background-color var(--transicion-rapida);
-}
-
-@media (min-width: 768px) {
-  .tarjeta-franja-acuerdo {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--espacio-6);
-  }
-}
-
-.tarjeta-franja-acuerdo:hover {
-  border-color: var(--color-borde-medio);
-}
-
-/* Franja seleccionada / votada por el usuario actual */
-.tarjeta-franja-acuerdo.franja-seleccionada,
-.tarjeta-franja-acuerdo.franja-votada {
-  border-color: var(--color-primario);
-  background-color: rgba(240, 166, 59, 0.05);
-  box-shadow: 0 0 16px rgba(240, 166, 59, 0.12);
-}
-
-/* Franja con quórum alcanzado */
-.tarjeta-franja-acuerdo.franja-quorom-alcanzado {
-  border-color: rgba(16, 185, 129, 0.5);
-}
-
-/* Franja ganadora destacada */
-.tarjeta-franja-acuerdo.franja-ganadora {
-  border-color: rgba(240, 166, 59, 0.7);
-  background: linear-gradient(135deg, rgba(240, 166, 59, 0.08) 0%, rgba(16, 185, 129, 0.06) 100%);
-  box-shadow: 0 0 20px rgba(240, 166, 59, 0.18);
-}
-
-/* Badge de franja ganadora */
-.franja-ganadora-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.55rem;
-  background-color: rgba(240, 166, 59, 0.2);
-  border: 1px solid rgba(240, 166, 59, 0.6);
-  border-radius: var(--radio-sm);
-  color: #fef3c7;
-  font-size: var(--texto-xs);
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  animation: pulso-ganadora 2.5s ease-in-out infinite;
 }
 
 @keyframes pulso-ganadora {
@@ -6042,63 +6341,6 @@ a.tabla-admin-principal:focus-visible {
   50% {
     box-shadow: 0 0 0 4px rgba(240, 166, 59, 0);
   }
-}
-
-/* Panel de confirmación del organizador cuando se alcanza el mínimo */
-.ficha-acuerdo-panel-confirmacion {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-4);
-  padding: var(--espacio-5);
-  background: linear-gradient(135deg, rgba(240, 166, 59, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%);
-  border: 2px solid var(--color-primario);
-  border-radius: var(--radio-lg);
-  margin-bottom: var(--espacio-6);
-  box-shadow: 0 4px 20px rgba(240, 166, 59, 0.15);
-}
-
-@media (min-width: 640px) {
-  .ficha-acuerdo-panel-confirmacion {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-}
-
-.acuerdo-confirmacion-contenido {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--espacio-4);
-}
-
-.acuerdo-confirmacion-icono {
-  font-size: 2rem;
-  line-height: 1;
-}
-
-.acuerdo-confirmacion-texto {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.acuerdo-confirmacion-titulo {
-  font-family: var(--fuente-titulos);
-  font-size: var(--texto-xl);
-  font-weight: 700;
-  color: var(--color-texto-brillante);
-  margin: 0;
-}
-
-.acuerdo-confirmacion-bajada {
-  font-size: var(--texto-sm);
-  color: var(--color-texto);
-  line-height: 1.45;
-  margin: 0;
-}
-
-.acuerdo-confirmacion-bajada strong {
-  color: var(--color-primario);
 }
 
 .formulario-confirmar-acuerdo {
@@ -6114,181 +6356,9 @@ a.tabla-admin-principal:focus-visible {
   box-shadow: 0 4px 14px rgba(240, 166, 59, 0.35);
 }
 
-/* Panel del organizador cuando no se alcanzó el quórum mínimo (E3-13.5 / IC-157) */
-.ficha-acuerdo-panel-sin-minimo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-4);
-  padding: var(--espacio-5);
-  background: linear-gradient(135deg, rgba(240, 166, 59, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%);
-  border: 2px solid var(--color-advertencia);
-  border-radius: var(--radio-lg);
-  margin-bottom: var(--espacio-6);
-  box-shadow: 0 4px 20px rgba(240, 166, 59, 0.12);
-}
-
-@media (min-width: 768px) {
-  .ficha-acuerdo-panel-sin-minimo {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-}
-
-.panel-sin-minimo-contenido {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--espacio-4);
-}
-
-.panel-sin-minimo-icono {
-  font-size: 2rem;
-  line-height: 1;
-}
-
-.panel-sin-minimo-texto {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.panel-sin-minimo-titulo {
-  font-family: var(--fuente-titulos);
-  font-size: var(--texto-xl);
-  font-weight: 700;
-  color: var(--color-texto-brillante);
-  margin: 0;
-}
-
-.panel-sin-minimo-bajada {
-  font-size: var(--texto-sm);
-  color: var(--color-texto);
-  line-height: 1.45;
-  margin: 0;
-}
-
-.panel-sin-minimo-bajada strong {
-  color: var(--color-advertencia);
-}
-
-.panel-sin-minimo-acciones {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--espacio-3);
-  flex-shrink: 0;
-}
-
 .formulario-cancelar-funcion {
   display: inline-flex;
   margin: 0;
-}
-
-/* Contenido principal de la franja (textos + barra de progreso) */
-.franja-contenido-principal {
-  flex: 1;
-  min-width: 0;
-}
-
-.franja-cabecera-info {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--espacio-3);
-  margin-bottom: var(--espacio-2);
-}
-
-.franja-icono-calendario {
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.franja-textos-tiempo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.franja-fecha-texto {
-  font-family: var(--fuente-titulos);
-  font-size: var(--texto-lg);
-  font-weight: 700;
-  color: var(--color-texto-brillante);
-  margin: 0;
-  line-height: 1.25;
-}
-
-.franja-horario-texto {
-  font-size: var(--texto-sm);
-  color: var(--color-texto-atenuado);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-/* Contenedor y barra de progreso de compromisos */
-.franja-progreso-contenedor {
-  width: 100%;
-  max-width: 520px;
-  margin-top: var(--espacio-3);
-}
-
-.franja-progreso-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--espacio-2);
-  font-size: var(--texto-xs);
-  margin-bottom: var(--espacio-2);
-}
-
-.progreso-conteo {
-  color: var(--color-texto-secundario);
-}
-
-.progreso-conteo strong {
-  color: var(--color-texto-brillante);
-}
-
-.progreso-estado-texto {
-  color: var(--color-primario);
-  font-weight: 500;
-}
-
-.progreso-estado-texto.estado-exito {
-  color: var(--color-exito);
-  font-weight: 600;
-}
-
-/* Barra de progreso con estilo track */
-.barra-progreso-compromisos {
-  width: 100%;
-  height: 10px;
-  background-color: var(--color-superficie-elevada);
-  border-radius: 9999px;
-  overflow: hidden;
-  border: 1px solid var(--color-superficie-borde);
-  position: relative;
-}
-
-.barra-progreso-relleno {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-primario) 0%, #fbbf24 100%);
-  border-radius: 9999px;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.barra-progreso-relleno.relleno-exito {
-  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
-}
-
-/* Columna de acción de la franja (botón o voto actual) */
-.franja-accion-columna {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
 }
 
 .boton-me-sirve {
@@ -6298,216 +6368,10 @@ a.tabla-admin-principal:focus-visible {
   white-space: nowrap;
 }
 
-.icono-me-sirve {
-  font-size: 1.1rem;
-}
-
-.franja-voto-registrado {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--espacio-2) var(--espacio-4);
-  background-color: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  border-radius: var(--radio-md);
-  color: #a7f3d0;
-  font-size: var(--texto-xs);
-  font-weight: 600;
-}
-
-/* Invitación accesible para espectadores sin sesión */
-.ficha-acuerdo-invitacion {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-4);
-  padding: var(--espacio-5);
-  background-color: var(--color-superficie);
-  border: 1px dashed var(--color-superficie-borde);
-  border-radius: var(--radio-md);
-  margin-top: var(--espacio-4);
-  margin-bottom: var(--espacio-4);
-}
-
-@media (min-width: 640px) {
-  .ficha-acuerdo-invitacion {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-}
-
-.acuerdo-invitacion-contenido {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--espacio-3);
-}
-
-.acuerdo-icono-invitacion {
-  font-size: 1.75rem;
-  line-height: 1;
-}
-
-.acuerdo-titulo-invitacion {
-  font-family: var(--fuente-titulos);
-  font-size: var(--texto-lg);
-  font-weight: 600;
-  color: var(--color-texto-brillante);
-  margin: 0;
-}
-
-.acuerdo-bajada-invitacion {
-  font-size: var(--texto-sm);
-  color: var(--color-texto-secundario);
-  margin: 0.2rem 0 0 0;
-}
-
-.acuerdo-acciones-invitacion {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--espacio-3);
-}
-
 /* --------------------------------------------------------------------------
    ACUERDO DE FECHA CON ESPECTADORES - FICHA Y WIREFRAME (E3-13 / IC-158)
    Línea de estados (stepper), panel complementario lateral y adaptación
    -------------------------------------------------------------------------- */
-
-/* Chip destacado para mínimo de asistentes en acuerdo de fecha */
-.ficha-metadato-chip.ficha-metadato-minimo {
-  background-color: rgba(240, 166, 59, 0.15);
-  border-color: rgba(240, 166, 59, 0.45);
-  color: #fef3c7;
-}
-
-.ficha-metadato-chip.ficha-metadato-minimo strong {
-  color: var(--color-primario);
-}
-
-/* ── Línea de estados (Timeline de progreso secuencial) ─────────────────── */
-.linea-estados-contenedor {
-  margin-bottom: var(--espacio-6);
-}
-
-.linea-estados-funcion {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--espacio-3);
-  padding: var(--espacio-4) var(--espacio-6);
-  background-color: var(--color-superficie);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-lg);
-  list-style: none;
-  margin: 0;
-}
-
-.etapa-estado {
-  display: flex;
-  align-items: center;
-  gap: var(--espacio-3);
-  flex: 1;
-  min-width: 0;
-}
-
-.etapa-indicador {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radio-completo);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: var(--texto-sm);
-  background-color: var(--color-superficie-elevada);
-  border: 2px solid var(--color-borde-fuerte);
-  color: var(--color-texto-atenuado);
-  flex-shrink: 0;
-  transition: all var(--transicion-rapida);
-}
-
-.etapa-cuerpo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.etapa-rotulo {
-  font-size: var(--texto-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-texto-atenuado);
-  font-weight: 600;
-}
-
-.etapa-nombre {
-  font-family: var(--fuente-titulos);
-  font-size: var(--texto-base);
-  font-weight: 700;
-  color: var(--color-texto);
-  line-height: 1.2;
-}
-
-.etapa-estado-texto {
-  font-size: var(--texto-xs);
-  color: var(--color-texto-secundario);
-}
-
-.etapa-separador {
-  flex: 0 0 32px;
-  height: 2px;
-  background-color: var(--color-borde);
-}
-
-/* Etapa completada */
-.etapa-estado.etapa-completada .etapa-indicador {
-  background-color: rgba(16, 185, 129, 0.15);
-  border-color: var(--color-exito);
-  color: var(--color-exito);
-}
-
-.etapa-estado.etapa-completada .etapa-nombre {
-  color: var(--color-texto-secundario);
-}
-
-/* Etapa activa */
-.etapa-estado.etapa-activa .etapa-indicador {
-  background-color: var(--color-primario);
-  border-color: var(--color-primario);
-  color: var(--color-texto-inverso);
-  box-shadow: 0 0 14px rgba(240, 166, 59, 0.4);
-}
-
-.etapa-estado.etapa-activa .etapa-nombre {
-  color: var(--color-texto-brillante);
-}
-
-/* Etapa pendiente */
-.etapa-estado.etapa-pendiente .etapa-indicador {
-  opacity: 0.7;
-}
-
-.etapa-estado.etapa-pendiente .etapa-nombre {
-  color: var(--color-texto-atenuado);
-}
-
-/* ── Disposición de 2 Columnas de Acuerdo (Figma Wireframe) ──────────────── */
-.ficha-acuerdo-disposicion {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: var(--espacio-8);
-  align-items: start;
-}
-
-.ficha-acuerdo-columna-principal {
-  min-width: 0;
-}
-
-.ficha-acuerdo-barra-lateral {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-6);
-}
 
 /* ── Tarjetas Laterales del Acuerdo ─────────────────────────────────────── */
 .tarjeta-acuerdo-lateral {
@@ -6518,270 +6382,6 @@ a.tabla-admin-principal:focus-visible {
   display: flex;
   flex-direction: column;
   gap: var(--espacio-4);
-}
-
-.lateral-cabecera {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-2);
-}
-
-.lateral-badge-elegido {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  align-self: flex-start;
-  padding: 0.2rem 0.6rem;
-  background-color: rgba(240, 166, 59, 0.18);
-  border: 1px solid rgba(240, 166, 59, 0.45);
-  border-radius: var(--radio-sm);
-  color: #fef3c7;
-  font-size: var(--texto-xs);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.lateral-titulo {
-  font-family: var(--fuente-titulos);
-  font-size: var(--texto-lg);
-  font-weight: 700;
-  color: var(--color-texto-brillante);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.lateral-anio {
-  color: var(--color-texto-atenuado);
-  font-weight: 400;
-  font-size: var(--texto-base);
-}
-
-.lateral-afiche-contenedor {
-  width: 100%;
-  border-radius: var(--radio-md);
-  overflow: hidden;
-  background-color: var(--color-superficie-elevada);
-}
-
-.lateral-afiche-img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  display: block;
-}
-
-.lateral-afiche-placeholder {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--espacio-2);
-  background: linear-gradient(135deg, var(--color-superficie-elevada) 0%, rgba(240, 166, 59, 0.08) 100%);
-  border: 1px dashed var(--color-superficie-borde);
-  border-radius: var(--radio-md);
-  color: var(--color-texto-atenuado);
-}
-
-.lateral-obra-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-3);
-}
-
-.lateral-obra-meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--espacio-2);
-  font-size: var(--texto-xs);
-  color: var(--color-texto-secundario);
-}
-
-.lateral-obra-metadato strong {
-  color: var(--color-texto-brillante);
-}
-
-.lateral-separador {
-  color: var(--color-texto-atenuado);
-}
-
-.lateral-generos-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--espacio-1);
-}
-
-.lateral-sinopsis {
-  font-size: var(--texto-xs);
-  color: var(--color-texto-secundario);
-  line-height: 1.5;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.lateral-votos-ganadora {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: var(--espacio-2) var(--espacio-3);
-  background-color: var(--color-superficie-elevada);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-md);
-  font-size: var(--texto-xs);
-  color: var(--color-texto);
-}
-
-.lateral-votos-ganadora strong {
-  color: var(--color-primario);
-}
-
-/* ── Tarjeta «Cómo se confirma» ─────────────────────────────────────────── */
-.lateral-requisitos-lista {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--espacio-3);
-}
-
-.lateral-requisito-item {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--espacio-3);
-  padding-bottom: var(--espacio-3);
-  border-bottom: 1px solid var(--color-borde);
-}
-
-.lateral-requisito-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.requisito-icono {
-  font-size: 1.25rem;
-  line-height: 1;
-  flex-shrink: 0;
-  margin-top: 0.15rem;
-}
-
-.requisito-datos {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-}
-
-.requisito-etiqueta {
-  font-size: var(--texto-xs);
-  color: var(--color-texto-atenuado);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.requisito-valor {
-  font-size: var(--texto-sm);
-  color: var(--color-texto-brillante);
-}
-
-.lateral-callout-advertencia {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--espacio-3);
-  padding: var(--espacio-3) var(--espacio-4);
-  background-color: rgba(240, 166, 59, 0.08);
-  border: 1px solid rgba(240, 166, 59, 0.25);
-  border-radius: var(--radio-md);
-}
-
-.lateral-callout-advertencia .callout-icono {
-  font-size: 1.2rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.lateral-callout-advertencia .callout-texto {
-  font-size: var(--texto-xs);
-  color: var(--color-texto);
-  line-height: 1.45;
-  margin: 0;
-}
-
-/* Callout lateral de sin mínimo (E3-13.5 / IC-157) */
-.lateral-callout-sin-minimo {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--espacio-3);
-  padding: var(--espacio-3) var(--espacio-4);
-  background-color: rgba(240, 166, 59, 0.1);
-  border-left: 3px solid var(--color-advertencia);
-  border-radius: var(--radio-sm);
-}
-
-.lateral-callout-sin-minimo .callout-icono {
-  font-size: 1.25rem;
-  line-height: 1.2;
-  flex-shrink: 0;
-}
-
-.lateral-callout-sin-minimo .callout-texto {
-  font-size: var(--texto-xs);
-  color: var(--color-texto-secundario);
-  line-height: 1.45;
-  margin: 0;
-}
-
-.lateral-callout-sin-minimo .callout-texto strong {
-  color: var(--color-advertencia);
-}
-
-/* Tarjetas de franjas horarias en modo cerrado (E3-13.5 / IC-157) */
-.tarjeta-franja-acuerdo.cerrado {
-  opacity: 0.92;
-  background-color: var(--color-superficie);
-  border-color: var(--color-borde);
-}
-
-.tarjeta-franja-acuerdo.cerrado:hover {
-  border-color: var(--color-borde-medio);
-}
-
-.estado-incompleto {
-  color: var(--color-texto-secundario);
-}
-
-.barra-progreso-relleno.relleno-incompleto {
-  background: linear-gradient(90deg, var(--color-superficie-interactiva), var(--color-advertencia));
-}
-
-.franja-estado-cerrado {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.franja-estado-cerrado-texto {
-  font-size: var(--texto-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: var(--espacio-2) var(--espacio-3);
-  border-radius: var(--radio-sm);
-  background-color: var(--color-superficie-elevada);
-  border: 1px solid var(--color-borde);
-  color: var(--color-texto-apagado);
-}
-
-.alerta-sin-minimo {
-  margin-bottom: var(--espacio-6);
 }
 
 /* ── Cartelera y tabla del organizador para acuerdo de fecha ────────────── */
@@ -6824,39 +6424,6 @@ a.tabla-admin-principal:focus-visible {
   background-color: rgba(240, 166, 59, 0.15);
   border-color: rgba(240, 166, 59, 0.4);
   color: var(--color-advertencia);
-}
-
-/* ── Responsive Acuerdo de Fecha ────────────────────────────────────────── */
-@media (max-width: 992px) {
-  .ficha-acuerdo-disposicion {
-    grid-template-columns: 1fr;
-    gap: var(--espacio-6);
-  }
-
-  .ficha-acuerdo-barra-lateral {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--espacio-5);
-  }
-}
-
-@media (max-width: 768px) {
-  .linea-estados-funcion {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--espacio-4);
-    padding: var(--espacio-4);
-  }
-
-  .etapa-separador {
-    width: 2px;
-    height: 16px;
-    margin-left: 17px;
-  }
-
-  .ficha-acuerdo-barra-lateral {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* --------------------------------------------------------------------------
@@ -7238,20 +6805,6 @@ a.tabla-admin-principal:focus-visible {
     margin: 0 auto var(--espacio-2) auto;
   }
 
-  /* Metadatos de la función apilados en móvil */
-  .ficha-funcion-metadatos {
-    /* Disposición en columna */
-    flex-direction: column;
-    /* Separación */
-    gap: var(--espacio-2);
-  }
-
-  /* Chips de metadatos al 100% de ancho */
-  .ficha-metadato-chip {
-    /* Ancho completo */
-    width: 100%;
-  }
-
   /* Título de la función ajustado en móvil */
   .ficha-funcion-titulo {
     /* Tamaño 30px */
@@ -7413,7 +6966,6 @@ a.tabla-admin-principal:focus-visible {
     width: 100%;
   }
   /* Ficha de la función en celulares angostos a 360 px (IC-87 / E3-04.3) */
-  .ficha-funcion-cabecera,
   .ficha-sala-tarjeta,
   .ficha-obra-tarjeta {
     /* Relleno compacto */
