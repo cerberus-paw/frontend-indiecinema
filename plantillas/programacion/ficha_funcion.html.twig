@@ -515,6 +515,9 @@
          (E3-13.F1): se dice eso, y no se muestran franjas ni un mínimo que no existen. #}
       <section class="ficha-seccion ficha-acuerdo-fecha" aria-labelledby="ficha-acuerdo-titulo">
         <h2 id="ficha-acuerdo-titulo" class="ficha-acuerdo-titulo">Acuerdo de fecha</h2>
+        {% if error_acuerdo|default(false) %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se pudo actualizar el acuerdo', mensaje: error_acuerdo } only %}
+        {% endif %}
         {% if funcion.es_organizador|default(false) %}
           {% include 'parciales/mensaje.html.twig' with {
             tipo: 'info',
@@ -599,6 +602,16 @@
                 } only %}
               </div>
             {% endif %}
+            {# Lo que no salió al confirmar o cerrar el acuerdo (E3-13.F4): es del organizador, no del voto. #}
+            {% if error_acuerdo|default(false) %}
+              <div class="ficha-acuerdo-error" role="alert">
+                {% include 'parciales/mensaje.html.twig' with {
+                  tipo: 'error',
+                  titulo: 'No se pudo actualizar el acuerdo',
+                  mensaje: error_acuerdo
+                } only %}
+              </div>
+            {% endif %}
 
             {# Panel de confirmación del organizador si se alcanzó el mínimo (E3-13.4 / IC-156) #}
             {% set quorom_alcanzado = max_votos >= minimo_asistentes_requerido %}
@@ -625,7 +638,11 @@
                   </button>
                 </form>
               </div>
-            {% elseif es_organizador and not es_acuerdo_sin_minimo %}
+            {% endif %}
+            {# Cerrar va siempre que el acuerdo esté abierto, también con el mínimo alcanzado: si la
+               franja ganadora ya empezó no se puede confirmar, y cerrarlo es la salida que propone
+               el aviso (E3-13.F4). Sin esto, la función quedaba trabada en el acuerdo. #}
+            {% if es_organizador and not es_acuerdo_sin_minimo %}
               <div class="ficha-acuerdo-panel-gestion-organizador" role="region" aria-label="Gestión de acuerdo para el organizador" style="margin-bottom: var(--espacio-m, 1.5rem); padding: var(--espacio-m, 1.25rem); background: var(--color-fondo-panel, #201a1c); border: 1px solid var(--color-borde, #44383c); border-radius: var(--radio-borde-m, 8px); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                 <div>
                   <strong style="color: var(--color-texto-destacado, #f6e8ea); font-size: 1rem;">Gestión del acuerdo de fecha</strong>
