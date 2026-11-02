@@ -537,8 +537,15 @@
         {% endif %}
       </section>
     {% elseif es_acuerdo_activo or es_acuerdo_sin_minimo %}
-      {% set voto_franja_actual = voto_franja ?? (funcion.voto_franja ?? (franja_votada ?? null)) %}
-      {% set tiene_voto_franja = voto_franja_actual is not empty %}
+      {# Las franjas que marcó quien mira: pueden ser varias (E3-13.F7). #}
+      {% set franjas_marcadas = franjas_del_usuario|default(funcion.franjas_del_usuario|default([])) %}
+      {% set tiene_voto_franja = franjas_marcadas is not empty %}
+      {# El organizador no marca sus propias franjas: el mínimo lo junta el público (E3-13.F7). #}
+      {# Pasada la fecha límite no se marca más, aunque el acuerdo siga abierto porque una franja
+         llegó al mínimo y falta que el organizador la confirme (E3-13.F8). #}
+      {# Con ?? y no con default: default toma el false como vacío y lo cambia por true. #}
+      {% set votacion_abierta = funcion.votacion_abierta ?? true %}
+      {% set marca_franjas = usuario and not funcion.es_organizador|default(false) and votacion_abierta %}
       {# Sólo lo que viene del acuerdo: antes, sin datos, se mostraban franjas, un mínimo y votos
          de ejemplo como si fueran reales (E3-13.F3). El mínimo nunca es 0: divide los porcentajes. #}
       {% set franjas_disponibles = funcion.franjas|default([]) %}
@@ -576,7 +583,7 @@
                   </span>
                   <h2 id="ficha-acuerdo-titulo" class="ficha-acuerdo-titulo">Franjas horarias propuestas</h2>
                   <p class="ficha-acuerdo-bajada">
-                    Podés marcar tu disponibilidad seleccionando la franja que te convenga. Tu elección se computa como un compromiso de asistencia para confirmar la función. Podés cambiar tu voto en cualquier momento mientras el acuerdo siga abierto.
+                    Podés marcar más de una: cada franja que te sirve cuenta como un compromiso de asistencia. Las podés quitar mientras el acuerdo siga abierto.
                   </p>
                 {% endif %}
               </div>
@@ -588,9 +595,24 @@
                 {% include 'parciales/mensaje.html.twig' with {
                   tipo: 'exito',
                   titulo: '¡Compromiso registrado con éxito!',
-                  mensaje: mensaje_acuerdo|default(mensaje_exito_franja|default('Marcaste «Me sirve» en esta franja. Tu voto fue computado y podés cambiarlo en cualquier momento.'))
+                  mensaje: mensaje_acuerdo|default(mensaje_exito_franja|default('Marcaste «Me sirve» en esa franja. Podés marcar otras, o quitarla, mientras el acuerdo siga abierto.'))
                 } only %}
               </div>
+            {% endif %}
+            {% if not es_acuerdo_sin_minimo and franja_quitada|default(false) %}
+              <div class="ficha-acuerdo-confirmacion" role="status">
+                {% include 'parciales/mensaje.html.twig' with {
+                  tipo: 'info',
+                  mensaje: 'Quitaste «Me sirve» de esa franja.'
+                } only %}
+              </div>
+            {% endif %}
+
+            {% if not es_acuerdo_sin_minimo and not votacion_abierta %}
+              {% include 'parciales/mensaje.html.twig' with {
+                tipo: 'info',
+                mensaje: 'Ya pasó la fecha límite para marcar «Me sirve». Falta que el organizador confirme la franja que llegó al mínimo.'
+              } only %}
             {% endif %}
 
             {% if error_franja|default(false) %}
@@ -703,7 +725,7 @@
               <div class="lista-tarjetas-franjas franjas-modo-cerrado" role="region" aria-label="Resultado final de las franjas horarias propuestas">
                 {% for franja in franjas_disponibles %}
                   {% set franja_id = franja.id|default(loop.index) %}
-                  {% set es_franja_votada = tiene_voto_franja and (voto_franja_actual == franja_id or voto_franja_actual == (franja.fecha ~ ' · ' ~ franja.hora_inicio)) %}
+                  {% set es_franja_votada = franja_id in franjas_marcadas %}
                   {% set votos_franja = franja.votos|default(conteo_votos_franjas[franja_id]|default(0)) %}
                   {% set porcentaje = ((votos_franja / minimo_asistentes_requerido) * 100)|round %}
                   {% set faltan_votos = minimo_asistentes_requerido - votos_franja %}
@@ -765,20 +787,11 @@
                 {% endfor %}
               </div>
             {% elseif usuario %}
-              {# Mensaje de estado si ya emitió un voto #}
-              {% if tiene_voto_franja %}
-                <div class="ficha-acuerdo-aviso-voto" role="status">
-                  <span class="aviso-icono" aria-hidden="true">✓</span>
-                  <p class="aviso-texto">
-                    Ya marcaste tu disponibilidad para esta función. Podés cambiar tu voto seleccionando otra franja horaria a continuación.
-                  </p>
-                </div>
-              {% endif %}
 
               <div class="lista-tarjetas-franjas" role="region" aria-label="Franjas horarias disponibles para votar" data-franjas-acuerdo>
                 {% for franja in franjas_disponibles %}
                   {% set franja_id = franja.id|default(loop.index) %}
-                  {% set es_franja_votada = tiene_voto_franja and (voto_franja_actual == franja_id or voto_franja_actual == (franja.fecha ~ ' · ' ~ franja.hora_inicio)) %}
+                  {% set es_franja_votada = franja_id in franjas_marcadas %}
                   {% set votos_franja = franja.votos|default(conteo_votos_franjas[franja_id]|default(0)) %}
                   {% set porcentaje = ((votos_franja / minimo_asistentes_requerido) * 100)|round %}
                   {% set alcanza_minimo = votos_franja >= minimo_asistentes_requerido %}
@@ -799,11 +812,6 @@
                         {% if es_ganadora %}
                           <span class="franja-ganadora-badge" role="status">
                             <span aria-hidden="true">🏆</span> Franja ganadora
-                          </span>
-                        {% endif %}
-                        {% if es_franja_votada %}
-                          <span class="insignia-tu-voto" role="status">
-                            <span aria-hidden="true">✓</span> Te sirve · Tu voto actual
                           </span>
                         {% endif %}
                       </div>
@@ -841,17 +849,16 @@
                     </div>
 
                     <div class="franja-accion-columna">
-                      {% if es_franja_votada %}
-                        <div class="franja-voto-registrado" role="status">
-                          <span class="voto-registrado-texto">✓ Marcaste «Me sirve» en esta opción</span>
-                        </div>
-                      {% else %}
-                        <form action="{{ accion_votar_franja|default('/cartelera/' ~ funcion.id ~ '/votar-franja') }}" method="POST" class="formulario-votar-franja" data-formulario-votar-franja>
+                      {% if marca_franjas %}
+                        {# Marcada, el mismo botón la quita: aria-pressed dice en qué estado está. #}
+                        <form action="{{ accion_votar_franja|default('/cartelera/' ~ funcion.id ~ '/votar') }}" method="POST" class="formulario-votar-franja" data-formulario-votar-franja>
                           <input type="hidden" name="_csrf" value="{{ csrf }}">
                           <input type="hidden" name="franja_id" value="{{ franja_id }}">
-                          <button type="submit" class="boton {{ tiene_voto_franja ? 'boton-secundario' : 'boton-primario' }} boton-me-sirve">
-                            <span class="icono-me-sirve" aria-hidden="true">🤝</span>
-                            {{ tiene_voto_franja ? 'Cambiar mi voto a esta franja' : 'Me sirve' }}
+                          {% if es_franja_votada %}
+                            <input type="hidden" name="quitar" value="1">
+                          {% endif %}
+                          <button type="submit" class="boton {{ es_franja_votada ? 'boton-primario' : 'boton-secundario' }} boton-me-sirve" aria-pressed="{{ es_franja_votada ? 'true' : 'false' }}">
+                            {{ es_franja_votada ? '✓ Me sirve' : 'Me sirve' }}
                           </button>
                         </form>
                       {% endif %}
@@ -1028,7 +1035,7 @@
                   <span class="requisito-icono" aria-hidden="true">⏳</span>
                   <div class="requisito-datos">
                     <span class="requisito-etiqueta">Fecha límite</span>
-                    <strong class="requisito-valor">{{ funcion.cierre_acuerdo|default('Hasta completar el mínimo') }}</strong>
+                    <strong class="requisito-valor">{{ funcion.fecha_limite|default('Sin franjas todavía') }}</strong>
                   </div>
                 </li>
 
@@ -1052,7 +1059,7 @@
                 <div class="lateral-callout-advertencia" role="note">
                   <span class="callout-icono" aria-hidden="true">💡</span>
                   <p class="callout-texto">
-                    Marcar «Me sirve» compromete tu voto para esta fecha. Si la franja ganadora alcanza el mínimo, la función pasa a programada con esa fecha. Si no lo alcanza, la función no se programa y el organizador decide qué hacer.
+                    Marcar «Me sirve» es comprometerte a ir, pero no reserva ni cobra nada. Si ninguna franja llega al mínimo antes de la fecha límite, la función no se programa y el organizador decide si propone otras fechas o la cancela.
                   </p>
                 </div>
               {% endif %}
