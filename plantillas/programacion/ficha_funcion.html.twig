@@ -536,14 +536,12 @@
     {% elseif es_acuerdo_activo or es_acuerdo_sin_minimo %}
       {% set voto_franja_actual = voto_franja ?? (funcion.voto_franja ?? (franja_votada ?? null)) %}
       {% set tiene_voto_franja = voto_franja_actual is not empty %}
-      {% set franjas_disponibles = funcion.franjas|default([
-        { id: 'franja-1', fecha: 'Viernes 18 de septiembre', hora_inicio: '20:30', hora_fin: '23:30', votos: 11 },
-        { id: 'franja-2', fecha: 'Sábado 19 de septiembre', hora_inicio: '18:00', hora_fin: '21:00', votos: 17 },
-        { id: 'franja-3', fecha: 'Domingo 20 de septiembre', hora_inicio: '19:30', hora_fin: '22:30', votos: 6 }
-      ]) %}
-      {% set minimo_asistentes_requerido = funcion.minimo_asistentes|default(20) %}
+      {# Sólo lo que viene del acuerdo: antes, sin datos, se mostraban franjas, un mínimo y votos
+         de ejemplo como si fueran reales (E3-13.F3). El mínimo nunca es 0: divide los porcentajes. #}
+      {% set franjas_disponibles = funcion.franjas|default([]) %}
+      {% set minimo_asistentes_requerido = max(funcion.minimo_asistentes|default(1), 1) %}
       {% set obra_ganadora = funcion.obra_ganadora|default(funcion.obras[0]|default(null)) %}
-      {% set votos_ganadora = funcion.votos_obra_ganadora|default(obra_ganadora.votos|default(34)) %}
+      {% set votos_ganadora = funcion.votos_obra_ganadora ?? 0 %}
       {% set max_votos = -1 %}
       {% set franja_lider = null %}
       {% for f in franjas_disponibles %}
@@ -805,7 +803,7 @@
                             {% if alcanza_minimo %}
                               <span aria-hidden="true">🎉</span> ¡Alcanzó el mínimo requerido!
                             {% else %}
-                              Faltan <strong>{{ faltan_votos }}</strong> {{ faltan_votos == 1 ? 'compromiso' : 'compromisos' }} para confirmar
+                              {{ faltan_votos == 1 ? 'Falta' : 'Faltan' }} <strong>{{ faltan_votos }}</strong> {{ faltan_votos == 1 ? 'compromiso' : 'compromisos' }} para confirmar
                             {% endif %}
                           </span>
                         </div>
@@ -898,7 +896,7 @@
                             {% if alcanza_minimo %}
                               ¡Alcanzó el mínimo requerido!
                             {% else %}
-                              Faltan <strong>{{ faltan_votos }}</strong> para confirmar
+                              {{ faltan_votos == 1 ? 'Falta' : 'Faltan' }} <strong>{{ faltan_votos }}</strong> {{ faltan_votos == 1 ? 'compromiso' : 'compromisos' }} para confirmar
                             {% endif %}
                           </span>
                         </div>
@@ -973,7 +971,7 @@
 
                   <div class="lateral-votos-ganadora">
                     <span class="icono-votos-ganadora" aria-hidden="true">🗳️</span>
-                    <span>Ganadora con <strong>{{ votos_ganadora }} votos</strong> en la votación previa</span>
+                    <span>Ganadora con <strong>{{ votos_ganadora }} {{ votos_ganadora == 1 ? 'voto' : 'votos' }}</strong> en la votación previa</span>
                   </div>
                 </div>
               </article>
