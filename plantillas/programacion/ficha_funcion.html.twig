@@ -676,14 +676,12 @@
                     <span class="boton-icono boton-icono-antes" aria-hidden="true">📅</span>
                     <span class="boton-texto">Proponer nuevas franjas horarias</span>
                   </a>
-                  <form action="{{ accion_cancelar_funcion|default('/organizador/funciones/' ~ funcion.id ~ '/cancelar') }}" method="POST" class="formulario-cancelar-funcion" onsubmit="return confirm('¿Estás seguro de que deseás cancelar esta función? Esta acción dará de baja la función definitivamente.');">
-                    <input type="hidden" name="_csrf" value="{{ csrf }}">
-                    <input type="hidden" name="volver" value="ficha">
-                    <button type="submit" class="boton boton-peligro">
-                      <span class="boton-icono boton-icono-antes" aria-hidden="true">✕</span>
-                      <span class="boton-texto">Cancelar función</span>
-                    </button>
-                  </form>
+                  {# A la página de confirmación de siempre (E3-13.F5): el confirm() del navegador
+                     no se puede leer ni probar, y el resto del sitio confirma así. #}
+                  <a href="/organizador/funciones/{{ funcion.id }}/cancelar" class="boton boton-peligro">
+                    <span class="boton-icono boton-icono-antes" aria-hidden="true">✕</span>
+                    <span class="boton-texto">Cancelar función</span>
+                  </a>
                 </div>
               </div>
             {% endif %}
