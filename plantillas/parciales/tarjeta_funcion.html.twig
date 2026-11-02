@@ -32,6 +32,10 @@
   or estado_codigo == 'ACUERDO_DE_FECHA'
   or estado_codigo == 'EN_ACUERDO_FECHA'
   or (funcion.estado_valor is defined and funcion.estado_valor == 'en_acuerdo_fecha')) %}
+{% set es_sin_quorum = (estado_codigo == 'ACUERDO_SIN_MINIMO'
+  or estado_codigo == 'SIN_QUORUM'
+  or funcion.acuerdo_sin_minimo|default(false)
+  or (funcion.estado_valor is defined and funcion.estado_valor == 'acuerdo_sin_minimo')) %}
 {# Caso de estado: si la función se encuentra en fase de votación popular por los espectadores #}
 {% if es_votacion %}
   {# Asigna la etiqueta visual con tilde para lectura del usuario #}
@@ -44,6 +48,10 @@
   {% set etiqueta_estado = 'EN ACUERDO DE FECHA' %}
   {# Asigna la clase CSS para el badge de acuerdo de fecha #}
   {% set clase_insignia = 'insignia-acuerdo' %}
+{# Caso de estado: si el acuerdo cerró sin alcanzar el mínimo de asistentes #}
+{% elseif es_sin_quorum %}
+  {% set etiqueta_estado = 'ACUERDO SIN MÍNIMO' %}
+  {% set clase_insignia = 'insignia-sin-quorum' %}
 {# Caso de estado predeterminado: función confirmada con sala, fecha y hora #}
 {% else %}
   {# Asigna la etiqueta de función fijada en cartelera #}
@@ -57,7 +65,7 @@
 {# Resuelve la representación textual del precio de la función predeterminando 'A la gorra' si no se indicó #}
 {% set texto_precio = funcion.precio ?? 'A la gorra' %}
 {# Contenedor principal de la tarjeta con semántica de artículo independiente #}
-<article class="tarjeta-funcion{% if es_votacion %} tarjeta-funcion-votacion{% elseif es_acuerdo %} tarjeta-funcion-acuerdo{% endif %}{% if clase is defined %} {{ clase }}{% endif %}">
+<article class="tarjeta-funcion{% if es_votacion %} tarjeta-funcion-votacion{% elseif es_acuerdo %} tarjeta-funcion-acuerdo{% elseif es_sin_quorum %} tarjeta-funcion-sin-quorum{% endif %}{% if clase is defined %} {{ clase }}{% endif %}">
   {# Contenedor superior para el afiche gráfico de la obra #}
   <div class="tarjeta-funcion-afiche">
     {# Enlace que envuelve el afiche para permitir navegar al hacer clic en la imagen #}
@@ -98,7 +106,7 @@
     <div class="tarjeta-funcion-cabecera">
       {# Insignia de píldora que indica el estado del ciclo o función #}
       <span class="insignia-estado {{ clase_insignia }}" aria-label="Estado: {{ etiqueta_estado }}">
-        {% if es_votacion %}<span class="insignia-icono" aria-hidden="true">🗳️</span>{% elseif es_acuerdo %}<span class="insignia-icono" aria-hidden="true">🤝</span>{% endif %}
+        {% if es_votacion %}<span class="insignia-icono" aria-hidden="true">🗳️</span>{% elseif es_acuerdo %}<span class="insignia-icono" aria-hidden="true">🤝</span>{% elseif es_sin_quorum %}<span class="insignia-icono" aria-hidden="true">⚠️</span>{% endif %}
         {{ etiqueta_estado }}
       </span>
       {# Valor monetario o modalidad de cobro de la entrada #}
@@ -149,7 +157,10 @@
                 Acuerdo de fecha · Franjas en debate
               {% endif %}
             </span>
-          {# Caso 3: Función programada con fecha y hora #}
+          {# Caso 3: Acuerdo cerrado sin quórum #}
+          {% elseif es_sin_quorum %}
+            <span class="meta-texto-destacado meta-texto-sin-quorum">Sin quórum · No programada</span>
+          {# Caso 4: Función programada con fecha y hora #}
           {% else %}
             {# Fecha y horario confirmados de la función #}
             {{ funcion.fecha ?? 'Próximamente' }}
@@ -162,11 +173,11 @@
     </div>
     {# Pie de la tarjeta con el botón de llamado a la acción #}
     <div class="tarjeta-funcion-acciones">
-      {% set texto_boton = es_votacion ? 'Votar títulos' : (es_acuerdo ? 'Votar fecha' : 'Ver función') %}
+      {% set texto_boton = es_votacion ? 'Votar títulos' : (es_acuerdo ? 'Votar fecha' : (es_sin_quorum ? 'Ver resultado' : 'Ver función')) %}
       {% set variante_boton = (es_votacion or es_acuerdo) ? 'primario' : 'secundario' %}
-      {% set icono_boton = es_votacion ? '🗳️' : (es_acuerdo ? '🤝' : null) %}
+      {% set icono_boton = es_votacion ? '🗳️' : (es_acuerdo ? '🤝' : (es_sin_quorum ? 'ℹ️' : null)) %}
       {% set clase_boton_extra = es_votacion ? ' boton-tarjeta-votar' : (es_acuerdo ? ' boton-tarjeta-acuerdo' : '') %}
-      {% set aria_label_boton = es_votacion ? ('Votar títulos para ' ~ funcion.titulo) : (es_acuerdo ? ('Votar fecha para ' ~ funcion.titulo) : ('Ver función ' ~ funcion.titulo)) %}
+      {% set aria_label_boton = es_votacion ? ('Votar títulos para ' ~ funcion.titulo) : (es_acuerdo ? ('Votar fecha para ' ~ funcion.titulo) : (es_sin_quorum ? ('Ver resultado de ' ~ funcion.titulo) : ('Ver función ' ~ funcion.titulo))) %}
       {% include 'parciales/boton.html.twig' with {
         texto: texto_boton,
         url: url_detalle,
