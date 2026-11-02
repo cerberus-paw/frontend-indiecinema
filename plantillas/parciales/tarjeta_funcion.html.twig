@@ -9,7 +9,8 @@
       - id: (int|string, obligatorio) Identificador de la función.
       - titulo: (string, obligatorio) Título de la función, ciclo o película.
       - afiche: (string, opcional) URL o ruta de la imagen del afiche.
-      - estado: (string, opcional, por defecto 'PROGRAMADA') 'PROGRAMADA' | 'EN_VOTACION' | 'ACUERDO_FECHA'.
+      - estado: (string, opcional, por defecto 'PROGRAMADA') 'PROGRAMADA' | 'EN_VOTACION' | 'ACUERDO_FECHA' |
+        'ACUERDO_SIN_MINIMO' (el acuerdo de fecha cerró sin quórum: se ve, pero no se vota).
       - precio: (string|number, opcional) Valor de entrada (ej: '$3.500', 'Gratis', 'A la gorra').
       - sala: (string, opcional) Nombre del espacio o sala indie donde se proyecta.
       - localidad: (string, opcional) Ciudad o barrio de la sala (ej: 'Luján', 'Mercedes').
@@ -88,8 +89,6 @@
       {% else %}
         {# Contenedor de marcador visual con cuadrícula de afiche indie #}
         <div class="tarjeta-funcion-afiche-placeholder">
-          {# Símbolo gráfico de bobina de celuloide #}
-          <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
           {# Texto indicativo que refleja el wireframe original #}
           <span class="afiche-placeholder-texto">AFICHE</span>
         {# Cierre del marcador visual #}
@@ -106,7 +105,6 @@
     <div class="tarjeta-funcion-cabecera">
       {# Insignia de píldora que indica el estado del ciclo o función #}
       <span class="insignia-estado {{ clase_insignia }}" aria-label="Estado: {{ etiqueta_estado }}">
-        {% if es_votacion %}<span class="insignia-icono" aria-hidden="true">🗳️</span>{% elseif es_acuerdo %}<span class="insignia-icono" aria-hidden="true">🤝</span>{% elseif es_sin_quorum %}<span class="insignia-icono" aria-hidden="true">⚠️</span>{% endif %}
         {{ etiqueta_estado }}
       </span>
       {# Valor monetario o modalidad de cobro de la entrada #}
@@ -129,8 +127,8 @@
       {% if funcion.sala is defined or funcion.localidad is defined %}
         {# Párrafo de datos de geolocalización de la proyección #}
         <p class="tarjeta-funcion-dato meta-ubicacion">
-          {# Icono representativo de geolocalización #}
-          <span class="meta-icono" aria-hidden="true">📍</span>
+          {# Pin de la sala, en línea como el del wireframe #}
+          {% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'meta-icono' } only %}
           {# Nombre de la sala y localidad #}
           <span class="meta-texto">{{ funcion.sala ?? 'Sala a confirmar' }}{% if funcion.localidad is defined %} · {{ funcion.localidad }}{% endif %}</span>
         {# Cierre del párrafo de ubicación #}
@@ -139,8 +137,8 @@
       {% endif %}
       {# Fila de información temporal: fecha confirmada, fecha límite de votación o franjas en negociación #}
       <p class="tarjeta-funcion-dato meta-tiempo">
-        {# Icono representativo de calendario #}
-        <span class="meta-icono" aria-hidden="true">📅</span>
+        {# Calendario, en línea como el del wireframe #}
+        {% include 'parciales/icono.html.twig' with { nombre: 'calendario', clase: 'meta-icono' } only %}
         {# Muestra el texto correspondiente según el estado de la función #}
         <span class="meta-texto">
           {# Caso 1: En votación muestra el cierre o fecha a definir tras la votación #}
@@ -173,18 +171,17 @@
     </div>
     {# Pie de la tarjeta con el botón de llamado a la acción #}
     <div class="tarjeta-funcion-acciones">
-      {% set texto_boton = es_votacion ? 'Votar títulos' : (es_acuerdo ? 'Votar fecha' : (es_sin_quorum ? 'Ver resultado' : 'Ver función')) %}
+      {# Sin quórum ya no se vota: se ve la función, que dice qué pasó (E3-13.F9). #}
+      {% set texto_boton = es_votacion ? 'Votar títulos' : (es_acuerdo ? 'Votar fecha' : 'Ver función') %}
       {% set variante_boton = (es_votacion or es_acuerdo) ? 'primario' : 'secundario' %}
-      {% set icono_boton = es_votacion ? '🗳️' : (es_acuerdo ? '🤝' : (es_sin_quorum ? 'ℹ️' : null)) %}
       {% set clase_boton_extra = es_votacion ? ' boton-tarjeta-votar' : (es_acuerdo ? ' boton-tarjeta-acuerdo' : '') %}
-      {% set aria_label_boton = es_votacion ? ('Votar títulos para ' ~ funcion.titulo) : (es_acuerdo ? ('Votar fecha para ' ~ funcion.titulo) : (es_sin_quorum ? ('Ver resultado de ' ~ funcion.titulo) : ('Ver función ' ~ funcion.titulo))) %}
+      {% set aria_label_boton = es_votacion ? ('Votar títulos para ' ~ funcion.titulo) : (es_acuerdo ? ('Votar fecha para ' ~ funcion.titulo) : ('Ver función ' ~ funcion.titulo)) %}
       {% include 'parciales/boton.html.twig' with {
         texto: texto_boton,
         url: url_detalle,
         variante: variante_boton,
         tamano: 'chico',
         bloque: true,
-        icono: icono_boton,
         clase: 'boton-tarjeta-funcion' ~ clase_boton_extra,
         aria_label: aria_label_boton
       } %}

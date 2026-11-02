@@ -36,7 +36,7 @@
     <div class="solicitud-texto-cabecera">
       <div class="ficha-insignia-contenedor">
         <span class="insignia-estado insignia-acuerdo">
-          <span class="insignia-icono" aria-hidden="true">🤝</span> ACUERDO DE FECHA
+          ACUERDO DE FECHA
         </span>
       </div>
       <h1 class="solicitud-titulo">Proponer franjas horarias</h1>
@@ -128,7 +128,7 @@
                     aria-label="Eliminar opción {{ loop.index }}"
                     {% if loop.length <= 2 %}disabled title="Tiene que haber al menos 2 franjas propuestas"{% endif %}
                   >
-                    <span aria-hidden="true">🗑️</span> Quitar
+                    Quitar
                   </button>
                 </div>
 
@@ -183,7 +183,7 @@
                 </div>
 
                 <span class="franja-alerta-rango campo-error" data-error-rango hidden role="alert">
-                  <span class="error-icono" aria-hidden="true">⚠️</span> La hora de finalización debe ser posterior a la de inicio.
+                  {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} La hora de finalización debe ser posterior a la de inicio.
                 </span>
               </div>
             {% endfor %}
@@ -192,7 +192,7 @@
           {# Mensajes de error específicos de franjas #}
           {% if errores.franjas is defined and errores.franjas %}
             <span class="campo-error" role="alert">
-              <span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.franjas }}
+              {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.franjas }}
             </span>
           {% endif %}
 
@@ -204,7 +204,7 @@
               id="boton-agregar-franja"
               data-agregar-franja
             >
-              <span class="icono-mas" aria-hidden="true">➕</span> Agregar otra opción de fecha y hora
+              Agregar otra opción de fecha y hora
             </button>
             <span class="franja-ayuda-agregar">Podés proponer hasta 5 alternativas para facilitar la concurrencia.</span>
           </div>
@@ -215,14 +215,13 @@
 
         {# Callout informativo de funcionamiento del acuerdo #}
         <div class="aviso-publicacion-funcion" role="status">
-          <span class="aviso-icono" aria-hidden="true">💡</span>
           <div class="aviso-contenido">
             <strong class="aviso-titulo">¿Cómo funciona el acuerdo de fecha?</strong>
             <p class="aviso-texto">
-              Al guardar las franjas, la función quedará visible en la cartelera con el estado <strong>en acuerdo de fecha</strong>.
-              Los espectadores registrados podrán marcar «Me sirve» en la opción que prefieran. Si la franja ganadora alcanza el quórum
-              de <strong><span data-quorom-preview>{{ valor_minimo }}</span> asistentes</strong>, podrás confirmarla y la función pasará a estar
-              programada definitivamente.
+              Al guardar las franjas, la función queda en la cartelera con el estado <strong>en acuerdo de fecha</strong>.
+              Los espectadores registrados marcan «Me sirve» en todas las opciones a las que pueden ir, hasta las 23:59 del día
+              anterior a la primera. Cuando una llegue a <strong><span data-quorom-preview>{{ valor_minimo }}</span> asistentes</strong>,
+              vas a poder confirmarla y la función queda programada con esa fecha.
             </p>
           </div>
         </div>
@@ -233,7 +232,6 @@
             texto: 'Publicar franjas y abrir acuerdo',
             tipo: 'submit',
             variante: 'primario',
-            icono: '🤝',
             id: 'boton-publicar-franjas'
           } only %}
           <a href="/cartelera/{{ funcion.id }}" class="boton boton-secundario">Descartar</a>
@@ -294,7 +292,7 @@
         data-eliminar-franja
         aria-label="Eliminar opción __NUMERO__"
       >
-        <span aria-hidden="true">🗑️</span> Quitar
+        Quitar
       </button>
     </div>
 
@@ -349,7 +347,7 @@
     </div>
 
     <span class="franja-alerta-rango campo-error" data-error-rango hidden role="alert">
-      <span class="error-icono" aria-hidden="true">⚠️</span> La hora de finalización debe ser posterior a la de inicio.
+      {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} La hora de finalización debe ser posterior a la de inicio.
     </span>
   </div>
 </template>

@@ -1,15 +1,16 @@
 /**
- * Componente interactivo y accesible para el acuerdo de fecha con los espectadores (IC-155 / E3-13.3).
+ * El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
  *
- * - Gestiona el botón «Me sirve» y «Cambiar mi voto» entre las franjas horarias propuestas.
- * - Garantiza unicidad visual: sólo la franja elegida muestra el estado activo «✓ Te sirve / Tu voto actual».
- * - Previene doble envío accidental deshabilitando botones concurrentes y activando estado de carga accesible.
- * - Anuncia los cambios de estado a tecnologías asistivas mediante regiones aria-live y role="status".
- * - Soporta mejora progresiva transparente: funciona con POST nativo si JavaScript está deshabilitado.
+ * Los formularios de la ficha («Me sirve», confirmar la franja ganadora y cerrar el acuerdo)
+ * funcionan sin JavaScript, con un POST común. Esto sólo evita el doble envío, que marcaría y
+ * quitaría la misma franja, y le avisa al lector de pantalla qué se está mandando.
  */
 class AcuerdoFecha {
+  /** Los formularios del acuerdo, por el atributo que les pone la plantilla. */
+  static FORMULARIOS = 'form[data-formulario-votar-franja], form[data-formulario-confirmar-acuerdo], form[data-formulario-cerrar-acuerdo]';
+
   /**
-   * @param {Element|string} pContenedor El contenedor del acuerdo [data-seccion-acuerdo-fecha]
+   * @param {Element|string} pContenedor la sección del acuerdo, [data-seccion-acuerdo-fecha]
    */
   constructor(pContenedor) {
     this.contenedor = PAW.contenedor(pContenedor);
@@ -18,85 +19,53 @@ class AcuerdoFecha {
     }
 
     this.anunciador = this.contenedor.querySelector('[data-anuncio-acuerdo]');
-    this.iniciarFormulariosVoto();
-    this.iniciarFormularioConfirmacion();
-    this.iniciarBarrasProgreso();
+    this.enviando = false;
+    for (const formulario of this.contenedor.querySelectorAll(AcuerdoFecha.FORMULARIOS)) {
+      formulario.addEventListener('submit', (evento) => this.alEnviar(evento, formulario));
+    }
   }
 
   /**
-   * Vincula la prevención de doble submit al formulario de confirmación de franja ganadora del organizador.
+   * Deja pasar el primer envío y frena los demás hasta que cargue la página nueva.
+   *
+   * @param {SubmitEvent} evento
+   * @param {HTMLFormElement} formulario
    */
-  iniciarFormularioConfirmacion() {
-    const formConfirmar = this.contenedor.querySelector('form[data-formulario-confirmar-acuerdo]');
-    if (!formConfirmar) {
+  alEnviar(evento, formulario) {
+    if (this.enviando) {
+      evento.preventDefault();
       return;
     }
+    this.enviando = true;
 
-    formConfirmar.addEventListener('submit', (evento) => {
-      const boton = formConfirmar.querySelector('button[type="submit"]');
-      if (boton && boton.disabled) {
-        evento.preventDefault();
-        return;
-      }
-
-      if (boton) {
-        boton.disabled = true;
-        boton.classList.add('cargando');
-        boton.setAttribute('aria-busy', 'true');
-      }
-
-      this.anunciar('Confirmando franja ganadora y programando la función en cartelera...');
-    });
-  }
-
-  /**
-   * Vincula la prevención de doble submit y feedback accesible a los formularios de voto de franja.
-   */
-  iniciarFormulariosVoto() {
-    const formularios = this.contenedor.querySelectorAll('form[data-formulario-votar-franja]');
-
-    for (const form of formularios) {
-      form.addEventListener('submit', (evento) => {
-        const boton = form.querySelector('button[type="submit"]');
-        if (boton && boton.disabled) {
-          evento.preventDefault();
-          return;
-        }
-
-        // Deshabilita todos los botones de votar franja del acuerdo para evitar carreras
-        const todosLosBotones = this.contenedor.querySelectorAll('button.boton-me-sirve, button.boton-votar-franja');
-        for (const btn of todosLosBotones) {
-          btn.disabled = true;
-        }
-
-        if (boton) {
-          boton.classList.add('cargando');
-          boton.setAttribute('aria-busy', 'true');
-        }
-
-        const tarjetaFranja = form.closest('.tarjeta-franja-acuerdo');
-        const rotuloFranja = tarjetaFranja?.querySelector('.franja-fecha-texto')?.textContent?.trim() || 'la franja seleccionada';
-        this.anunciar(`Registrando tu compromiso «Me sirve» para ${rotuloFranja}...`);
-      });
+    for (const boton of this.contenedor.querySelectorAll('button[type="submit"]')) {
+      boton.disabled = true;
     }
+    formulario.querySelector('button[type="submit"]')?.setAttribute('aria-busy', 'true');
+    this.anunciar(this.descripcion(formulario));
   }
 
   /**
-   * Inicializa la animación fluida y atributos accesibles de las barras de progreso de compromisos.
+   * Qué se está mandando, en palabras.
+   *
+   * @param {HTMLFormElement} formulario
+   * @returns {string}
    */
-  iniciarBarrasProgreso() {
-    const barras = this.contenedor.querySelectorAll('.barra-progreso-relleno[data-progreso-porcentaje]');
-    for (const barra of barras) {
-      const porcentaje = barra.dataset.progresoPorcentaje || '0';
-      // Permite que la transición CSS anime el llenado desde 0 al porcentaje real
-      window.requestAnimationFrame(() => {
-        barra.style.width = `${Math.min(100, Math.max(0, parseFloat(porcentaje)))}%`;
-      });
+  descripcion(formulario) {
+    if (formulario.matches('[data-formulario-confirmar-acuerdo]')) {
+      return 'Confirmando la franja ganadora…';
     }
+    if (formulario.matches('[data-formulario-cerrar-acuerdo]')) {
+      return 'Cerrando el acuerdo…';
+    }
+    const fecha = formulario.closest('.ficha-franja')?.querySelector('.ficha-franja-fecha')?.textContent?.trim() ?? 'la franja';
+    const quita = formulario.querySelector('input[name="quitar"]') !== null;
+
+    return quita ? `Quitando «Me sirve» del ${fecha}…` : `Marcando «Me sirve» en el ${fecha}…`;
   }
 
   /**
-   * Emite mensajes accesibles a lectores de pantalla.
+   * Lo dice en la región aria-live: vaciarla antes hace que se lea aunque el texto se repita.
    *
    * @param {string} mensaje
    */
