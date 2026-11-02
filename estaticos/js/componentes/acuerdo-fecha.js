@@ -19,7 +19,34 @@ class AcuerdoFecha {
 
     this.anunciador = this.contenedor.querySelector('[data-anuncio-acuerdo]');
     this.iniciarFormulariosVoto();
+    this.iniciarFormularioConfirmacion();
     this.iniciarBarrasProgreso();
+  }
+
+  /**
+   * Vincula la prevención de doble submit al formulario de confirmación de franja ganadora del organizador.
+   */
+  iniciarFormularioConfirmacion() {
+    const formConfirmar = this.contenedor.querySelector('form[data-formulario-confirmar-acuerdo]');
+    if (!formConfirmar) {
+      return;
+    }
+
+    formConfirmar.addEventListener('submit', (evento) => {
+      const boton = formConfirmar.querySelector('button[type="submit"]');
+      if (boton && boton.disabled) {
+        evento.preventDefault();
+        return;
+      }
+
+      if (boton) {
+        boton.disabled = true;
+        boton.classList.add('cargando');
+        boton.setAttribute('aria-busy', 'true');
+      }
+
+      this.anunciar('Confirmando franja ganadora y programando la función en cartelera...');
+    });
   }
 
   /**
