@@ -126,7 +126,7 @@
                     class="boton-eliminar-franja"
                     data-eliminar-franja
                     aria-label="Eliminar opción {{ loop.index }}"
-                    {% if loop.length <= 1 %}disabled title="Debe haber al menos una franja propuesta"{% endif %}
+                    {% if loop.length <= 2 %}disabled title="Tiene que haber al menos 2 franjas propuestas"{% endif %}
                   >
                     <span aria-hidden="true">🗑️</span> Quitar
                   </button>
