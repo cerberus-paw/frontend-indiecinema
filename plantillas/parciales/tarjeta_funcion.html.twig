@@ -173,7 +173,8 @@
       {# Los lugares libres (E4-02): sólo si funciones dio el dato; si no, la tarjeta sigue sin él #}
       {% if not es_votacion and funcion.lugares_libres|default(null) is not null %}
         <p class="tarjeta-funcion-dato meta-lugares{% if funcion.agotada|default(false) %} meta-agotada{% endif %}">
-          <span class="meta-icono" aria-hidden="true">🎟️</span>
+          {# Una entrada, en línea como el pin y el calendario #}
+          {% include 'parciales/icono.html.twig' with { nombre: 'entrada', clase: 'meta-icono' } only %}
           <span class="meta-texto">
             {%- if funcion.agotada|default(false) -%}
               Agotada

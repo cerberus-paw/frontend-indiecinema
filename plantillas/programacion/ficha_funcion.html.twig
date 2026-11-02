@@ -214,7 +214,8 @@
           {# «A la gorra» no es por lugar: sólo un precio con signo lo es. #}
           <p class="ficha-reserva-monto"><strong>{{ funcion.precio }}</strong>{% if funcion.precio starts with '$' %} por lugar{% endif %}</p>
           {# La barra de lo que ya se reservó, como el recuadro de reserva del wireframe #}
-          {% if funcion.lugares_libres|default(null) is not null %}
+          {# cupo > 0 lo asegura la base; igual se mira, porque un <progress> con max 0 es inválido #}
+          {% if funcion.lugares_libres|default(null) is not null and funcion.cupo > 0 %}
             <div class="ficha-reserva-disponibles">
               <progress class="ficha-reserva-barra" max="{{ funcion.cupo }}" value="{{ funcion.cupo - funcion.lugares_libres }}" aria-label="Lugares ya reservados: {{ funcion.cupo - funcion.lugares_libres }} de {{ funcion.cupo }}"></progress>
               <p class="ficha-reserva-disponibles-texto">
