@@ -18,6 +18,9 @@
       - cierre_votacion: (string, opcional) Fecha límite cuando está en votación (ej: 'Cierra el 15 sep').
       - franjas_propuestas: (string|int, opcional) Cantidad de opciones cuando está en acuerdo de fecha.
       - url: (string, opcional) URL de detalle personalizada (por defecto '/cartelera/{id}', la ficha de la función).
+      - lugares_libres: (int|null, opcional) cuántos lugares quedan (E4-02). null si no se reserva
+        (en votación) o si el subsistema funciones no respondió: entonces la tarjeta no los muestra.
+      - agotada: (bool, opcional) si no queda ningún lugar.
   - clase: (string, opcional) Clases CSS adicionales para el contenedor de la tarjeta.
 #}
 {# Resuelve el identificador único de la función para armar URLs y enlaces #}
@@ -167,6 +170,22 @@
         </span>
       {# Cierre del párrafo de tiempo #}
       </p>
+      {# Los lugares libres (E4-02): sólo si funciones dio el dato; si no, la tarjeta sigue sin él #}
+      {% if not es_votacion and funcion.lugares_libres|default(null) is not null %}
+        <p class="tarjeta-funcion-dato meta-lugares{% if funcion.agotada|default(false) %} meta-agotada{% endif %}">
+          {# Una entrada, en línea como el pin y el calendario #}
+          {% include 'parciales/icono.html.twig' with { nombre: 'entrada', clase: 'meta-icono' } only %}
+          <span class="meta-texto">
+            {%- if funcion.agotada|default(false) -%}
+              Agotada
+            {%- elseif funcion.lugares_libres == 1 -%}
+              Queda 1 lugar
+            {%- else -%}
+              {{ funcion.lugares_libres }} lugares libres
+            {%- endif -%}
+          </span>
+        </p>
+      {% endif %}
     {# Cierre de los metadatos contextuales #}
     </div>
     {# Pie de la tarjeta con el botón de llamado a la acción #}

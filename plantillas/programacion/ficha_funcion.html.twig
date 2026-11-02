@@ -29,7 +29,10 @@
         programada, mientras todavía no se dio).
       - cerrable: (bool) si quien la mira es su organizador y la votación de títulos está abierta,
         para cerrarla con la candidata ganadora (E3-12.4 / IC-150).
-      - reservable: (bool) si todavía se puede reservar: no se canceló ni empezó. Con sesión se
+      - lugares_libres: (int|null) cuántos lugares quedan (E4-02), sólo de una programada. null si
+        el subsistema funciones no respondió: la ficha se muestra igual, sin ese dato.
+      - agotada: (bool) si no queda ningún lugar.
+      - reservable: (bool) si todavía se puede reservar: no se canceló, no empezó ni está agotada. Con sesión se
         ve el formulario, que manda la reserva al subsistema funciones; sin sesión, el enlace
         para ingresar.
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
@@ -135,7 +138,15 @@
               {% if funcion.fecha %}
                 <li class="ficha-chip">{{ funcion.fecha }}</li>
               {% endif %}
-              <li class="ficha-chip">{{ funcion.cupo }} lugares</li>
+              {# Los lugares libres en vez del cupo, como el wireframe «funcion-programada» (E4-02):
+                 el cupo ya lo dice la barra de la reserva. Sin el dato de funciones, el cupo. #}
+              {% if funcion.lugares_libres|default(null) is not null %}
+                <li class="ficha-chip ficha-chip-lugares{% if funcion.agotada|default(false) %} ficha-chip-agotada{% endif %}">
+                  {{- funcion.agotada|default(false) ? 'Agotada' : (funcion.lugares_libres == 1 ? 'Queda 1 lugar libre' : funcion.lugares_libres ~ ' lugares libres') -}}
+                </li>
+              {% else %}
+                <li class="ficha-chip">{{ funcion.cupo }} lugares</li>
+              {% endif %}
             {% endif %}
           </ul>
         </div>
@@ -202,6 +213,17 @@
           <h2 id="ficha-reserva-titulo" class="ficha-reserva-titulo">Reservá tus lugares</h2>
           {# «A la gorra» no es por lugar: sólo un precio con signo lo es. #}
           <p class="ficha-reserva-monto"><strong>{{ funcion.precio }}</strong>{% if funcion.precio starts with '$' %} por lugar{% endif %}</p>
+          {# La barra de lo que ya se reservó, como el recuadro de reserva del wireframe #}
+          {# cupo > 0 lo asegura la base; igual se mira, porque un <progress> con max 0 es inválido #}
+          {% if funcion.lugares_libres|default(null) is not null and funcion.cupo > 0 %}
+            <div class="ficha-reserva-disponibles">
+              <progress class="ficha-reserva-barra" max="{{ funcion.cupo }}" value="{{ funcion.cupo - funcion.lugares_libres }}" aria-label="Lugares ya reservados: {{ funcion.cupo - funcion.lugares_libres }} de {{ funcion.cupo }}"></progress>
+              <p class="ficha-reserva-disponibles-texto">
+                <span><strong>{{ funcion.lugares_libres }} {{ funcion.lugares_libres == 1 ? 'lugar' : 'lugares' }}</strong> {{ funcion.lugares_libres == 1 ? 'disponible' : 'disponibles' }}</span>
+                <span>de {{ funcion.cupo }}</span>
+              </p>
+            </div>
+          {% endif %}
         </div>
         {% if usuario %}
           <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario">
@@ -213,7 +235,7 @@
               valor: '1',
               requerido: true,
               valor_minimo: 1,
-              valor_maximo: funcion.cupo
+              valor_maximo: funcion.lugares_libres ?? funcion.cupo
             } only %}
             {% include 'parciales/boton.html.twig' with {
               texto: 'Reservar mis lugares',
@@ -229,6 +251,14 @@
             } only %}
           </div>
         {% endif %}
+      </section>
+    {% elseif funcion.agotada|default(false) %}
+      {# Agotada: en lugar del formulario, el aviso. Si alguien cancela, vuelve a aparecer. #}
+      <section class="ficha-seccion ficha-reserva ficha-reserva-agotada" aria-labelledby="ficha-reserva-titulo">
+        <div class="ficha-reserva-precio">
+          <h2 id="ficha-reserva-titulo" class="ficha-reserva-titulo">Función agotada</h2>
+          <p class="ficha-reserva-ayuda">Ya se reservaron los {{ funcion.cupo }} lugares. Si alguien cancela su reserva, vuelve a haber lugar.</p>
+        </div>
       </section>
     {% endif %}
     {% endset %}
