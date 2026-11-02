@@ -2033,6 +2033,30 @@ dd {
   transition: transform var(--transicion-base);
 }
 
+/* El afiche de una función se ve entero: es vertical y el recuadro apaisado, y recortado se
+   pierde el título. Va encima de su copia desenfocada, que llena los costados. */
+.tarjeta-funcion-imagen-entera {
+  /* Por encima del fondo */
+  position: relative;
+  /* Entero, sin recortar */
+  object-fit: contain;
+}
+
+/* La copia desenfocada del afiche, de fondo */
+.tarjeta-funcion-imagen-fondo {
+  /* Ocupa todo el recuadro, detrás del afiche */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Cubre el recuadro: los bordes no se ven nítidos igual */
+  object-fit: cover;
+  /* Desenfocada y oscurecida para que resalte el afiche */
+  filter: blur(18px) brightness(0.55);
+  /* Agrandada para que el desenfoque no deje los bordes claros */
+  transform: scale(1.2);
+}
+
 /* Zoom suave en la imagen al hacer hover sobre la tarjeta */
 .tarjeta-funcion:hover .tarjeta-funcion-imagen {
   /* Escala sutil del 104% */
