@@ -15,6 +15,9 @@
     no hay nada que editar, y una cancelada, finalizada o con la fecha ya pasada ya terminó).
     cancelable dice si se puede cancelar: en votación o programada, mientras todavía no se dio.
     cerrable dice si se puede cerrar la votación: sólo si está en votación de títulos (IC-150 / E3-12.4).
+    Las que están en acuerdo de fecha traen además acuerdo («sin_franjas», «abierto», «sin_minimo»
+    o «sin_dato» si funciones no respondió), confirmable (la franja que lidera llegó al mínimo) y
+    acuerdo_sin_minimo (E3-13).
   - programada: (bool) aviso de que se acaba de programar una. El de la edición no va acá: al
     guardar se vuelve a la ficha de la función, que es la que lo muestra.
   - cancelada: (bool) aviso de que se acaba de cancelar una.
@@ -68,6 +71,33 @@
       tipo: 'exito',
       titulo: '¡Votación cerrada!',
       mensaje: 'La votación se cerró correctamente. La función pasó a acuerdo de fecha con la obra más votada.'
+    } only %}
+  {% endif %}
+
+  {# Al volver de confirmar el acuerdo de fecha (IC-156 / E3-13.4) #}
+  {% if acuerdo_confirmado|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: '¡Función programada!',
+      mensaje: 'El acuerdo de fecha concluyó exitosamente. La función quedó programada con su fecha definitiva.'
+    } only %}
+  {% endif %}
+
+  {# Al reproponer nuevas franjas horarias (IC-157 / E3-13.5) #}
+  {% if franjas_repropuestas|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: '¡Nuevas franjas propuestas!',
+      mensaje: 'Se abrió un nuevo período de acuerdo de fecha para la función con las opciones propuestas.'
+    } only %}
+  {% endif %}
+
+  {# Al cancelar una función sin quórum (IC-157 / E3-13.5) #}
+  {% if funcion_cancelada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      titulo: 'Función cancelada',
+      mensaje: 'La función fue cancelada correctamente y ya no se encuentra activa en cartelera.'
     } only %}
   {% endif %}
 
@@ -126,6 +156,12 @@
                   <span class="estado-cuenta estado-cuenta-activa">{{ funcion.estado }}</span>
                 {% elseif funcion.estado_valor == 'cancelada' %}
                   <span class="estado-cuenta estado-cuenta-cancelada">{{ funcion.estado }}</span>
+                {# Sin quórum antes que en acuerdo: la función sigue en acuerdo de fecha, y lo que
+                   cerró sin mínimo es su acuerdo, que viene de funciones (E3-13.5). #}
+                {% elseif funcion.acuerdo_sin_minimo|default(false) %}
+                  <span class="estado-cuenta estado-cuenta-sin-quorum">Sin quórum</span>
+                {% elseif funcion.estado_valor == 'en_acuerdo_fecha' %}
+                  <span class="estado-cuenta estado-cuenta-acuerdo">{{ funcion.estado|default('en acuerdo de fecha') }}</span>
                 {% else %}
                   <span class="estado-cuenta">{{ funcion.estado }}</span>
                 {% endif %}
@@ -135,7 +171,7 @@
                 <span class="tabla-admin-secundario">{{ funcion.cupo }} lugares</span>
               </td>
               <td class="tabla-admin-acciones">
-                {% if funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) %}
+                {% if funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) or funcion.estado_valor == 'en_acuerdo_fecha' %}
                   <div class="tabla-admin-acciones-grupo">
                     {% if funcion.cerrable|default(false) %}
                       <form action="/organizador/funciones/{{ funcion.id }}/cerrar-votacion" method="POST" class="formulario-accion-tabla">
@@ -148,6 +184,44 @@
                         } only %}
                       </form>
                     {% endif %}
+                    {# El paso que sigue del acuerdo de fecha (E3-13): proponer las franjas,
+                       confirmar la que llegó al mínimo, o proponer otras si cerró sin mínimo.
+                       Sin el dato de funciones (acuerdo «sin_dato»), la ficha tiene todo. #}
+                    {% if funcion.estado_valor == 'en_acuerdo_fecha' %}
+                      {% set acuerdo = funcion.acuerdo|default('sin_dato') %}
+                      {% if acuerdo == 'sin_franjas' %}
+                        {% include 'parciales/boton.html.twig' with {
+                          texto: 'Proponer franjas',
+                          url: '/organizador/funciones/' ~ funcion.id ~ '/proponer-franjas',
+                          variante: 'primario',
+                          tamano: 'chico'
+                        } only %}
+                      {% elseif acuerdo == 'sin_minimo' %}
+                        {% include 'parciales/boton.html.twig' with {
+                          texto: 'Nuevas fechas',
+                          url: '/organizador/funciones/' ~ funcion.id ~ '/proponer-franjas',
+                          variante: 'primario',
+                          tamano: 'chico'
+                        } only %}
+                      {% elseif funcion.confirmable|default(false) %}
+                        <form action="/organizador/funciones/{{ funcion.id }}/confirmar-acuerdo" method="POST" class="formulario-accion-tabla">
+                          <input type="hidden" name="_csrf" value="{{ csrf }}">
+                          {% include 'parciales/boton.html.twig' with {
+                            texto: 'Confirmar fecha',
+                            tipo: 'submit',
+                            variante: 'primario',
+                            tamano: 'chico'
+                          } only %}
+                        </form>
+                      {% else %}
+                        {% include 'parciales/boton.html.twig' with {
+                          texto: 'Gestionar franjas',
+                          url: '/cartelera/' ~ funcion.id,
+                          variante: 'secundario',
+                          tamano: 'chico'
+                        } only %}
+                      {% endif %}
+                    {% endif %}
                     {% if funcion.editable|default(false) %}
                       {% include 'parciales/boton.html.twig' with {
                         texto: 'Editar',
@@ -156,6 +230,7 @@
                         tamano: 'chico'
                       } only %}
                     {% endif %}
+                    {# También sin quórum: cancelar pasa por la misma página de confirmación. #}
                     {% if funcion.cancelable|default(false) %}
                       {% include 'parciales/boton.html.twig' with {
                         texto: 'Cancelar',

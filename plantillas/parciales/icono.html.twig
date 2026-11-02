@@ -1,0 +1,25 @@
+{#
+  Ícono de línea, como los del wireframe (el pin de la sala, el reloj de la franja, el aviso).
+  Va en SVG dentro de la página: no pide archivos y toma el color del texto (currentColor).
+  Es decorativo: siempre acompaña un texto que dice lo mismo, así que los lectores de pantalla
+  lo saltean (aria-hidden).
+
+  Reemplaza a los emojis, que cada sistema dibuja distinto y no siguen la línea del sitio.
+
+  Variables:
+  - nombre: (string) 'ubicacion' | 'calendario' | 'reloj' | 'check' | 'advertencia'.
+  - clase: (string, opcional) clase extra para ubicarlo.
+#}
+<svg class="icono icono-{{ nombre }}{% if clase is defined %} {{ clase }}{% endif %}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  {%- if nombre == 'ubicacion' -%}
+    <path d="M12 21s-6.5-5.8-6.5-11a6.5 6.5 0 0 1 13 0c0 5.2-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.25"/>
+  {%- elseif nombre == 'calendario' -%}
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>
+  {%- elseif nombre == 'reloj' -%}
+    <circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>
+  {%- elseif nombre == 'check' -%}
+    <path d="M5 12.5l4.5 4.5L19 7.5"/>
+  {%- elseif nombre == 'advertencia' -%}
+    <path d="M12 4L2.75 19.5h18.5L12 4z"/><path d="M12 10v4.25"/><path d="M12 17.25h.01"/>
+  {%- endif -%}
+</svg>
