@@ -3850,11 +3850,15 @@ dd {
   margin: 0;
 }
 
-/* «Me sirve»: el mismo ancho marcado o no, para que la fila no salte */
+/* «Me sirve»: el mismo ancho marcado o no, para que la fila no salte. Uno solo: estaba dos veces
+   (stylelint, no-duplicate-selectors) y ganaba lo de la segunda, que queda acá. */
 .boton-me-sirve {
-  min-width: 7.5rem;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  gap: var(--espacio-2);
+  gap: 0.4rem;
+  min-width: 7.5rem;
+  white-space: nowrap;
 }
 
 .boton-me-sirve[aria-pressed="true"] {
@@ -6359,13 +6363,6 @@ a.tabla-admin-principal:focus-visible {
 .formulario-cancelar-funcion {
   display: inline-flex;
   margin: 0;
-}
-
-.boton-me-sirve {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
 }
 
 /* --------------------------------------------------------------------------
