@@ -2248,10 +2248,23 @@ dd {
   color: var(--color-texto-atenuado);
 }
 
-/* Icono del dato */
+/* Icono del dato: de línea y del color del texto atenuado, como los del wireframe */
 .meta-icono {
-  /* Tamaño fijo */
-  font-size: 0.85rem;
+  /* Tamaño fijo, un poco menor que el texto */
+  width: 0.9rem;
+  height: 0.9rem;
+  /* Color atenuado */
+  color: var(--color-texto-apagado);
+}
+
+/* Íconos de línea (parciales/icono): en línea con el texto y sin achicarse dentro de una fila flexible */
+.icono {
+  /* Se alinea con la línea de texto */
+  display: inline-block;
+  /* Bajado apenas, para quedar centrado con las minúsculas */
+  vertical-align: -0.15em;
+  /* No se deforma si falta lugar */
+  flex-shrink: 0;
 }
 
 /* Pie con botón de llamado a la acción */
