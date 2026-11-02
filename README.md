@@ -114,14 +114,14 @@ El encabezado y el pie adaptan sus opciones y enlaces según el estado de la ses
   - En el pie: Cartelera y Salas indie, **Ingresar** y **Crear cuenta**, y las secciones de «Acerca de».
 - **Espectador (cualquier usuario con sesión):**
   - Acceso al menú de usuario con su avatar, su nombre y una insignia con su rol.
-  - Enlace al panel de **Mi cuenta** (`/cuenta/`).
+  - Enlace al panel de **Mi cuenta** (`/cuenta/`) y a **Mis reservas** (`/funcion/reservas`), en el menú y en el pie.
   - No ve los accesos del organizador.
   - Botón seguro de **Cerrar sesión** por POST (`/cuenta/salir`) con token CSRF.
 - **Organizador (`usuario.alcanza('organizador')`):**
   - Todo lo de espectador más la gestión de sus salas y sus funciones:
   - Acceso directo en la barra de navegación superior: **Mis salas** (`/organizador/salas`).
   - En el menú desplegable: sección **Panel del Organizador** con accesos a **Mis salas** (`/organizador/salas`), **Mis funciones** (`/organizador/funciones`) y **Publicar una sala** (`/solicitar-sala`, la solicitud de sala).
-  - En el pie: accesos a **Mi cuenta**, **Mis salas**, **Mis funciones** y **Publicar una sala**.
+  - En el pie: accesos a **Mi cuenta**, **Mis reservas**, **Mis salas**, **Mis funciones** y **Publicar una sala**.
 - **Moderador y administrador:**
   - Lo mismo que el organizador: el backend los deja entrar a esas pantallas.
   - Todavía no tienen opciones propias: la moderación y la administración (usuarios y roles) no tienen pantalla. Su sección del menú se suma con ellas.
@@ -280,6 +280,7 @@ Sin librerías y con una clase por archivo. La plantilla base carga, con `defer`
   - `enviar(url, opciones)`: `fetch()` que agrega `X-CSRF-Token` (de `<meta name="csrf">`) a los POST, PUT, PATCH y DELETE al mismo sitio, y nunca a otro dominio.
 - **`js/app.js`, la clase de aplicación `App`**: su constructor sólo espera a `DOMContentLoaded`; ahí, por cada componente cuyo contenedor está en la página, carga su script con `PAW.cargarScript()` y lo crea pasándole el contenedor.
 - **`js/componentes/`, una clase por componente**: el constructor recibe su contenedor (elemento o selector) y no busca nada fuera de él salvo los eventos del documento que necesite. Hoy:
+  - `boton-imprimir.js`, `BotonImprimir` (`[data-imprimir]`, IC-268 / E4-04.2): muestra el botón «Imprimir» del comprobante de la reserva, que llega oculto (`hidden`), y al tocarlo abre el diálogo de impresión. Sin JavaScript no aparece, y queda el «Imprimir» del navegador; los estilos `@media print` dejan en el papel sólo el código y los datos de la reserva.
   - `buscador-de-cartelera.js`, `BuscadorDeCartelera` (`.filtros-cartelera` y `#resultados-cartelera`, IC-101): recibe el formulario de filtros y la sección de resultados. Al elegir una localidad, una fecha o un género, al dejar de escribir en «Buscar» (400 ms) o al enviar el formulario, pide la misma URL que el formulario con `Accept: application/json` y vuelve a dibujar la sección como `cartelera.html.twig`: los avisos, el total, las tarjetas (como `tarjeta_funcion.html.twig`), el paginado (sus links también van por JSON) o el mensaje sin resultados. También agrega o saca «Limpiar» según haya filtros. Un pedido nuevo cancela al anterior. Mientras busca, y también desde la primera tecla mientras espera que se deje de escribir, la sección queda con `aria-busy="true"`, los resultados anteriores atenuados y sin clics, y el aviso «Buscando funciones…» (`role="status"`) fijo abajo de la pantalla, así se ve aunque se haya buscado desde el paginado; sin animación con `prefers-reduced-motion` (IC-102). Cada búsqueda deja su URL en el historial (`pushState`, sin repetir la misma), así se puede compartir o recargar; «Atrás» y «Adelante» completan el formulario con esa URL y la vuelven a pedir. Cuando llegan los resultados, una región `aria-live` fuera de la sección (que no se redibuja) anuncia el total, la página y si algún filtro no se aplicó, o el mensaje de error si el pedido falla (IC-103). Si el pedido falla (sin conexión o sin la cartelera en JSON), la sección muestra el mensaje genérico de error (`alerta-error`, `role="alert"`) con un link que carga la misma búsqueda como página, y los filtros quedan como estaban para volver a intentar (IC-102). Sin JavaScript, el formulario y los links funcionan igual.
   - `enviar-al-elegir.js`, `EnviarAlElegir` (`form[data-enviar-al-elegir]`, IC-245): manda el formulario al elegir una opción de uno de sus desplegables, como los filtros de «Usuarios y roles»; el texto de un buscador se manda con Enter. Sin JavaScript, el botón está en un `<noscript>`.
   - `menu-usuario.js`, `MenuUsuario` (`#menu-usuario`): cierra el menú del usuario con un clic afuera o con Escape, y devuelve el foco al botón. Sin JavaScript, el `<details>` se abre y se cierra igual.
