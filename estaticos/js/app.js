@@ -45,6 +45,10 @@ class App {
     if (document.querySelector('[data-compartir]')) {
       PAW.cargarScript('Compartir', `${App.COMPONENTES}/compartir.js`, () => new Compartir('[data-compartir]'));
     }
+    // Los lugares libres de la ficha, al día sin recargar (E4-05.2 / IC-273).
+    if (document.querySelector('[data-lugares-libres]')) {
+      PAW.cargarScript('LugaresLibres', `${App.COMPONENTES}/lugares-libres.js`, () => new LugaresLibres('[data-lugares-libres]'));
+    }
     // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
     if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
       PAW.cargarScript('AcuerdoFecha', `${App.COMPONENTES}/acuerdo-fecha.js`, () => new AcuerdoFecha('[data-seccion-acuerdo-fecha]'));
