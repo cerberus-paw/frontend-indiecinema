@@ -228,7 +228,8 @@
           {% endif %}
         </div>
         {% if usuario %}
-          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario">
+          {# data-formulario-reserva: el enganche del componente que lo manda sin recargar (E4-05.3). #}
+          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva>
             <input type="hidden" name="_csrf" value="{{ csrf }}">
             {% include 'parciales/campo.html.twig' with {
               nombre: 'cantidad',

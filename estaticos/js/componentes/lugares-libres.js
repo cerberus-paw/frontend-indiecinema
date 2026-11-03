@@ -48,6 +48,10 @@ class LugaresLibres {
     this.anuncio = PAW.nuevoElemento('p', '', { class: 'sr-only', role: 'status', 'aria-live': 'polite' });
     this.contenedor.append(this.anuncio);
 
+    // Quien ya tiene el número —el formulario de reserva, que lo recibe al reservar— lo manda
+    // por acá y no hay que esperar la consulta siguiente (E4-05.3).
+    this.contenedor.addEventListener(PAW.EVENTO_LUGARES, (evento) => this.actualizar(evento.detail ?? {}));
+
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         // Al volver a la pestaña, enseguida: puede haberse reservado en otra.

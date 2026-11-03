@@ -7,6 +7,15 @@ class PAW {
   static METODOS_MUTABLES = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
   /**
+   * Con este evento un componente avisa que los lugares libres de una función cambiaron, y en el
+   * detail manda la respuesta del servidor (E4-05). Lo emite quien ya tiene el dato —el formulario
+   * de reserva, que lo recibe al reservar— y lo escucha quien muestra el número. Va por acá y no
+   * por una referencia entre componentes porque cada uno se carga solo, cuando su contenedor está
+   * en la página, y ninguno puede contar con que el otro exista.
+   */
+  static EVENTO_LUGARES = 'indiecinema:lugares';
+
+  /**
    * El elemento de un componente: lo recibe como elemento o como selector.
    *
    * @param {Element|string} pContenedor
