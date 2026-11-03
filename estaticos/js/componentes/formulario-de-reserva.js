@@ -8,7 +8,8 @@
  *
  * FormData manda el formulario tal cual está, con su campo oculto _csrf, así que el pedido lleva
  * el token aunque la cabecera X-CSRF-Token que agrega PAW.enviar no llegara. Un pedido sin token
- * lo rechaza el servidor con 403 y acá se ve como el error genérico: la reserva no se hace.
+ * lo rechaza el servidor con 403 y el mensaje que manda («La página venció…») sale debajo del
+ * campo: la reserva no se hace.
  *
  * Sin JavaScript el formulario es el de siempre: un POST que redirige al comprobante. Este
  * componente sólo intercepta lo que ya funciona.
@@ -50,13 +51,14 @@ class FormularioDeReserva {
     this.bloquear(true);
     this.limpiarError();
 
+    let datos = null;
     try {
       const respuesta = await PAW.enviar(this.formulario.action, {
         method: 'POST',
         body: cuerpo,
         headers: { Accept: 'application/json' },
       });
-      const datos = await respuesta.json();
+      datos = await respuesta.json();
       if (respuesta.status === 201) {
         // Queda bloqueado a propósito: la reserva ya está hecha y el formulario se reemplaza.
         this.avisarLugares(datos);
@@ -64,20 +66,31 @@ class FormularioDeReserva {
 
         return;
       }
-      // 422: la cantidad no entra o la regla no se cumple. El texto es para el espectador.
-      if (respuesta.status === 422) {
-        this.mostrarError(datos.errores?.cantidad ?? datos.error ?? FormularioDeReserva.MENSAJE_DE_ERROR);
-        // Si el 422 fue porque quedan menos lugares, el número que vuelve ya es el de ahora.
-        this.avisarLugares(datos);
-      } else {
-        this.mostrarError(FormularioDeReserva.MENSAJE_DE_ERROR);
-      }
-    } catch (error) {
-      // Sin red, o con una respuesta que no es JSON (un 403 del CSRF, una pantalla de error).
-      this.mostrarError(FormularioDeReserva.MENSAJE_DE_ERROR);
+    } catch {
+      // Sin red, o con una respuesta que no es JSON: queda el mensaje genérico.
     }
+    // En este orden: primero se habilita, porque LugaresLibres deshabilita el campo si con el
+    // número nuevo la función quedó agotada, y bloquear(false) lo volvería a habilitar; y el error
+    // va último, porque un campo deshabilitado no toma el foco que le da mostrarError().
     this.enviando = false;
     this.bloquear(false);
+    // Si el 422 fue porque quedan menos lugares, el número que vuelve ya es el de ahora.
+    this.avisarLugares(datos);
+    this.mostrarError(FormularioDeReserva.mensajeDe(datos));
+  }
+
+  /**
+   * El error que mandó el servidor, que en JSON viene para el espectador y sin detalles internos
+   * (E4-05.1): el del campo o el de la regla en un 422, «La página venció…» con el token vencido,
+   * «Tenés que ingresar…» con la sesión vencida. Si no trae ninguno, el genérico.
+   *
+   * @param {?{errores?: {cantidad?: string}, error?: string}} datos
+   * @returns {string}
+   */
+  static mensajeDe(datos) {
+    const mensaje = datos?.errores?.cantidad ?? datos?.error;
+
+    return typeof mensaje === 'string' && mensaje !== '' ? mensaje : FormularioDeReserva.MENSAJE_DE_ERROR;
   }
 
   /**
