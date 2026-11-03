@@ -113,6 +113,7 @@
               name="modo"
               value="programada"
               class="opcion-modo-radio"
+              {% if errores.modo is defined and errores.modo %}aria-invalid="true" aria-describedby="error-modo"{% endif %}
               {% if modo_actual == 'programada' %}checked{% endif %}
             >
             <span class="opcion-modo-contenido">
@@ -127,6 +128,7 @@
               name="modo"
               value="en_votacion_titulos"
               class="opcion-modo-radio"
+              {% if errores.modo is defined and errores.modo %}aria-invalid="true" aria-describedby="error-modo"{% endif %}
               {% if modo_actual == 'en_votacion_titulos' %}checked{% endif %}
             >
             <span class="opcion-modo-contenido">
@@ -135,8 +137,10 @@
             </span>
           </label>
         </div>
+        {# El error lleva id y cada radio lo apunta con aria-describedby: así el lector de
+           pantalla lo lee al pararse en la opción y no sólo al aparecer (E4-09.3). #}
         {% if errores.modo is defined and errores.modo %}
-          <span class="campo-error" role="alert">
+          <span id="error-modo" class="campo-error" role="alert">
             <span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.modo }}
           </span>
         {% endif %}
@@ -189,6 +193,9 @@
           <span class="seccion-subtitulo" data-obras-subtitulo>{{ es_votacion ? 'Elegí las obras candidatas que participarán de la votación.' : 'Elegí la obra o los títulos a proyectar en la función.' }}</span>
         </legend>
 
+        {# Arriba del if: lo miran las casillas y el mensaje de abajo, y tiene que estar definido
+           aunque no haya obras que mostrar. #}
+        {% set error_obras = errores.obras ?? (errores.obras_ids ?? (errores.obra_id ?? null)) %}
         {% if obras is empty %}
           {% include 'parciales/mensaje.html.twig' with {
             tipo: 'info',
@@ -206,6 +213,7 @@
                   name="obras[]"
                   value="{{ obra.id }}"
                   class="campo-control-checkbox"
+                  {% if error_obras %}aria-invalid="true" aria-describedby="error-obras"{% endif %}
                   {% if marcada %}checked{% endif %}
                 >
                 <div class="info-seleccion-obra">
@@ -223,9 +231,9 @@
         {% endif %}
 
         {# Mensaje de error para la selección de obras #}
-        {% set error_obras = errores.obras ?? (errores.obras_ids ?? (errores.obra_id ?? null)) %}
+        {# Con id, y cada casilla lo apunta: el lector lo lee al pararse en una obra (E4-09.3) #}
         {% if error_obras %}
-          <span class="campo-error" role="alert">
+          <span id="error-obras" class="campo-error" role="alert">
             <span class="error-icono" aria-hidden="true">⚠️</span> {{ error_obras }}
           </span>
         {% endif %}

@@ -110,8 +110,15 @@
           </legend>
 
           {# Contenedor dinámico de opciones de franjas #}
-          <div class="lista-franjas-formulario" data-contenedor-franjas role="list" aria-label="Lista de franjas horarias propuestas">
-            {% set franjas_iniciales = valores.franjas|default([
+          {# aria-describedby: el error del conjunto se lee al entrar a la lista, no sólo al
+             aparecer (E4-09.3). #}
+          <div class="lista-franjas-formulario" data-contenedor-franjas role="list" aria-label="Lista de franjas horarias propuestas"{% if errores.franjas is defined and errores.franjas %} aria-describedby="error-franjas"{% endif %}>
+            {# El error del conjunto suele hablar de una opción puntual («A la opción 2 le falta la
+             fecha…»): además de la lista, que no recibe el foco, lo describen la fecha y el inicio de
+             cada opción, así se lee al tabular por ellas (E4-09.3). El fin no: su aria-describedby lo
+             maneja el gestor, para el aviso del rango. #}
+          {% set error_del_conjunto = errores.franjas is defined and errores.franjas %}
+          {% set franjas_iniciales = valores.franjas|default([
               { fecha: '', hora_inicio: '20:00', hora_fin: '22:30' },
               { fecha: '', hora_inicio: '21:00', hora_fin: '23:30' }
             ]) %}
@@ -146,6 +153,7 @@
                       data-campo-fecha
                       required
                       aria-required="true"
+                      {% if error_del_conjunto %}aria-describedby="error-franjas"{% endif %}
                     >
                   </div>
 
@@ -162,6 +170,7 @@
                       data-campo-inicio
                       required
                       aria-required="true"
+                      {% if error_del_conjunto %}aria-describedby="error-franjas"{% endif %}
                     >
                   </div>
 
@@ -182,7 +191,7 @@
                   </div>
                 </div>
 
-                <span class="franja-alerta-rango campo-error" data-error-rango hidden role="alert">
+                <span class="franja-alerta-rango campo-error" id="error-franja-rango-{{ idx }}" data-error-rango hidden role="alert">
                   {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} La hora de finalización debe ser posterior a la de inicio.
                 </span>
               </div>
@@ -191,7 +200,7 @@
 
           {# Mensajes de error específicos de franjas #}
           {% if errores.franjas is defined and errores.franjas %}
-            <span class="campo-error" role="alert">
+            <span id="error-franjas" class="campo-error" role="alert">
               {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.franjas }}
             </span>
           {% endif %}
@@ -346,7 +355,7 @@
       </div>
     </div>
 
-    <span class="franja-alerta-rango campo-error" data-error-rango hidden role="alert">
+    <span class="franja-alerta-rango campo-error" id="error-franja-rango-__INDICE__" data-error-rango hidden role="alert">
       {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} La hora de finalización debe ser posterior a la de inicio.
     </span>
   </div>
