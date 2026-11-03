@@ -4,6 +4,10 @@
  * barra del recuadro de reserva, el texto de «N lugares disponibles» y el máximo del campo de
  * cantidad, que es lo que valida el navegador.
  *
+ * Cuando se agota, el recuadro de reserva pasa a ser el aviso de «Función agotada», el mismo que
+ * dibuja el servidor cuando la página se carga sin lugares, y si alguien cancela vuelve a estar
+ * el de antes: no tiene sentido dejar un formulario que sólo puede dar error.
+ *
  * Sólo consulta mientras la pestaña se ve: con la pestaña de fondo el intervalo se detiene, y al
  * volver a ella se consulta enseguida. Así, si se reservó desde otra pestaña, el número ya está
  * bien al volver, sin dejar pedidos corriendo en pestañas que nadie mira.
@@ -46,6 +50,9 @@ class LugaresLibres {
     this.pedido = null;
     this.espera = null;
     this.fallas = 0;
+    // Lo que había en el recuadro de reserva antes de agotarse, para volver a ponerlo si alguien
+    // cancela. Null mientras no esté agotada.
+    this.recuadroGuardado = null;
     this.libres = this.leerLibres();
     // Afuera de lo que se redibuja: la región tiene que existir antes del cambio para que un
     // lector de pantalla la lea.
@@ -157,6 +164,9 @@ class LugaresLibres {
     const anunciar = this.libres !== null;
     this.libres = libres;
     this.pintarPildora(libres, agotada);
+    // Antes que la barra y el campo: si el recuadro vuelve, los dos están adentro y hay que
+    // pintarlos con el número de ahora y no con el que tenían cuando se agotó.
+    this.pintarRecuadro(agotada);
     this.pintarBarra(libres);
     this.pintarCampo(libres, agotada);
     if (anunciar) {
@@ -204,9 +214,49 @@ class LugaresLibres {
   }
 
   /**
+   * Cuando se agota, el recuadro de reserva pasa a ser el aviso de «Función agotada», el mismo
+   * que dibuja el servidor cuando la página se carga sin lugares (ficha_funcion.html.twig), y
+   * cuando alguien cancela vuelve a estar el de antes.
+   *
+   * Lo que estaba no se copia ni se vuelve a armar: se saca del documento y se guarda tal cual,
+   * y al volver se vuelven a poner los mismos nodos. Así el formulario conserva lo que le
+   * engancharon FormularioDeReserva y la validación de la cantidad; con un clon, reservar
+   * recargaría la página.
+   *
+   * Si la página ya se cargó agotada no hay nada guardado que devolver: ahí el recuadro vuelve
+   * recién al recargar. Armar el formulario desde el JavaScript sería tener el marcado en dos
+   * lados, y el número de la ficha igual queda al día.
+   *
+   * @param {boolean} agotada
+   */
+  pintarRecuadro(agotada) {
+    const recuadro = this.contenedor.querySelector('.ficha-reserva');
+    if (!recuadro || agotada === recuadro.classList.contains('ficha-reserva-agotada')) {
+      return;
+    }
+    if (!agotada) {
+      if (this.recuadroGuardado) {
+        recuadro.replaceChildren(...this.recuadroGuardado);
+        this.recuadroGuardado = null;
+        recuadro.classList.remove('ficha-reserva-agotada');
+      }
+
+      return;
+    }
+    this.recuadroGuardado = [...recuadro.childNodes];
+    const precio = PAW.nuevoElemento('div', '', { class: 'ficha-reserva-precio' });
+    precio.append(
+      PAW.nuevoElemento('h2', 'Función agotada', { id: 'ficha-reserva-titulo', class: 'ficha-reserva-titulo' }),
+      PAW.nuevoElemento('p', `Ya se reservaron los ${this.cupo} lugares. Si alguien cancela su reserva, vuelve a haber lugar.`, { class: 'ficha-reserva-ayuda' }),
+    );
+    recuadro.replaceChildren(precio);
+    recuadro.classList.add('ficha-reserva-agotada');
+  }
+
+  /**
    * El máximo del campo de cantidad, que es contra lo que valida el navegador, y el botón: con la
    * función agotada no hay cantidad que entre, así que mandar el formulario sólo daría el error.
-   * Reemplazar el recuadro entero por el de «Función agotada» es de E4-05.3 y E4-05.6.
+   * Cuando el recuadro entero pasó a ser el aviso de agotada no hay campo ni botón que tocar.
    *
    * @param {number} libres
    * @param {boolean} agotada
