@@ -7500,3 +7500,83 @@ a.tabla-admin-principal:focus-visible {
 .carrusel-flecha-siguiente {
   right: var(--espacio-3);
 }
+
+/* La barra de carga (E4-07.3): tapa la diapositiva hasta que bajaron todas las imágenes, que es
+   cuando arranca el pase automático */
+.carrusel-carga {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-3);
+  background-color: rgba(23, 20, 28, 0.88);
+  border-radius: var(--radio-lg);
+}
+
+.carrusel-carga[hidden] {
+  display: none;
+}
+
+.carrusel-carga-texto {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.carrusel-carga-barra {
+  appearance: none;
+  width: min(20rem, 70%);
+  height: 0.5rem;
+  border: 0;
+  border-radius: var(--radio-completo);
+  overflow: hidden;
+  background-color: var(--color-superficie-interactiva);
+}
+
+.carrusel-carga-barra::-webkit-progress-bar {
+  background-color: var(--color-superficie-interactiva);
+}
+
+.carrusel-carga-barra::-webkit-progress-value {
+  background-color: var(--color-primario);
+  transition: width var(--transicion-base);
+}
+
+.carrusel-carga-barra::-moz-progress-bar {
+  background-color: var(--color-primario);
+}
+
+/* Debajo de la diapositiva, los controles */
+.carrusel-controles {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-3);
+}
+
+.carrusel-pausa {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+}
+
+.carrusel-pausa:hover {
+  border-color: var(--color-primario);
+}
+
+.carrusel-pausa:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
