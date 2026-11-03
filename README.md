@@ -19,7 +19,8 @@ Siguiendo las decisiones arquitectónicas de la Entrega 2:
 frontend-indiecinema/
 ├── composer.json               # Definición del paquete cerberus-paw/frontend-indiecinema
 ├── README.md                   # Documentación técnica del paquete
-├── package.json                # Sólo para el CI: stylelint, con las reglas de .stylelintrc.json
+├── package.json                # stylelint para el CI y Playwright para las pruebas de punta a punta
+├── e2e/                        # Pruebas de punta a punta: los casos (casos.md) y su código (README)
 ├── herramientas/
 │   └── compilar-plantillas.php # Compila todas las plantillas con el Twig del núcleo (lo corre el CI)
 ├── plantillas/                 # Plantillas Twig organizadas por jerarquía
@@ -308,3 +309,9 @@ cada repositorio tiene la variable `E2E_URL`, los secretos `E2E_CORREO` y `E2E_C
 de espectador) y la variable `E2E_FUNCION` (el id de una función con lugares): el back y el front
 usan cuentas y funciones distintas para no pisarse. Si fallan, la corrida deja las capturas como
 artefacto; la traza completa, que guarda la contraseña, sólo en local.
+
+## 10. Pruebas de punta a punta
+
+En `e2e/`, con Playwright: recorren el sitio en Chromium como un espectador (ingresar, reservar,
+«Mis reservas» y cancelar, con sus bordes). Los casos están en [`e2e/casos.md`](e2e/casos.md) y
+cómo correrlas, en [`e2e/README.md`](e2e/README.md).
