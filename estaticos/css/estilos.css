@@ -7388,13 +7388,79 @@ a.tabla-admin-principal:focus-visible {
   border-radius: var(--radio-lg);
 }
 
+.carrusel-armado {
+  /* Lo que dura cada transición */
+  --carrusel-duracion: 0.6s;
+}
+
+/* La que no se ve se esconde recién cuando terminó de irse: si no, desaparecería de golpe */
 .carrusel-armado .carrusel-diapositiva {
   grid-area: 1 / 1;
   visibility: hidden;
+  transition:
+    opacity var(--carrusel-duracion) ease,
+    transform var(--carrusel-duracion) cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear var(--carrusel-duracion);
 }
 
 .carrusel-armado .carrusel-diapositiva.es-actual {
   visibility: visible;
+  transition:
+    opacity var(--carrusel-duracion) ease,
+    transform var(--carrusel-duracion) cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s;
+}
+
+/* El JS la pone un instante para ubicar la que entra en su punto de partida sin animar */
+.carrusel-armado .carrusel-diapositiva.sin-transicion {
+  transition: none;
+}
+
+/* Las tres transiciones (E4-07.2): una clase en el contenedor elige cuál. La actual siempre queda
+   quieta y a la vista; cambia de dónde viene la que entra y a dónde va la que sale. */
+
+/* Fundido: la nueva aparece encima de la anterior */
+.carrusel-fundido .carrusel-diapositiva {
+  opacity: 0;
+}
+
+.carrusel-fundido .carrusel-diapositiva.es-actual {
+  opacity: 1;
+}
+
+/* Deslizar: entra por un costado y empuja a la anterior por el otro. Hacia adelante entra por la
+   derecha; hacia atrás, por la izquierda */
+.carrusel-deslizar .carrusel-diapositiva {
+  transform: translateX(100%);
+}
+
+.carrusel-deslizar .carrusel-diapositiva.desde-atras,
+.carrusel-deslizar .carrusel-diapositiva.sale-hacia-atras {
+  transform: translateX(-100%);
+}
+
+.carrusel-deslizar .carrusel-diapositiva.sale-hacia-adelante {
+  transform: translateX(100%);
+}
+
+.carrusel-deslizar .carrusel-diapositiva.es-actual {
+  transform: none;
+}
+
+/* Zoom: la nueva se acerca desde un poco más grande y la anterior se aleja mientras se apaga */
+.carrusel-zoom .carrusel-diapositiva {
+  opacity: 0;
+  transform: scale(1.15);
+}
+
+.carrusel-zoom .carrusel-diapositiva.sale-hacia-atras,
+.carrusel-zoom .carrusel-diapositiva.sale-hacia-adelante {
+  transform: scale(0.85);
+}
+
+.carrusel-zoom .carrusel-diapositiva.es-actual {
+  opacity: 1;
+  transform: none;
 }
 
 /* Las flechas, a los costados de la diapositiva */

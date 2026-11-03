@@ -70,7 +70,8 @@
       <header class="portada-seccion-cabecera">
         <h2 id="portada-destacadas-titulo" class="portada-seccion-titulo">Destacadas</h2>
       </header>
-      <div class="carrusel" data-carrusel aria-label="Funciones destacadas">
+      {# La transición es una clase que pone el componente: fundido, deslizar o zoom (E4-07.2) #}
+      <div class="carrusel" data-carrusel data-transicion="deslizar" aria-label="Funciones destacadas">
         <ul class="carrusel-pista">
           {% for funcion in destacadas %}
             {% set url_funcion = '/cartelera/' ~ funcion.id %}
