@@ -7661,7 +7661,8 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* En el celular, una columna: el afiche arriba y los datos abajo, centrados. Las flechas quedan a
-   la altura del afiche, en los costados que deja libres */
+   la altura del afiche: a los costados de uno vertical, y encima de los bordes de un fotograma
+   apaisado, que ocupa todo el ancho */
 @media (max-width: 768px) {
   .carrusel-diapositiva {
     grid-template-columns: minmax(0, 1fr);
@@ -7671,7 +7672,10 @@ a.tabla-admin-principal:focus-visible {
   }
 
   .carrusel-imagen {
-    height: 15rem;
+    /* Con tope y no fijo: un fotograma apaisado que no entra a lo ancho se achica entero, en vez de
+       quedar aplastado */
+    height: auto;
+    max-height: 15rem;
   }
 
   .carrusel-texto {
