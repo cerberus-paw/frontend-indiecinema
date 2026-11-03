@@ -45,6 +45,11 @@ class App {
     if (document.querySelector('[data-compartir]')) {
       PAW.cargarScript('Compartir', `${App.COMPONENTES}/compartir.js`, () => new Compartir('[data-compartir]'));
     }
+    // La validación en línea de los formularios de carga (E4-09.1 / IC-295). Son varios en la
+    // misma página sólo si alguna pantalla los junta; uno por formulario marcado.
+    for (const formulario of document.querySelectorAll('[data-validar-en-linea]')) {
+      PAW.cargarScript('ValidacionEnLinea', `${App.COMPONENTES}/validacion-en-linea.js`, () => new ValidacionEnLinea(formulario));
+    }
     // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
     if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
       PAW.cargarScript('AcuerdoFecha', `${App.COMPONENTES}/acuerdo-fecha.js`, () => new AcuerdoFecha('[data-seccion-acuerdo-fecha]'));

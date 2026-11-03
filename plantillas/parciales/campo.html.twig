@@ -21,6 +21,10 @@
   - patron: (string, opcional) Expresión que tiene que cumplir todo el valor (pattern), salvo en 'textarea'.
   - valor_minimo / valor_maximo: (int, opcional) Para 'number': el menor y el mayor valor (min y max).
   - aceptar: (string, opcional) Para 'file': los tipos que se pueden elegir (accept).
+  - mensajes: (map, opcional) Los textos con los que el backend rechaza este campo, por regla
+    (requerido, maximo, minimo, valor_minimo, valor_maximo, patron, tipo). Salen como atributos
+    data-error-* y los usa el componente de validación en línea para decir lo mismo que el
+    servidor mientras se escribe (E4-09.1). Sin ellos el campo se comporta como siempre.
   - autocompletar: (string, opcional) Qué dato es, para que el navegador lo sugiera (autocomplete).
   Con minimo, maximo, patron, valor_minimo, valor_maximo y aceptar tomados de las reglas que manda el backend, el navegador valida lo mismo que el servidor.
 #}
@@ -70,6 +74,9 @@
       {% if minimo is defined %}minlength="{{ minimo }}"{% endif %}
       {% if maximo is defined %}maxlength="{{ maximo }}"{% endif %}
       {# Comunica estado inválido y asocia los IDs de error o ayuda para tecnologías de asistencia #}
+      {# Los textos con los que el backend rechaza este campo, para que el navegador diga lo mismo #}
+      {% for regla, texto in mensajes|default({}) %}data-error-{{ regla|replace({'_': '-'}) }}="{{ texto }}"
+      {% endfor %}
       {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% elseif ayuda is defined %}aria-describedby="{{ id_ayuda }}"{% endif %}
     {# Renderiza el contenido persistido escapado y cierra la etiqueta textarea #}
     >{{ valor ?? '' }}</textarea>
@@ -88,6 +95,9 @@
         {# Bloquea el envío si no se seleccionó ninguna opción válida #}
         {% if requerido ?? false %}required{% endif %}
         {# Atributos ARIA para accesibilidad que anuncian si la selección es inválida y su descripción #}
+        {# Los textos con los que el backend rechaza este campo, para que el navegador diga lo mismo #}
+        {% for regla, texto in mensajes|default({}) %}data-error-{{ regla|replace({'_': '-'}) }}="{{ texto }}"
+        {% endfor %}
         {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% elseif ayuda is defined %}aria-describedby="{{ id_ayuda }}"{% endif %}
       {# Cierre de la etiqueta de apertura del select #}
       >
@@ -140,6 +150,9 @@
         {# Obliga a marcar la casilla (ej. aceptación de términos legales) #}
         {% if requerido ?? false %}required{% endif %}
         {# Asocia el ID del error si no se tildó y era obligatoria #}
+        {# Los textos con los que el backend rechaza este campo, para que el navegador diga lo mismo #}
+        {% for regla, texto in mensajes|default({}) %}data-error-{{ regla|replace({'_': '-'}) }}="{{ texto }}"
+        {% endfor %}
         {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% endif %}
       {# Cierre de la etiqueta de apertura del input checkbox #}
       >
@@ -177,6 +190,9 @@
         {# Pista para que el navegador sugiera el dato guardado (correo, teléfono…) #}
         {% if autocompletar is defined %}autocomplete="{{ autocompletar }}"{% endif %}
         {# Soporte de accesibilidad anunciando el mensaje de error o texto de ayuda #}
+        {# Los textos con los que el backend rechaza este campo, para que el navegador diga lo mismo #}
+        {% for regla, texto in mensajes|default({}) %}data-error-{{ regla|replace({'_': '-'}) }}="{{ texto }}"
+        {% endfor %}
         {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% elseif ayuda is defined %}aria-describedby="{{ id_ayuda }}"{% endif %}
       {# Cierre del elemento input #}
       >
