@@ -63,12 +63,17 @@ class FormularioDeReserva {
    */
   validar(foco = false) {
     const campo = this.campo();
+    // Deshabilitado lo deja LugaresLibres cuando la función se agota: no hay nada que validar, y
+    // un campo deshabilitado da válido, así que seguir borraría el error de «agotada».
+    if (campo?.disabled) {
+      return false;
+    }
     if (!campo || campo.checkValidity()) {
       this.limpiarError();
 
       return true;
     }
-    this.mostrarError(FormularioDeReserva.mensajeDe(campo), foco);
+    this.mostrarError(FormularioDeReserva.mensajeDelCampo(campo), foco);
 
     return false;
   }
@@ -81,7 +86,7 @@ class FormularioDeReserva {
    * @param {HTMLInputElement} campo
    * @returns {string}
    */
-  static mensajeDe(campo) {
+  static mensajeDelCampo(campo) {
     if (campo.validity.rangeOverflow) {
       const libres = Number.parseInt(campo.getAttribute('max') ?? '', 10);
 
