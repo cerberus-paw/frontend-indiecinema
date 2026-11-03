@@ -7191,3 +7191,167 @@ a.tabla-admin-principal:focus-visible {
   font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   letter-spacing: 0.08em;
 }
+
+/* --------------------------------------------------------------------------
+   25. CARRUSEL DE DESTACADAS DE LA PORTADA (E4-07)
+   La lista de programacion/inicio.html.twig y lo que le agrega el componente
+   Carrusel (js/componentes/carrusel.js), que marca el contenedor con
+   .carrusel-armado. Sin esa clase, la lista es una tira que se desplaza de
+   costado: así se ve sin JavaScript.
+   -------------------------------------------------------------------------- */
+
+/* Sin JavaScript: una diapositiva por vez, las demás al costado, y se pasa desplazando */
+.carrusel-pista {
+  list-style: none;
+  display: flex;
+  gap: var(--espacio-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Que el desplazamiento de costado no arrastre la página en el celular */
+  overscroll-behavior-x: contain;
+}
+
+/* La diapositiva: el afiche entero a la izquierda y los datos de la función a la derecha */
+.carrusel-diapositiva {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--espacio-8);
+  /* A los costados, lugar para las flechas sin que tapen el afiche */
+  padding: var(--espacio-8) calc(var(--espacio-12) + var(--espacio-6));
+  min-height: 26rem;
+  overflow: hidden;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+}
+
+/* El mismo afiche, desenfocado y oscurecido, de fondo: los afiches son verticales y el recuadro
+   apaisado, y así los costados no quedan vacíos */
+.carrusel-fondo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(28px) brightness(0.35) saturate(1.2);
+  /* Agrandado, para que el desenfoque no deje un borde claro */
+  transform: scale(1.25);
+  pointer-events: none;
+}
+
+/* El afiche, entero: recortado se pierde el título */
+.carrusel-imagen {
+  position: relative;
+  display: block;
+  height: 22rem;
+  width: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: contain;
+  border-radius: var(--radio-md);
+  box-shadow: var(--sombra-lg);
+  /* Arrastrar el afiche con el mouse no lo levanta como una imagen suelta */
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.carrusel-texto {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  max-width: 36rem;
+}
+
+.carrusel-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: clamp(var(--texto-xl), 3vw, var(--texto-3xl));
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.carrusel-titulo-enlace {
+  color: var(--color-texto);
+  text-decoration: none;
+}
+
+.carrusel-titulo-enlace:hover {
+  color: var(--color-primario);
+}
+
+.carrusel-dato {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin: 0;
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-md);
+}
+
+.carrusel-accion {
+  margin-top: var(--espacio-2);
+}
+
+/* Con JavaScript: todas en la misma celda, y se ve sólo la actual */
+.carrusel-pantalla {
+  position: relative;
+}
+
+.carrusel-armado .carrusel-pista {
+  display: grid;
+  overflow: hidden;
+  border-radius: var(--radio-lg);
+}
+
+.carrusel-armado .carrusel-diapositiva {
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+
+.carrusel-armado .carrusel-diapositiva.es-actual {
+  visibility: visible;
+}
+
+/* Las flechas, a los costados de la diapositiva */
+.carrusel-flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  background-color: rgba(23, 20, 28, 0.75);
+  color: var(--color-texto);
+  font-size: var(--texto-2xl);
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.carrusel-flecha:hover {
+  background-color: var(--color-superficie-interactiva);
+  border-color: var(--color-primario);
+}
+
+.carrusel-flecha:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+.carrusel-flecha-anterior {
+  left: var(--espacio-3);
+}
+
+.carrusel-flecha-siguiente {
+  right: var(--espacio-3);
+}
