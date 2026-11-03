@@ -57,6 +57,10 @@ class App {
     if (document.querySelector('[data-formulario-reserva]')) {
       PAW.cargarScript('FormularioDeReserva', `${App.COMPONENTES}/formulario-de-reserva.js`, () => new FormularioDeReserva('[data-formulario-reserva]'));
     }
+    // Las acciones de los paneles de reservas, sin recargar la lista (E4-05.5 / IC-276).
+    if (document.querySelector('[data-panel-de-reservas]')) {
+      PAW.cargarScript('AccionesDeReserva', `${App.COMPONENTES}/acciones-de-reserva.js`, () => new AccionesDeReserva('[data-panel-de-reservas]'));
+    }
     // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
     if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
       PAW.cargarScript('AcuerdoFecha', `${App.COMPONENTES}/acuerdo-fecha.js`, () => new AcuerdoFecha('[data-seccion-acuerdo-fecha]'));
