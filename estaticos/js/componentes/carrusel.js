@@ -151,7 +151,13 @@ class Carrusel {
         this.reanudar('puntero');
       }
     });
-    c.addEventListener('focusin', () => this.pausar('foco'));
+    // Sólo el foco del teclado: un clic o un toque en una flecha también le da el foco al botón,
+    // y la pausa quedaría pegada hasta hacer clic afuera.
+    c.addEventListener('focusin', (e) => {
+      if (e.target.matches(':focus-visible')) {
+        this.pausar('foco');
+      }
+    });
     c.addEventListener('focusout', (e) => {
       if (!c.contains(e.relatedTarget)) {
         this.reanudar('foco');
