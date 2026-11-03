@@ -12,10 +12,9 @@
  * sólo traduce cada bandera al mensaje que corresponde. Así las reglas viven en los atributos del
  * HTML —required, maxlength, min, max, pattern— que ya salen de las del servidor.
  *
- * El error se dibuja con el marcado de parciales/campo.html.twig: el grupo marcado, el control con
- * aria-invalid y aria-describedby apuntando al span del error, y el span con role="alert". Así el
+ * El error lo dibuja PAW.errorDeCampo(), con el marcado de parciales/campo.html.twig, así el
  * lector de pantalla lo lee junto al campo (E4-09.3) y se ve igual que cuando lo dibuja el
- * servidor.
+ * servidor. Está en PAW y no acá porque la zona de la imagen muestra los suyos igual.
  *
  * El error de un campo aparece recién cuando se lo deja (blur) o cuando se intenta mandar: avisar
  * en la primera tecla de un campo vacío sería gritarle a alguien que todavía está escribiendo. Una
@@ -84,11 +83,11 @@ class ValidacionEnLinea {
       return true;
     }
     if (campo.checkValidity()) {
-      this.limpiarError(campo);
+      PAW.limpiarErrorDeCampo(campo);
 
       return true;
     }
-    this.mostrarError(campo, ValidacionEnLinea.mensajeDe(campo));
+    PAW.errorDeCampo(campo, ValidacionEnLinea.mensajeDe(campo));
 
     return false;
   }
@@ -102,54 +101,6 @@ class ValidacionEnLinea {
   revisarSiYaFallaba(campo) {
     if (ValidacionEnLinea.esControl(campo) && campo.getAttribute('aria-invalid') === 'true') {
       this.revisar(campo);
-    }
-  }
-
-  /**
-   * El error debajo del campo, con el marcado de parciales/campo.html.twig. Si el campo ya tiene
-   * uno con el mismo texto no se vuelve a dibujar: con role="alert", rehacerlo en cada tecla se lo
-   * repetiría al lector de pantalla letra por letra.
-   *
-   * @param {HTMLElement} campo
-   * @param {string} mensaje
-   */
-  mostrarError(campo, mensaje) {
-    const grupo = campo.closest('.grupo-campo');
-    if (!grupo) {
-      return;
-    }
-    const id = `error-${campo.name || campo.id}`;
-    if (grupo.querySelector('.campo-error')?.textContent.trim().endsWith(mensaje)) {
-      return;
-    }
-    this.limpiarError(campo);
-    grupo.classList.add('con-error');
-    campo.classList.add('control-invalido');
-    campo.setAttribute('aria-invalid', 'true');
-    campo.setAttribute('aria-describedby', id);
-
-    const error = PAW.nuevoElemento('span', '', { id, class: 'campo-error', role: 'alert' });
-    error.append(PAW.nuevoElemento('span', '⚠️', { class: 'error-icono', 'aria-hidden': 'true' }), ` ${mensaje}`);
-    grupo.append(error);
-  }
-
-  /**
-   * Saca el error del campo y le devuelve el aria-describedby de la ayuda, si tenía: el texto que
-   * explica qué se espera sigue valiendo cuando el error se va.
-   *
-   * @param {HTMLElement} campo
-   */
-  limpiarError(campo) {
-    const grupo = campo.closest('.grupo-campo');
-    grupo?.classList.remove('con-error');
-    grupo?.querySelector('.campo-error')?.remove();
-    campo.classList.remove('control-invalido');
-    campo.removeAttribute('aria-invalid');
-    const ayuda = grupo?.querySelector('.campo-ayuda');
-    if (ayuda?.id) {
-      campo.setAttribute('aria-describedby', ayuda.id);
-    } else {
-      campo.removeAttribute('aria-describedby');
     }
   }
 

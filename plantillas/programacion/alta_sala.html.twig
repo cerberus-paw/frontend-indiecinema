@@ -159,6 +159,7 @@
         {# Campo: Imagen de la sala #}
         {% include 'parciales/campo.html.twig' with reglas.imagen|merge({
           nombre: 'imagen',
+          zona_de_imagen: true,
           etiqueta: 'Fotografía de la sala',
           tipo: 'file',
           ayuda: 'Foto representativa de la sala (JPG, PNG o WebP, máx. 5 MB).',

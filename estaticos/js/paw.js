@@ -63,6 +63,55 @@ class PAW {
   }
 
   /**
+   * El error de un campo, debajo, con el marcado de parciales/campo.html.twig: el grupo marcado,
+   * el control con aria-invalid y aria-describedby apuntando al span, y el span con role="alert".
+   * Se ve igual que cuando lo dibuja el servidor y el lector de pantalla lo lee junto al campo
+   * (E4-09.3). Lo comparten los componentes que revisan algo de un formulario.
+   *
+   * El mismo error que ya está no se vuelve a dibujar: con role="alert", rehacerlo en cada tecla
+   * se lo repetiría al lector de pantalla letra por letra.
+   *
+   * @param {HTMLElement} campo
+   * @param {string} mensaje
+   */
+  static errorDeCampo(campo, mensaje) {
+    const grupo = campo.closest('.grupo-campo');
+    if (!grupo || grupo.querySelector('.campo-error')?.textContent.trim().endsWith(mensaje)) {
+      return;
+    }
+    PAW.limpiarErrorDeCampo(campo);
+    const id = `error-${campo.name || campo.id}`;
+    grupo.classList.add('con-error');
+    campo.classList.add('control-invalido');
+    campo.setAttribute('aria-invalid', 'true');
+    campo.setAttribute('aria-describedby', id);
+
+    const error = PAW.nuevoElemento('span', '', { id, class: 'campo-error', role: 'alert' });
+    error.append(PAW.nuevoElemento('span', '⚠️', { class: 'error-icono', 'aria-hidden': 'true' }), ` ${mensaje}`);
+    grupo.append(error);
+  }
+
+  /**
+   * Saca el error del campo y le devuelve el aria-describedby de la ayuda, si tenía: el texto que
+   * explica qué se espera sigue valiendo cuando el error se va.
+   *
+   * @param {HTMLElement} campo
+   */
+  static limpiarErrorDeCampo(campo) {
+    const grupo = campo.closest('.grupo-campo');
+    grupo?.classList.remove('con-error');
+    grupo?.querySelector('.campo-error')?.remove();
+    campo.classList.remove('control-invalido');
+    campo.removeAttribute('aria-invalid');
+    const ayuda = grupo?.querySelector('.campo-ayuda');
+    if (ayuda?.id) {
+      campo.setAttribute('aria-describedby', ayuda.id);
+    } else {
+      campo.removeAttribute('aria-describedby');
+    }
+  }
+
+  /**
    * El token CSRF que publica la plantilla base en <meta name="csrf">: la cookie es HttpOnly, así
    * que el JavaScript no la puede leer.
    *

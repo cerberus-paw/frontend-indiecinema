@@ -54,6 +54,10 @@ class App {
     for (const formulario of document.querySelectorAll('[data-validar-en-linea]')) {
       PAW.cargarScript('ValidacionEnLinea', `${App.COMPONENTES}/validacion-en-linea.js`, () => new ValidacionEnLinea(formulario));
     }
+    // Arrastrar y soltar la imagen, con vista previa (E4-09.2 / IC-296).
+    for (const campo of document.querySelectorAll('[data-zona-de-imagen]')) {
+      PAW.cargarScript('ZonaDeImagen', `${App.COMPONENTES}/zona-de-imagen.js`, () => new ZonaDeImagen(campo));
+    }
     // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
     if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
       PAW.cargarScript('AcuerdoFecha', `${App.COMPONENTES}/acuerdo-fecha.js`, () => new AcuerdoFecha('[data-seccion-acuerdo-fecha]'));
