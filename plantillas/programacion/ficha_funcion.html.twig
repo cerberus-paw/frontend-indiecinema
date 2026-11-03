@@ -100,7 +100,9 @@
     </ol>
   </nav>
 
-  <article class="ficha-funcion-contenido">
+  {# data-lugares-libres: de dónde traer los lugares al día, para el componente LugaresLibres
+     (E4-05.2). Sólo si la página se cargó con el dato: sin él no hay número que actualizar. #}
+  <article class="ficha-funcion-contenido"{% if funcion.lugares_libres|default(null) is not null %} data-lugares-libres="/cartelera/{{ funcion.id }}/lugares" data-cupo="{{ funcion.cupo }}"{% endif %}>
     {# La cabecera de los wireframes de la función (las tres pantallas la comparten): el título
        con «Compartir» a la derecha y, abajo, la sala con su localidad y dos o tres datos en
        píldoras, que cambian según el estado (E3-13.F10). #}
@@ -226,7 +228,8 @@
           {% endif %}
         </div>
         {% if usuario %}
-          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario">
+          {# data-formulario-reserva: el enganche del componente que lo manda sin recargar (E4-05.3). #}
+          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva>
             <input type="hidden" name="_csrf" value="{{ csrf }}">
             {% include 'parciales/campo.html.twig' with {
               nombre: 'cantidad',

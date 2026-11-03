@@ -1,11 +1,13 @@
 {
   "name": "frontend-indiecinema",
   "private": true,
-  "description": "Sólo para el CI: revisar el CSS con stylelint.",
+  "description": "Para el CI y las pruebas: stylelint revisa el CSS y Playwright recorre el sitio (e2e/README.md).",
   "scripts": {
-    "css": "stylelint \"estaticos/css/**/*.css\""
+    "css": "stylelint \"estaticos/css/**/*.css\"",
+    "e2e": "playwright test -c e2e"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
     "stylelint": "^16.0.0",
     "stylelint-value-no-unknown-custom-properties": "^6.0.0"
   }

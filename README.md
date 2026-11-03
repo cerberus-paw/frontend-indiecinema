@@ -19,7 +19,8 @@ Siguiendo las decisiones arquitectónicas de la Entrega 2:
 frontend-indiecinema/
 ├── composer.json               # Definición del paquete cerberus-paw/frontend-indiecinema
 ├── README.md                   # Documentación técnica del paquete
-├── package.json                # Sólo para el CI: stylelint, con las reglas de .stylelintrc.json
+├── package.json                # stylelint para el CI y Playwright para las pruebas de punta a punta
+├── e2e/                        # Pruebas de punta a punta: los casos (casos.md) y su código (README)
 ├── herramientas/
 │   └── compilar-plantillas.php # Compila todas las plantillas con el Twig del núcleo (lo corre el CI)
 ├── plantillas/                 # Plantillas Twig organizadas por jerarquía
@@ -45,7 +46,7 @@ frontend-indiecinema/
 │   │   ├── alta_sala.html.twig # Formulario de edición de sala
 │   │   ├── cartelera.html.twig # Cartelera pública con filtros GET, paginado y descarga en CSV
 │   │   ├── ficha_funcion.html.twig # Ficha de una función: obras, sala, fecha, precio y estado
-│   │   ├── inicio.html.twig    # Portada: buscador, próximas funciones y salas
+│   │   ├── inicio.html.twig    # Portada: buscador, carrusel de destacadas, próximas funciones y salas
 │   │   ├── mis_funciones.html.twig # «Mis funciones»: las funciones de las salas del organizador, con estado y fecha
 │   │   ├── mis_salas.html.twig # Gestión de salas del organizador
 │   │   ├── sala.html.twig      # Ficha pública de una sala con sus próximas funciones
@@ -63,6 +64,7 @@ frontend-indiecinema/
     │   ├── paw.js              # Clase utilitaria PAW: contenedor, nuevoElemento, cargarScript y enviar con CSRF
     │   ├── app.js              # Clase App: en DOMContentLoaded carga e inicia los componentes de la página
     │   └── componentes/        # Una clase por archivo, cada una recibe su contenedor
+    │       ├── carrusel.js     # Carrusel: convierte la lista de un contenedor en diapositivas (E4-07)
     │       ├── buscador-de-cartelera.js # BuscadorDeCartelera: filtra la cartelera sin recargar, con el JSON de la misma URL
     │       ├── enviar-al-elegir.js # EnviarAlElegir: manda un formulario del panel al elegir una opción
     │       ├── menu-usuario.js # MenuUsuario: cierra el menú del usuario con un clic afuera o con Escape
@@ -261,7 +263,7 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 - **`plantillas/funciones/reservar.html.twig`**: Reserva de una función en `/funcion/reservar/{id}` (IC-252): el resumen de la función, la cantidad de lugares con los límites que manda el backend y el error si no quedan tantos; si la función ya no admite reservas, el motivo en lugar del formulario. Es la misma página a la que vuelve el formulario de la ficha cuando hay un error.
 - **`plantillas/funciones/reserva_confirmada.html.twig`**: Confirmación en `/funcion/reservas/{id}` (IC-252): el código de la reserva en dos grupos de cuatro para dictarlo en la puerta, la función, la fecha, la sala, los lugares y el total; mientras la función no empezó, el botón para cancelarla (IC-254).
 - **`plantillas/funciones/cancelar_reserva.html.twig`**: Confirmación para cancelar una reserva propia en `/funcion/reservas/{id}/cancelar` (IC-254): la advertencia de que los lugares quedan libres, el resumen y el formulario POST con token CSRF; si no se pudo, el motivo en lugar del formulario.
-- **`plantillas/programacion/inicio.html.twig`**: Portada en `/`: la presentación con un buscador GET (qué y dónde) que lleva a la cartelera filtrada, la cantidad de salas publicadas y de funciones en cartelera, las próximas cuatro funciones y tres salas, cada sección con el enlace a su listado y un mensaje propio si está vacía (IC-93).
+- **`plantillas/programacion/inicio.html.twig`**: Portada en `/`: la presentación con un buscador GET (qué y dónde) que lleva a la cartelera filtrada, la cantidad de salas publicadas y de funciones en cartelera, el carrusel de destacadas (las próximas con afiche, en una franja propia porque el wireframe no dibuja un destacado; E4-07), las próximas cuatro funciones y tres salas, cada sección con el enlace a su listado y un mensaje propio si está vacía (IC-93).
 - **`plantillas/programacion/mis_funciones.html.twig`**: «Mis funciones» para organizadores en `/organizador/funciones`, con migas de pan: una tabla con las funciones de sus salas en cualquier estado, también las canceladas y las que todavía no tienen fecha, con la sala, la fecha (o «Sin fecha todavía»), el estado y la entrada. La columna de acciones tiene «Editar» sólo en las programadas que todavía no se dieron (IC-122 / E3-11.3) y «Cancelar» en las que están en votación o programadas y todavía no se dieron (IC-123 / E3-11.4), con el aviso al volver de cancelar. Sólo enlaza a la ficha de la función y a la de la sala si la sala está habilitada, y muestra un mensaje si no tiene ninguna función (IC-120).
 - **`plantillas/programacion/mis_salas.html.twig`**: Vista de «Mis salas» para organizadores en `/organizador/salas` con migas de pan, botón para publicar sala y cuadrícula de tarjetas editables (IC-38).
 - **`plantillas/programacion/salas.html.twig`**: Catálogo público de salas indie habilitadas en `/salas` con cuadrícula de tarjetas de sala (IC-39), y un buscador GET por nombre y localidad que funciona sin JavaScript, con el aviso si la búsqueda no es válida y un mensaje propio sin resultados (IC-91).
@@ -281,6 +283,7 @@ Sin librerías y con una clase por archivo. La plantilla base carga, con `defer`
 - **`js/app.js`, la clase de aplicación `App`**: su constructor sólo espera a `DOMContentLoaded`; ahí, por cada componente cuyo contenedor está en la página, carga su script con `PAW.cargarScript()` y lo crea pasándole el contenedor.
 - **`js/componentes/`, una clase por componente**: el constructor recibe su contenedor (elemento o selector) y no busca nada fuera de él salvo los eventos del documento que necesite. Hoy:
   - `boton-imprimir.js`, `BotonImprimir` (`[data-imprimir]`, IC-268 / E4-04.2): muestra el botón «Imprimir» del comprobante de la reserva, que llega oculto (`hidden`), y al tocarlo abre el diálogo de impresión. Sin JavaScript no aparece, y queda el «Imprimir» del navegador; los estilos `@media print` dejan en el papel sólo el código y los datos de la reserva.
+  - `carrusel.js`, `Carrusel` (`[data-carrusel]`, E4-07): recibe sólo el contenedor y convierte cada `<li>` de su lista en una diapositiva, con flechas anterior y siguiente que dan la vuelta; las que no se ven quedan `inert`. Tiene tres transiciones hechas en CSS (`fundido`, `deslizar` y `zoom`), cada una una clase `carrusel-<nombre>` en el contenedor: se elige con `data-transicion` (la portada usa `deslizar`) o con la propiedad `transicion`; el JS sólo marca qué diapositiva entra, cuál sale y hacia qué lado. Mientras bajan las imágenes, una barra (`<progress>`) tapa la diapositiva y muestra el porcentaje (cada imagen distinta cuenta una vez, y una que falla cuenta igual para no trabarla); al llegar al 100 % arranca el pase automático, cada `data-intervalo` ms (6 s por defecto). Se pausa con su botón y mientras el mouse o el foco están sobre el carrusel o la pestaña no se ve. Se navega con las flechas de los costados, con las miniaturas de abajo (la misma imagen de cada diapositiva, con `aria-current` en la actual), deslizando el dedo o el mouse de costado (50 px; un gesto vertical sigue desplazando la página, y un deslizamiento que empezó sobre un enlace no lo abre) y, con el foco adentro, con ← y → (Inicio y Fin van a la primera y a la última). Si el foco estaba en la diapositiva que sale, pasa a la que entra. Es responsive: en tablet el afiche se achica y en el celular (≤ 768 px) la diapositiva pasa a una columna, con el afiche arriba y las flechas a su altura; a 360 px no desborda. Con `prefers-reduced-motion`, las diapositivas cambian sin animar y el pase automático arranca en pausa (el botón dice «Reanudar»). Sin JavaScript, la lista es una tira que se desplaza de costado. Un contenedor que no existe sólo avisa por consola.
   - `buscador-de-cartelera.js`, `BuscadorDeCartelera` (`.filtros-cartelera` y `#resultados-cartelera`, IC-101): recibe el formulario de filtros y la sección de resultados. Al elegir una localidad, una fecha o un género, al dejar de escribir en «Buscar» (400 ms) o al enviar el formulario, pide la misma URL que el formulario con `Accept: application/json` y vuelve a dibujar la sección como `cartelera.html.twig`: los avisos, el total, las tarjetas (como `tarjeta_funcion.html.twig`), el paginado (sus links también van por JSON) o el mensaje sin resultados. También agrega o saca «Limpiar» según haya filtros. Un pedido nuevo cancela al anterior. Mientras busca, y también desde la primera tecla mientras espera que se deje de escribir, la sección queda con `aria-busy="true"`, los resultados anteriores atenuados y sin clics, y el aviso «Buscando funciones…» (`role="status"`) fijo abajo de la pantalla, así se ve aunque se haya buscado desde el paginado; sin animación con `prefers-reduced-motion` (IC-102). Cada búsqueda deja su URL en el historial (`pushState`, sin repetir la misma), así se puede compartir o recargar; «Atrás» y «Adelante» completan el formulario con esa URL y la vuelven a pedir. Cuando llegan los resultados, una región `aria-live` fuera de la sección (que no se redibuja) anuncia el total, la página y si algún filtro no se aplicó, o el mensaje de error si el pedido falla (IC-103). Si el pedido falla (sin conexión o sin la cartelera en JSON), la sección muestra el mensaje genérico de error (`alerta-error`, `role="alert"`) con un link que carga la misma búsqueda como página, y los filtros quedan como estaban para volver a intentar (IC-102). Sin JavaScript, el formulario y los links funcionan igual.
   - `enviar-al-elegir.js`, `EnviarAlElegir` (`form[data-enviar-al-elegir]`, IC-245): manda el formulario al elegir una opción de uno de sus desplegables, como los filtros de «Usuarios y roles»; el texto de un buscador se manda con Enter. Sin JavaScript, el botón está en un `<noscript>`.
   - `menu-usuario.js`, `MenuUsuario` (`#menu-usuario`): cierra el menú del usuario con un clic afuera o con Escape, y devuelve el foco al botón. Sin JavaScript, el `<details>` se abre y se cierra igual.
@@ -292,12 +295,25 @@ Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.inici
 
 ## 9. Integración continua
 
-En cada PR y en cada push a `main` (`.github/workflows/ci.yml`):
+En cada PR y en cada push a `main` o a `dev` (`.github/workflows/ci.yml`):
 
-- **Pruebas del back:** el back con el front del PR al lado, y las pruebas de cada subsistema. El back es el de la rama del mismo nombre si existe allá, y si no el de `main`: un cambio que toca los dos repositorios va en ramas que se llaman igual, y sus dos PR pasan sin esperar al otro. Es el espejo del CI del back.
+- **Pruebas del back:** el back con el front del PR al lado, y las pruebas de cada subsistema. El back es el de la rama del mismo nombre si existe allá; si no, el de la base del PR (`dev` o `main`): un cambio que toca los dos repositorios va en ramas que se llaman igual, y sus dos PR pasan sin esperar al otro. Es el espejo del CI del back.
 - **Plantillas:** `herramientas/compilar-plantillas.php` compila todas con el Twig del núcleo (del back de la misma rama, como las pruebas); falla con un error de sintaxis o un filtro que no existe.
 - **CSS:** stylelint, sólo con reglas que encuentran errores (una variable que no existe, una propiedad mal escrita, un selector repetido). En local: `npm ci && npm run css`.
 - **JavaScript:** `node --check` sobre cada archivo de `estaticos/js`.
 - **Secretos:** gitleaks sobre todo el historial, como en el back.
 
-Cuando la CI pasa en un push a `main`, `.github/workflows/cd.yml` publica el cambio en el VPS con el mismo script que el back (README del back, «Despliegue continuo»).
+Cuando la CI pasa en un push a `main` o a `dev`, `.github/workflows/cd.yml` publica el cambio en el servidor de esa rama, con el mismo script que el back. Cada subtarea sale de `dev` y su PR apunta ahí; a producción llega por un PR de `dev` a `main` (README del back, «Ramas y entornos» y «Despliegue continuo»).
+
+Después de publicar `dev`, el CD corre las pruebas de punta a punta contra ese sitio
+(`.github/workflows/e2e.yml`, también a mano desde Actions → E2E). El environment `desarrollo` de
+cada repositorio tiene la variable `E2E_URL`, los secretos `E2E_CORREO` y `E2E_CLAVE` (una cuenta
+de espectador) y la variable `E2E_FUNCION` (el id de una función con lugares): el back y el front
+usan cuentas y funciones distintas para no pisarse. Si fallan, la corrida deja las capturas como
+artefacto; la traza completa, que guarda la contraseña, sólo en local.
+
+## 10. Pruebas de punta a punta
+
+En `e2e/`, con Playwright: recorren el sitio en Chromium como un espectador (ingresar, reservar,
+«Mis reservas» y cancelar, con sus bordes). Los casos están en [`e2e/casos.md`](e2e/casos.md) y
+cómo correrlas, en [`e2e/README.md`](e2e/README.md).

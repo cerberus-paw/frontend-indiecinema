@@ -7,6 +7,22 @@ class PAW {
   static METODOS_MUTABLES = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
   /**
+   * Con este evento un componente avisa que los lugares libres de una función cambiaron, y en el
+   * detail manda la respuesta del servidor (E4-05). Lo emite quien ya tiene el dato —el formulario
+   * de reserva, que lo recibe al reservar— y lo escucha quien muestra el número. Va por acá y no
+   * por una referencia entre componentes porque cada uno se carga solo, cuando su contenedor está
+   * en la página, y ninguno puede contar con que el otro exista.
+   */
+  static EVENTO_LUGARES = 'indiecinema:lugares';
+
+  /**
+   * Cuánto esperar antes de mostrar el aviso de carga, en milisegundos (E4-05.6). Un pedido que
+   * vuelve enseguida no tiene que hacer parpadear nada: el aviso es para cuando la espera se
+   * nota, no para cada fetch.
+   */
+  static ESPERA_DEL_AVISO = 400;
+
+  /**
    * El elemento de un componente: lo recibe como elemento o como selector.
    *
    * @param {Element|string} pContenedor
@@ -70,6 +86,64 @@ class PAW {
    */
   static tokenCsrf() {
     return document.querySelector('meta[name="csrf"]')?.getAttribute('content') ?? '';
+  }
+
+  /**
+   * El aviso flotante que comparten los componentes que hacen fetch (E4-05.6): el de carga, con
+   * el aro que gira, y el de error, con el mensaje genérico de que algo no anduvo. Nace oculto;
+   * se muestra con mostrarAviso(). Va fijo abajo de la pantalla, así se ve esté donde esté la
+   * página, y no empuja nada de lo que ya está.
+   *
+   * El de error es role="alert" para que se lea apenas aparece; el de carga, role="status", que
+   * no interrumpe lo que se esté leyendo.
+   *
+   * @param {string} texto
+   * @param {'carga'|'error'} [tipo='carga']
+   * @returns {HTMLElement}
+   */
+  static avisoFlotante(texto, tipo = 'carga') {
+    const esError = tipo === 'error';
+    const aviso = PAW.nuevoElemento('p', '', {
+      class: esError ? 'aviso-flotante aviso-flotante-error' : 'aviso-flotante',
+      role: esError ? 'alert' : 'status',
+      hidden: '',
+    });
+    aviso.append(
+      PAW.nuevoElemento('span', esError ? '✕' : '', { class: 'aviso-flotante-icono', 'aria-hidden': 'true' }),
+      texto,
+    );
+
+    return aviso;
+  }
+
+  /**
+   * Muestra u oculta un aviso de avisoFlotante(). El de carga espera ESPERA_DEL_AVISO antes de
+   * aparecer: si el pedido vuelve antes, nunca llega a verse. El de error aparece enseguida, que
+   * para eso es.
+   *
+   * La espera queda en una propiedad del elemento y no en el componente: así el que llama pide
+   * mostrar y ocultar sin acordarse de ningún temporizador.
+   *
+   * @param {?HTMLElement} aviso
+   * @param {boolean} visible
+   */
+  static mostrarAviso(aviso, visible) {
+    if (!aviso) {
+      return;
+    }
+    clearTimeout(aviso.espera);
+    aviso.espera = null;
+    if (!visible) {
+      aviso.hidden = true;
+
+      return;
+    }
+    if (aviso.classList.contains('aviso-flotante-error')) {
+      aviso.hidden = false;
+
+      return;
+    }
+    aviso.espera = setTimeout(() => { aviso.hidden = false; }, PAW.ESPERA_DEL_AVISO);
   }
 
   /**

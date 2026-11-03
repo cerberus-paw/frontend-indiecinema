@@ -1,13 +1,13 @@
-# Integración continua del front: en cada PR y en cada push a main. Las plantillas las usan los
-# subsistemas del back, así que lo más importante es correr sus pruebas con este front antes de
-# integrarlo, y no recién cuando falla el CI del back.
+# Integración continua del front: en cada PR y en cada push a main o a dev. Las plantillas
+# las usan los subsistemas del back, así que lo más importante es correr sus pruebas con este front
+# antes de integrarlo, y no recién cuando falla el CI del back.
 
 name: CI
 
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, dev]
 
 # Sólo lee el código: ningún trabajo necesita escribir en el repositorio.
 permissions:
@@ -58,19 +58,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Twig no es dependencia del front: lo trae el núcleo del back, con su misma versión.
-      # La rama del back con el mismo nombre que ésta, si existe; si no, main. Así un cambio
-      # que toca los dos repositorios (las ramas IC-… se llaman igual en los dos) se prueba entero
-      # antes de mergear ninguno. La rama va por env y no en el script, por si trae algo raro.
+      # La rama del back con el mismo nombre que ésta, si existe; si no, la rama a la que apunta
+      # el PR (dev o main), y si tampoco existe, main. Así un cambio que toca los dos
+      # repositorios (las ramas IC-… se llaman igual en los dos) se prueba entero antes de mergear
+      # ninguno. Las ramas van por env y no en el script, por si traen algo raro.
       - name: Elegir la rama del back
         id: back
         env:
           RAMA: ${{ github.head_ref || github.ref_name }}
+          BASE: ${{ github.base_ref || github.ref_name }}
         run: |
-          if git ls-remote --exit-code --heads https://github.com/cerberus-paw/backend-indiecinema.git "refs/heads/$RAMA" >/dev/null; then
-            echo "ref=$RAMA" >> "$GITHUB_OUTPUT"
-          else
-            echo "ref=main" >> "$GITHUB_OUTPUT"
-          fi
+          for ref in "$RAMA" "$BASE" main; do
+            if git ls-remote --exit-code --heads https://github.com/cerberus-paw/backend-indiecinema.git "refs/heads/$ref" >/dev/null; then
+              echo "ref=$ref" >> "$GITHUB_OUTPUT"
+              break
+            fi
+          done
           grep ref= "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
         with:
@@ -118,19 +121,22 @@ jobs:
     steps:
       # El espejo del CI del back: el back con el front de este PR al lado, como en la máquina de
       # cada uno (los subsistemas instalan el front desde ../../frontend-indiecinema).
-      # La rama del back con el mismo nombre que ésta, si existe; si no, main. Así un cambio
-      # que toca los dos repositorios (las ramas IC-… se llaman igual en los dos) se prueba entero
-      # antes de mergear ninguno. La rama va por env y no en el script, por si trae algo raro.
+      # La rama del back con el mismo nombre que ésta, si existe; si no, la rama a la que apunta
+      # el PR (dev o main), y si tampoco existe, main. Así un cambio que toca los dos
+      # repositorios (las ramas IC-… se llaman igual en los dos) se prueba entero antes de mergear
+      # ninguno. Las ramas van por env y no en el script, por si traen algo raro.
       - name: Elegir la rama del back
         id: back
         env:
           RAMA: ${{ github.head_ref || github.ref_name }}
+          BASE: ${{ github.base_ref || github.ref_name }}
         run: |
-          if git ls-remote --exit-code --heads https://github.com/cerberus-paw/backend-indiecinema.git "refs/heads/$RAMA" >/dev/null; then
-            echo "ref=$RAMA" >> "$GITHUB_OUTPUT"
-          else
-            echo "ref=main" >> "$GITHUB_OUTPUT"
-          fi
+          for ref in "$RAMA" "$BASE" main; do
+            if git ls-remote --exit-code --heads https://github.com/cerberus-paw/backend-indiecinema.git "refs/heads/$ref" >/dev/null; then
+              echo "ref=$ref" >> "$GITHUB_OUTPUT"
+              break
+            fi
+          done
           grep ref= "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
         with:

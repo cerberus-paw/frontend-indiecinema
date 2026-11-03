@@ -12,6 +12,11 @@ class App {
   }
 
   iniciar() {
+    // Los carruseles, como el de destacadas de la portada (E4-07): cada uno recibe su contenedor.
+    const carruseles = document.querySelectorAll('[data-carrusel]');
+    if (carruseles.length > 0) {
+      PAW.cargarScript('Carrusel', `${App.COMPONENTES}/carrusel.js`, () => carruseles.forEach((contenedor) => new Carrusel(contenedor)));
+    }
     // El menú del usuario, sólo con sesión.
     if (document.querySelector('#menu-usuario')) {
       PAW.cargarScript('MenuUsuario', `${App.COMPONENTES}/menu-usuario.js`, () => new MenuUsuario('#menu-usuario'));
@@ -53,6 +58,18 @@ class App {
     // misma página sólo si alguna pantalla los junta; uno por formulario marcado.
     for (const formulario of document.querySelectorAll('[data-validar-en-linea]')) {
       PAW.cargarScript('ValidacionEnLinea', `${App.COMPONENTES}/validacion-en-linea.js`, () => new ValidacionEnLinea(formulario));
+    }
+    // Los lugares libres de la ficha, al día sin recargar (E4-05.2 / IC-273).
+    if (document.querySelector('[data-lugares-libres]')) {
+      PAW.cargarScript('LugaresLibres', `${App.COMPONENTES}/lugares-libres.js`, () => new LugaresLibres('[data-lugares-libres]'));
+    }
+    // El formulario de reserva de la ficha, sin recargar (E4-05.3 / IC-274).
+    if (document.querySelector('[data-formulario-reserva]')) {
+      PAW.cargarScript('FormularioDeReserva', `${App.COMPONENTES}/formulario-de-reserva.js`, () => new FormularioDeReserva('[data-formulario-reserva]'));
+    }
+    // Las acciones de los paneles de reservas, sin recargar la lista (E4-05.5 / IC-276).
+    if (document.querySelector('[data-panel-de-reservas]')) {
+      PAW.cargarScript('AccionesDeReserva', `${App.COMPONENTES}/acciones-de-reserva.js`, () => new AccionesDeReserva('[data-panel-de-reservas]'));
     }
     // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
     if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
