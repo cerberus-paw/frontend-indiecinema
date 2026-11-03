@@ -23,7 +23,8 @@
 
 {% block contenido %}
 {% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
-<div class="contenedor panel-reservas">
+{# data-panel-de-reservas: el enganche del componente que registra la asistencia sin recargar (E4-05.5). #}
+<div class="contenedor panel-reservas" data-panel-de-reservas>
   <nav class="navegacion-migas" aria-label="Migas de pan">
     <ol class="lista-migas">
       <li class="item-miga"><a href="/organizador/funciones" class="enlace-miga">Mis funciones</a></li>
@@ -48,22 +49,22 @@
   <dl class="panel-admin-resumen">
     <div class="panel-admin-dato">
       <dt>Lugares reservados</dt>
-      <dd class="panel-admin-dato-valor">{{ resumen.reservados }}</dd>
+      <dd class="panel-admin-dato-valor" data-resumen="reservados">{{ resumen.reservados }}</dd>
       <dd class="panel-admin-dato-nota">de {{ funcion.cupo }} · {{ resumen.reservas }} {{ resumen.reservas == 1 ? 'reserva' : 'reservas' }}</dd>
     </div>
     <div class="panel-admin-dato">
       <dt>Lugares libres</dt>
-      <dd class="panel-admin-dato-valor">{{ resumen.libres }}</dd>
+      <dd class="panel-admin-dato-valor" data-resumen="libres">{{ resumen.libres }}</dd>
       <dd class="panel-admin-dato-nota">{{ resumen.libres == 0 ? 'agotada' : 'para reservar' }}</dd>
     </div>
     <div class="panel-admin-dato">
       <dt>Asistentes registrados</dt>
-      <dd class="panel-admin-dato-valor">{{ resumen.asistentes }}</dd>
+      <dd class="panel-admin-dato-valor" data-resumen="asistentes">{{ resumen.asistentes }}</dd>
       <dd class="panel-admin-dato-nota">de {{ resumen.reservados }} lugares reservados</dd>
     </div>
     <div class="panel-admin-dato">
       <dt>Total de las reservas</dt>
-      <dd class="panel-admin-dato-valor">{{ resumen.recaudado }}</dd>
+      <dd class="panel-admin-dato-valor" data-resumen="recaudado">{{ resumen.recaudado }}</dd>
       <dd class="panel-admin-dato-nota">sin las canceladas</dd>
     </div>
   </dl>
@@ -74,10 +75,13 @@
   {% if error_general is defined %}
     {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se registró la asistencia', mensaje: error_general } only %}
   {% endif %}
+  {# data-avisos: acá pone el componente el resultado de registrar sin recargar. Vacía y en la
+     página desde el principio, para que un lector de pantalla lea lo que aparece. #}
+  <div data-avisos aria-live="polite"></div>
 
   {# En la puerta: el espectador dicta el código de su comprobante #}
   {% if registra_asistencia %}
-    <form action="/funcion/organizador/funciones/{{ funcion.id }}/asistencia" method="POST" class="panel-reservas-asistencia">
+    <form action="/funcion/organizador/funciones/{{ funcion.id }}/asistencia" method="POST" class="panel-reservas-asistencia" data-accion-de-reserva>
       <input type="hidden" name="_csrf" value="{{ csrf }}">
       {% include 'parciales/campo.html.twig' with {
         nombre: 'codigo',
@@ -117,7 +121,7 @@
                 {% if reserva.estado == 'asistio' %}
                   <span class="tabla-admin-secundario">Registrada</span>
                 {% elseif reserva.registrable and registra_asistencia %}
-                  <form action="/funcion/organizador/funciones/{{ funcion.id }}/asistencia" method="POST" class="formulario-accion-tabla">
+                  <form action="/funcion/organizador/funciones/{{ funcion.id }}/asistencia" method="POST" class="formulario-accion-tabla" data-accion-de-reserva data-hecho="Registrada">
                     <input type="hidden" name="_csrf" value="{{ csrf }}">
                     <input type="hidden" name="codigo" value="{{ reserva.codigo }}">
                     {% include 'parciales/boton.html.twig' with {

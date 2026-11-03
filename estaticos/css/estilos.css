@@ -2009,6 +2009,86 @@ dd {
   color: #60a5fa;
 }
 
+/* Aviso flotante de que se está esperando al servidor, compartido por los componentes que
+   hacen fetch (IC-102 / IC-277): fijo abajo y centrado, así se ve esté donde esté la página */
+.aviso-flotante {
+  /* Fijo en la pantalla */
+  position: fixed;
+  /* Abajo */
+  bottom: var(--espacio-6);
+  /* Centrado */
+  left: 50%;
+  transform: translateX(-50%);
+  /* Por encima del contenido */
+  z-index: 50;
+  /* Ícono y texto en fila */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  /* Sin margen propio */
+  margin: 0;
+  /* Píldora */
+  padding: var(--espacio-2) var(--espacio-4);
+  border-radius: 999px;
+  /* Superficie elevada con borde */
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  /* Texto */
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  /* Sombra para separarlo de lo que tiene abajo */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Oculto con el atributo hidden mientras no hay nada que avisar: el display de arriba le ganaría */
+.aviso-flotante[hidden] {
+  /* Fuera de la pantalla */
+  display: none;
+}
+
+/* Círculo que gira */
+.aviso-flotante-icono {
+  /* Tamaño del ícono */
+  width: 1rem;
+  height: 1rem;
+  /* Aro con un tramo en el color primario */
+  border: 2px solid var(--color-borde-fuerte);
+  border-top-color: var(--color-primario);
+  border-radius: 50%;
+  /* Giro continuo */
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Sin animación para quien la desactivó: queda el aro y el texto */
+@media (prefers-reduced-motion: reduce) {
+  .aviso-flotante-icono {
+    animation: none;
+  }
+}
+
+/* La variante de error del aviso flotante: lo mismo, con el borde y el ícono del error (IC-277) */
+.aviso-flotante-error {
+  /* Borde del color del error, para distinguirlo del de carga */
+  border-color: var(--color-error);
+}
+
+/* El ícono del aviso de error: el símbolo, sin aro ni giro */
+.aviso-flotante-error .aviso-flotante-icono {
+  /* Sin el aro que gira */
+  width: auto;
+  height: auto;
+  border: 0;
+  animation: none;
+  /* Del color del error */
+  color: var(--color-error);
+}
+
 /* --------------------------------------------------------------------------
    15. TARJETA DE FUNCIÓN DE CINE Y CUADRÍCULA (IC-45)
    Componentes para tarjeta_funcion.html.twig en Home y Cartelera
@@ -2094,6 +2174,30 @@ dd {
   object-position: center;
   /* Transición de zoom al posar ratón */
   transition: transform var(--transicion-base);
+}
+
+/* El afiche de una función se ve entero: es vertical y el recuadro apaisado, y recortado se
+   pierde el título. Va encima de su copia desenfocada, que llena los costados. */
+.tarjeta-funcion-imagen-entera {
+  /* Por encima del fondo */
+  position: relative;
+  /* Entero, sin recortar */
+  object-fit: contain;
+}
+
+/* La copia desenfocada del afiche, de fondo */
+.tarjeta-funcion-imagen-fondo {
+  /* Ocupa todo el recuadro, detrás del afiche */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Cubre el recuadro: los bordes no se ven nítidos igual */
+  object-fit: cover;
+  /* Desenfocada y oscurecida para que resalte el afiche */
+  filter: blur(18px) brightness(0.55);
+  /* Agrandada para que el desenfoque no deje los bordes claros */
+  transform: scale(1.2);
 }
 
 /* Zoom suave en la imagen al hacer hover sobre la tarjeta */
@@ -3486,62 +3590,13 @@ dd {
 }
 
 /* Mientras la búsqueda en vivo trae resultados, los anteriores quedan atenuados y sin clics (IC-102) */
-.cartelera-resultados-seccion[aria-busy="true"] > :not(.cartelera-cargando) {
+.cartelera-resultados-seccion[aria-busy="true"] > :not(.aviso-flotante) {
   /* Atenuados */
   opacity: 0.45;
   /* Sin clics hasta que lleguen los nuevos */
   pointer-events: none;
   /* El cambio, suave */
   transition: opacity 0.15s ease;
-}
-
-/* Aviso de carga de la búsqueda en vivo: fijo abajo y centrado, se ve aunque se haya buscado desde el paginado */
-.cartelera-cargando {
-  /* Fijo en la pantalla */
-  position: fixed;
-  /* Abajo */
-  bottom: var(--espacio-6);
-  /* Centrado */
-  left: 50%;
-  transform: translateX(-50%);
-  /* Por encima del contenido */
-  z-index: 50;
-  /* Ícono y texto en fila */
-  display: inline-flex;
-  align-items: center;
-  gap: var(--espacio-2);
-  /* Sin margen propio */
-  margin: 0;
-  /* Píldora */
-  padding: var(--espacio-2) var(--espacio-4);
-  border-radius: 999px;
-  /* Superficie elevada con borde */
-  background-color: var(--color-superficie-elevada);
-  border: 1px solid var(--color-borde-medio);
-  /* Texto */
-  color: var(--color-texto);
-  font-size: var(--texto-sm);
-  /* Sombra para separarlo de lo que tiene abajo */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-}
-
-/* Círculo que gira */
-.cartelera-cargando-icono {
-  /* Tamaño del ícono */
-  width: 1rem;
-  height: 1rem;
-  /* Aro con un tramo en el color primario */
-  border: 2px solid var(--color-borde-fuerte);
-  border-top-color: var(--color-primario);
-  border-radius: 50%;
-  /* Giro continuo */
-  animation: girar 0.8s linear infinite;
-}
-
-@keyframes girar {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* Link del mensaje de error de la búsqueda en vivo: carga la misma búsqueda como página (IC-102) */
@@ -3557,13 +3612,6 @@ dd {
 /* Separación entre el texto del mensaje y el link */
 .alerta-texto + .alerta-texto {
   margin-top: var(--espacio-2);
-}
-
-/* Sin animación para quien la desactivó: queda el aro y el texto */
-@media (prefers-reduced-motion: reduce) {
-  .cartelera-cargando-icono {
-    animation: none;
-  }
 }
 
 /* --------------------------------------------------------------------------
@@ -7253,4 +7301,509 @@ a.tabla-admin-principal:focus-visible {
 .panel-reservas-codigo {
   font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   letter-spacing: 0.08em;
+}
+
+/* --------------------------------------------------------------------------
+   25. CARRUSEL DE DESTACADAS DE LA PORTADA (E4-07)
+   La lista de programacion/inicio.html.twig y lo que le agrega el componente
+   Carrusel (js/componentes/carrusel.js), que marca el contenedor con
+   .carrusel-armado. Sin esa clase, la lista es una tira que se desplaza de
+   costado: así se ve sin JavaScript.
+   -------------------------------------------------------------------------- */
+
+/* Sin JavaScript: una diapositiva por vez, las demás al costado, y se pasa desplazando */
+.carrusel-pista {
+  list-style: none;
+  display: flex;
+  gap: var(--espacio-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Que el desplazamiento de costado no arrastre la página en el celular */
+  overscroll-behavior-x: contain;
+}
+
+/* La diapositiva: el afiche entero a la izquierda y los datos de la función ocupando todo el resto,
+   hasta el borde: así no queda un hueco al costado */
+.carrusel-diapositiva {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--espacio-10);
+  /* A los costados, lugar para las flechas sin que tapen el afiche */
+  padding: var(--espacio-8) calc(var(--espacio-12) + var(--espacio-6));
+  min-height: 26rem;
+  overflow: hidden;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+}
+
+/* El mismo afiche, desenfocado y oscurecido, de fondo: los afiches son verticales y el recuadro
+   apaisado, y así los costados no quedan vacíos */
+.carrusel-fondo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(28px) brightness(0.35) saturate(1.2);
+  /* Agrandado, para que el desenfoque no deje un borde claro */
+  transform: scale(1.25);
+  pointer-events: none;
+}
+
+/* El afiche, entero: recortado se pierde el título. El ancho sale de la imagen, sin una proporción
+   fija: los fotogramas apaisados quedarían en una caja vertical con la sombra marcando el hueco */
+.carrusel-imagen {
+  position: relative;
+  display: block;
+  height: 22rem;
+  width: auto;
+  max-width: 100%;
+  border-radius: var(--radio-md);
+  box-shadow: var(--sombra-lg);
+  /* Arrastrar el afiche con el mouse no lo levanta como una imagen suelta */
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.carrusel-texto {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-5);
+}
+
+/* El título, grande y con una línea debajo que cruza la diapositiva */
+.carrusel-titulo {
+  align-self: stretch;
+  font-family: var(--fuente-titulos);
+  font-size: clamp(var(--texto-2xl), 3.5vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0;
+  padding-bottom: var(--espacio-5);
+  border-bottom: 1px solid var(--color-borde-medio);
+}
+
+.carrusel-titulo-enlace {
+  color: var(--color-texto);
+  text-decoration: none;
+}
+
+.carrusel-titulo-enlace:hover {
+  color: var(--color-primario);
+}
+
+/* Sala, cuándo y entrada, en tres columnas iguales */
+.carrusel-datos {
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espacio-6);
+  margin: 0;
+}
+
+.carrusel-dato dt {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-1);
+  color: var(--color-texto-apagado);
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.carrusel-dato dd {
+  margin: 0;
+  color: var(--color-texto);
+  font-size: var(--texto-lg);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* La localidad, debajo de la sala */
+.carrusel-dato-detalle {
+  display: block;
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  font-weight: 400;
+}
+
+.carrusel-accion {
+  margin-top: var(--espacio-2);
+}
+
+/* Con JavaScript: todas en la misma celda, y se ve sólo la actual */
+.carrusel-pantalla {
+  position: relative;
+}
+
+/* Deslizar de costado es del carrusel; de arriba a abajo sigue siendo desplazar la página. Y
+   arrastrar con el mouse no selecciona el texto */
+.carrusel-armado .carrusel-pantalla {
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.carrusel-armado .carrusel-pista {
+  display: grid;
+  overflow: hidden;
+  border-radius: var(--radio-lg);
+}
+
+.carrusel-armado {
+  /* Lo que dura cada transición */
+  --carrusel-duracion: 0.6s;
+}
+
+/* La que no se ve se esconde recién cuando terminó de irse: si no, desaparecería de golpe */
+.carrusel-armado .carrusel-diapositiva {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  transition:
+    opacity var(--carrusel-duracion) ease,
+    transform var(--carrusel-duracion) cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear var(--carrusel-duracion);
+}
+
+.carrusel-armado .carrusel-diapositiva.es-actual {
+  visibility: visible;
+  transition:
+    opacity var(--carrusel-duracion) ease,
+    transform var(--carrusel-duracion) cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s;
+}
+
+/* El JS la pone un instante para ubicar la que entra en su punto de partida sin animar */
+.carrusel-armado .carrusel-diapositiva.sin-transicion {
+  transition: none;
+}
+
+/* Las tres transiciones (E4-07.2): una clase en el contenedor elige cuál. La actual siempre queda
+   quieta y a la vista; cambia de dónde viene la que entra y a dónde va la que sale. */
+
+/* Fundido: la nueva aparece encima de la anterior */
+.carrusel-fundido .carrusel-diapositiva {
+  opacity: 0;
+}
+
+.carrusel-fundido .carrusel-diapositiva.es-actual {
+  opacity: 1;
+}
+
+/* Deslizar: entra por un costado y empuja a la anterior por el otro. Hacia adelante entra por la
+   derecha; hacia atrás, por la izquierda */
+.carrusel-deslizar .carrusel-diapositiva {
+  transform: translateX(100%);
+}
+
+.carrusel-deslizar .carrusel-diapositiva.desde-atras,
+.carrusel-deslizar .carrusel-diapositiva.sale-hacia-atras {
+  transform: translateX(-100%);
+}
+
+.carrusel-deslizar .carrusel-diapositiva.sale-hacia-adelante {
+  transform: translateX(100%);
+}
+
+.carrusel-deslizar .carrusel-diapositiva.es-actual {
+  transform: none;
+}
+
+/* Zoom: la nueva se acerca desde un poco más grande y la anterior se aleja mientras se apaga */
+.carrusel-zoom .carrusel-diapositiva {
+  opacity: 0;
+  transform: scale(1.15);
+}
+
+.carrusel-zoom .carrusel-diapositiva.sale-hacia-atras,
+.carrusel-zoom .carrusel-diapositiva.sale-hacia-adelante {
+  transform: scale(0.85);
+}
+
+.carrusel-zoom .carrusel-diapositiva.es-actual {
+  opacity: 1;
+  transform: none;
+}
+
+/* Las flechas, a los costados de la diapositiva */
+.carrusel-flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  background-color: rgba(23, 20, 28, 0.75);
+  color: var(--color-texto);
+  font-size: var(--texto-2xl);
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.carrusel-flecha:hover {
+  background-color: var(--color-superficie-interactiva);
+  border-color: var(--color-primario);
+}
+
+.carrusel-flecha:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+.carrusel-flecha-anterior {
+  left: var(--espacio-3);
+}
+
+.carrusel-flecha-siguiente {
+  right: var(--espacio-3);
+}
+
+/* La barra de carga (E4-07.3): tapa la diapositiva hasta que bajaron todas las imágenes, que es
+   cuando arranca el pase automático */
+.carrusel-carga {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-3);
+  background-color: rgba(23, 20, 28, 0.88);
+  border-radius: var(--radio-lg);
+}
+
+.carrusel-carga[hidden] {
+  display: none;
+}
+
+.carrusel-carga-texto {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.carrusel-carga-barra {
+  appearance: none;
+  width: min(20rem, 70%);
+  height: 0.5rem;
+  border: 0;
+  border-radius: var(--radio-completo);
+  overflow: hidden;
+  background-color: var(--color-superficie-interactiva);
+}
+
+.carrusel-carga-barra::-webkit-progress-bar {
+  background-color: var(--color-superficie-interactiva);
+}
+
+.carrusel-carga-barra::-webkit-progress-value {
+  background-color: var(--color-primario);
+  transition: width var(--transicion-base);
+}
+
+.carrusel-carga-barra::-moz-progress-bar {
+  background-color: var(--color-primario);
+}
+
+/* Debajo de la diapositiva, los controles */
+/* Las miniaturas y la pausa juntas y centradas, debajo de la diapositiva: con pocas, en los
+   extremos dejaban un hueco en el medio */
+.carrusel-controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-3);
+}
+
+.carrusel-pausa {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+}
+
+.carrusel-pausa:hover {
+  border-color: var(--color-primario);
+}
+
+.carrusel-pausa:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+/* Las miniaturas (E4-07.4): una por diapositiva, repartiéndose todo el ancho, con el afiche
+   recortado; la actual, con el borde ámbar */
+.carrusel-miniaturas {
+  list-style: none;
+  flex: 1 1 auto;
+  display: flex;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: var(--espacio-1);
+  min-width: 0;
+}
+
+.carrusel-miniaturas li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.carrusel-miniatura {
+  display: block;
+  width: 100%;
+  height: 4.5rem;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: var(--radio-sm);
+  background-color: var(--color-superficie-elevada);
+  color: var(--color-texto-secundario);
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.carrusel-miniatura img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* El tercio de arriba del afiche, donde suele estar el título */
+  object-position: center 25%;
+  -webkit-user-drag: none;
+}
+
+.carrusel-miniatura:hover {
+  opacity: 0.85;
+}
+
+.carrusel-miniatura[aria-current="true"] {
+  opacity: 1;
+  border-color: var(--color-primario);
+}
+
+.carrusel-miniatura:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+/* Responsive (E4-07.5). En tablet, el afiche un poco más chico y menos aire a los costados */
+@media (max-width: 1024px) {
+  .carrusel-diapositiva {
+    gap: var(--espacio-6);
+    padding: var(--espacio-6) calc(var(--espacio-12) + var(--espacio-2));
+    min-height: 0;
+  }
+
+  .carrusel-imagen {
+    height: 18rem;
+  }
+}
+
+/* En el celular, una columna: el afiche arriba y los datos abajo, centrados. Las flechas quedan a
+   la altura del afiche: a los costados de uno vertical, y encima de los bordes de un fotograma
+   apaisado, que ocupa todo el ancho */
+@media (max-width: 768px) {
+  .carrusel-diapositiva {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: var(--espacio-4);
+    padding: var(--espacio-5) var(--espacio-4) var(--espacio-6);
+  }
+
+  .carrusel-imagen {
+    /* Con tope y no fijo: un fotograma apaisado que no entra a lo ancho se achica entero, en vez de
+       quedar aplastado */
+    height: auto;
+    max-height: 15rem;
+  }
+
+  .carrusel-texto {
+    align-items: center;
+    text-align: center;
+    gap: var(--espacio-2);
+    max-width: 100%;
+  }
+
+  .carrusel-titulo {
+    /* Un título largo («El gabinete del Dr. Caligari + Viaje a la Luna») corta, no desborda */
+    overflow-wrap: anywhere;
+  }
+
+  /* Los tres datos, uno debajo del otro: en tres columnas no entran */
+  .carrusel-datos {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-3);
+  }
+
+  .carrusel-dato dt {
+    justify-content: center;
+  }
+
+  .carrusel-dato dd {
+    font-size: var(--texto-md);
+  }
+
+  .carrusel-flecha {
+    /* La mitad del afiche, que empieza después del relleno de arriba */
+    top: calc(var(--espacio-5) + 7.5rem);
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .carrusel-flecha-anterior {
+    left: var(--espacio-2);
+  }
+
+  .carrusel-flecha-siguiente {
+    right: var(--espacio-2);
+  }
+
+  .carrusel-miniatura {
+    height: 3.5rem;
+  }
+}
+
+/* En el celular, el toque ya se ve en el botón: sin el recuadro azul que agrega el navegador */
+.carrusel-flecha,
+.carrusel-miniatura,
+.carrusel-pausa {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Para quien pidió reducir el movimiento: las diapositivas cambian sin animar. El pase automático
+   lo frena el componente */
+@media (prefers-reduced-motion: reduce) {
+  .carrusel-armado {
+    --carrusel-duracion: 0s;
+  }
+
+  .carrusel-carga-barra::-webkit-progress-value,
+  .carrusel-flecha,
+  .carrusel-miniatura {
+    transition: none;
+  }
 }

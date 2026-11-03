@@ -20,6 +20,7 @@
   - minimo / maximo: (int, opcional) Largo mínimo y máximo del texto (minlength y maxlength), en 'text', 'email', 'tel' y 'textarea'.
   - patron: (string, opcional) Expresión que tiene que cumplir todo el valor (pattern), salvo en 'textarea'.
   - valor_minimo / valor_maximo: (int, opcional) Para 'number': el menor y el mayor valor (min y max).
+  - paso: (string, opcional) Para 'number': de a cuánto puede ir el valor (step), por ejemplo '0.01' para un precio con centavos. Sin él, el navegador sólo acepta enteros.
   - aceptar: (string, opcional) Para 'file': los tipos que se pueden elegir (accept).
   - zona_de_imagen: (bool, opcional) Para 'file': marca el campo para que el componente lo
     envuelva en la zona de arrastrar y soltar con vista previa (E4-09.2).
@@ -188,6 +189,7 @@
         {% if patron is defined %}pattern="{{ patron }}"{% endif %}
         {% if valor_minimo is defined %}min="{{ valor_minimo }}"{% endif %}
         {% if valor_maximo is defined %}max="{{ valor_maximo }}"{% endif %}
+        {% if paso is defined %}step="{{ paso }}"{% endif %}
         {% if aceptar is defined %}accept="{{ aceptar }}"{% endif %}
         {# El enganche de la zona para arrastrar y soltar la imagen, con vista previa (E4-09.2) #}
         {% if zona_de_imagen ?? false %}data-zona-de-imagen{% endif %}

@@ -1,0 +1,57 @@
+# Las pruebas de punta a punta (e2e/README.md) contra el sitio de desarrollo. Las llama el CD del
+# back y del front después de desplegar dev, y se pueden correr a mano desde Actions. La URL,
+# la cuenta y la función salen del environment desarrollo del repositorio que las corre: el
+# repositorio es público y las claves no pueden estar en el código.
+
+name: E2E
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: Pruebas de punta a punta
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: desarrollo
+      url: ${{ vars.E2E_URL }}
+    steps:
+      # Las pruebas de la rama dev del front, aunque las llame el back: son las que van con
+      # lo que se acaba de publicar.
+      - uses: actions/checkout@v7
+        with:
+          repository: cerberus-paw/frontend-indiecinema
+          ref: dev
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Instalar Playwright y Chromium
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Correr las pruebas
+        env:
+          E2E_URL: ${{ vars.E2E_URL }}
+          E2E_FUNCION: ${{ vars.E2E_FUNCION }}
+          E2E_CORREO: ${{ secrets.E2E_CORREO }}
+          E2E_CLAVE: ${{ secrets.E2E_CLAVE }}
+        run: npm run e2e
+      # Sólo las capturas y el error de lo que falló. La traza y el informe HTML quedan afuera: la
+      # traza guarda los pedidos, con la contraseña del ingreso y la cookie de la sesión, y los
+      # artefactos de un repositorio público los baja cualquiera. La traza completa sale en local.
+      - name: Guardar las capturas de lo que falló
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-capturas-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            e2e/resultados/**/*.png
+            e2e/resultados/**/error-context.md
+          retention-days: 14
+          if-no-files-found: ignore

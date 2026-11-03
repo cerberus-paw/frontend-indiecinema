@@ -59,8 +59,8 @@ class BuscadorDeCartelera {
     this.espera = null;
     // La búsqueda que se está mostrando: la de la página cargada, después la última que llegó.
     this.urlMostrada = window.location.pathname + window.location.search;
-    this.indicador = this.nodo('p', { class: 'cartelera-cargando', role: 'status' }, [
-      this.nodo('span', { class: 'cartelera-cargando-icono', 'aria-hidden': 'true' }),
+    this.indicador = this.nodo('p', { class: 'aviso-flotante', role: 'status' }, [
+      this.nodo('span', { class: 'aviso-flotante-icono', 'aria-hidden': 'true' }),
       'Buscando funciones…',
     ]);
     // Afuera de la sección, que se redibuja entera: la región tiene que existir antes del cambio.
@@ -369,13 +369,17 @@ class BuscadorDeCartelera {
     }, [
       this.nodo('div', { class: 'tarjeta-funcion-afiche' }, [
         this.nodo('a', { href: funcion.url, class: 'tarjeta-funcion-afiche-enlace', tabindex: '-1', 'aria-hidden': 'true' }, [
-          // Con afiche, la imagen; sin, el recuadro del wireframe, como la plantilla.
-          funcion.afiche
-            ? this.nodo('img', { src: funcion.afiche, alt: `Afiche de ${funcion.titulo}`, class: 'tarjeta-funcion-imagen', loading: 'lazy' }, [])
-            : this.nodo('div', { class: 'tarjeta-funcion-afiche-placeholder' }, [
+          // Con afiche, la imagen entera sobre ella misma desenfocada; sin, el recuadro del
+          // wireframe, como la plantilla.
+          ...(funcion.afiche
+            ? [
+              this.nodo('img', { src: funcion.afiche, alt: '', class: 'tarjeta-funcion-imagen-fondo', loading: 'lazy' }, []),
+              this.nodo('img', { src: funcion.afiche, alt: `Afiche de ${funcion.titulo}`, class: 'tarjeta-funcion-imagen tarjeta-funcion-imagen-entera', loading: 'lazy' }, []),
+            ]
+            : [this.nodo('div', { class: 'tarjeta-funcion-afiche-placeholder' }, [
               this.nodo('span', { class: 'afiche-placeholder-icono', 'aria-hidden': 'true' }, ['🎬']),
               this.nodo('span', { class: 'afiche-placeholder-texto' }, ['AFICHE']),
-            ]),
+            ])]),
         ]),
       ]),
       this.nodo('div', { class: 'tarjeta-funcion-cuerpo' }, [
