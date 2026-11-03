@@ -4,12 +4,20 @@
  *
  * Recibe sólo el contenedor, como pide el enunciado; lo demás sale del HTML:
  *   - cada <li> de la primera lista del contenedor es una diapositiva;
- *   - el aria-label del contenedor nombra al carrusel para los lectores de pantalla.
+ *   - el aria-label del contenedor nombra al carrusel para los lectores de pantalla;
+ *   - data-transicion="fundido|deslizar|zoom" elige la transición (por defecto, fundido).
+ *
+ * Cada transición es una clase de CSS en el contenedor (carrusel-fundido, carrusel-deslizar,
+ * carrusel-zoom): cambiar de transición es cambiar esa clase, a mano o con la propiedad
+ * transicion. El JavaScript sólo marca qué diapositiva entra, cuál sale y hacia qué lado.
  *
  * Las diapositivas vienen en el HTML y el JavaScript sólo las reacomoda: sin él (o si no carga),
  * la lista se ve como una tira que se desplaza de costado y ninguna queda escondida.
  */
 class Carrusel {
+  /** Las transiciones que hay en el CSS, con la primera por defecto. */
+  static TRANSICIONES = ['fundido', 'deslizar', 'zoom'];
+
   /**
    * @param {Element|string} pContenedor el contenedor de la lista, o su selector
    */
@@ -31,6 +39,29 @@ class Carrusel {
     this.armar();
     this.escuchar();
     this.mostrar(0);
+    this.transicion = this.contenedor.dataset.transicion;
+  }
+
+  /** La transición en uso. */
+  get transicion() {
+    return Carrusel.TRANSICIONES.find((nombre) => this.contenedor.classList.contains(`carrusel-${nombre}`)) ?? null;
+  }
+
+  /**
+   * Cambia la transición: deja en el contenedor sólo la clase de la elegida. Con un nombre que no
+   * existe, avisa y usa la primera.
+   *
+   * @param {string|undefined} nombre
+   */
+  set transicion(nombre) {
+    let elegida = nombre ?? Carrusel.TRANSICIONES[0];
+    if (!Carrusel.TRANSICIONES.includes(elegida)) {
+      console.warn(`Carrusel: no hay una transición «${elegida}»; se usa «${Carrusel.TRANSICIONES[0]}».`);
+      elegida = Carrusel.TRANSICIONES[0];
+    }
+    for (const t of Carrusel.TRANSICIONES) {
+      this.contenedor.classList.toggle(`carrusel-${t}`, t === elegida);
+    }
   }
 
   /** Cuántas diapositivas hay. */
@@ -74,12 +105,13 @@ class Carrusel {
     this.botonSiguiente?.addEventListener('click', () => this.siguiente(true));
   }
 
+  // Pasar de la última a la primera sigue siendo «hacia adelante»: por eso el sentido va aparte.
   siguiente(avisar = false) {
-    this.ir(this.actual + 1, avisar);
+    this.ir(this.actual + 1, avisar, 1);
   }
 
   anterior(avisar = false) {
-    this.ir(this.actual - 1, avisar);
+    this.ir(this.actual - 1, avisar, -1);
   }
 
   /**
@@ -88,13 +120,14 @@ class Carrusel {
    *
    * @param {number} n
    * @param {boolean} [avisar=false] si lo pidió el usuario: entonces se avisa a los lectores de pantalla
+   * @param {number} [sentido] 1 hacia adelante, -1 hacia atrás; por defecto, según dónde queda n
    */
-  ir(n, avisar = false) {
+  ir(n, avisar = false, sentido = Math.sign(n - this.actual)) {
     const destino = ((n % this.total) + this.total) % this.total;
     if (destino === this.actual) {
       return;
     }
-    this.mostrar(destino);
+    this.mostrar(destino, sentido);
     if (avisar) {
       this.aviso.textContent = `${destino + 1} de ${this.total}: ${this.nombre(destino)}`;
     }
@@ -104,13 +137,40 @@ class Carrusel {
    * Marca cuál se ve. Las demás quedan inert: sus enlaces no se alcanzan con el tabulador ni los
    * lee un lector de pantalla mientras no se ven.
    *
+   * La que entra se ubica primero de su lado sin animar (para «deslizar», del lado del que viene)
+   * y recién después se la anima al centro; la que sale se va hacia el otro lado.
+   *
    * @param {number} n
+   * @param {number} [sentido=0] 1 hacia adelante, -1 hacia atrás; 0 la muestra sin animar
    */
-  mostrar(n) {
+  mostrar(n, sentido = 0) {
+    const sale = this.diapositivas[this.actual];
+    const entra = this.diapositivas[n];
+
+    entra.classList.add('sin-transicion');
+    entra.classList.remove('sale-hacia-atras', 'sale-hacia-adelante');
+    entra.classList.toggle('desde-atras', sentido < 0);
+    // Leer el tamaño obliga al navegador a aplicar esa posición antes de animar desde ahí.
+    void entra.offsetWidth;
+    entra.classList.remove('desde-atras');
+    if (sentido !== 0) {
+      entra.classList.remove('sin-transicion');
+    }
+
+    if (sale !== entra) {
+      sale.classList.remove('es-actual');
+      sale.classList.add(sentido < 0 ? 'sale-hacia-adelante' : 'sale-hacia-atras');
+    }
+    entra.classList.add('es-actual');
     this.diapositivas.forEach((diapositiva, i) => {
-      diapositiva.classList.toggle('es-actual', i === n);
       diapositiva.inert = i !== n;
     });
+
+    // Sin sentido (al armarlo) aparece de una; las siguientes ya animan.
+    if (sentido === 0) {
+      void entra.offsetWidth;
+      entra.classList.remove('sin-transicion');
+    }
     this.actual = n;
   }
 
