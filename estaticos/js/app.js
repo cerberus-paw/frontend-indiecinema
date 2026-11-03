@@ -53,6 +53,10 @@ class App {
     if (document.querySelector('[data-lugares-libres]')) {
       PAW.cargarScript('LugaresLibres', `${App.COMPONENTES}/lugares-libres.js`, () => new LugaresLibres('[data-lugares-libres]'));
     }
+    // El formulario de reserva de la ficha, sin recargar (E4-05.3 / IC-274).
+    if (document.querySelector('[data-formulario-reserva]')) {
+      PAW.cargarScript('FormularioDeReserva', `${App.COMPONENTES}/formulario-de-reserva.js`, () => new FormularioDeReserva('[data-formulario-reserva]'));
+    }
     // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
     if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
       PAW.cargarScript('AcuerdoFecha', `${App.COMPONENTES}/acuerdo-fecha.js`, () => new AcuerdoFecha('[data-seccion-acuerdo-fecha]'));
