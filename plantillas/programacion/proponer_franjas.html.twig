@@ -110,7 +110,9 @@
           </legend>
 
           {# Contenedor dinámico de opciones de franjas #}
-          <div class="lista-franjas-formulario" data-contenedor-franjas role="list" aria-label="Lista de franjas horarias propuestas">
+          {# aria-describedby: el error del conjunto se lee al entrar a la lista, no sólo al
+             aparecer (E4-09.3). #}
+          <div class="lista-franjas-formulario" data-contenedor-franjas role="list" aria-label="Lista de franjas horarias propuestas"{% if errores.franjas is defined and errores.franjas %} aria-describedby="error-franjas"{% endif %}>
             {% set franjas_iniciales = valores.franjas|default([
               { fecha: '', hora_inicio: '20:00', hora_fin: '22:30' },
               { fecha: '', hora_inicio: '21:00', hora_fin: '23:30' }
@@ -182,7 +184,7 @@
                   </div>
                 </div>
 
-                <span class="franja-alerta-rango campo-error" data-error-rango hidden role="alert">
+                <span class="franja-alerta-rango campo-error" id="error-franja-rango-{{ idx }}" data-error-rango hidden role="alert">
                   {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} La hora de finalización debe ser posterior a la de inicio.
                 </span>
               </div>
@@ -191,7 +193,7 @@
 
           {# Mensajes de error específicos de franjas #}
           {% if errores.franjas is defined and errores.franjas %}
-            <span class="campo-error" role="alert">
+            <span id="error-franjas" class="campo-error" role="alert">
               {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.franjas }}
             </span>
           {% endif %}
@@ -346,7 +348,7 @@
       </div>
     </div>
 
-    <span class="franja-alerta-rango campo-error" data-error-rango hidden role="alert">
+    <span class="franja-alerta-rango campo-error" id="error-franja-rango-0" data-error-rango hidden role="alert">
       {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} La hora de finalización debe ser posterior a la de inicio.
     </span>
   </div>

@@ -144,6 +144,7 @@ class GestorFranjas {
         alerta.hidden = true;
       }
       campoFin.removeAttribute('aria-invalid');
+      campoFin.removeAttribute('aria-describedby');
       return true;
     }
 
@@ -154,8 +155,14 @@ class GestorFranjas {
     }
     if (!esValido) {
       campoFin.setAttribute('aria-invalid', 'true');
+      // Apuntado al aviso de esta fila: el lector de pantalla lo lee al pararse en el campo y no
+      // sólo cuando aparece, que es cuando el foco suele estar en otro lado (E4-09.3).
+      if (alerta?.id) {
+        campoFin.setAttribute('aria-describedby', alerta.id);
+      }
     } else {
       campoFin.removeAttribute('aria-invalid');
+      campoFin.removeAttribute('aria-describedby');
     }
 
     return esValido;
@@ -260,6 +267,18 @@ class GestorFranjas {
         const label = fila.querySelector(`label[for="${idOriginal}"]`);
         if (label) {
           label.setAttribute('for', nuevoId);
+        }
+      }
+
+      // El aviso del rango también se renumera: su id es el que apunta el campo de fin con
+      // aria-describedby, y dos filas no pueden compartirlo (E4-09.3).
+      const alerta = fila.querySelector('[data-error-rango]');
+      const campoFin = fila.querySelector('[data-campo-fin]');
+      if (alerta) {
+        const anterior = alerta.id;
+        alerta.id = `error-franja-rango-${idx}`;
+        if (campoFin?.getAttribute('aria-describedby') === anterior) {
+          campoFin.setAttribute('aria-describedby', alerta.id);
         }
       }
     });
