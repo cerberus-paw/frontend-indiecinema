@@ -64,6 +64,8 @@ class AccionesDeReserva {
     // Como en el formulario de reserva: el cuerpo se arma antes de bloquear, porque un campo
     // deshabilitado no entra en el FormData y el código no viajaría.
     const cuerpo = new FormData(formulario);
+    // Se anota antes de bloquear: al deshabilitar el botón, el navegador le saca el foco.
+    const enfocado = formulario.contains(document.activeElement) ? document.activeElement : null;
     this.bloquear(formulario, true);
 
     try {
@@ -75,22 +77,38 @@ class AccionesDeReserva {
       const datos = await respuesta.json();
       if (respuesta.ok) {
         // La fila primero: el aviso cuenta algo que ya se tiene que ver.
-        this.pintarFila(datos.reserva);
+        this.pintarFila(datos.reserva, enfocado);
         this.pintarResumen(datos.resumen);
         this.avisar('exito', AccionesDeReserva.hecho(datos.reserva));
         formulario.reset();
-      } else if (respuesta.status === 422) {
-        // La regla no se cumple: el texto es para quien está mirando el panel.
-        this.avisar('error', datos.error ?? AccionesDeReserva.MENSAJE_DE_ERROR);
       } else {
-        this.avisar('error', AccionesDeReserva.MENSAJE_DE_ERROR);
+        this.avisar('error', AccionesDeReserva.mensajeDe(datos));
       }
-    } catch (error) {
-      // Sin red, o con una respuesta que no es JSON (un 403 del CSRF, una pantalla de error).
+    } catch {
+      // Sin red, o con una respuesta que no es JSON: queda el mensaje genérico.
       this.avisar('error', AccionesDeReserva.MENSAJE_DE_ERROR);
     }
     this.enviando = false;
     this.bloquear(formulario, false);
+    // Si el foco quedó perdido por el bloqueo, vuelve adonde estaba, si sigue en la página.
+    if (enfocado?.isConnected && document.activeElement === document.body) {
+      enfocado.focus();
+    }
+  }
+
+  /**
+   * El error que mandó el servidor, que en JSON viene para quien mira el panel y sin detalles
+   * internos (E4-05.1): el de la regla en un 422 («ya tiene la asistencia registrada»), «La página
+   * venció…» con el token vencido, «Tenés que ingresar…» con la sesión vencida. Si no trae
+   * ninguno, el genérico.
+   *
+   * @param {?{error?: string}} datos
+   * @returns {string}
+   */
+  static mensajeDe(datos) {
+    const mensaje = datos?.error;
+
+    return typeof mensaje === 'string' && mensaje !== '' ? mensaje : AccionesDeReserva.MENSAJE_DE_ERROR;
   }
 
   /**
@@ -101,8 +119,9 @@ class AccionesDeReserva {
    * en ninguna fila, y igual tiene que cambiar la que se registró.
    *
    * @param {{id: string, estado: string, estado_etiqueta: string, anulable?: boolean, registrable?: boolean}} reserva
+   * @param {?Element} [enfocado=null] lo que tenía el foco cuando se mandó la acción
    */
-  pintarFila(reserva) {
+  pintarFila(reserva, enfocado = null) {
     const fila = this.contenedor.querySelector(`tr[data-reserva="${CSS.escape(reserva?.id ?? '')}"]`);
     if (!fila) {
       return;
@@ -116,7 +135,19 @@ class AccionesDeReserva {
     // este panel no viene, y sin él no se saca ningún botón.
     if (reserva.anulable === false || reserva.registrable === false) {
       const deLaFila = fila.querySelector('[data-accion-de-reserva]');
-      deLaFila?.replaceWith(PAW.nuevoElemento('span', deLaFila.dataset.hecho ?? '—', { class: 'tabla-admin-secundario' }));
+      if (!deLaFila) {
+        return;
+      }
+      // Si el foco estaba en el botón que se va, pasa al texto que lo reemplaza: si no, se va al
+      // principio de la página, y quien registra varias seguidas con el teclado en la puerta
+      // tendría que volver a recorrerla entera.
+      const teniaElFoco = enfocado !== null && deLaFila.contains(enfocado);
+      const hecho = PAW.nuevoElemento('span', deLaFila.dataset.hecho ?? '—', { class: 'tabla-admin-secundario' });
+      deLaFila.replaceWith(hecho);
+      if (teniaElFoco) {
+        hecho.tabIndex = -1;
+        hecho.focus();
+      }
     }
   }
 
