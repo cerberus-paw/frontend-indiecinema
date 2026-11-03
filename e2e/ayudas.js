@@ -22,9 +22,9 @@ export const codigoEscrito = (codigo) => `${codigo.slice(0, 4)}-${codigo.slice(4
 /**
  * Dónde queda la sesión del espectador entre una prueba y otra. Se ingresa una sola vez
  * (sesion.setup.js): nginx deja ingresar 5 veces por minuto desde la misma IP, y con una por
- * prueba las últimas recibirían 429.
+ * prueba las últimas recibirían 429. Un archivo por cuenta, por si corren dos a la vez.
  */
-export const ARCHIVO_DE_SESION = new URL('./.sesion/espectador.json', import.meta.url).pathname;
+export const ARCHIVO_DE_SESION = new URL(`./.sesion/${process.env.E2E_CORREO ?? 'espectador'}.json`, import.meta.url).pathname;
 
 export async function ingresar(page, { correo, clave } = cuenta()) {
   await page.goto('/cuenta/ingresar');
@@ -49,18 +49,32 @@ export async function abrirMisReservas(page) {
 }
 
 /**
- * Recorre la primera página de la cartelera y devuelve la dirección de la primera ficha con el
- * formulario de reserva y al menos `minimo` lugares libres. Necesita la sesión: sin ella la ficha
- * no tiene formulario.
+ * Abre la ficha de una función con el formulario de reserva y al menos `minimo` lugares libres, y
+ * devuelve su dirección. Es la de `E2E_FUNCION` (su id) si está; si no, la primera de la primera
+ * página de la cartelera que sirva. Necesita la sesión: sin ella la ficha no tiene formulario.
+ *
+ * Con E2E_FUNCION, dos corridas a la vez (el back y el front mergeados juntos, cada uno con su
+ * cuenta) no cuentan los lugares de la misma función.
  */
 export async function buscarFuncionReservable(page, minimo = 3) {
+  const elegida = process.env.E2E_FUNCION;
+  const sirve = async () => (await page.locator('form[data-formulario-reserva]').count()) > 0
+    && (await lugaresLibres(page)) >= minimo;
+  if (elegida) {
+    await page.goto(`/cartelera/${elegida}`);
+    if (!(await sirve())) {
+      throw new Error(`La función ${elegida} de E2E_FUNCION no se puede reservar con ${minimo} lugares libres.`);
+    }
+
+    return page.url();
+  }
   await page.goto('/cartelera');
   const fichas = await page.locator('a[href^="/cartelera/"]').evaluateAll((enlaces) => [
     ...new Set(enlaces.map((enlace) => enlace.getAttribute('href'))),
   ]);
   for (const ficha of fichas.filter((href) => /^\/cartelera\/[0-9a-f-]{36}$/.test(href))) {
     await page.goto(ficha);
-    if ((await page.locator('form[data-formulario-reserva]').count()) > 0 && (await lugaresLibres(page)) >= minimo) {
+    if (await sirve()) {
       return ficha;
     }
   }

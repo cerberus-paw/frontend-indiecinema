@@ -18,6 +18,7 @@ E2E_URL=http://localhost:8080 E2E_CORREO=eva@indiecinema.test E2E_CLAVE=espectad
 | --- | --- |
 | `E2E_URL` | El sitio, sin la barra final. Sin ella, `http://localhost:8080` |
 | `E2E_CORREO` y `E2E_CLAVE` | La cuenta de espectador (en local, la de Eva de los datos de prueba) |
+| `E2E_FUNCION` | Opcional: el id de la función donde reservan. Sin ella, la primera de la cartelera que se pueda reservar |
 
 - **Qué dejan:** en `resultados/`, la traza y la captura de cada prueba que falló
   (`npx playwright show-trace e2e/resultados/<prueba>/trace.zip` la reproduce paso a paso); en
@@ -29,3 +30,5 @@ E2E_URL=http://localhost:8080 E2E_CORREO=eva@indiecinema.test E2E_CLAVE=espectad
   la contraseña equivocada): si se corre muchas veces seguidas, el ingreso da 429 y hay que
   esperar un minuto.
 - **De a una:** comparten la cuenta y cuentan los lugares libres, así que no corren en paralelo.
+  Dos corridas a la vez (en Actions, la del back y la del front) necesitan cada una su cuenta y
+  su `E2E_FUNCION`.
