@@ -154,6 +154,19 @@ class FormularioDeReserva {
     this.bloquear(false);
     // Si el 422 fue porque quedan menos lugares, el número que vuelve ya es el de ahora.
     this.avisarLugares(datos);
+    // Si con ese número la función quedó agotada, LugaresLibres cambió el recuadro por el aviso
+    // de «Función agotada» y este formulario salió del documento (IC-446): no hay campo donde
+    // mostrar el error, y el foco, que estaba en el botón, se iría al principio de la página. Va
+    // al título del aviso, que es lo que ahora ocupa su lugar.
+    if (!this.formulario.isConnected) {
+      const titulo = document.getElementById('ficha-reserva-titulo');
+      if (titulo) {
+        titulo.tabIndex = -1;
+        titulo.focus();
+      }
+
+      return;
+    }
     this.mostrarError(FormularioDeReserva.mensajeDe(datos));
   }
 
