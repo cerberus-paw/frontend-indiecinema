@@ -67,7 +67,9 @@
   {% endif %}
 
   {# Formulario de alta y configuración de sala #}
-  <form action="{{ accion ?? '/organizador/salas/nueva' }}" method="POST" enctype="multipart/form-data" class="formulario-sala" novalidate>
+  {# data-validar-en-linea: el enganche del componente que avisa los errores mientras se carga
+     (E4-09.1). El novalidate lo pone él; sin JavaScript valida el navegador. #}
+  <form action="{{ accion ?? '/organizador/salas/nueva' }}" method="POST" enctype="multipart/form-data" class="formulario-sala" data-validar-en-linea>
     {# Campo oculto para el token de protección contra ataques CSRF #}
     <input type="hidden" name="_csrf" value="{{ csrf }}">
 
@@ -81,7 +83,7 @@
       </legend>
 
       {# Campo: Nombre de la sala #}
-      {% include 'parciales/campo.html.twig' with {
+      {% include 'parciales/campo.html.twig' with reglas.nombre|merge({
         nombre: 'nombre',
         etiqueta: 'Nombre de la sala',
         tipo: 'text',
@@ -90,10 +92,10 @@
         ayuda: 'Nombre con el que el público identificará tu espacio.',
         requerido: true,
         error: errores.nombre ?? null
-      } %}
+      }) %}
 
       {# Campo: Descripción #}
-      {% include 'parciales/campo.html.twig' with {
+      {% include 'parciales/campo.html.twig' with reglas.descripcion|merge({
         nombre: 'descripcion',
         etiqueta: 'Descripción del espacio',
         tipo: 'textarea',
@@ -103,11 +105,11 @@
         ayuda: 'Breve reseña sobre el espacio y su propuesta cinematográfica.',
         requerido: true,
         error: errores.descripcion ?? null
-      } %}
+      }) %}
 
       <div class="fila-campos-doble">
         {# Campo: Dirección #}
-        {% include 'parciales/campo.html.twig' with {
+        {% include 'parciales/campo.html.twig' with reglas.direccion|merge({
           nombre: 'direccion',
           etiqueta: 'Dirección (calle y número)',
           tipo: 'text',
@@ -116,10 +118,10 @@
           ayuda: 'Ubicación física donde se realizan las proyecciones.',
           requerido: true,
           error: errores.direccion ?? null
-        } %}
+        }) %}
 
         {# Campo: Localidad #}
-        {% include 'parciales/campo.html.twig' with {
+        {% include 'parciales/campo.html.twig' with reglas.localidad|merge({
           nombre: 'localidad',
           etiqueta: 'Localidad / Ciudad',
           tipo: 'text',
@@ -128,7 +130,7 @@
           ayuda: 'Ciudad o municipio para filtrado geográfico.',
           requerido: true,
           error: errores.localidad ?? null
-        } %}
+        }) %}
       </div>
     </fieldset>
 
@@ -143,7 +145,7 @@
 
       <div class="fila-campos-doble">
         {# Campo: Capacidad de espectadores #}
-        {% include 'parciales/campo.html.twig' with {
+        {% include 'parciales/campo.html.twig' with reglas.capacidad|merge({
           nombre: 'capacidad',
           etiqueta: 'Capacidad de espectadores (butacas)',
           tipo: 'number',
@@ -152,17 +154,17 @@
           ayuda: 'Cantidad máxima de espectadores que admite la sala.',
           requerido: true,
           error: errores.capacidad ?? null
-        } %}
+        }) %}
 
         {# Campo: Imagen de la sala #}
-        {% include 'parciales/campo.html.twig' with {
+        {% include 'parciales/campo.html.twig' with reglas.imagen|merge({
           nombre: 'imagen',
           etiqueta: 'Fotografía de la sala',
           tipo: 'file',
           ayuda: 'Foto representativa de la sala (JPG, PNG o WebP, máx. 5 MB).',
           requerido: not (es_edicion ?? false),
           error: errores.imagen ?? null
-        } %}
+        }) %}
       </div>
     </fieldset>
 
@@ -177,7 +179,7 @@
 
       <div class="fila-campos-triple">
         {# Campo: Películas por función #}
-        {% include 'parciales/campo.html.twig' with {
+        {% include 'parciales/campo.html.twig' with reglas.peliculas_por_funcion|merge({
           nombre: 'peliculas_por_funcion',
           etiqueta: 'Películas por función',
           tipo: 'number',
@@ -186,10 +188,10 @@
           ayuda: 'Películas o cortos proyectados por función (mínimo 1).',
           requerido: true,
           error: errores.peliculas_por_funcion ?? null
-        } %}
+        }) %}
 
         {# Campo: Duración de la función #}
-        {% include 'parciales/campo.html.twig' with {
+        {% include 'parciales/campo.html.twig' with reglas.duracion_funcion|merge({
           nombre: 'duracion_funcion',
           etiqueta: 'Duración de función (minutos)',
           tipo: 'number',
@@ -198,10 +200,10 @@
           ayuda: 'Duración promedio total estimada en minutos.',
           requerido: true,
           error: errores.duracion_funcion ?? null
-        } %}
+        }) %}
 
         {# Campo: Tiempo entre funciones #}
-        {% include 'parciales/campo.html.twig' with {
+        {% include 'parciales/campo.html.twig' with reglas.tiempo_entre_funciones|merge({
           nombre: 'tiempo_entre_funciones',
           etiqueta: 'Intervalo entre funciones (minutos)',
           tipo: 'number',
@@ -210,7 +212,7 @@
           ayuda: 'Tiempo necesario para limpieza y rotación de público.',
           requerido: true,
           error: errores.tiempo_entre_funciones ?? null
-        } %}
+        }) %}
       </div>
     </fieldset>
 

@@ -91,7 +91,8 @@
     {% set url_accion = accion ?? ((es_edicion ?? false and funcion_id is defined) ? ('/organizador/funciones/' ~ funcion_id ~ '/editar') : '/organizador/funciones/nueva') %}
     {% set modo_actual = valores.modo|default('programada') %}
     {% set es_votacion = not (es_edicion ?? false) and modo_actual == 'en_votacion_titulos' %}
-    <form action="{{ url_accion }}" method="POST" class="formulario-sala formulario-alta-funcion">
+    {# data-validar-en-linea: los errores mientras se carga, con los mensajes del backend (E4-09.1) #}
+    <form action="{{ url_accion }}" method="POST" class="formulario-sala formulario-alta-funcion" data-validar-en-linea>
       {# Token de protección CSRF #}
       <input type="hidden" name="_csrf" value="{{ csrf }}">
 
@@ -166,7 +167,7 @@
           }]) %}
         {% endfor %}
 
-        {% include 'parciales/campo.html.twig' with {
+        {% include 'parciales/campo.html.twig' with reglas.sala_id|merge({
           nombre: 'sala_id',
           etiqueta: 'Sala',
           tipo: 'select',
@@ -176,7 +177,7 @@
           requerido: true,
           errores: errores,
           ayuda: 'Solo se listan las salas propias que ya fueron habilitadas.'
-        } only %}
+        }) only %}
       </fieldset>
 
       {# ==================================================================== #}
@@ -242,7 +243,7 @@
 
         <div class="fila-campos-doble">
           {# Campo: Fecha de proyección #}
-          {% include 'parciales/campo.html.twig' with {
+          {% include 'parciales/campo.html.twig' with reglas.fecha|merge({
             nombre: 'fecha',
             etiqueta: 'Fecha de proyección',
             tipo: 'date',
@@ -250,10 +251,10 @@
             requerido: (es_edicion ?? false) or not es_votacion,
             errores: errores,
             ayuda: 'La fecha debe ser a partir de hoy o futura.'
-          } only %}
+          }) only %}
 
           {# Campo: Horario de inicio #}
-          {% include 'parciales/campo.html.twig' with {
+          {% include 'parciales/campo.html.twig' with reglas.hora|merge({
             nombre: 'hora',
             etiqueta: 'Horario de inicio',
             tipo: 'time',
@@ -262,7 +263,7 @@
             requerido: (es_edicion ?? false) or not es_votacion,
             errores: errores,
             ayuda: 'Hora estimada en la que comienza la función.'
-          } only %}
+          }) only %}
         </div>
       </fieldset>
 
@@ -277,7 +278,7 @@
 
         <div class="fila-campos-doble">
           {# Campo: Precio de la entrada #}
-          {% include 'parciales/campo.html.twig' with {
+          {% include 'parciales/campo.html.twig' with reglas.precio|merge({
             nombre: 'precio',
             etiqueta: 'Precio de la entrada ($)',
             tipo: 'number',
@@ -286,10 +287,10 @@
             requerido: true,
             errores: errores,
             ayuda: 'Poné 0 para función gratuita o a la gorra.'
-          } only %}
+          }) only %}
 
           {# Campo: Cupo de butacas disponibles #}
-          {% include 'parciales/campo.html.twig' with {
+          {% include 'parciales/campo.html.twig' with reglas.cupo|merge({
             nombre: 'cupo',
             etiqueta: 'Cupo disponible (butacas)',
             tipo: 'number',
@@ -298,7 +299,7 @@
             requerido: true,
             errores: errores,
             ayuda: 'Cantidad de entradas disponibles. No puede superar la capacidad de la sala.'
-          } only %}
+          }) only %}
         </div>
       </fieldset>
 

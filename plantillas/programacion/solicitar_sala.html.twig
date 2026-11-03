@@ -90,7 +90,8 @@
     {% endif %}
 
     {# Sin novalidate: el navegador avisa antes de mandar, y el backend vuelve a validar todo #}
-    <form action="/solicitar-sala" method="post" enctype="multipart/form-data">
+    {# data-validar-en-linea: los errores mientras se carga, con los mensajes del backend (E4-09.1) #}
+    <form action="/solicitar-sala" method="post" enctype="multipart/form-data" data-validar-en-linea>
       <input type="hidden" name="_csrf" value="{{ csrf }}">
 
       <fieldset class="seccion-formulario seccion-lateral">

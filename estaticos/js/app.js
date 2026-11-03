@@ -54,6 +54,11 @@ class App {
     if (document.querySelector('[data-compartir]')) {
       PAW.cargarScript('Compartir', `${App.COMPONENTES}/compartir.js`, () => new Compartir('[data-compartir]'));
     }
+    // La validación en línea de los formularios de carga (E4-09.1 / IC-295). Son varios en la
+    // misma página sólo si alguna pantalla los junta; uno por formulario marcado.
+    for (const formulario of document.querySelectorAll('[data-validar-en-linea]')) {
+      PAW.cargarScript('ValidacionEnLinea', `${App.COMPONENTES}/validacion-en-linea.js`, () => new ValidacionEnLinea(formulario));
+    }
     // Los lugares libres de la ficha, al día sin recargar (E4-05.2 / IC-273).
     if (document.querySelector('[data-lugares-libres]')) {
       PAW.cargarScript('LugaresLibres', `${App.COMPONENTES}/lugares-libres.js`, () => new LugaresLibres('[data-lugares-libres]'));
