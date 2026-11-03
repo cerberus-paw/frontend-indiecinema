@@ -293,17 +293,17 @@ Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.inici
 
 ## 9. Integración continua
 
-En cada PR y en cada push a `main` o a `desarrollo` (`.github/workflows/ci.yml`):
+En cada PR y en cada push a `main` o a `dev` (`.github/workflows/ci.yml`):
 
-- **Pruebas del back:** el back con el front del PR al lado, y las pruebas de cada subsistema. El back es el de la rama del mismo nombre si existe allá; si no, el de la base del PR (`desarrollo` o `main`): un cambio que toca los dos repositorios va en ramas que se llaman igual, y sus dos PR pasan sin esperar al otro. Es el espejo del CI del back.
+- **Pruebas del back:** el back con el front del PR al lado, y las pruebas de cada subsistema. El back es el de la rama del mismo nombre si existe allá; si no, el de la base del PR (`dev` o `main`): un cambio que toca los dos repositorios va en ramas que se llaman igual, y sus dos PR pasan sin esperar al otro. Es el espejo del CI del back.
 - **Plantillas:** `herramientas/compilar-plantillas.php` compila todas con el Twig del núcleo (del back de la misma rama, como las pruebas); falla con un error de sintaxis o un filtro que no existe.
 - **CSS:** stylelint, sólo con reglas que encuentran errores (una variable que no existe, una propiedad mal escrita, un selector repetido). En local: `npm ci && npm run css`.
 - **JavaScript:** `node --check` sobre cada archivo de `estaticos/js`.
 - **Secretos:** gitleaks sobre todo el historial, como en el back.
 
-Cuando la CI pasa en un push a `main` o a `desarrollo`, `.github/workflows/cd.yml` publica el cambio en el servidor de esa rama, con el mismo script que el back. Cada subtarea sale de `desarrollo` y su PR apunta ahí; a producción llega por un PR de `desarrollo` a `main` (README del back, «Ramas y entornos» y «Despliegue continuo»).
+Cuando la CI pasa en un push a `main` o a `dev`, `.github/workflows/cd.yml` publica el cambio en el servidor de esa rama, con el mismo script que el back. Cada subtarea sale de `dev` y su PR apunta ahí; a producción llega por un PR de `dev` a `main` (README del back, «Ramas y entornos» y «Despliegue continuo»).
 
-Después de publicar `desarrollo`, el CD corre las pruebas de punta a punta contra ese sitio
+Después de publicar `dev`, el CD corre las pruebas de punta a punta contra ese sitio
 (`.github/workflows/e2e.yml`, también a mano desde Actions → E2E). El environment `desarrollo` de
 cada repositorio tiene la variable `E2E_URL`, los secretos `E2E_CORREO` y `E2E_CLAVE` (una cuenta
 de espectador) y la variable `E2E_FUNCION` (el id de una función con lugares): el back y el front
