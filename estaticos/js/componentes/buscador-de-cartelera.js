@@ -308,9 +308,9 @@ class BuscadorDeCartelera {
   }
 
   /**
-   * Como parciales/tarjeta_funcion.html.twig, para una función de la cartelera (sin afiche).
+   * Como parciales/tarjeta_funcion.html.twig, para una función de la cartelera.
    *
-   * @param {{id: string, titulo: string, estado: string, precio: string, sala: string, localidad: string, fecha: string, url: string}} funcion
+   * @param {{id: string, titulo: string, afiche: ?string, estado: string, precio: string, sala: string, localidad: string, fecha: string, url: string}} funcion
    * @returns {HTMLElement}
    */
   tarjeta(funcion) {
@@ -369,10 +369,13 @@ class BuscadorDeCartelera {
     }, [
       this.nodo('div', { class: 'tarjeta-funcion-afiche' }, [
         this.nodo('a', { href: funcion.url, class: 'tarjeta-funcion-afiche-enlace', tabindex: '-1', 'aria-hidden': 'true' }, [
-          this.nodo('div', { class: 'tarjeta-funcion-afiche-placeholder' }, [
-            this.nodo('span', { class: 'afiche-placeholder-icono', 'aria-hidden': 'true' }, ['🎬']),
-            this.nodo('span', { class: 'afiche-placeholder-texto' }, ['AFICHE']),
-          ]),
+          // Con afiche, la imagen; sin, el recuadro del wireframe, como la plantilla.
+          funcion.afiche
+            ? this.nodo('img', { src: funcion.afiche, alt: `Afiche de ${funcion.titulo}`, class: 'tarjeta-funcion-imagen', loading: 'lazy' }, [])
+            : this.nodo('div', { class: 'tarjeta-funcion-afiche-placeholder' }, [
+              this.nodo('span', { class: 'afiche-placeholder-icono', 'aria-hidden': 'true' }, ['🎬']),
+              this.nodo('span', { class: 'afiche-placeholder-texto' }, ['AFICHE']),
+            ]),
         ]),
       ]),
       this.nodo('div', { class: 'tarjeta-funcion-cuerpo' }, [

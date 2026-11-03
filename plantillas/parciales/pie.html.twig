@@ -64,6 +64,7 @@
       <ul class="pie-enlaces">
         {% if usr %}
           <li><a href="/cuenta/">Mi cuenta</a></li>
+          <li><a href="/funcion/reservas">Mis reservas</a></li>
           {% if not usr.alcanza('organizador') %}
             <li><a href="/solicitar-sala">Abrir una sala</a></li>
           {% endif %}
