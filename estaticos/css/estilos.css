@@ -1757,6 +1757,69 @@ dd {
   line-height: 1.35;
 }
 
+/* Zona para arrastrar y soltar la imagen, con vista previa (IC-296). El campo de archivo queda
+   adentro: se llega con el tabulador y se abre con Enter, como siempre */
+.zona-de-imagen {
+  /* Vista previa, texto, campo y nombre, uno debajo del otro y centrados */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espacio-3);
+  /* Aire para que se vea como una zona y no como un campo más */
+  padding: var(--espacio-6) var(--espacio-4);
+  /* Borde punteado: la pista de que algo se puede soltar acá */
+  border: 2px dashed var(--color-borde-medio);
+  border-radius: var(--radio-md);
+  /* Apenas separada del fondo */
+  background-color: var(--color-superficie);
+  /* El resalte al arrastrar, suave */
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Mientras hay algo encima para soltar */
+.zona-de-imagen-encima {
+  /* Borde del color primario, lleno */
+  border-style: solid;
+  border-color: var(--color-primario);
+  /* Y el fondo elevado, para que se note que recibe */
+  background-color: var(--color-superficie-elevada);
+}
+
+/* La foto elegida, antes de mandarla */
+.zona-de-imagen-vista {
+  /* Entra en la zona sin deformarse */
+  max-width: 100%;
+  max-height: 14rem;
+  /* Recortada al centro si no es del mismo lado */
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+}
+
+/* «Arrastrá la imagen acá, o elegila:» */
+.zona-de-imagen-texto {
+  /* Sin margen propio: el gap de la zona separa */
+  margin: 0;
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+/* El nombre del archivo, para quien no ve la vista previa */
+.zona-de-imagen-nombre {
+  margin: 0;
+  color: var(--color-texto-atenuado);
+  font-size: var(--texto-xs);
+  /* Si es largo, que no estire la zona */
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Sin animación para quien la desactivó */
+@media (prefers-reduced-motion: reduce) {
+  .zona-de-imagen {
+    transition: none;
+  }
+}
+
 /* --------------------------------------------------------------------------
    14. MENSAJES Y ALERTAS REUTILIZABLES (IC-45)
    Componentes para mensaje.html.twig: éxito, error, advertencia e info

@@ -22,6 +22,8 @@
   - valor_minimo / valor_maximo: (int, opcional) Para 'number': el menor y el mayor valor (min y max).
   - paso: (string, opcional) Para 'number': de a cuánto puede ir el valor (step), por ejemplo '0.01' para un precio con centavos. Sin él, el navegador sólo acepta enteros.
   - aceptar: (string, opcional) Para 'file': los tipos que se pueden elegir (accept).
+  - zona_de_imagen: (bool, opcional) Para 'file': marca el campo para que el componente lo
+    envuelva en la zona de arrastrar y soltar con vista previa (E4-09.2).
   - mensajes: (map, opcional) Los textos con los que el backend rechaza este campo, por regla
     (requerido, maximo, minimo, valor_minimo, valor_maximo, patron, tipo). Salen como atributos
     data-error-* y los usa el componente de validación en línea para decir lo mismo que el
@@ -189,6 +191,8 @@
         {% if valor_maximo is defined %}max="{{ valor_maximo }}"{% endif %}
         {% if paso is defined %}step="{{ paso }}"{% endif %}
         {% if aceptar is defined %}accept="{{ aceptar }}"{% endif %}
+        {# El enganche de la zona para arrastrar y soltar la imagen, con vista previa (E4-09.2) #}
+        {% if zona_de_imagen ?? false %}data-zona-de-imagen{% endif %}
         {# Pista para que el navegador sugiera el dato guardado (correo, teléfono…) #}
         {% if autocompletar is defined %}autocomplete="{{ autocompletar }}"{% endif %}
         {# Soporte de accesibilidad anunciando el mensaje de error o texto de ayuda #}

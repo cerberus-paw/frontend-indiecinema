@@ -59,6 +59,10 @@ class App {
     for (const formulario of document.querySelectorAll('[data-validar-en-linea]')) {
       PAW.cargarScript('ValidacionEnLinea', `${App.COMPONENTES}/validacion-en-linea.js`, () => new ValidacionEnLinea(formulario));
     }
+    // Arrastrar y soltar la imagen, con vista previa (E4-09.2 / IC-296).
+    for (const campo of document.querySelectorAll('[data-zona-de-imagen]')) {
+      PAW.cargarScript('ZonaDeImagen', `${App.COMPONENTES}/zona-de-imagen.js`, () => new ZonaDeImagen(campo));
+    }
     // Los lugares libres de la ficha, al día sin recargar (E4-05.2 / IC-273).
     if (document.querySelector('[data-lugares-libres]')) {
       PAW.cargarScript('LugaresLibres', `${App.COMPONENTES}/lugares-libres.js`, () => new LugaresLibres('[data-lugares-libres]'));

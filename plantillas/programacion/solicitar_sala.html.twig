@@ -157,6 +157,7 @@
           {% endif %}
           {% include 'parciales/campo.html.twig' with reglas.imagen|merge({
             nombre: 'imagen',
+            zona_de_imagen: true,
             etiqueta: corrigiendo ? 'Otra foto de la sala' : 'Foto de la sala',
             tipo: 'file',
             ayuda: 'JPG, PNG o WebP, hasta 5 MB.' ~ (corrigiendo ? ' Si no elegís otra, queda la que mandaste.' : ''),
