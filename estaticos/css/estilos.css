@@ -7211,13 +7211,15 @@ a.tabla-admin-principal:focus-visible {
   overscroll-behavior-x: contain;
 }
 
-/* La diapositiva: el afiche entero a la izquierda y los datos de la función a la derecha */
+/* La diapositiva: el afiche entero a la izquierda y los datos de la función a la derecha, los dos
+   juntos y centrados. Pegados a la izquierda, la mitad derecha quedaba vacía */
 .carrusel-diapositiva {
   flex: 0 0 100%;
   scroll-snap-align: start;
   position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto fit-content(36rem);
+  justify-content: center;
   align-items: center;
   gap: var(--espacio-8);
   /* A los costados, lugar para las flechas sin que tapen el afiche */
