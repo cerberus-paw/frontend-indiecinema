@@ -1,5 +1,6 @@
 /**
- * El formulario de reserva de la ficha, sin recargar (E4-05.3).
+ * El formulario de reserva de la ficha, sin recargar (E4-05.3) y con la cantidad revisada contra
+ * los lugares libres mientras se escribe (E4-05.4).
  *
  * Toma el submit, manda el mismo formulario con FormData y PAW.enviar, y con la respuesta en JSON
  * muestra el comprobante en el lugar del formulario o el error debajo del campo. La página no se
@@ -11,11 +12,18 @@
  * lo rechaza el servidor con 403 y el mensaje que manda («La página venció…») sale debajo del
  * campo: la reserva no se hace.
  *
- * Sin JavaScript el formulario es el de siempre: un POST que redirige al comprobante. Este
- * componente sólo intercepta lo que ya funciona.
+ * La cantidad se revisa mientras se escribe, contra los lugares que quedan (E4-05.4): el error
+ * sale debajo del campo, en el momento, y un submit con la cantidad mal no se manda. El número
+ * contra el que se compara es el atributo max del campo, que LugaresLibres deja al día, así que
+ * la validación sigue a los lugares aunque alguien reserve desde otra pestaña.
  *
- * Lo que no es de esta subtarea: no dejar pedir más lugares de los que quedan antes de mandar es
- * E4-05.4, y el indicador de carga y el aviso de error genérico con la red cortada son E4-05.6.
+ * Sin JavaScript el formulario es el de siempre: un POST que redirige al comprobante, con el
+ * required, el min y el max que valida el navegador. Este componente sólo intercepta lo que ya
+ * funciona: el novalidate lo pone el JavaScript, no la plantilla, justamente para no sacarle la
+ * validación nativa a quien no lo tenga.
+ *
+ * Lo que no es de esta subtarea: el indicador de carga y el aviso de error genérico con la red
+ * cortada son E4-05.6.
  */
 class FormularioDeReserva {
   /** Lo que se muestra si el servidor no contesta o contesta algo que no se entiende. */
@@ -31,17 +39,80 @@ class FormularioDeReserva {
     }
     this.enviando = false;
     this.formulario.addEventListener('submit', (evento) => this.alEnviar(evento));
+
+    const campo = this.campo();
+    if (campo) {
+      // Los mensajes los escribe el componente, no el navegador: así son los mismos que los del
+      // servidor y salen debajo del campo y no en un globo. Acá y no en la plantilla, porque sin
+      // JavaScript el que tiene que validar es el navegador.
+      this.formulario.noValidate = true;
+      campo.addEventListener('input', () => this.validar());
+      // LugaresLibres baja el max cuando alguien reserva desde otra pestaña: lo que estaba
+      // escrito puede haber quedado de más sin que se tocara el campo.
+      new MutationObserver(() => this.validar()).observe(campo, { attributeFilter: ['max'] });
+    }
   }
 
   /**
-   * Manda la reserva y muestra lo que conteste el servidor. El navegador ya validó el campo
-   * (required, min y max): si no pasa, el submit no llega acá.
+   * Revisa la cantidad contra lo que valida el navegador (required, min, max y que sea un entero)
+   * y muestra el error debajo del campo, o lo saca si ya está bien. El max lo deja al día
+   * LugaresLibres, así que el límite es el de ahora y no el de cuando cargó la página.
+   *
+   * @param {boolean} [foco=false] si llevar el foco al campo; al escribir no, que ya está ahí
+   * @returns {boolean} si la cantidad se puede mandar
+   */
+  validar(foco = false) {
+    const campo = this.campo();
+    // Deshabilitado lo deja LugaresLibres cuando la función se agota: no hay nada que validar, y
+    // un campo deshabilitado da válido, así que seguir borraría el error de «agotada».
+    if (campo?.disabled) {
+      return false;
+    }
+    if (!campo || campo.checkValidity()) {
+      this.limpiarError();
+
+      return true;
+    }
+    this.mostrarError(FormularioDeReserva.mensajeDelCampo(campo), foco);
+
+    return false;
+  }
+
+  /**
+   * El error de una cantidad que no va. El de los lugares es palabra por palabra el que contesta
+   * el servidor (ServicioDeReservas::reservar), para que pedir de más diga lo mismo antes y
+   * después de mandar.
+   *
+   * @param {HTMLInputElement} campo
+   * @returns {string}
+   */
+  static mensajeDelCampo(campo) {
+    if (campo.validity.rangeOverflow) {
+      const libres = Number.parseInt(campo.getAttribute('max') ?? '', 10);
+
+      switch (libres) {
+        case 0: return 'La función está agotada.';
+        case 1: return 'Queda 1 lugar.';
+        default: return `Quedan ${libres} lugares.`;
+      }
+    }
+    if (campo.validity.valueMissing) {
+      return 'Ingresá cuántos lugares querés reservar.';
+    }
+
+    // Lo que queda: un 0, un negativo, un 1.5 o algo que no es un número.
+    return 'Ingresá un número entero de lugares, desde 1.';
+  }
+
+  /**
+   * Manda la reserva y muestra lo que conteste el servidor. Con la cantidad mal no se manda nada:
+   * el error ya está debajo del campo y el foco va ahí, que es adonde hay que volver.
    *
    * @param {SubmitEvent} evento
    */
   async alEnviar(evento) {
     evento.preventDefault();
-    if (this.enviando) {
+    if (this.enviando || !this.validar(true)) {
       return;
     }
     this.enviando = true;
@@ -124,14 +195,25 @@ class FormularioDeReserva {
    * (parciales/campo.html.twig), para que se vea igual con y sin JavaScript.
    *
    * @param {string} mensaje
+   * @param {boolean} [foco=true] si llevar el foco al campo
    */
-  mostrarError(mensaje) {
-    this.limpiarError();
+  mostrarError(mensaje, foco = true) {
     const campo = this.campo();
     const grupo = campo?.closest('.grupo-campo');
     if (!campo || !grupo) {
       return;
     }
+    // El mismo error que ya está no se vuelve a dibujar: con role="alert", rehacerlo en cada
+    // tecla se lo repetiría al lector de pantalla letra por letra.
+    if (grupo.querySelector('.campo-error')?.textContent.trim().endsWith(mensaje)) {
+      // El foco sí, igual: puede venir de un submit, y ahí hay que volver al campo.
+      if (foco) {
+        campo.focus();
+      }
+
+      return;
+    }
+    this.limpiarError();
     grupo.classList.add('con-error');
     campo.classList.add('control-invalido');
     campo.setAttribute('aria-invalid', 'true');
@@ -140,7 +222,9 @@ class FormularioDeReserva {
     const error = PAW.nuevoElemento('span', '', { id: 'error-cantidad', class: 'campo-error', role: 'alert' });
     error.append(PAW.nuevoElemento('span', '⚠️', { class: 'error-icono', 'aria-hidden': 'true' }), ` ${mensaje}`);
     grupo.append(error);
-    campo.focus();
+    if (foco) {
+      campo.focus();
+    }
   }
 
   /** Saca el error anterior: el de antes no tiene por qué valer para este envío. */
