@@ -1,1 +1,6 @@
 node_modules/
+# Lo que dejan las pruebas de punta a punta (e2e/README.md): la sesión guardada, las trazas
+# y el informe.
+e2e/.sesion/
+e2e/resultados/
+e2e/informe/
