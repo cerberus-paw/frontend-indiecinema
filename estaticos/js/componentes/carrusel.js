@@ -221,11 +221,13 @@ class Carrusel {
     let inicio = null;
     let deslizo = false;
     this.pantalla.addEventListener('pointerdown', (e) => {
+      // Antes de cualquier salida: con el dedo, un deslizamiento no termina en clic y la marca
+      // quedaría puesta, así que el primer toque en una flecha se perdería.
+      deslizo = false;
       if (!e.isPrimary || e.button !== 0 || e.target.closest('.carrusel-flecha') || this.total < 2) {
         return;
       }
       inicio = { x: e.clientX, y: e.clientY };
-      deslizo = false;
     });
     this.pantalla.addEventListener('pointerup', (e) => {
       if (!inicio) {
