@@ -8,6 +8,10 @@
  *   - data-transicion="fundido|deslizar|zoom" elige la transición (por defecto, fundido);
  *   - data-intervalo="6000" dice cada cuántos milisegundos pasa solo (por defecto, 6 s).
  *
+ * Se pasa con las flechas de los costados, con las miniaturas de abajo, deslizando el dedo (o el
+ * mouse) y, con el foco adentro, con las flechas del teclado (Inicio y Fin van a la primera y a la
+ * última).
+ *
  * Mientras se descargan las imágenes, una barra muestra el avance; al llegar al 100 % arranca el
  * pase automático (el enunciado del TP4). Se pausa con su botón, y también mientras el mouse o el
  * foco están sobre el carrusel o la pestaña no se ve: nadie se pierde lo que estaba leyendo.
@@ -28,6 +32,9 @@ class Carrusel {
 
   /** Para los id de la barra de carga, si hay más de un carrusel en la página. */
   static cantidad = 0;
+
+  /** Cuánto hay que arrastrar de costado para que cuente como deslizar y no como un toque. */
+  static UMBRAL_SWIPE = 50;
 
   /**
    * @param {Element|string} pContenedor el contenedor de la lista, o su selector
@@ -120,11 +127,28 @@ class Carrusel {
     this.carga.append(this.porcentaje, this.barra);
     this.pantalla.append(this.carga);
 
-    // Debajo, los controles: por ahora, pausar y reanudar.
+    // Debajo, los controles: las miniaturas y el botón de pausa.
     this.controles = PAW.nuevoElemento('div', '', { class: 'carrusel-controles' });
+    this.botonesMiniatura = [];
     if (this.total > 1) {
+      const miniaturas = PAW.nuevoElemento('ol', '', { class: 'carrusel-miniaturas' });
+      this.botonesMiniatura = this.diapositivas.map((diapositiva, i) => {
+        const boton = Carrusel.boton('carrusel-miniatura', `Ver ${this.nombre(i)}`);
+        // La misma imagen de la diapositiva: el navegador no la vuelve a descargar.
+        const imagen = diapositiva.querySelector('img:not([alt=""])') ?? diapositiva.querySelector('img');
+        if (imagen) {
+          boton.append(PAW.nuevoElemento('img', '', { src: imagen.currentSrc || imagen.src, alt: '', draggable: 'false' }));
+        } else {
+          boton.textContent = String(i + 1);
+        }
+        const item = PAW.nuevoElemento('li');
+        item.append(boton);
+        miniaturas.append(item);
+
+        return boton;
+      });
       this.botonPausa = Carrusel.boton('carrusel-pausa', 'Pausar el pase automático', '❚❚');
-      this.controles.append(this.botonPausa);
+      this.controles.append(miniaturas, this.botonPausa);
     }
     c.append(this.controles);
 
@@ -138,6 +162,23 @@ class Carrusel {
     this.botonAnterior?.addEventListener('click', () => this.anterior(true));
     this.botonSiguiente?.addEventListener('click', () => this.siguiente(true));
     this.botonPausa?.addEventListener('click', () => this.alternarPausa());
+    this.botonesMiniatura.forEach((boton, i) => boton.addEventListener('click', () => this.ir(i, true)));
+
+    c.addEventListener('keydown', (e) => {
+      const teclas = {
+        ArrowRight: () => this.siguiente(true),
+        ArrowLeft: () => this.anterior(true),
+        Home: () => this.ir(0, true),
+        End: () => this.ir(this.total - 1, true),
+      };
+      if (!(e.key in teclas) || e.altKey || e.ctrlKey || e.metaKey) {
+        return;
+      }
+      // Las flechas ya no desplazan la página mientras el foco está en el carrusel.
+      e.preventDefault();
+      teclas[e.key]();
+    });
+    this.escucharSwipe();
 
     // Mientras alguien lo mira o lo usa, no cambia solo. Sólo el mouse: en el celular no hay
     // «encima», y un toque dejaría la pausa pegada.
@@ -170,6 +211,55 @@ class Carrusel {
         this.reanudar('oculta');
       }
     });
+  }
+
+  /**
+   * Deslizar con el dedo o arrastrar con el mouse. Cuenta sólo si el gesto es más de costado que
+   * vertical: subir o bajar la página con el dedo encima no cambia la diapositiva.
+   */
+  escucharSwipe() {
+    let inicio = null;
+    let deslizo = false;
+    this.pantalla.addEventListener('pointerdown', (e) => {
+      // Antes de cualquier salida: con el dedo, un deslizamiento no termina en clic y la marca
+      // quedaría puesta, así que el primer toque en una flecha se perdería.
+      deslizo = false;
+      if (!e.isPrimary || e.button !== 0 || e.target.closest('.carrusel-flecha') || this.total < 2) {
+        return;
+      }
+      inicio = { x: e.clientX, y: e.clientY };
+    });
+    this.pantalla.addEventListener('pointerup', (e) => {
+      if (!inicio) {
+        return;
+      }
+      const dx = e.clientX - inicio.x;
+      const dy = e.clientY - inicio.y;
+      inicio = null;
+      if (Math.abs(dx) < Carrusel.UMBRAL_SWIPE || Math.abs(dx) < Math.abs(dy)) {
+        return;
+      }
+      deslizo = true;
+      if (dx < 0) {
+        this.siguiente(true);
+      } else {
+        this.anterior(true);
+      }
+    });
+    this.pantalla.addEventListener('pointercancel', () => {
+      inicio = null;
+    });
+    // Arrastrar un enlace o una imagen con el mouse empieza el «arrastrar y soltar» del navegador,
+    // que cancela el gesto: adentro del carrusel, arrastrar es pasar de diapositiva.
+    this.pantalla.addEventListener('dragstart', (e) => e.preventDefault());
+    // Un deslizamiento que empezó sobre «Ver función» no es un clic: no abre la función.
+    this.pantalla.addEventListener('click', (e) => {
+      if (deslizo) {
+        e.preventDefault();
+        e.stopPropagation();
+        deslizo = false;
+      }
+    }, true);
   }
 
   /**
@@ -311,6 +401,9 @@ class Carrusel {
   mostrar(n, sentido = 0) {
     const sale = this.diapositivas[this.actual];
     const entra = this.diapositivas[n];
+    // Si el foco estaba en la que sale (pasando con el teclado desde «Ver función»), sigue en la
+    // que entra: si no, quedaría en una diapositiva inert y se perdería.
+    const conFoco = sale !== entra && sale.contains(document.activeElement);
 
     entra.classList.add('sin-transicion');
     entra.classList.remove('sale-hacia-atras', 'sale-hacia-adelante');
@@ -330,6 +423,16 @@ class Carrusel {
     this.diapositivas.forEach((diapositiva, i) => {
       diapositiva.inert = i !== n;
     });
+    this.botonesMiniatura.forEach((boton, i) => {
+      if (i === n) {
+        boton.setAttribute('aria-current', 'true');
+      } else {
+        boton.removeAttribute('aria-current');
+      }
+    });
+    if (conFoco) {
+      entra.querySelector('a, button')?.focus({ preventScroll: true });
+    }
 
     // Sin sentido (al armarlo) aparece de una; las siguientes ya animan.
     if (sentido === 0) {
