@@ -7646,3 +7646,101 @@ a.tabla-admin-principal:focus-visible {
   outline: 2px solid var(--color-primario);
   outline-offset: 2px;
 }
+
+/* Responsive (E4-07.5). En tablet, el afiche un poco más chico y menos aire a los costados */
+@media (max-width: 1024px) {
+  .carrusel-diapositiva {
+    gap: var(--espacio-6);
+    padding: var(--espacio-6) calc(var(--espacio-12) + var(--espacio-2));
+    min-height: 0;
+  }
+
+  .carrusel-imagen {
+    height: 18rem;
+  }
+}
+
+/* En el celular, una columna: el afiche arriba y los datos abajo, centrados. Las flechas quedan a
+   la altura del afiche: a los costados de uno vertical, y encima de los bordes de un fotograma
+   apaisado, que ocupa todo el ancho */
+@media (max-width: 768px) {
+  .carrusel-diapositiva {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: var(--espacio-4);
+    padding: var(--espacio-5) var(--espacio-4) var(--espacio-6);
+  }
+
+  .carrusel-imagen {
+    /* Con tope y no fijo: un fotograma apaisado que no entra a lo ancho se achica entero, en vez de
+       quedar aplastado */
+    height: auto;
+    max-height: 15rem;
+  }
+
+  .carrusel-texto {
+    align-items: center;
+    text-align: center;
+    gap: var(--espacio-2);
+    max-width: 100%;
+  }
+
+  .carrusel-titulo {
+    /* Un título largo («El gabinete del Dr. Caligari + Viaje a la Luna») corta, no desborda */
+    overflow-wrap: anywhere;
+  }
+
+  /* Los tres datos, uno debajo del otro: en tres columnas no entran */
+  .carrusel-datos {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-3);
+  }
+
+  .carrusel-dato dt {
+    justify-content: center;
+  }
+
+  .carrusel-dato dd {
+    font-size: var(--texto-md);
+  }
+
+  .carrusel-flecha {
+    /* La mitad del afiche, que empieza después del relleno de arriba */
+    top: calc(var(--espacio-5) + 7.5rem);
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .carrusel-flecha-anterior {
+    left: var(--espacio-2);
+  }
+
+  .carrusel-flecha-siguiente {
+    right: var(--espacio-2);
+  }
+
+  .carrusel-miniatura {
+    height: 3.5rem;
+  }
+}
+
+/* En el celular, el toque ya se ve en el botón: sin el recuadro azul que agrega el navegador */
+.carrusel-flecha,
+.carrusel-miniatura,
+.carrusel-pausa {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Para quien pidió reducir el movimiento: las diapositivas cambian sin animar. El pase automático
+   lo frena el componente */
+@media (prefers-reduced-motion: reduce) {
+  .carrusel-armado {
+    --carrusel-duracion: 0s;
+  }
+
+  .carrusel-carga-barra::-webkit-progress-value,
+  .carrusel-flecha,
+  .carrusel-miniatura {
+    transition: none;
+  }
+}

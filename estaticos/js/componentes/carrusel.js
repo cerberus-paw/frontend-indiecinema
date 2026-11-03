@@ -16,6 +16,10 @@
  * pase automático (el enunciado del TP4). Se pausa con su botón, y también mientras el mouse o el
  * foco están sobre el carrusel o la pestaña no se ve: nadie se pierde lo que estaba leyendo.
  *
+ * Con «reducir movimiento» (prefers-reduced-motion), las diapositivas cambian sin animar (CSS) y
+ * el pase automático arranca en pausa, como si se hubiera apretado el botón: quien lo quiera lo
+ * reanuda.
+ *
  * Cada transición es una clase de CSS en el contenedor (carrusel-fundido, carrusel-deslizar,
  * carrusel-zoom): cambiar de transición es cambiar esa clase, a mano o con la propiedad
  * transicion. El JavaScript sólo marca qué diapositiva entra, cuál sale y hacia qué lado.
@@ -59,11 +63,15 @@ class Carrusel {
     this.temporizador = null;
     // Por qué está pausado ahora: el pase automático corre sólo si no hay ningún motivo.
     this.pausas = new Set();
+    this.movimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     this.armar();
     this.escuchar();
     this.mostrar(0);
     this.transicion = this.contenedor.dataset.transicion;
+    if (this.movimientoReducido.matches) {
+      this.alternarPausa(true);
+    }
     this.esperarCarga();
   }
 
@@ -202,6 +210,13 @@ class Carrusel {
     c.addEventListener('focusout', (e) => {
       if (!c.contains(e.relatedTarget)) {
         this.reanudar('foco');
+      }
+    });
+    // Si se activa con la página abierta, también frena; si se desactiva, queda como el usuario
+    // lo dejó.
+    this.movimientoReducido.addEventListener('change', (e) => {
+      if (e.matches) {
+        this.alternarPausa(true);
       }
     });
     document.addEventListener('visibilitychange', () => {
@@ -347,9 +362,15 @@ class Carrusel {
     this.programar();
   }
 
-  /** El botón de pausa: la pausa del usuario dura hasta que la saque él. */
-  alternarPausa() {
-    const pausar = !this.pausas.has('usuario');
+  /**
+   * El botón de pausa: la pausa del usuario dura hasta que la saque él.
+   *
+   * @param {boolean} [pausar] true para pausar, false para reanudar; por defecto, lo contrario de ahora
+   */
+  alternarPausa(pausar = !this.pausas.has('usuario')) {
+    if (!this.botonPausa) {
+      return;
+    }
     if (pausar) {
       this.pausar('usuario');
     } else {
@@ -426,6 +447,7 @@ class Carrusel {
     this.botonesMiniatura.forEach((boton, i) => {
       if (i === n) {
         boton.setAttribute('aria-current', 'true');
+        this.miniaturaAlaVista(boton);
       } else {
         boton.removeAttribute('aria-current');
       }
@@ -440,6 +462,24 @@ class Carrusel {
       entra.classList.remove('sin-transicion');
     }
     this.actual = n;
+  }
+
+  /**
+   * En el celular las miniaturas no entran y se desplazan de costado: la de la actual tiene que
+   * quedar a la vista. Se mueve sólo la fila, no la página (scrollIntoView() la desplazaría
+   * hasta el carrusel en cada pase automático).
+   *
+   * @param {HTMLElement} boton
+   */
+  miniaturaAlaVista(boton) {
+    const fila = boton.closest('.carrusel-miniaturas');
+    const caja = fila.getBoundingClientRect();
+    const miniatura = boton.getBoundingClientRect();
+    if (miniatura.left < caja.left) {
+      fila.scrollLeft -= caja.left - miniatura.left;
+    } else if (miniatura.right > caja.right) {
+      fila.scrollLeft += miniatura.right - caja.right;
+    }
   }
 
   /**
