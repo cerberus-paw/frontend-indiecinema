@@ -1,6 +1,7 @@
 {#
   La reserva recién hecha, en /funcion/reservas/{id} (E4-01.3): el paso «Comprobante» del
   wireframe reserva-pago-comprobante, con el código para la puerta. Sólo la ve quien reservó.
+  Se imprime limpia (E4-04.2): en papel quedan sólo el código y los datos de la reserva.
 
   Variables:
   - reserva: id, codigo (8 caracteres; se muestra en dos grupos de 4 para dictarlo), cantidad,
@@ -64,15 +65,23 @@
       </div>
     </dl>
 
-    {% if reserva.cancelable|default(false) %}
-      <div class="comprobante-acciones">
+    <div class="comprobante-acciones">
+      {# Imprimir necesita JavaScript: sin él no aparece, y queda el «Imprimir» del navegador (E4-04.2) #}
+      <span data-imprimir hidden>
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Imprimir',
+          tipo: 'button',
+          variante: 'secundario'
+        } only %}
+      </span>
+      {% if reserva.cancelable|default(false) %}
         {% include 'parciales/boton.html.twig' with {
           texto: 'Cancelar reserva',
           url: '/funcion/reservas/' ~ reserva.id ~ '/cancelar',
           variante: 'secundario'
         } only %}
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
   </article>
 
   {% if reserva.estado == 'confirmada' %}
