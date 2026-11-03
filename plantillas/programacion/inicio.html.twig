@@ -105,12 +105,14 @@
                     <dd>{{ funcion.precio ?? 'A la gorra' }}</dd>
                   </div>
                 </dl>
+                {# Los mismos textos que el botón de la tarjeta de la función #}
+                {% set texto_boton = funcion.estado == 'EN_VOTACION_TITULOS' ? 'Votar títulos' : (funcion.estado == 'EN_ACUERDO_FECHA' ? 'Votar fecha' : 'Ver función') %}
                 {% include 'parciales/boton.html.twig' with {
-                  texto: funcion.estado == 'PROGRAMADA' ? 'Ver función' : 'Votar',
+                  texto: texto_boton,
                   url: url_funcion,
                   variante: 'primario',
                   clase: 'carrusel-accion',
-                  aria_label: (funcion.estado == 'PROGRAMADA' ? 'Ver función ' : 'Votar en ') ~ funcion.titulo
+                  aria_label: texto_boton ~ (texto_boton == 'Ver función' ? ' ' : ' para ') ~ funcion.titulo
                 } only %}
               </div>
             </li>

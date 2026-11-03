@@ -7244,14 +7244,14 @@ a.tabla-admin-principal:focus-visible {
   pointer-events: none;
 }
 
-/* El afiche, entero: recortado se pierde el título */
+/* El afiche, entero: recortado se pierde el título. El ancho sale de la imagen, sin una proporción
+   fija: los fotogramas apaisados quedarían en una caja vertical con la sombra marcando el hueco */
 .carrusel-imagen {
   position: relative;
   display: block;
   height: 22rem;
   width: auto;
-  aspect-ratio: 2 / 3;
-  object-fit: contain;
+  max-width: 100%;
   border-radius: var(--radio-md);
   box-shadow: var(--sombra-lg);
   /* Arrastrar el afiche con el mouse no lo levanta como una imagen suelta */
