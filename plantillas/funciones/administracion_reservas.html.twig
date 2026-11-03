@@ -22,6 +22,8 @@
 
 {% block panel %}
 {% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
+{# data-panel-de-reservas: el enganche del componente que anula sin recargar la lista (E4-05.5). #}
+<div data-panel-de-reservas>
 <header class="panel-admin-cabecera">
   <h1 class="panel-admin-titulo">Reservas</h1>
   <p class="panel-admin-bajada">Las reservas de todas las funciones. Anular una la cancela y libera sus lugares.</p>
@@ -49,6 +51,10 @@
 {% if error_general is defined %}
   {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se anuló la reserva', mensaje: error_general } only %}
 {% endif %}
+
+{# data-avisos: acá pone el componente el resultado de anular sin recargar. Vacía y en la página
+   desde el principio, para que un lector de pantalla lea lo que aparece. #}
+<div data-avisos aria-live="polite"></div>
 
 {% if reservas is empty %}
   {% include 'parciales/mensaje.html.twig' with {
@@ -88,7 +94,7 @@
             <td><span class="estado-cuenta {{ clases_estado[reserva.estado] }}">{{ reserva.estado_etiqueta }}</span></td>
             <td>
               {% if reserva.anulable %}
-                <form action="/funcion/administracion/reservas/{{ reserva.id }}/anular" method="POST" class="formulario-accion-tabla">
+                <form action="/funcion/administracion/reservas/{{ reserva.id }}/anular" method="POST" class="formulario-accion-tabla" data-accion-de-reserva data-hecho="—">
                   <input type="hidden" name="_csrf" value="{{ csrf }}">
                   {% include 'parciales/boton.html.twig' with {
                     texto: 'Anular',
@@ -121,4 +127,5 @@
     </nav>
   {% endif %}
 {% endif %}
+</div>
 {% endblock %}
