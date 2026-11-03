@@ -7686,10 +7686,18 @@ a.tabla-admin-principal:focus-visible {
     overflow-wrap: anywhere;
   }
 
-  .carrusel-dato {
+  /* Los tres datos, uno debajo del otro: en tres columnas no entran */
+  .carrusel-datos {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-3);
+  }
+
+  .carrusel-dato dt {
     justify-content: center;
-    flex-wrap: wrap;
-    font-size: var(--texto-base);
+  }
+
+  .carrusel-dato dd {
+    font-size: var(--texto-md);
   }
 
   .carrusel-flecha {
@@ -7708,7 +7716,7 @@ a.tabla-admin-principal:focus-visible {
   }
 
   .carrusel-miniatura {
-    width: 2.5rem;
+    height: 3.5rem;
   }
 }
 
