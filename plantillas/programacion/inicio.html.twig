@@ -87,14 +87,24 @@
                   <span class="insignia-estado insignia-programada">Programada</span>
                 {% endif %}
                 <h3 class="carrusel-titulo"><a href="{{ url_funcion }}" class="carrusel-titulo-enlace">{{ funcion.titulo }}</a></h3>
-                <p class="carrusel-dato">
-                  {% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'meta-icono' } only %}
-                  <span>{{ funcion.sala ?? 'Sala a confirmar' }}{% if funcion.localidad|default(null) %} · {{ funcion.localidad }}{% endif %}</span>
-                </p>
-                <p class="carrusel-dato">
-                  {% include 'parciales/icono.html.twig' with { nombre: 'calendario', clase: 'meta-icono' } only %}
-                  <span>{{ funcion.fecha ?? 'Fecha a definir' }} · {{ funcion.precio ?? 'A la gorra' }}</span>
-                </p>
+                {# Dónde, cuándo y cuánto, en tres columnas que llenan el ancho de la diapositiva #}
+                <dl class="carrusel-datos">
+                  <div class="carrusel-dato">
+                    <dt>{% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'meta-icono' } only %} Sala</dt>
+                    <dd>
+                      {{ funcion.sala ?? 'Sala a confirmar' }}
+                      {% if funcion.localidad|default(null) %}<span class="carrusel-dato-detalle">{{ funcion.localidad }}</span>{% endif %}
+                    </dd>
+                  </div>
+                  <div class="carrusel-dato">
+                    <dt>{% include 'parciales/icono.html.twig' with { nombre: 'calendario', clase: 'meta-icono' } only %} Cuándo</dt>
+                    <dd>{{ funcion.fecha ?? 'Fecha a definir' }}</dd>
+                  </div>
+                  <div class="carrusel-dato">
+                    <dt>{% include 'parciales/icono.html.twig' with { nombre: 'entrada', clase: 'meta-icono' } only %} Entrada</dt>
+                    <dd>{{ funcion.precio ?? 'A la gorra' }}</dd>
+                  </div>
+                </dl>
                 {% include 'parciales/boton.html.twig' with {
                   texto: funcion.estado == 'PROGRAMADA' ? 'Ver función' : 'Votar',
                   url: url_funcion,

@@ -7211,17 +7211,16 @@ a.tabla-admin-principal:focus-visible {
   overscroll-behavior-x: contain;
 }
 
-/* La diapositiva: el afiche entero a la izquierda y los datos de la función a la derecha, los dos
-   juntos y centrados. Pegados a la izquierda, la mitad derecha quedaba vacía */
+/* La diapositiva: el afiche entero a la izquierda y los datos de la función ocupando todo el resto,
+   hasta el borde: así no queda un hueco al costado */
 .carrusel-diapositiva {
   flex: 0 0 100%;
   scroll-snap-align: start;
   position: relative;
   display: grid;
-  grid-template-columns: auto fit-content(36rem);
-  justify-content: center;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--espacio-8);
+  gap: var(--espacio-10);
   /* A los costados, lugar para las flechas sin que tapen el afiche */
   padding: var(--espacio-8) calc(var(--espacio-12) + var(--espacio-6));
   min-height: 26rem;
@@ -7265,17 +7264,20 @@ a.tabla-admin-principal:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--espacio-3);
-  max-width: 36rem;
+  gap: var(--espacio-5);
 }
 
+/* El título, grande y con una línea debajo que cruza la diapositiva */
 .carrusel-titulo {
+  align-self: stretch;
   font-family: var(--fuente-titulos);
-  font-size: clamp(var(--texto-xl), 3vw, var(--texto-3xl));
+  font-size: clamp(var(--texto-2xl), 3.5vw, 2.75rem);
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.015em;
   margin: 0;
+  padding-bottom: var(--espacio-5);
+  border-bottom: 1px solid var(--color-borde-medio);
 }
 
 .carrusel-titulo-enlace {
@@ -7287,13 +7289,40 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-primario);
 }
 
-.carrusel-dato {
+/* Sala, cuándo y entrada, en tres columnas iguales */
+.carrusel-datos {
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espacio-6);
+  margin: 0;
+}
+
+.carrusel-dato dt {
   display: flex;
   align-items: center;
   gap: var(--espacio-2);
+  margin-bottom: var(--espacio-1);
+  color: var(--color-texto-apagado);
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.carrusel-dato dd {
   margin: 0;
+  color: var(--color-texto);
+  font-size: var(--texto-lg);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* La localidad, debajo de la sala */
+.carrusel-dato-detalle {
+  display: block;
   color: var(--color-texto-secundario);
-  font-size: var(--texto-md);
+  font-size: var(--texto-sm);
+  font-weight: 400;
 }
 
 .carrusel-accion {
