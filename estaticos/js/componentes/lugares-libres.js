@@ -9,9 +9,10 @@
  * bien al volver, sin dejar pedidos corriendo en pestañas que nadie mira.
  *
  * Un pedido nuevo cancela el anterior, así una respuesta lenta no pisa a una más reciente. Si
- * falla, no se muestra nada: el número que está es el que trajo la página, y sigue sirviendo. Tras
- * varias fallas seguidas deja de consultar, para no insistir contra un servidor caído; el
- * indicador de carga y el aviso de error son de E4-05.6.
+ * falla, no se muestra nada todavía: el número que está es el que trajo la página, y sigue
+ * sirviendo. Tras varias fallas seguidas deja de consultar, para no insistir contra un servidor
+ * caído, y recién ahí avisa que el número puede no estar al día (E4-05.6). Mientras consulta,
+ * el aviso de carga aparece sólo si la espera se nota.
  *
  * Quien ya tiene el dato (el formulario de reserva, que lo recibe al reservar) puede pasarlo con
  * actualizar(), en lugar de esperar la consulta siguiente.
@@ -28,6 +29,9 @@ class LugaresLibres {
 
   /** Cuánto esperar entre vaciar el anuncio y escribirlo, para que se lea aunque se repita. */
   static ESPERA_DEL_ANUNCIO = 100;
+
+  /** Lo que se muestra cuando se deja de consultar por fallas seguidas (E4-05.6). */
+  static MENSAJE_DE_ERROR = 'No pudimos actualizar los lugares libres. El número puede no estar al día.';
 
   /**
    * @param {Element|string} pContenedor la ficha, con data-lugares-libres, o su selector
@@ -47,6 +51,12 @@ class LugaresLibres {
     // lector de pantalla la lea.
     this.anuncio = PAW.nuevoElemento('p', '', { class: 'sr-only', role: 'status', 'aria-live': 'polite' });
     this.contenedor.append(this.anuncio);
+
+    // Los avisos van fijos abajo de la pantalla, así que cuelgan del body y no de la ficha: no
+    // empujan nada de lo que ya está y se ven con la página donde esté (E4-05.6).
+    this.carga = PAW.avisoFlotante('Actualizando los lugares…');
+    this.error = PAW.avisoFlotante(LugaresLibres.MENSAJE_DE_ERROR, 'error');
+    document.body.append(this.carga, this.error);
 
     // Quien ya tiene el número —el formulario de reserva, que lo recibe al reservar— lo manda
     // por acá y no hay que esperar la consulta siguiente (E4-05.3).
@@ -101,6 +111,7 @@ class LugaresLibres {
   async consultar() {
     this.detener();
     this.pedido = new AbortController();
+    PAW.mostrarAviso(this.carga, true);
     try {
       const respuesta = await PAW.enviar(this.url, {
         headers: { Accept: 'application/json' },
@@ -110,12 +121,21 @@ class LugaresLibres {
         throw new Error(`Los lugares respondieron ${respuesta.status}.`);
       }
       this.fallas = 0;
+      // Si venía fallando y volvió a andar, el aviso ya no tiene nada que decir.
+      PAW.mostrarAviso(this.error, false);
       this.actualizar(await respuesta.json());
     } catch (error) {
       // Un pedido que cancelamos nosotros no es una falla del servidor.
       if (error.name !== 'AbortError') {
         this.fallas += 1;
       }
+    }
+    PAW.mostrarAviso(this.carga, false);
+    // Recién cuando se deja de consultar: una falla suelta se arregla sola en la siguiente y no
+    // vale la pena avisar de algo que ya pasó. Que el número de la ficha no esté al día, sí
+    // (E4-05.6). La página no se rompe: el número que trajo sigue ahí.
+    if (this.fallas >= LugaresLibres.FALLAS_PARA_CORTAR) {
+      PAW.mostrarAviso(this.error, true);
     }
     this.programar();
   }
