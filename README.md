@@ -301,3 +301,10 @@ En cada PR y en cada push a `main` o a `desarrollo` (`.github/workflows/ci.yml`)
 - **Secretos:** gitleaks sobre todo el historial, como en el back.
 
 Cuando la CI pasa en un push a `main` o a `desarrollo`, `.github/workflows/cd.yml` publica el cambio en el servidor de esa rama, con el mismo script que el back. Cada subtarea sale de `desarrollo` y su PR apunta ahí; a producción llega por un PR de `desarrollo` a `main` (README del back, «Ramas y entornos» y «Despliegue continuo»).
+
+Después de publicar `desarrollo`, el CD corre las pruebas de punta a punta contra ese sitio
+(`.github/workflows/e2e.yml`, también a mano desde Actions → E2E). El environment `desarrollo` de
+cada repositorio tiene la variable `E2E_URL`, los secretos `E2E_CORREO` y `E2E_CLAVE` (una cuenta
+de espectador) y la variable `E2E_FUNCION` (el id de una función con lugares): el back y el front
+usan cuentas y funciones distintas para no pisarse. Si fallan, la corrida deja las capturas como
+artefacto; la traza completa, que guarda la contraseña, sólo en local.
