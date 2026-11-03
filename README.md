@@ -292,12 +292,12 @@ Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.inici
 
 ## 9. Integración continua
 
-En cada PR y en cada push a `main` (`.github/workflows/ci.yml`):
+En cada PR y en cada push a `main` o a `desarrollo` (`.github/workflows/ci.yml`):
 
-- **Pruebas del back:** el back con el front del PR al lado, y las pruebas de cada subsistema. El back es el de la rama del mismo nombre si existe allá, y si no el de `main`: un cambio que toca los dos repositorios va en ramas que se llaman igual, y sus dos PR pasan sin esperar al otro. Es el espejo del CI del back.
+- **Pruebas del back:** el back con el front del PR al lado, y las pruebas de cada subsistema. El back es el de la rama del mismo nombre si existe allá; si no, el de la base del PR (`desarrollo` o `main`): un cambio que toca los dos repositorios va en ramas que se llaman igual, y sus dos PR pasan sin esperar al otro. Es el espejo del CI del back.
 - **Plantillas:** `herramientas/compilar-plantillas.php` compila todas con el Twig del núcleo (del back de la misma rama, como las pruebas); falla con un error de sintaxis o un filtro que no existe.
 - **CSS:** stylelint, sólo con reglas que encuentran errores (una variable que no existe, una propiedad mal escrita, un selector repetido). En local: `npm ci && npm run css`.
 - **JavaScript:** `node --check` sobre cada archivo de `estaticos/js`.
 - **Secretos:** gitleaks sobre todo el historial, como en el back.
 
-Cuando la CI pasa en un push a `main`, `.github/workflows/cd.yml` publica el cambio en el VPS con el mismo script que el back (README del back, «Despliegue continuo»).
+Cuando la CI pasa en un push a `main` o a `desarrollo`, `.github/workflows/cd.yml` publica el cambio en el servidor de esa rama, con el mismo script que el back. Cada subtarea sale de `desarrollo` y su PR apunta ahí; a producción llega por un PR de `desarrollo` a `main` (README del back, «Ramas y entornos» y «Despliegue continuo»).
