@@ -1,11 +1,19 @@
 {#
   Portada, en /: para cualquiera, con o sin sesión. Un buscador que lleva a la cartelera filtrada
-  (un formulario GET, así funciona sin JavaScript), las próximas funciones y algunas salas, cada
-  sección con el acceso a su listado completo.
+  (un formulario GET, así funciona sin JavaScript), el carrusel de destacadas, las próximas
+  funciones y algunas salas, cada sección con el acceso a su listado completo.
+
+  El carrusel (E4-07) es una lista: el componente Carrusel (estaticos/js/componentes/carrusel.js)
+  la convierte en diapositivas. Sin JavaScript queda como una tira que se desplaza de costado, así
+  ninguna destacada queda escondida. El wireframe «Home» no dibuja un destacado: va en una franja
+  propia, antes de las próximas funciones, para no mover nada de lo que ya estaba.
 
   Encabezados, sin saltar niveles: h1 la portada; h2 cada sección; h3 cada tarjeta.
 
   Variables:
+  - destacadas: (opcional) las próximas funciones que tienen afiche, con los mismos datos que las
+    tarjetas (id, titulo, afiche, estado, precio, sala, localidad, fecha). Sin ninguna, no hay
+    carrusel.
   - funciones: lista de las próximas funciones de la cartelera, como las recibe
     parciales/tarjeta_funcion.html.twig.
   - total_funciones: (int) cuántas funciones hay en toda la cartelera.
@@ -57,6 +65,63 @@
 </section>
 
 <div class="contenedor">
+  {% if destacadas|default([]) is not empty %}
+    <section class="portada-seccion" aria-labelledby="portada-destacadas-titulo">
+      <header class="portada-seccion-cabecera">
+        <h2 id="portada-destacadas-titulo" class="portada-seccion-titulo">Destacadas</h2>
+      </header>
+      <div class="carrusel" data-carrusel aria-label="Funciones destacadas">
+        <ul class="carrusel-pista">
+          {% for funcion in destacadas %}
+            {% set url_funcion = '/cartelera/' ~ funcion.id %}
+            <li class="carrusel-diapositiva">
+              {# El mismo afiche, desenfocado, de fondo: el afiche se ve entero y esto llena el resto #}
+              <img src="{{ funcion.afiche }}" alt="" class="carrusel-fondo">
+              <img src="{{ funcion.afiche }}" alt="Afiche de {{ funcion.titulo }}" class="carrusel-imagen">
+              <div class="carrusel-texto">
+                {% if funcion.estado == 'EN_VOTACION_TITULOS' %}
+                  <span class="insignia-estado insignia-votacion">En votación de títulos</span>
+                {% elseif funcion.estado == 'EN_ACUERDO_FECHA' %}
+                  <span class="insignia-estado insignia-acuerdo">En acuerdo de fecha</span>
+                {% else %}
+                  <span class="insignia-estado insignia-programada">Programada</span>
+                {% endif %}
+                <h3 class="carrusel-titulo"><a href="{{ url_funcion }}" class="carrusel-titulo-enlace">{{ funcion.titulo }}</a></h3>
+                {# Dónde, cuándo y cuánto, en tres columnas que llenan el ancho de la diapositiva #}
+                <dl class="carrusel-datos">
+                  <div class="carrusel-dato">
+                    <dt>{% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'meta-icono' } only %} Sala</dt>
+                    <dd>
+                      {{ funcion.sala ?? 'Sala a confirmar' }}
+                      {% if funcion.localidad|default(null) %}<span class="carrusel-dato-detalle">{{ funcion.localidad }}</span>{% endif %}
+                    </dd>
+                  </div>
+                  <div class="carrusel-dato">
+                    <dt>{% include 'parciales/icono.html.twig' with { nombre: 'calendario', clase: 'meta-icono' } only %} Cuándo</dt>
+                    <dd>{{ funcion.fecha ?? 'Fecha a definir' }}</dd>
+                  </div>
+                  <div class="carrusel-dato">
+                    <dt>{% include 'parciales/icono.html.twig' with { nombre: 'entrada', clase: 'meta-icono' } only %} Entrada</dt>
+                    <dd>{{ funcion.precio ?? 'A la gorra' }}</dd>
+                  </div>
+                </dl>
+                {# Los mismos textos que el botón de la tarjeta de la función #}
+                {% set texto_boton = funcion.estado == 'EN_VOTACION_TITULOS' ? 'Votar títulos' : (funcion.estado == 'EN_ACUERDO_FECHA' ? 'Votar fecha' : 'Ver función') %}
+                {% include 'parciales/boton.html.twig' with {
+                  texto: texto_boton,
+                  url: url_funcion,
+                  variante: 'primario',
+                  clase: 'carrusel-accion',
+                  aria_label: texto_boton ~ (texto_boton == 'Ver función' ? ' ' : ' para ') ~ funcion.titulo
+                } only %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+  {% endif %}
+
   <section class="portada-seccion" aria-labelledby="portada-funciones-titulo">
     <header class="portada-seccion-cabecera">
       <h2 id="portada-funciones-titulo" class="portada-seccion-titulo">Próximas funciones</h2>

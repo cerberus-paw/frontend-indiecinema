@@ -12,6 +12,11 @@ class App {
   }
 
   iniciar() {
+    // Los carruseles, como el de destacadas de la portada (E4-07): cada uno recibe su contenedor.
+    const carruseles = document.querySelectorAll('[data-carrusel]');
+    if (carruseles.length > 0) {
+      PAW.cargarScript('Carrusel', `${App.COMPONENTES}/carrusel.js`, () => carruseles.forEach((contenedor) => new Carrusel(contenedor)));
+    }
     // El menú del usuario, sólo con sesión.
     if (document.querySelector('#menu-usuario')) {
       PAW.cargarScript('MenuUsuario', `${App.COMPONENTES}/menu-usuario.js`, () => new MenuUsuario('#menu-usuario'));
