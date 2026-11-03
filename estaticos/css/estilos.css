@@ -1946,6 +1946,80 @@ dd {
   color: #60a5fa;
 }
 
+/* Aviso flotante de que se está esperando al servidor, compartido por los componentes que
+   hacen fetch (IC-102 / IC-277): fijo abajo y centrado, así se ve esté donde esté la página */
+.aviso-flotante {
+  /* Fijo en la pantalla */
+  position: fixed;
+  /* Abajo */
+  bottom: var(--espacio-6);
+  /* Centrado */
+  left: 50%;
+  transform: translateX(-50%);
+  /* Por encima del contenido */
+  z-index: 50;
+  /* Ícono y texto en fila */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  /* Sin margen propio */
+  margin: 0;
+  /* Píldora */
+  padding: var(--espacio-2) var(--espacio-4);
+  border-radius: 999px;
+  /* Superficie elevada con borde */
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  /* Texto */
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  /* Sombra para separarlo de lo que tiene abajo */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Círculo que gira */
+.aviso-flotante-icono {
+  /* Tamaño del ícono */
+  width: 1rem;
+  height: 1rem;
+  /* Aro con un tramo en el color primario */
+  border: 2px solid var(--color-borde-fuerte);
+  border-top-color: var(--color-primario);
+  border-radius: 50%;
+  /* Giro continuo */
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Sin animación para quien la desactivó: queda el aro y el texto */
+@media (prefers-reduced-motion: reduce) {
+  .aviso-flotante-icono {
+    animation: none;
+  }
+}
+
+/* La variante de error del aviso flotante: lo mismo, con el borde y el ícono del error (IC-277) */
+.aviso-flotante-error {
+  /* Borde del color del error, para distinguirlo del de carga */
+  border-color: var(--color-error);
+}
+
+/* El ícono del aviso de error: el símbolo, sin aro ni giro */
+.aviso-flotante-error .aviso-flotante-icono {
+  /* Sin el aro que gira */
+  width: auto;
+  height: auto;
+  border: 0;
+  animation: none;
+  /* Del color del error */
+  color: var(--color-error);
+}
+
 /* --------------------------------------------------------------------------
    15. TARJETA DE FUNCIÓN DE CINE Y CUADRÍCULA (IC-45)
    Componentes para tarjeta_funcion.html.twig en Home y Cartelera
@@ -3423,62 +3497,13 @@ dd {
 }
 
 /* Mientras la búsqueda en vivo trae resultados, los anteriores quedan atenuados y sin clics (IC-102) */
-.cartelera-resultados-seccion[aria-busy="true"] > :not(.cartelera-cargando) {
+.cartelera-resultados-seccion[aria-busy="true"] > :not(.aviso-flotante) {
   /* Atenuados */
   opacity: 0.45;
   /* Sin clics hasta que lleguen los nuevos */
   pointer-events: none;
   /* El cambio, suave */
   transition: opacity 0.15s ease;
-}
-
-/* Aviso de carga de la búsqueda en vivo: fijo abajo y centrado, se ve aunque se haya buscado desde el paginado */
-.cartelera-cargando {
-  /* Fijo en la pantalla */
-  position: fixed;
-  /* Abajo */
-  bottom: var(--espacio-6);
-  /* Centrado */
-  left: 50%;
-  transform: translateX(-50%);
-  /* Por encima del contenido */
-  z-index: 50;
-  /* Ícono y texto en fila */
-  display: inline-flex;
-  align-items: center;
-  gap: var(--espacio-2);
-  /* Sin margen propio */
-  margin: 0;
-  /* Píldora */
-  padding: var(--espacio-2) var(--espacio-4);
-  border-radius: 999px;
-  /* Superficie elevada con borde */
-  background-color: var(--color-superficie-elevada);
-  border: 1px solid var(--color-borde-medio);
-  /* Texto */
-  color: var(--color-texto);
-  font-size: var(--texto-sm);
-  /* Sombra para separarlo de lo que tiene abajo */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-}
-
-/* Círculo que gira */
-.cartelera-cargando-icono {
-  /* Tamaño del ícono */
-  width: 1rem;
-  height: 1rem;
-  /* Aro con un tramo en el color primario */
-  border: 2px solid var(--color-borde-fuerte);
-  border-top-color: var(--color-primario);
-  border-radius: 50%;
-  /* Giro continuo */
-  animation: girar 0.8s linear infinite;
-}
-
-@keyframes girar {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* Link del mensaje de error de la búsqueda en vivo: carga la misma búsqueda como página (IC-102) */
@@ -3494,13 +3519,6 @@ dd {
 /* Separación entre el texto del mensaje y el link */
 .alerta-texto + .alerta-texto {
   margin-top: var(--espacio-2);
-}
-
-/* Sin animación para quien la desactivó: queda el aro y el texto */
-@media (prefers-reduced-motion: reduce) {
-  .cartelera-cargando-icono {
-    animation: none;
-  }
 }
 
 /* --------------------------------------------------------------------------

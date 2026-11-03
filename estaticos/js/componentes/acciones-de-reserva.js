@@ -41,6 +41,10 @@ class AccionesDeReserva {
       return;
     }
     this.enviando = false;
+    // Fijo abajo de la pantalla, así que cuelga del body: no mueve la tabla mientras se manda
+    // (E4-05.6). Aparece sólo si la espera se nota.
+    this.carga = PAW.avisoFlotante('Guardando el cambio…');
+    document.body.append(this.carga);
     this.contenedor.addEventListener('submit', (evento) => {
       const formulario = evento.target.closest('[data-accion-de-reserva]');
       if (formulario) {
@@ -67,6 +71,7 @@ class AccionesDeReserva {
     // Se anota antes de bloquear: al deshabilitar el botón, el navegador le saca el foco.
     const enfocado = formulario.contains(document.activeElement) ? document.activeElement : null;
     this.bloquear(formulario, true);
+    PAW.mostrarAviso(this.carga, true);
 
     try {
       const respuesta = await PAW.enviar(formulario.action, {
@@ -88,6 +93,7 @@ class AccionesDeReserva {
       // Sin red, o con una respuesta que no es JSON: queda el mensaje genérico.
       this.avisar('error', AccionesDeReserva.MENSAJE_DE_ERROR);
     }
+    PAW.mostrarAviso(this.carga, false);
     this.enviando = false;
     this.bloquear(formulario, false);
     // Si el foco quedó perdido por el bloqueo, vuelve adonde estaba, si sigue en la página.

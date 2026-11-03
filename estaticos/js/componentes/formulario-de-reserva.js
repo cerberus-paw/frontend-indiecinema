@@ -39,6 +39,10 @@ class FormularioDeReserva {
     }
     this.enviando = false;
     this.formulario.addEventListener('submit', (evento) => this.alEnviar(evento));
+    // Fijo abajo de la pantalla, así que cuelga del body: no empuja el formulario mientras se
+    // manda (E4-05.6). Aparece sólo si la espera se nota.
+    this.carga = PAW.avisoFlotante('Haciendo la reserva…');
+    document.body.append(this.carga);
 
     const campo = this.campo();
     if (campo) {
@@ -121,6 +125,7 @@ class FormularioDeReserva {
     const cuerpo = new FormData(this.formulario);
     this.bloquear(true);
     this.limpiarError();
+    PAW.mostrarAviso(this.carga, true);
 
     let datos = null;
     try {
@@ -132,6 +137,7 @@ class FormularioDeReserva {
       datos = await respuesta.json();
       if (respuesta.status === 201) {
         // Queda bloqueado a propósito: la reserva ya está hecha y el formulario se reemplaza.
+        PAW.mostrarAviso(this.carga, false);
         this.avisarLugares(datos);
         this.confirmar(datos);
 
@@ -140,6 +146,7 @@ class FormularioDeReserva {
     } catch {
       // Sin red, o con una respuesta que no es JSON: queda el mensaje genérico.
     }
+    PAW.mostrarAviso(this.carga, false);
     // En este orden: primero se habilita, porque LugaresLibres deshabilita el campo si con el
     // número nuevo la función quedó agotada, y bloquear(false) lo volvería a habilitar; y el error
     // va último, porque un campo deshabilitado no toma el foco que le da mostrarError().
