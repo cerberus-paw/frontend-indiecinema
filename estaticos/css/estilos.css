@@ -1977,6 +1977,12 @@ dd {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
+/* Oculto con el atributo hidden mientras no hay nada que avisar: el display de arriba le ganaría */
+.aviso-flotante[hidden] {
+  /* Fuera de la pantalla */
+  display: none;
+}
+
 /* Círculo que gira */
 .aviso-flotante-icono {
   /* Tamaño del ícono */
