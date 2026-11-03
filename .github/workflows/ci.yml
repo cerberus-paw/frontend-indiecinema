@@ -1,4 +1,4 @@
-# Integración continua del front: en cada PR y en cada push a main o a desarrollo. Las plantillas
+# Integración continua del front: en cada PR y en cada push a main o a dev. Las plantillas
 # las usan los subsistemas del back, así que lo más importante es correr sus pruebas con este front
 # antes de integrarlo, y no recién cuando falla el CI del back.
 
@@ -7,7 +7,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, desarrollo]
+    branches: [main, dev]
 
 # Sólo lee el código: ningún trabajo necesita escribir en el repositorio.
 permissions:
@@ -59,7 +59,7 @@ jobs:
     steps:
       # Twig no es dependencia del front: lo trae el núcleo del back, con su misma versión.
       # La rama del back con el mismo nombre que ésta, si existe; si no, la rama a la que apunta
-      # el PR (desarrollo o main), y si tampoco existe, main. Así un cambio que toca los dos
+      # el PR (dev o main), y si tampoco existe, main. Así un cambio que toca los dos
       # repositorios (las ramas IC-… se llaman igual en los dos) se prueba entero antes de mergear
       # ninguno. Las ramas van por env y no en el script, por si traen algo raro.
       - name: Elegir la rama del back
@@ -122,7 +122,7 @@ jobs:
       # El espejo del CI del back: el back con el front de este PR al lado, como en la máquina de
       # cada uno (los subsistemas instalan el front desde ../../frontend-indiecinema).
       # La rama del back con el mismo nombre que ésta, si existe; si no, la rama a la que apunta
-      # el PR (desarrollo o main), y si tampoco existe, main. Así un cambio que toca los dos
+      # el PR (dev o main), y si tampoco existe, main. Así un cambio que toca los dos
       # repositorios (las ramas IC-… se llaman igual en los dos) se prueba entero antes de mergear
       # ninguno. Las ramas van por env y no en el script, por si traen algo raro.
       - name: Elegir la rama del back

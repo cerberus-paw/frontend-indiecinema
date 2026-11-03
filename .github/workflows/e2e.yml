@@ -1,5 +1,5 @@
 # Las pruebas de punta a punta (e2e/README.md) contra el sitio de desarrollo. Las llama el CD del
-# back y del front después de desplegar desarrollo, y se pueden correr a mano desde Actions. La URL,
+# back y del front después de desplegar dev, y se pueden correr a mano desde Actions. La URL,
 # la cuenta y la función salen del environment desarrollo del repositorio que las corre: el
 # repositorio es público y las claves no pueden estar en el código.
 
@@ -21,12 +21,12 @@ jobs:
       name: desarrollo
       url: ${{ vars.E2E_URL }}
     steps:
-      # Las pruebas de la rama desarrollo del front, aunque las llame el back: son las que van con
+      # Las pruebas de la rama dev del front, aunque las llame el back: son las que van con
       # lo que se acaba de publicar.
       - uses: actions/checkout@v7
         with:
           repository: cerberus-paw/frontend-indiecinema
-          ref: desarrollo
+          ref: dev
       - uses: actions/setup-node@v7
         with:
           node-version: 22
