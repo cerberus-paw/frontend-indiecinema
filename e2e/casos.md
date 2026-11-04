@@ -80,6 +80,18 @@ Sin sesión, con los datos de prueba: hay funciones a la gorra (precio 0).
 | --- | --- | --- |
 | PR-1 | Escribe 0 en «Precio hasta» y deja de escribir | Sin recargar, sólo funciones «A la gorra», y la dirección lleva `precio_max=0` |
 
+## Paginado de la cartelera
+
+Sin sesión. Necesitan más de una página de cartelera (más de 12 funciones), como en los datos de
+prueba.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| PG-1 | En la compu, aprieta el número 2 del paginado | Sin recargar, la página 2, con el 2 marcado como la actual |
+| PG-2 | En el celular, baja hasta el final de la cartelera | Sin números de página, se agregan las funciones de la página siguiente |
+| PG-3 | En el celular, elige «Tradicional» en «Paginado» y recarga | Sigue en «Tradicional», con los números de página |
+| PG-4 | Sin JavaScript, abre la cartelera | No ve «Paginado», y los números de página llevan a cada página |
+
 ## Lo que todavía no cubren
 
 Votar títulos, proponer y votar franjas, confirmar la franja ganadora y el panel de reservas del
