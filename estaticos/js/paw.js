@@ -196,6 +196,94 @@ class PAW {
   }
 
   /**
+   * Le da el foco a un elemento que no lo toma solo —un aviso, un título, el texto que reemplaza
+   * a un botón—, haciéndolo enfocable sin meterlo en el recorrido del tabulador: con tabindex="-1"
+   * se enfoca por programa pero no se tabula. Si ya traía un tabindex, ése se respeta.
+   *
+   * Hace falta cada vez que algo que tenía el foco sale del documento: el navegador se lo pasa al
+   * body, que es el principio de la página, y quien navega con el teclado o con un lector de
+   * pantalla pierde dónde estaba y tiene que recorrerla de nuevo.
+   *
+   * @param {?Element} elemento
+   */
+  static enfocar(elemento) {
+    if (!(elemento instanceof HTMLElement)) {
+      return;
+    }
+    if (!elemento.hasAttribute('tabindex')) {
+      elemento.tabIndex = -1;
+    }
+    elemento.focus();
+  }
+
+  /**
+   * Deshabilita o vuelve a habilitar los controles de un formulario mientras se manda —para que un
+   * doble clic no mande dos pedidos— conservando el foco.
+   *
+   * El foco es el motivo de que esto esté acá: al deshabilitar el control que lo tiene, el
+   * navegador se lo pasa al body. Así que al bloquear se anota quién lo tenía, y se devuelve para
+   * el que necesite saberlo; al desbloquear se le devuelve, pero sólo si sigue en la página y el
+   * foco quedó perdido en el body: si mientras tanto el componente se lo llevó al campo con el
+   * error, al comprobante o al texto que reemplazó al botón, ése es el que vale y no hay que
+   * pisarlo.
+   *
+   * Lo anotado vive en una propiedad del formulario y no en el componente, como la espera de
+   * mostrarAviso(): así el que llama bloquea y desbloquea sin tener que guardar nada.
+   *
+   * @param {?HTMLElement} formulario
+   * @param {boolean} bloqueado
+   * @param {string} [selector='button[type="submit"]'] los controles que se deshabilitan
+   * @returns {?Element} al bloquear, lo que tenía el foco; al desbloquear, null
+   */
+  static bloquear(formulario, bloqueado, selector = 'button[type="submit"]') {
+    if (!formulario) {
+      return null;
+    }
+    if (bloqueado) {
+      // Se anota antes de deshabilitar nada, que es justo lo que se lleva el foco puesto.
+      formulario.enfocado = formulario.contains(document.activeElement) ? document.activeElement : null;
+    }
+    for (const control of formulario.querySelectorAll(selector)) {
+      control.toggleAttribute('disabled', bloqueado);
+    }
+    // En el botón, además, que es lo que el lector de pantalla anuncia como ocupado.
+    formulario.querySelector('button[type="submit"]')?.toggleAttribute('aria-busy', bloqueado);
+    if (bloqueado) {
+      return formulario.enfocado;
+    }
+    const enfocado = formulario.enfocado;
+    formulario.enfocado = null;
+    if (enfocado?.isConnected && document.activeElement === document.body) {
+      enfocado.focus();
+    }
+
+    return null;
+  }
+
+  /**
+   * El mensaje de error de una respuesta JSON, el que está escrito para quien usa el sitio. Desde
+   * E4-05.1 toda respuesta de error trae uno —el del campo o el de la regla en un 422, «La página
+   * venció…» con el token vencido, «Tenés que ingresar…» con la sesión vencida— y sin detalles
+   * internos, así que se muestra el que venga, sea cual sea el estado. Si no vino ninguno —sin
+   * red, o una respuesta que no es JSON— queda el genérico del componente, que es el único que
+   * sabe qué fue lo que no se pudo hacer.
+   *
+   * Está acá y no en cada componente porque mirar sólo el 422 y tapar todo lo demás con el
+   * genérico fue el error que hubo que arreglar dos veces (#70 y #72): así el próximo componente
+   * con fetch pide el mensaje y le sale bien de entrada.
+   *
+   * @param {?{errores?: Object<string, string>, error?: string}} datos el JSON de la respuesta
+   * @param {string} generico lo que se muestra si la respuesta no trajo ningún mensaje
+   * @param {?string} [campo=null] el campo cuyo error tiene prioridad, si vienen por campo
+   * @returns {string}
+   */
+  static mensajeDeError(datos, generico, campo = null) {
+    const mensaje = (campo === null ? null : datos?.errores?.[campo]) ?? datos?.error;
+
+    return typeof mensaje === 'string' && mensaje !== '' ? mensaje : generico;
+  }
+
+  /**
    * fetch() con la cabecera X-CSRF-Token en los pedidos que cambian algo, y sólo si van a este
    * mismo sitio: el token no sale a otro dominio.
    *

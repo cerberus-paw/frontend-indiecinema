@@ -22,6 +22,10 @@
  * funciona: el novalidate lo pone el JavaScript, no la plantilla, justamente para no sacarle la
  * validación nativa a quien no lo tenga.
  *
+ * El mensaje de error que manda el servidor y el foco al bloquear no los resuelve este componente:
+ * los pone PAW.mensajeDeError() y PAW.bloquear() (E4-05.8), que son los mismos que usa
+ * AccionesDeReserva. Estaban escritos dos veces, y las dos veces hubo que arreglarlos.
+ *
  * Lo que no es de esta subtarea: el indicador de carga y el aviso de error genérico con la red
  * cortada son E4-05.6.
  */
@@ -159,29 +163,11 @@ class FormularioDeReserva {
     // mostrar el error, y el foco, que estaba en el botón, se iría al principio de la página. Va
     // al título del aviso, que es lo que ahora ocupa su lugar.
     if (!this.formulario.isConnected) {
-      const titulo = document.getElementById('ficha-reserva-titulo');
-      if (titulo) {
-        titulo.tabIndex = -1;
-        titulo.focus();
-      }
+      PAW.enfocar(document.getElementById('ficha-reserva-titulo'));
 
       return;
     }
-    this.mostrarError(FormularioDeReserva.mensajeDe(datos));
-  }
-
-  /**
-   * El error que mandó el servidor, que en JSON viene para el espectador y sin detalles internos
-   * (E4-05.1): el del campo o el de la regla en un 422, «La página venció…» con el token vencido,
-   * «Tenés que ingresar…» con la sesión vencida. Si no trae ninguno, el genérico.
-   *
-   * @param {?{errores?: {cantidad?: string}, error?: string}} datos
-   * @returns {string}
-   */
-  static mensajeDe(datos) {
-    const mensaje = datos?.errores?.cantidad ?? datos?.error;
-
-    return typeof mensaje === 'string' && mensaje !== '' ? mensaje : FormularioDeReserva.MENSAJE_DE_ERROR;
+    this.mostrarError(PAW.mensajeDeError(datos, FormularioDeReserva.MENSAJE_DE_ERROR, 'cantidad'));
   }
 
   /**
@@ -207,7 +193,7 @@ class FormularioDeReserva {
     aviso.append(icono, contenido);
 
     this.formulario.replaceWith(aviso);
-    aviso.focus();
+    PAW.enfocar(aviso);
   }
 
   /**
@@ -273,17 +259,17 @@ class FormularioDeReserva {
 
   /**
    * Deshabilita o vuelve a habilitar el campo y el botón mientras se manda, para que no salgan dos
-   * reservas con un doble clic.
+   * reservas con un doble clic. El campo también, y no sólo el botón, porque con Enter la reserva
+   * se manda desde ahí.
+   *
+   * Lo hace PAW.bloquear(), que además conserva el foco: al deshabilitar el control que lo tiene,
+   * el navegador lo manda al principio de la página.
    *
    * @param {boolean} bloqueado
+   * @returns {?Element} al bloquear, lo que tenía el foco
    */
   bloquear(bloqueado) {
-    const boton = this.formulario.querySelector('button[type="submit"]');
-    this.campo()?.toggleAttribute('disabled', bloqueado);
-    boton?.toggleAttribute('disabled', bloqueado);
-    if (boton) {
-      boton.toggleAttribute('aria-busy', bloqueado);
-    }
+    return PAW.bloquear(this.formulario, bloqueado, 'input[name="cantidad"], button[type="submit"]');
   }
 
   /**

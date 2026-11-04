@@ -15,6 +15,10 @@
  * El aviso de lo que pasó va en la región de data-avisos, que es aria-live: la fila cambia sola y
  * un lector de pantalla no lee un cambio en una tabla.
  *
+ * El mensaje de error que manda el servidor y el foco al bloquear no los resuelve este componente:
+ * los ponen PAW.mensajeDeError() y PAW.bloquear() (E4-05.8), que son los mismos que usa
+ * FormularioDeReserva. Estaban escritos dos veces, y las dos veces hubo que arreglarlos.
+ *
  * Sin JavaScript los formularios son los de siempre: un POST que redirige a la lista con el
  * código en la URL. Este componente sólo intercepta lo que ya funciona.
  */
@@ -68,9 +72,10 @@ class AccionesDeReserva {
     // Como en el formulario de reserva: el cuerpo se arma antes de bloquear, porque un campo
     // deshabilitado no entra en el FormData y el código no viajaría.
     const cuerpo = new FormData(formulario);
-    // Se anota antes de bloquear: al deshabilitar el botón, el navegador le saca el foco.
-    const enfocado = formulario.contains(document.activeElement) ? document.activeElement : null;
-    this.bloquear(formulario, true);
+    // PAW.bloquear() anota qué tenía el foco antes de deshabilitar el botón, porque el navegador
+    // se lo saca, y lo devuelve: pintarFila() lo necesita para saber si el texto que reemplaza al
+    // botón se lo tiene que quedar.
+    const enfocado = PAW.bloquear(formulario, true);
     PAW.mostrarAviso(this.carga, true);
 
     try {
@@ -87,7 +92,7 @@ class AccionesDeReserva {
         this.avisar('exito', AccionesDeReserva.hecho(datos.reserva));
         formulario.reset();
       } else {
-        this.avisar('error', AccionesDeReserva.mensajeDe(datos));
+        this.avisar('error', PAW.mensajeDeError(datos, AccionesDeReserva.MENSAJE_DE_ERROR));
       }
     } catch {
       // Sin red, o con una respuesta que no es JSON: queda el mensaje genérico.
@@ -95,26 +100,9 @@ class AccionesDeReserva {
     }
     PAW.mostrarAviso(this.carga, false);
     this.enviando = false;
-    this.bloquear(formulario, false);
-    // Si el foco quedó perdido por el bloqueo, vuelve adonde estaba, si sigue en la página.
-    if (enfocado?.isConnected && document.activeElement === document.body) {
-      enfocado.focus();
-    }
-  }
-
-  /**
-   * El error que mandó el servidor, que en JSON viene para quien mira el panel y sin detalles
-   * internos (E4-05.1): el de la regla en un 422 («ya tiene la asistencia registrada»), «La página
-   * venció…» con el token vencido, «Tenés que ingresar…» con la sesión vencida. Si no trae
-   * ninguno, el genérico.
-   *
-   * @param {?{error?: string}} datos
-   * @returns {string}
-   */
-  static mensajeDe(datos) {
-    const mensaje = datos?.error;
-
-    return typeof mensaje === 'string' && mensaje !== '' ? mensaje : AccionesDeReserva.MENSAJE_DE_ERROR;
+    // Vuelve a habilitar y, si el foco quedó perdido por el bloqueo, lo devuelve adonde estaba: si
+    // pintarFila() ya se lo pasó al texto que reemplazó al botón, ése es el que queda.
+    PAW.bloquear(formulario, false);
   }
 
   /**
@@ -151,8 +139,7 @@ class AccionesDeReserva {
       const hecho = PAW.nuevoElemento('span', deLaFila.dataset.hecho ?? '—', { class: 'tabla-admin-secundario' });
       deLaFila.replaceWith(hecho);
       if (teniaElFoco) {
-        hecho.tabIndex = -1;
-        hecho.focus();
+        PAW.enfocar(hecho);
       }
     }
   }
@@ -195,18 +182,6 @@ class AccionesDeReserva {
     alerta.append(icono, contenido);
 
     region.replaceChildren(alerta);
-  }
-
-  /**
-   * Deshabilita el botón mientras se manda, para que no salgan dos pedidos con un doble clic.
-   *
-   * @param {HTMLFormElement} formulario
-   * @param {boolean} bloqueado
-   */
-  bloquear(formulario, bloqueado) {
-    const boton = formulario.querySelector('button[type="submit"]');
-    boton?.toggleAttribute('disabled', bloqueado);
-    boton?.toggleAttribute('aria-busy', bloqueado);
   }
 
   /**
