@@ -4665,16 +4665,6 @@ dd {
   display: block;
 }
 
-/* Cabecera de la sección de obras */
-.ficha-obras-cabecera {
-  /* Margen inferior */
-  margin-bottom: var(--espacio-4);
-  /* Relleno inferior */
-  padding-bottom: var(--espacio-2);
-  /* Línea divisoria sutil */
-  border-bottom: 1px solid var(--color-superficie-borde);
-}
-
 /* Rótulo de estado de las obras (programadas o candidatas en votación) */
 .ficha-obras-etiqueta {
   /* Tipografía de títulos */
@@ -4693,180 +4683,6 @@ dd {
   margin: 0;
 }
 
-/* Lista vertical de tarjetas de obras */
-.ficha-obras-lista {
-  /* Disposición flex en columna */
-  display: flex;
-  /* Dirección vertical */
-  flex-direction: column;
-  /* Separación entre películas */
-  gap: var(--espacio-6);
-}
-
-/* Tarjeta individual de una película o cortometraje */
-.ficha-obra-tarjeta {
-  /* Fondo superficie */
-  background-color: var(--color-superficie);
-  /* Borde tenue */
-  border: 1px solid var(--color-superficie-borde);
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-lg);
-  /* Relleno interno */
-  padding: var(--espacio-6);
-  /* Disposición flex */
-  display: flex;
-  /* Separación entre afiche y datos */
-  gap: var(--espacio-6);
-  /* Alineación superior */
-  align-items: flex-start;
-  /* Sombra sutil */
-  box-shadow: var(--sombra-sm);
-}
-
-/* Columna para el afiche cinematográfico */
-.ficha-obra-afiche-columna {
-  /* Ancho fijo de afiche */
-  width: 180px;
-  /* No se comprime */
-  flex-shrink: 0;
-}
-
-/* Marcador visual sustituto del afiche cuando no hay imagen */
-.ficha-obra-afiche-placeholder {
-  /* Ancho 100% */
-  width: 100%;
-  /* Proporción 2:3 */
-  aspect-ratio: 2 / 3;
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-md);
-  /* Fondo degradado suave */
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%);
-  /* Borde tenue */
-  border: 1px solid var(--color-superficie-borde);
-  /* Disposición flex */
-  display: flex;
-  /* Dirección vertical */
-  flex-direction: column;
-  /* Centrado vertical */
-  align-items: center;
-  /* Centrado horizontal */
-  justify-content: center;
-  /* Separación */
-  gap: var(--espacio-2);
-}
-
-/* Cuerpo de información textual de la obra */
-.ficha-obra-cuerpo {
-  /* Ocupa el espacio restante */
-  flex: 1;
-  /* Evita desborde horizontal */
-  min-width: 0;
-  /* Disposición flex en columna */
-  display: flex;
-  /* Dirección vertical */
-  flex-direction: column;
-  /* Separación interna */
-  gap: var(--espacio-2);
-}
-
-/* Título de la obra individual (h2) */
-.ficha-obra-titulo {
-  /* Tipografía de títulos */
-  font-family: var(--fuente-titulos);
-  /* Tamaño 30px */
-  font-size: var(--texto-2xl);
-  /* Peso negrita */
-  font-weight: 700;
-  /* Color blanco brillante */
-  color: var(--color-texto-brillante);
-  /* Margen cero */
-  margin: 0;
-  /* Altura de línea */
-  line-height: 1.25;
-}
-
-/* Año de realización o estreno */
-.ficha-obra-anio {
-  /* Tamaño normal */
-  font-size: var(--texto-lg);
-  /* Peso normal */
-  font-weight: 400;
-  /* Color atenuado */
-  color: var(--color-texto-apagado);
-  /* Separación del título */
-  margin-left: var(--espacio-1);
-}
-
-/* Fila de metadatos de la obra (dirección, duración, tipo) */
-.ficha-obra-metadatos {
-  /* Disposición flex */
-  display: flex;
-  /* Envoltorio responsivo */
-  flex-wrap: wrap;
-  /* Alineación centrada */
-  align-items: center;
-  /* Separación */
-  gap: var(--espacio-2);
-  /* Tamaño chico */
-  font-size: var(--texto-sm);
-  /* Color secundario */
-  color: var(--color-texto-secundario);
-  /* Margen vertical */
-  margin: var(--espacio-1) 0;
-}
-
-/* Énfasis en valores clave de metadatos */
-.ficha-obra-metadato strong {
-  /* Color blanco de lectura */
-  color: var(--color-texto);
-  /* Peso seminegrita */
-  font-weight: 600;
-}
-
-/* Separador puntual entre metadatos */
-.ficha-obra-separador {
-  /* Color atenuado */
-  color: var(--color-texto-apagado);
-}
-
-/* Contenedor de géneros cinematográficos */
-.ficha-obra-generos {
-  /* Disposición flex */
-  display: flex;
-  /* Envoltorio */
-  flex-wrap: wrap;
-  /* Alineación centrada */
-  align-items: center;
-  /* Separación */
-  gap: var(--espacio-2);
-  /* Margen superior */
-  margin-top: var(--espacio-1);
-}
-
-/* Rótulo de la lista de géneros */
-.ficha-obra-generos-rotulo {
-  /* Tamaño micro */
-  font-size: var(--texto-xs);
-  /* Peso seminegrita */
-  font-weight: 600;
-  /* Mayúsculas */
-  text-transform: uppercase;
-  /* Espaciado */
-  letter-spacing: 0.05em;
-  /* Color atenuado */
-  color: var(--color-texto-apagado);
-}
-
-/* Fila de chips de géneros */
-.ficha-obra-generos-chips {
-  /* Disposición flex */
-  display: flex;
-  /* Envoltorio */
-  flex-wrap: wrap;
-  /* Separación */
-  gap: var(--espacio-1);
-}
-
 /* Chip de género individual */
 .ficha-genero-chip {
   /* Disposición en bloque de línea */
@@ -4883,24 +4699,6 @@ dd {
   font-size: var(--texto-xs);
   /* Peso seminegrita */
   font-weight: 600;
-}
-
-/* Contenedor de la sinopsis argumental */
-.ficha-obra-sinopsis {
-  /* Tamaño de lectura base */
-  font-size: var(--texto-base);
-  /* Color crema de lectura */
-  color: var(--color-texto-secundario);
-  /* Altura de línea confortable */
-  line-height: 1.6;
-  /* Margen superior */
-  margin-top: var(--espacio-2);
-}
-
-/* Párrafo dentro de la sinopsis */
-.ficha-obra-sinopsis p {
-  /* Sin margen propio */
-  margin: 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -7031,6 +6829,168 @@ a.tabla-admin-principal:focus-visible {
   border-color: var(--color-borde-medio);
 }
 
+/* --------------------------------------------------------------------------
+   FICHA DE UNA FUNCIÓN PROGRAMADA (E4-10.10)
+   Como el wireframe «funcion-programada»: el detalle (las obras, los recuadros y
+   la sala) y, al costado, la reserva. Finalizada y cancelada, sin el costado.
+   -------------------------------------------------------------------------- */
+
+.ficha-detalle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--espacio-8);
+}
+
+.ficha-detalle-con-lateral {
+  grid-template-columns: minmax(0, 1fr) 340px;
+}
+
+.ficha-detalle-principal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  min-width: 0;
+}
+
+/* En el costado la reserva va apilada: el precio, la barra y, abajo, el formulario a lo ancho */
+.ficha-detalle-lateral .ficha-reserva {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ficha-detalle-lateral .ficha-reserva-disponibles {
+  min-width: 0;
+}
+
+.ficha-detalle-lateral .ficha-reserva-formulario {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ficha-detalle-lateral .ficha-reserva-formulario .grupo-campo {
+  width: auto;
+}
+
+/* Las obras en filas: el afiche chico, el título y «2023 · Documental · 94 min» */
+.ficha-obras-filas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin: var(--espacio-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ficha-obra-fila {
+  display: flex;
+  /* Arriba y no al centro: con la sinopsis la fila es alta y el afiche va junto al título */
+  align-items: flex-start;
+  gap: var(--espacio-4);
+  padding: var(--espacio-3) var(--espacio-4);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+.ficha-obra-fila .ficha-titulo-nombre,
+.ficha-sala-fila .ficha-titulo-nombre {
+  font-size: var(--texto-base);
+}
+
+/* Fecha, horario, duración total y entrada: cuatro recuadros con el rótulo chico arriba */
+.ficha-recuadros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espacio-4);
+  width: auto;
+  margin: 0;
+  /* Sin la caja que el dl tiene en todo el sitio: cada recuadro tiene la suya */
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.ficha-recuadro {
+  padding: var(--espacio-4);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+.ficha-recuadro dt {
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+.ficha-recuadro dd {
+  margin: var(--espacio-2) 0 0;
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+/* La sala: la foto, el nombre con la dirección y «Ver sala» a la derecha */
+.ficha-sala-fila {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-5);
+  margin-top: var(--espacio-4);
+  padding: var(--espacio-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-lg);
+}
+
+.ficha-sala-fila-foto {
+  flex-shrink: 0;
+  width: 10rem;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+}
+
+.ficha-sala-fila-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  flex: 1;
+  min-width: 0;
+}
+
+/* La sinopsis de cada obra y la descripción de la sala, debajo de sus datos */
+.ficha-obra-fila-sinopsis,
+.ficha-sala-fila-descripcion {
+  margin: var(--espacio-2) 0 0;
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+  color: var(--color-texto);
+}
+
+/* En tablet y celular, una columna: la reserva baja después del detalle */
+@media (max-width: 900px) {
+  .ficha-detalle-con-lateral {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ficha-recuadros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .ficha-sala-fila {
+    flex-direction: column;
+  }
+
+  .ficha-sala-fila-foto {
+    width: 100%;
+  }
+}
+
 /* El chip de los lugares de la cabecera, en rojo cuando no queda ninguno */
 .ficha-chip-agotada {
   border-color: var(--color-error);
@@ -7528,26 +7488,6 @@ a.tabla-admin-principal:focus-visible {
     height: 200px;
   }
 
-  /* Tarjeta de obra apilada verticalmente */
-  .ficha-obra-tarjeta {
-    /* Dirección de columna */
-    flex-direction: column;
-    /* Alineación estirada */
-    align-items: stretch;
-    /* Separación vertical */
-    gap: var(--espacio-4);
-  }
-
-  /* Afiche centrado y con ancho controlado en móvil */
-  .ficha-obra-afiche-columna {
-    /* Ancho responsivo */
-    width: 100%;
-    /* Límite para no ocupar toda la pantalla vertical */
-    max-width: 220px;
-    /* Centrado horizontal con margen inferior */
-    margin: 0 auto var(--espacio-2) auto;
-  }
-
   /* Título de la función ajustado en móvil */
   .ficha-funcion-titulo {
     /* Tamaño 30px */
@@ -7710,27 +7650,10 @@ a.tabla-admin-principal:focus-visible {
   }
   /* Ficha de la función en celulares angostos a 360 px (IC-87 / E3-04.3) */
   .ficha-sala-tarjeta,
-  .ficha-obra-tarjeta {
-    /* Relleno compacto */
-    padding: var(--espacio-4);
-  }
-
-  /* Afiche compacto en celulares angostos */
-  .ficha-obra-afiche-columna {
-    /* Máximo 180px */
-    max-width: 180px;
-  }
-
   /* Título de la función a 360 px */
   .ficha-funcion-titulo {
     /* Tamaño adaptado */
     font-size: 1.75rem;
-  }
-
-  /* Título de obra a 360 px */
-  .ficha-obra-titulo {
-    /* Tamaño 24px */
-    font-size: var(--texto-xl);
   }
 
   /* Título de sala a 360 px */
@@ -7739,11 +7662,6 @@ a.tabla-admin-principal:focus-visible {
     font-size: var(--texto-lg);
   }
 
-  /* Metadatos más compactos */
-  .ficha-obra-metadatos {
-    /* Tamaño micro */
-    font-size: var(--texto-xs);
-  }
 }
 
 /* ── 12.4 Pantallas de Escritorio Ancho (1440 px o superior) ───────────── */
