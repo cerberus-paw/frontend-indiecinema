@@ -1,0 +1,26 @@
+{#
+  Armado compartido de los paneles, como los wireframes de la E2: sin el encabezado ni el pie del
+  sitio público, sólo una barra lateral y el contenido al lado. Cada rol arma encima el suyo con su
+  barra (administracion.html.twig para el administrador), que reemplaza al encabezado: lleva el
+  logo, las secciones y la sesión con el botón para salir.
+
+  Bloques del armado de cada rol:
+  - barra: la barra lateral, que resalta la sección actual con block('seccion').
+  Bloques de la pantalla:
+  - seccion: la sección actual, para resaltarla en la barra.
+  - panel: el contenido.
+#}
+{% extends 'base.html.twig' %}
+
+{% block encabezado %}{% endblock %}
+{% block pie %}{% endblock %}
+
+{% block contenido %}
+<div class="panel-admin">
+  {% block barra %}{% endblock %}
+
+  <div class="panel-admin-contenido">
+    {% block panel %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

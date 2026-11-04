@@ -5310,14 +5310,14 @@ dd {
   overflow-x: clip;
 }
 
-/* Sin encabezado ni pie, el panel del administrador ocupa toda la pantalla, como el wireframe */
+/* Sin encabezado ni pie, el panel (panel.html.twig) ocupa toda la pantalla, como el wireframe */
 .contenido-principal:has(> .panel-admin) {
   max-width: none;
   padding: 0;
   display: flex;
 }
 
-/* Panel del administrador: la barra lateral y el contenido, como el wireframe. El fondo de la
+/* Los paneles: la barra lateral y el contenido, como el wireframe. El fondo de la
    columna de la barra lo pinta el panel, así sigue hasta abajo aunque la página sea más alta que
    la pantalla (la barra es del alto de la pantalla) */
 .panel-admin {
