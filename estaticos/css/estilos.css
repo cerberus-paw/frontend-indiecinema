@@ -297,6 +297,12 @@ select {
   top: 1rem;
 }
 
+/* El contenido principal toma el foco al saltar (tabindex -1) sólo para que Tab siga desde ahí */
+.contenido-principal:focus {
+  /* Sin el contorno del foco: marcaría la página entera */
+  outline: none;
+}
+
 /* --------------------------------------------------------------------------
    4. TIPOGRAFÍA Y JERARQUÍA VISUAL
    -------------------------------------------------------------------------- */
@@ -2981,40 +2987,35 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
-   19. FICHA DE LA SALA: FOTO, DATOS Y PRÓXIMAS FUNCIONES (IC-90)
-   Componentes de programacion/sala.html.twig
+   19. FICHA DE LA SALA: PORTADA, DATOS, PRÓXIMAS FUNCIONES Y COSTADO (IC-90, IC-335)
+   Componentes de programacion/sala.html.twig y parciales/fila_funcion.html.twig, en el orden
+   del wireframe «sala-indie» de Figma
    -------------------------------------------------------------------------- */
 
-/* La foto y los datos de la sala, lado a lado en escritorio */
-.ficha-sala-cabecera {
-  /* Cuadrícula de dos columnas: la foto un poco más ancha */
-  display: grid;
-  /* Foto y datos */
-  grid-template-columns: 3fr 2fr;
-  /* Separación entre las columnas */
-  gap: var(--espacio-8);
-  /* Los datos arrancan arriba, a la altura de la foto */
-  align-items: start;
-  /* Separación con las funciones */
-  margin: var(--espacio-6) 0 var(--espacio-10);
+/* La portada empieza pegada al encabezado: sin el relleno superior del main */
+.contenido-principal:has(> .ficha-sala:first-child) {
+  /* Sin relleno arriba */
+  padding-top: 0;
 }
 
-/* Marco de la foto, apaisado como una pantalla */
-.ficha-sala-foto {
-  /* Proporción de pantalla */
-  aspect-ratio: 16 / 9;
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-lg);
-  /* La imagen no se sale de las esquinas */
-  overflow: hidden;
+/* Foto de portada de borde a borde de la ventana; el body corta lo que se sale a los costados */
+.ficha-sala-portada {
+  /* Todo el ancho de la ventana */
+  width: 100vw;
+  /* Sale del ancho máximo del main, centrada */
+  margin-left: calc(50% - 50vw);
+  /* Alto de franja, como el wireframe (300 de 1440), con piso y techo */
+  height: clamp(160px, 21vw, 360px);
   /* Fondo mientras carga o sin foto */
   background-color: var(--color-superficie);
-  /* Borde tenue */
-  border: 1px solid var(--color-borde);
+  /* Línea inferior tenue */
+  border-bottom: 1px solid var(--color-borde);
+  /* La imagen no se sale */
+  overflow: hidden;
 }
 
-/* La foto ocupa todo el marco sin deformarse */
-.ficha-sala-foto-imagen {
+/* La foto llena la franja sin deformarse */
+.ficha-sala-portada-imagen {
   /* Ancho completo */
   width: 100%;
   /* Alto completo */
@@ -3025,16 +3026,30 @@ dd {
   display: block;
 }
 
-/* Nombre, dirección, capacidad y descripción, en columna */
-.ficha-sala-datos {
-  /* En columna */
+/* Marcador de la portada sin foto, con el texto del wireframe */
+.ficha-sala-portada-marcador {
+  /* Llena la franja */
+  height: 100%;
+  /* Centra el texto */
   display: flex;
-  /* Dirección vertical */
-  flex-direction: column;
-  /* Separación entre los datos */
-  gap: var(--espacio-3);
-  /* Evita desborde con nombres largos */
-  min-width: 0;
+  /* Centrado vertical */
+  align-items: center;
+  /* Centrado horizontal */
+  justify-content: center;
+  /* Fondo neutro degradado, como el marcador del afiche */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%);
+}
+
+/* Las migas, separadas de la portada */
+.ficha-sala-migas {
+  /* Aire arriba */
+  margin-top: var(--espacio-6);
+}
+
+/* Nombre y dirección de la sala */
+.ficha-sala-cabecera {
+  /* Separación con las columnas */
+  margin: var(--espacio-2) 0 var(--espacio-8);
 }
 
 /* Nombre de la sala */
@@ -3045,41 +3060,346 @@ dd {
   font-size: var(--texto-3xl);
   /* Interlineado compacto */
   line-height: 1.15;
-  /* Sin margen propio: lo da el gap */
-  margin: 0;
+  /* Separación con la dirección */
+  margin: 0 0 var(--espacio-3);
   /* Corta palabras muy largas */
   overflow-wrap: anywhere;
 }
 
-/* Título de la sección de funciones */
-.ficha-sala-funciones-titulo {
+/* Dirección y localidad debajo del nombre, con el pin */
+.ficha-sala-ubicacion-linea {
+  /* Pin y texto en fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación entre el pin y el texto */
+  gap: var(--espacio-2);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Tamaño chico */
+  font-size: var(--texto-sm);
+  /* Sin margen propio */
+  margin: 0;
+}
+
+/* Columna principal y costado, como el wireframe (780 y 268 de 1440) */
+.ficha-sala-columnas {
+  /* Cuadrícula de dos columnas */
+  display: grid;
+  /* La principal ocupa lo que queda; el costado, un ancho fijo con piso */
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  /* Separación entre las columnas */
+  gap: var(--espacio-8);
+  /* Cada columna arranca arriba */
+  align-items: start;
+}
+
+/* Las secciones de la columna principal, apiladas */
+.ficha-sala-seccion + .ficha-sala-seccion {
+  /* Separación entre «Sobre la sala» y las funciones */
+  margin-top: var(--espacio-10);
+}
+
+/* Título de cada sección de la columna principal */
+.ficha-sala-seccion-titulo {
   /* Tipografía de títulos */
   font-family: var(--fuente-titulos);
   /* Tamaño de sección */
-  font-size: var(--texto-2xl);
-  /* Separación con la cuadrícula */
-  margin: 0 0 var(--espacio-6);
+  font-size: var(--texto-xl);
+  /* Separación con el contenido */
+  margin: 0 0 var(--espacio-4);
 }
 
-/* En tablet y celular, la foto arriba y los datos debajo */
-@media (max-width: 768px) {
-  .ficha-sala-cabecera {
-    /* Una sola columna */
-    grid-template-columns: 1fr;
-    /* Menos separación */
-    gap: var(--espacio-5);
-    /* Menos margen con las funciones */
-    margin-bottom: var(--espacio-8);
-  }
+/* La descripción de la sala */
+.ficha-sala-sobre {
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Interlineado cómodo para leer */
+  line-height: 1.7;
+  /* Ancho de lectura */
+  max-width: 65ch;
+  /* Sin margen propio */
+  margin: 0;
+}
 
+/* Lista de próximas funciones, sin viñetas, con una línea entre fila y fila */
+.lista-filas-funcion {
+  /* Sin viñetas */
+  list-style: none;
+  /* Sin margen */
+  margin: 0;
+  /* Sin relleno */
+  padding: 0;
+  /* Línea arriba de la primera fila */
+  border-top: 1px solid var(--color-borde);
+}
+
+/* Una función: afiche, datos y, a la derecha, lugares, estado y «Ver» */
+.fila-funcion {
+  /* En fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación entre las partes */
+  gap: var(--espacio-4);
+  /* Relleno vertical */
+  padding: var(--espacio-4) 0;
+  /* Línea entre filas */
+  border-bottom: 1px solid var(--color-borde);
+}
+
+/* El afiche chico, vertical como uno de verdad */
+.fila-funcion-afiche {
+  /* Ancho fijo, como el wireframe */
+  flex: 0 0 48px;
+  /* Proporción de afiche */
+  aspect-ratio: 2 / 3;
+  /* Centra el marcador */
+  display: flex;
+  /* Centrado vertical */
+  align-items: center;
+  /* Centrado horizontal */
+  justify-content: center;
+  /* Fondo del marcador */
+  background-color: var(--color-superficie-elevada);
+  /* Esquinas apenas redondeadas */
+  border-radius: var(--radio-sm);
+  /* La imagen no se sale */
+  overflow: hidden;
+}
+
+/* La palabra AFICHE del marcador, más chica para que entre en el recuadro */
+.fila-funcion-afiche .afiche-placeholder-texto {
+  /* Tamaño mínimo */
+  font-size: 0.5rem;
+  /* Menos espaciado entre letras */
+  letter-spacing: 0.05em;
+}
+
+/* La imagen del afiche llena el recuadro */
+.fila-funcion-afiche-imagen {
+  /* Ancho completo */
+  width: 100%;
+  /* Alto completo */
+  height: 100%;
+  /* Recorta en lugar de deformar */
+  object-fit: cover;
+  /* Sin espacio de línea */
+  display: block;
+}
+
+/* Título y fecha */
+.fila-funcion-datos {
+  /* Ocupa lo que queda */
+  flex: 1;
+  /* Deja achicarse con títulos largos */
+  min-width: 0;
+}
+
+/* Título de la función */
+.fila-funcion-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño de texto destacado */
+  font-size: var(--texto-base);
+  /* Peso medio */
+  font-weight: 600;
+  /* Separación con la fecha */
+  margin: 0 0 var(--espacio-1);
+  /* Corta palabras muy largas */
+  overflow-wrap: anywhere;
+}
+
+/* Fecha con el calendario */
+.fila-funcion-fecha {
+  /* Ícono y texto en fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación */
+  gap: var(--espacio-2);
+  /* Texto chico */
+  font-size: var(--texto-sm);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Sin margen */
+  margin: 0;
+}
+
+/* Lugares, insignia y «Ver», a la derecha */
+.fila-funcion-estado {
+  /* En fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación */
+  gap: var(--espacio-4);
+  /* No se achica */
+  flex-shrink: 0;
+}
+
+/* «5 de 80 lugares libres» */
+.fila-funcion-lugares {
+  /* Texto chico */
+  font-size: var(--texto-sm);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Sin margen */
+  margin: 0;
+}
+
+/* Agotada, en el color de error */
+.fila-funcion-agotada {
+  /* Rojo de estado */
+  color: var(--color-error);
+  /* Peso medio */
+  font-weight: 600;
+}
+
+/* El costado: los recuadros apilados */
+.ficha-sala-costado {
+  /* En columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación entre recuadros */
+  gap: var(--espacio-4);
+}
+
+/* Cada recuadro del costado */
+.ficha-sala-recuadro {
+  /* Fondo de superficie */
+  background-color: var(--color-superficie);
+  /* Borde tenue */
+  border: 1px solid var(--color-borde);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-md);
+  /* Relleno interno */
+  padding: var(--espacio-4);
+}
+
+/* Título del recuadro, en versalitas monoespaciadas como el wireframe */
+.ficha-sala-recuadro-titulo {
+  /* Tipografía monoespaciada */
+  font-family: var(--fuente-codigo);
+  /* Texto extra chico */
+  font-size: var(--texto-xs);
+  /* Mayúsculas */
+  text-transform: uppercase;
+  /* Espaciado entre letras */
+  letter-spacing: 0.08em;
+  /* Peso normal */
+  font-weight: 500;
+  /* Texto atenuado */
+  color: var(--color-texto-apagado);
+  /* Separación con el contenido */
+  margin: 0 0 var(--espacio-3);
+}
+
+/* La dirección, destacada */
+.ficha-sala-direccion {
+  /* Peso medio */
+  font-weight: 600;
+  /* Separación con la localidad */
+  margin: 0 0 var(--espacio-1);
+}
+
+/* La localidad, debajo */
+.ficha-sala-localidad {
+  /* Texto chico */
+  font-size: var(--texto-sm);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Sin margen */
+  margin: 0;
+}
+
+/* Lista de parámetros: el nombre a la izquierda y el valor a la derecha. Sin la tarjeta que el
+   dl tiene por defecto: ya está dentro del recuadro */
+.ficha-sala-parametros {
+  /* Sin margen */
+  margin: 0;
+  /* Sin relleno */
+  padding: 0;
+  /* Sin fondo */
+  background: none;
+  /* Sin borde */
+  border: 0;
+  /* Sin redondeo */
+  border-radius: 0;
+  /* En columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación entre parámetros */
+  gap: var(--espacio-2);
+  /* Texto chico */
+  font-size: var(--texto-sm);
+}
+
+/* Un parámetro */
+.ficha-sala-parametro {
+  /* Nombre y valor en fila */
+  display: flex;
+  /* A los extremos */
+  justify-content: space-between;
+  /* Separación mínima */
+  gap: var(--espacio-3);
+}
+
+/* El nombre del parámetro */
+.ficha-sala-parametro dt {
+  /* Peso normal, como el wireframe: el valor es lo que se destaca */
+  font-weight: 400;
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+}
+
+/* El valor del parámetro */
+.ficha-sala-parametro dd {
+  /* Sin la sangría de dd */
+  margin: 0;
+  /* Peso medio */
+  font-weight: 600;
+  /* Alineado a la derecha */
+  text-align: right;
+}
+
+/* En tablet y celular, una sola columna: el costado después de las funciones */
+@media (max-width: 900px) {
+  .ficha-sala-columnas {
+    /* Una sola columna */
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* En el celular, cada fila acomoda los lugares, el estado y «Ver» debajo del título */
+@media (max-width: 600px) {
   .ficha-sala-nombre {
     /* Título más chico */
     font-size: var(--texto-2xl);
   }
 
-  .ficha-sala-funciones-titulo {
-    /* Título de sección más chico */
-    font-size: var(--texto-xl);
+  .fila-funcion {
+    /* Pueden bajar de renglón */
+    flex-wrap: wrap;
+    /* Arriba, porque las alturas cambian */
+    align-items: flex-start;
+  }
+
+  .fila-funcion-estado {
+    /* Todo el ancho, debajo del afiche y el título */
+    flex-basis: 100%;
+    /* Que se acomode si no entra */
+    flex-wrap: wrap;
+    /* Menos separación */
+    gap: var(--espacio-3);
+  }
+
+  /* «Ver» se va a la derecha */
+  .fila-funcion-ver {
+    /* Empuja a la derecha */
+    margin-left: auto;
   }
 }
 
@@ -5043,7 +5363,7 @@ dd {
 
 /* Tarjetas de números arriba de la tabla, como el wireframe: del ancho de cuatro por fila, aunque
    haya dos */
-.panel-admin-resumen {
+.panel-resumen {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--espacio-4);
@@ -5054,7 +5374,7 @@ dd {
   background: none;
 }
 
-.panel-admin-dato {
+.panel-dato {
   padding: var(--espacio-4) var(--espacio-5);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
@@ -5062,7 +5382,7 @@ dd {
 }
 
 /* «USUARIOS REGISTRADOS», en versalitas como los títulos de las columnas */
-.panel-admin-dato dt {
+.panel-dato dt {
   font-size: var(--texto-xs);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -5070,11 +5390,11 @@ dd {
   color: var(--color-texto-apagado);
 }
 
-.panel-admin-dato dd {
+.panel-dato dd {
   margin: 0;
 }
 
-.panel-admin-dato-valor {
+.panel-dato-valor {
   margin-top: var(--espacio-2);
   font-family: var(--fuente-titulos);
   font-size: var(--texto-3xl);
@@ -5083,20 +5403,20 @@ dd {
   color: var(--color-texto-brillante);
 }
 
-.panel-admin-dato-nota {
+.panel-dato-nota {
   font-size: var(--texto-sm);
   color: var(--color-texto-secundario);
 }
 
 /* En tablet, dos por fila; en el celular, una */
 @media (max-width: 900px) {
-  .panel-admin-resumen {
+  .panel-resumen {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 480px) {
-  .panel-admin-resumen {
+  .panel-resumen {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -5104,21 +5424,21 @@ dd {
 /* El body corta lo que se sale a los costados con overflow-x: hidden, que lo vuelve un contenedor
    con desplazamiento propio: la barra lateral (sticky) se pegaba a él, que nunca se desplaza, y se
    iba con la página. clip corta igual sin eso */
-.cuerpo-app:has(.panel-admin) {
+.cuerpo-app:has(.panel) {
   overflow-x: clip;
 }
 
-/* Sin encabezado ni pie, el panel del administrador ocupa toda la pantalla, como el wireframe */
-.contenido-principal:has(> .panel-admin) {
+/* Sin encabezado ni pie, el panel (panel.html.twig) ocupa toda la pantalla, como el wireframe */
+.contenido-principal:has(> .panel) {
   max-width: none;
   padding: 0;
   display: flex;
 }
 
-/* Panel del administrador: la barra lateral y el contenido, como el wireframe. El fondo de la
+/* Los paneles: la barra lateral y el contenido, como el wireframe. El fondo de la
    columna de la barra lo pinta el panel, así sigue hasta abajo aunque la página sea más alta que
    la pantalla (la barra es del alto de la pantalla) */
-.panel-admin {
+.panel {
   flex: 1;
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
@@ -5126,7 +5446,7 @@ dd {
 }
 
 /* Barra lateral: el logo, las secciones y, al pie, la sesión */
-.panel-admin-menu {
+.panel-menu {
   display: flex;
   flex-direction: column;
   gap: var(--espacio-6);
@@ -5140,17 +5460,17 @@ dd {
   overflow-y: auto;
 }
 
-.panel-admin-marca {
+.panel-marca {
   align-self: flex-start;
   padding-left: var(--espacio-2);
 }
 
-.panel-admin-marca img {
+.panel-marca img {
   display: block;
 }
 
 /* Quién está en sesión y, debajo, el botón para salir, abajo de todo */
-.panel-admin-sesion {
+.panel-sesion {
   margin-top: auto;
   display: flex;
   flex-direction: column;
@@ -5160,14 +5480,14 @@ dd {
 }
 
 /* El avatar y, al lado, el nombre sobre el rol */
-.panel-admin-sesion-usuario {
+.panel-sesion-usuario {
   display: flex;
   align-items: center;
   gap: var(--espacio-3);
   min-width: 0;
 }
 
-.panel-admin-sesion-datos {
+.panel-sesion-datos {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -5176,7 +5496,7 @@ dd {
 }
 
 /* Un nombre largo se corta con puntos suspensivos en vez de ensanchar la barra */
-.panel-admin-sesion-nombre {
+.panel-sesion-nombre {
   max-width: 100%;
   font-weight: 600;
   font-size: var(--texto-sm);
@@ -5185,18 +5505,18 @@ dd {
   white-space: nowrap;
 }
 
-.panel-admin-salir {
+.panel-salir {
   width: 100%;
 }
 
 /* El contenido, en todo el ancho que deja la barra, como el wireframe */
-.panel-admin-contenido {
+.panel-contenido {
   min-width: 0;
   padding: var(--espacio-8) var(--espacio-10) var(--espacio-12);
 }
 
 /* «ADMINISTRACIÓN», sobre las secciones */
-.panel-admin-menu-titulo {
+.panel-menu-titulo {
   margin: 0 0 var(--espacio-3);
   font-size: var(--texto-xs);
   letter-spacing: 0.08em;
@@ -5205,7 +5525,7 @@ dd {
 }
 
 /* Las secciones, una debajo de otra */
-.panel-admin-menu-lista {
+.panel-menu-lista {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -5215,7 +5535,7 @@ dd {
 }
 
 /* Cada sección */
-.panel-admin-menu-enlace {
+.panel-menu-enlace {
   display: block;
   padding: var(--espacio-2) var(--espacio-3);
   border-radius: var(--radio-md);
@@ -5223,37 +5543,51 @@ dd {
   text-decoration: none;
 }
 
-.panel-admin-menu-enlace:hover {
+.panel-menu-enlace:hover {
   background-color: var(--color-superficie-hover);
   color: var(--color-texto);
 }
 
 /* La sección actual, llena como en el wireframe: con los colores invertidos, como la página
    actual del paginado */
-.panel-admin-menu-enlace.activo {
+.panel-menu-enlace.activo {
   background-color: var(--color-texto);
   color: var(--color-texto-inverso);
   font-weight: 600;
 }
 
+/* Un grupo de secciones dentro de la lista, como «Funciones» en el panel del organizador: el
+   nombre del grupo, que no es un enlace, y sus secciones debajo con sangría */
+.panel-menu-subtitulo {
+  display: block;
+  padding: var(--espacio-2) var(--espacio-3) var(--espacio-1);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.panel-menu-grupo .panel-menu-lista {
+  padding-left: var(--espacio-3);
+}
+
 /* Título y bajada del contenido */
-.panel-admin-cabecera {
+.panel-cabecera {
   margin-bottom: var(--espacio-6);
 }
 
 /* Más chico que el título de las páginas públicas: acá manda la tabla, no el título */
-.panel-admin-titulo {
+.panel-titulo {
   margin: 0;
   font-size: var(--texto-2xl);
 }
 
-.panel-admin-bajada {
+.panel-bajada {
   margin: var(--espacio-1) 0 0;
   color: var(--color-texto-secundario);
 }
 
 /* Buscador y filtros en una fila: el buscador más ancho */
-.panel-admin-filtros {
+.panel-filtros {
   display: grid;
   grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(140px, 1fr)) auto;
   gap: var(--espacio-3);
@@ -5262,11 +5596,11 @@ dd {
 }
 
 /* El buscador con la lupa adentro */
-.panel-admin-busqueda {
+.panel-busqueda {
   position: relative;
 }
 
-.panel-admin-busqueda-icono {
+.panel-busqueda-icono {
   position: absolute;
   left: 0.85rem;
   top: 50%;
@@ -5275,7 +5609,7 @@ dd {
   pointer-events: none;
 }
 
-.panel-admin-busqueda .campo-control {
+.panel-busqueda .campo-control {
   /* Lugar para la lupa */
   padding-left: 2.4rem;
 }
@@ -5326,14 +5660,14 @@ dd {
 
 /* En tablet y celular, la barra lateral pasa arriba y en fila, y los filtros uno debajo de otro */
 @media (max-width: 900px) {
-  .panel-admin {
+  .panel {
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
     background: none;
   }
 
   /* Arriba: el logo y la sesión en un renglón y las secciones debajo */
-  .panel-admin-menu {
+  .panel-menu {
     position: static;
     height: auto;
     display: grid;
@@ -5345,17 +5679,17 @@ dd {
   }
 
   /* El logo y la sesión en el primer renglón; cada grupo de secciones, en uno propio debajo */
-  .panel-admin-marca {
+  .panel-marca {
     grid-row: 1;
     grid-column: 1;
   }
 
-  .panel-admin-menu nav {
+  .panel-menu nav {
     grid-column: 1 / -1;
   }
 
   /* En el renglón del logo queda sólo el botón para salir: el nombre no entra */
-  .panel-admin-sesion {
+  .panel-sesion {
     grid-row: 1;
     grid-column: 2;
     margin-top: 0;
@@ -5364,24 +5698,40 @@ dd {
     align-items: flex-end;
   }
 
-  .panel-admin-sesion-usuario {
+  .panel-sesion-usuario {
     display: none;
   }
 
-  .panel-admin-salir {
+  .panel-salir {
     width: auto;
   }
 
-  .panel-admin-contenido {
+  .panel-contenido {
     padding: var(--espacio-6) var(--espacio-4) var(--espacio-12);
   }
 
-  .panel-admin-menu-lista {
+  .panel-menu-lista {
     flex-direction: row;
     flex-wrap: wrap;
   }
 
-  .panel-admin-filtros {
+  /* El grupo sigue en la fila: su nombre y sus secciones al lado, sin la sangría */
+  .panel-menu-grupo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .panel-menu-grupo .panel-menu-lista {
+    padding-left: 0;
+  }
+
+  .panel-menu-subtitulo {
+    padding: var(--espacio-2) var(--espacio-1) var(--espacio-2) var(--espacio-3);
+    color: var(--color-texto-apagado);
+  }
+
+  .panel-filtros {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -6772,6 +7122,146 @@ a.tabla-admin-principal:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: var(--espacio-2);
+}
+
+/* «Mi cuenta» (E4-10.13), como los wireframes mi-cuenta-mis-datos y mi-cuenta-mis-reservas: la
+   barra lateral a la izquierda y el contenido al lado, entre el encabezado y el pie del sitio */
+.mi-cuenta-cuerpo {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: var(--espacio-8);
+  align-items: start;
+}
+
+/* La tarjeta del usuario (en «Mis datos») arriba de las secciones */
+.mi-cuenta-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+/* La inicial y, al lado, el nombre sobre «Desde…»; los roles en el renglón de abajo */
+.mi-cuenta-tarjeta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--espacio-3) var(--espacio-4);
+  padding: var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* Más grande que el del encabezado, como la foto del wireframe */
+.mi-cuenta-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: var(--texto-xl);
+}
+
+.mi-cuenta-nombre {
+  margin: 0;
+  font-weight: 600;
+  /* Un nombre largo baja de renglón en vez de ensanchar la barra */
+  overflow-wrap: anywhere;
+}
+
+.mi-cuenta-desde {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.mi-cuenta-roles {
+  grid-column: 1 / -1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+/* Las secciones, una debajo de otra */
+.mi-cuenta-menu-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.mi-cuenta-menu-enlace {
+  display: block;
+  padding: var(--espacio-2) var(--espacio-3);
+  border-radius: var(--radio-md);
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.mi-cuenta-menu-enlace:hover {
+  background-color: var(--color-superficie-hover);
+  color: var(--color-texto);
+}
+
+/* La sección actual, llena como en el wireframe, igual que en el panel del administrador */
+.mi-cuenta-menu-enlace.activo {
+  background-color: var(--color-texto);
+  color: var(--color-texto-inverso);
+  font-weight: 600;
+}
+
+/* «Mis datos», en su recuadro como el wireframe */
+.mi-cuenta-panel {
+  padding: var(--espacio-8);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* «Información personal», con la línea debajo del wireframe */
+.mi-cuenta-subtitulo {
+  margin: var(--espacio-6) 0 var(--espacio-4);
+  padding-bottom: var(--espacio-2);
+  border-bottom: 1px solid var(--color-borde);
+  font-size: var(--texto-md);
+}
+
+/* Cada dato con su nombre arriba, como las etiquetas del formulario del wireframe */
+.mi-cuenta-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin: 0;
+}
+
+.mi-cuenta-datos dt {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.mi-cuenta-datos dd {
+  margin: var(--espacio-1) 0 0;
+  color: var(--color-texto-brillante);
+  overflow-wrap: anywhere;
+}
+
+/* En tablet y celular, una sola columna: la tarjeta y las secciones en fila arriba del contenido */
+@media (max-width: 900px) {
+  .mi-cuenta-cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-6);
+  }
+
+  .mi-cuenta-menu-lista {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .mi-cuenta-panel {
+    padding: var(--espacio-5);
+  }
 }
 
 /* El comprobante en papel (E4-04.2): sólo el código y los datos de la reserva, en negro sobre

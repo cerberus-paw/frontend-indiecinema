@@ -1,0 +1,50 @@
+{#
+  «Mi cuenta» en /cuenta/ (E4-10.13), como el wireframe mi-cuenta-mis-datos: la tarjeta del
+  usuario arriba de la barra (la inicial, el nombre, desde cuándo tiene la cuenta y sus roles) y
+  «Mis datos» con el nombre y el correo. Es sólo de lectura: editar los datos y cambiar la
+  contraseña todavía no tienen ruta en el back, así que quedan afuera el formulario, «Editar
+  perfil» y «Seguridad». También las secciones de la barra sin pantalla y «Eliminar mi cuenta».
+
+  Variables:
+  - cuenta: {nombre, correo, roles (lista de 'espectador', 'organizador', 'moderador' o
+    'administrador', de menor a mayor), desde ('marzo de 2025')}.
+#}
+{% extends 'cuenta.html.twig' %}
+
+{% block titulo %}Mis datos{% endblock %}
+{% block seccion %}datos{% endblock %}
+{% block miga %}Mis datos{% endblock %}
+
+{% block tarjeta %}
+<section class="mi-cuenta-tarjeta" aria-label="Tu cuenta">
+  <span class="usuario-avatar mi-cuenta-avatar" aria-hidden="true">{{ cuenta.nombre|slice(0, 1)|upper }}</span>
+  <div>
+    <p class="mi-cuenta-nombre">{{ cuenta.nombre }}</p>
+    <p class="mi-cuenta-desde">Desde {{ cuenta.desde }}</p>
+  </div>
+  <ul class="mi-cuenta-roles" aria-label="Tus roles">
+    {% for rol in cuenta.roles %}
+      <li class="usuario-rol rol-{{ rol }}">{{ rol|capitalize }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}
+
+{% block panel %}
+<section class="mi-cuenta-panel" aria-labelledby="mis-datos-titulo">
+  <h1 id="mis-datos-titulo" class="solicitud-titulo">Mis datos</h1>
+  <p class="solicitud-bajada">Con estos datos entrás a IndieCinema.</p>
+
+  <h2 class="mi-cuenta-subtitulo">Información personal</h2>
+  <dl class="mi-cuenta-datos">
+    <div>
+      <dt>Nombre completo</dt>
+      <dd>{{ cuenta.nombre }}</dd>
+    </div>
+    <div>
+      <dt>Correo electrónico</dt>
+      <dd>{{ cuenta.correo }}</dd>
+    </div>
+  </dl>
+</section>
+{% endblock %}

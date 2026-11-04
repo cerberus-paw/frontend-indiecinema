@@ -5,11 +5,13 @@
   Variables:
   - salas: lista de salas como las recibe parciales/tarjeta_sala.html.twig.
 #}
-{% extends 'base.html.twig' %}
+{% extends 'organizador.html.twig' %}
 
 {% block titulo %}Mis salas{% endblock %}
 
-{% block contenido %}
+{% block seccion %}salas{% endblock %}
+
+{% block panel %}
 <div class="contenedor">
   <nav class="navegacion-migas" aria-label="Migas de pan">
     <ol class="lista-migas">

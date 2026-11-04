@@ -33,28 +33,28 @@
 {% block seccion %}usuarios{% endblock %}
 
 {% block panel %}
-<header class="panel-admin-cabecera">
-  <h1 class="panel-admin-titulo">Usuarios y roles</h1>
-  <p class="panel-admin-bajada">Buscá cuentas y asigná roles.</p>
+<header class="panel-cabecera">
+  <h1 class="panel-titulo">Usuarios y roles</h1>
+  <p class="panel-bajada">Buscá cuentas y asigná roles.</p>
 </header>
 
-<dl class="panel-admin-resumen">
-  <div class="panel-admin-dato">
+<dl class="panel-resumen">
+  <div class="panel-dato">
     <dt>Usuarios registrados</dt>
-    <dd class="panel-admin-dato-valor">{{ resumen.usuarios|number_format(0, ',', '.') }}</dd>
-    <dd class="panel-admin-dato-nota">+{{ resumen.nuevos|number_format(0, ',', '.') }} este mes</dd>
+    <dd class="panel-dato-valor">{{ resumen.usuarios|number_format(0, ',', '.') }}</dd>
+    <dd class="panel-dato-nota">+{{ resumen.nuevos|number_format(0, ',', '.') }} este mes</dd>
   </div>
-  <div class="panel-admin-dato">
+  <div class="panel-dato">
     <dt>Organizadores activos</dt>
-    <dd class="panel-admin-dato-valor">{{ resumen.organizadores|number_format(0, ',', '.') }}</dd>
-    <dd class="panel-admin-dato-nota">con la cuenta activa</dd>
+    <dd class="panel-dato-valor">{{ resumen.organizadores|number_format(0, ',', '.') }}</dd>
+    <dd class="panel-dato-nota">con la cuenta activa</dd>
   </div>
 </dl>
 
-<form class="panel-admin-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios" data-enviar-al-elegir>
-  <label class="panel-admin-busqueda">
+<form class="panel-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios" data-enviar-al-elegir>
+  <label class="panel-busqueda">
     <span class="sr-only">Buscar por nombre o correo</span>
-    <span class="panel-admin-busqueda-icono" aria-hidden="true">🔍</span>
+    <span class="panel-busqueda-icono" aria-hidden="true">🔍</span>
     <input type="search" name="q" value="{{ filtros.q ?? '' }}" placeholder="Buscar por nombre o correo" maxlength="254" class="campo-control">
   </label>
   <label>
