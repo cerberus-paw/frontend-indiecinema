@@ -151,22 +151,19 @@ class FormularioDeReserva {
       // Sin red, o con una respuesta que no es JSON: queda el mensaje genérico.
     }
     PAW.mostrarAviso(this.carga, false);
-    // En este orden: primero se habilita, porque LugaresLibres deshabilita el campo si con el
-    // número nuevo la función quedó agotada, y bloquear(false) lo volvería a habilitar; y el error
-    // va último, porque un campo deshabilitado no toma el foco que le da mostrarError().
     this.enviando = false;
-    this.bloquear(false);
-    // Si el 422 fue porque quedan menos lugares, el número que vuelve ya es el de ahora.
+    // Si el 422 fue porque quedan menos lugares, el numero que vuelve ya es el de ahora.
     this.avisarLugares(datos);
-    // Si con ese número la función quedó agotada, LugaresLibres cambió el recuadro por el aviso
-    // de «Función agotada» y este formulario salió del documento (IC-446): no hay campo donde
-    // mostrar el error, y el foco, que estaba en el botón, se iría al principio de la página. Va
-    // al título del aviso, que es lo que ahora ocupa su lugar.
+    // Si con ese numero la funcion quedo agotada, LugaresLibres cambio el recuadro por el aviso
+    // de Â«Funcion agotadaÂ» y este formulario salio del documento (IC-446): el foco va directo al
+    // titulo del aviso sin pasar por el boton de submit.
     if (!this.formulario.isConnected) {
       PAW.enfocar(document.getElementById('ficha-reserva-titulo'));
 
       return;
     }
+    // Se desbloquea sin forzar el foco al boton porque mostrarError() se lo da al campo con error.
+    this.bloquear(false, false);
     this.mostrarError(PAW.mensajeDeError(datos, FormularioDeReserva.MENSAJE_DE_ERROR, 'cantidad'));
   }
 
@@ -267,9 +264,10 @@ class FormularioDeReserva {
    *
    * @param {boolean} bloqueado
    * @returns {?Element} al bloquear, lo que tenía el foco
+   * @param {boolean} [restaurarFoco=true] si devolver el foco al control previo al desbloquear
    */
-  bloquear(bloqueado) {
-    return PAW.bloquear(this.formulario, bloqueado, 'input[name="cantidad"], button[type="submit"]');
+  bloquear(bloqueado, restaurarFoco = true) {
+    return PAW.bloquear(this.formulario, bloqueado, 'input[name="cantidad"], button[type="submit"]', restaurarFoco);
   }
 
   /**
