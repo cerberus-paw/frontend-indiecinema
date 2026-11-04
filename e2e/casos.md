@@ -42,6 +42,11 @@ se pueden correr muchas veces contra el mismo sitio sin agotar las funciones.
 | Caso | Qué hace | Qué tiene que ver |
 | --- | --- | --- |
 | T-1 | Sin sesión, abre la portada y aprieta Tab, y después Enter | Con Tab, el foco está en «Saltar al contenido», que se ve; con Enter, el foco pasa al contenido principal |
+## Menú del usuario
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| U-1 | Con sesión, abre el menú del encabezado con Enter, lo recorre con Tab, lo cierra con Esc, lo vuelve a abrir con Espacio y hace clic afuera | Se abre; Tab pasa por «Panel de mi cuenta» y «Mis reservas»; Esc lo cierra con el foco de vuelta en el botón; Espacio lo abre y el clic afuera lo cierra |
 
 ## Lo que todavía no cubren
 
