@@ -235,27 +235,40 @@ class PAW {
    * @param {?HTMLElement} formulario
    * @param {boolean} bloqueado
    * @param {string} [selector='button[type="submit"]'] los controles que se deshabilitan
-   * @returns {?Element} al bloquear, lo que tenía el foco; al desbloquear, null
+   * @param {boolean} [restaurarFoco=true] si devolver el foco al control previo al desbloquear
+   * @returns {?Element} al bloquear, lo que tenia el foco; al desbloquear, null
    */
-  static bloquear(formulario, bloqueado, selector = 'button[type="submit"]') {
+  static bloquear(formulario, bloqueado, selector = 'button[type="submit"]', restaurarFoco = true) {
     if (!formulario) {
       return null;
     }
     if (bloqueado) {
       // Se anota antes de deshabilitar nada, que es justo lo que se lleva el foco puesto.
-      formulario.enfocado = formulario.contains(document.activeElement) ? document.activeElement : null;
+      formulario._enfocadoPorPaw = formulario.contains(document.activeElement) ? document.activeElement : null;
+      for (const control of formulario.querySelectorAll(selector)) {
+        if (!control.disabled) {
+          control.dataset.bloqueadoPorPaw = 'si';
+          control.disabled = true;
+        }
+      }
+    } else {
+      for (const control of formulario.querySelectorAll(selector)) {
+        if (control.dataset.bloqueadoPorPaw === 'si') {
+          delete control.dataset.bloqueadoPorPaw;
+          control.disabled = false;
+        }
+      }
     }
-    for (const control of formulario.querySelectorAll(selector)) {
-      control.toggleAttribute('disabled', bloqueado);
+    // En los botones de envio, ademas, que es lo que el lector de pantalla anuncia como ocupado.
+    for (const boton of formulario.querySelectorAll('button[type="submit"], input[type="submit"]')) {
+      boton.toggleAttribute('aria-busy', bloqueado);
     }
-    // En el botón, además, que es lo que el lector de pantalla anuncia como ocupado.
-    formulario.querySelector('button[type="submit"]')?.toggleAttribute('aria-busy', bloqueado);
     if (bloqueado) {
-      return formulario.enfocado;
+      return formulario._enfocadoPorPaw;
     }
-    const enfocado = formulario.enfocado;
-    formulario.enfocado = null;
-    if (enfocado?.isConnected && document.activeElement === document.body) {
+    const enfocado = formulario._enfocadoPorPaw;
+    formulario._enfocadoPorPaw = null;
+    if (restaurarFoco && enfocado?.isConnected && document.activeElement === document.body) {
       enfocado.focus();
     }
 
