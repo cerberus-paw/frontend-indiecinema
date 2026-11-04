@@ -111,6 +111,8 @@ Cada plantilla renderizada por el núcleo recibe automáticamente las siguientes
 
 El encabezado y el pie adaptan sus opciones y enlaces según el estado de la sesión y el rol, para que cada rol vea sólo sus opciones. Los roles son acumulativos, como en el backend (`Rol::alcanza()`): cada uno ve lo del anterior y lo suyo, con `usuario.alcanza('<rol>')`. Sólo se enlazan pantallas que existen (sin 404).
 
+El menú de usuario es un desplegable común (`<details>`/`<summary>`), no un menú de aplicación: sin `role="menu"` ni `menuitem`, porque se recorre con Tab y no con las flechas. Las opciones van en una lista de enlaces por sección, nombrada por su título, con «Cerrar sesión» al final; se abre con Enter o Espacio y se cierra con Esc (el foco vuelve al botón) o con un clic afuera (IC-301).
+
 - **Sin sesión (Invitado / Visitante):**
   - Enlaces a Cartelera (`/cartelera`), Salas (`/salas`), Cómo funciona (`/acerca-de#como-funciona`), Acerca de (`/acerca-de`) y Buscador hacia la cartelera (`action="/cartelera"` con parámetro `q`).
   - Botones de acción: **Ingresar** (`/cuenta/ingresar`) y **Crear cuenta** (`/cuenta/registro`).

@@ -948,6 +948,16 @@ a:hover {
   font-weight: 700;
 }
 
+/* Lista de enlaces de una sección del menú, sin viñetas (IC-301) */
+.menu-seccion {
+  /* Sin viñetas */
+  list-style: none;
+  /* Sin margen propio de la lista */
+  margin: 0;
+  /* Sin sangría de la lista */
+  padding: 0;
+}
+
 /* Item de enlace del menú */
 .menu-item {
   /* Flexbox horizontal */
