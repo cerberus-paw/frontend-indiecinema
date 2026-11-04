@@ -60,8 +60,9 @@
   --color-texto: #FBF4E7;
   /* Texto secundario (#D4C9B8): crema suave para descripciones, metadatos y subtítulos */
   --color-texto-secundario: #D4C9B8;
-  /* Texto atenuado (#8C8478): crema apagado para placeholders, iconos pasivos y pies de página */
-  --color-texto-apagado: #8C8478;
+  /* Texto atenuado (#A19B91): crema apagado para placeholders, ayudas, iconos pasivos y pies de
+     página. Da 4,5:1 hasta sobre la superficie interactiva, la más clara (E4-10.4) */
+  --color-texto-apagado: #A19B91;
   /* Texto inverso (#17141C): Tinta para lectura sobre botones con fondo primario ámbar */
   --color-texto-inverso: #17141C;
   /* Texto de máximo contraste y realce visual en blanco puro */
