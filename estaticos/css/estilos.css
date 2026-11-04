@@ -5438,6 +5438,20 @@ dd {
   font-weight: 600;
 }
 
+/* Un grupo de secciones dentro de la lista, como «Funciones» en el panel del organizador: el
+   nombre del grupo, que no es un enlace, y sus secciones debajo con sangría */
+.panel-admin-menu-subtitulo {
+  display: block;
+  padding: var(--espacio-2) var(--espacio-3) var(--espacio-1);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.panel-admin-menu-grupo .panel-admin-menu-lista {
+  padding-left: var(--espacio-3);
+}
+
 /* Título y bajada del contenido */
 .panel-admin-cabecera {
   margin-bottom: var(--espacio-6);
@@ -5581,6 +5595,22 @@ dd {
   .panel-admin-menu-lista {
     flex-direction: row;
     flex-wrap: wrap;
+  }
+
+  /* El grupo sigue en la fila: su nombre y sus secciones al lado, sin la sangría */
+  .panel-admin-menu-grupo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .panel-admin-menu-grupo .panel-admin-menu-lista {
+    padding-left: 0;
+  }
+
+  .panel-admin-menu-subtitulo {
+    padding: var(--espacio-2) var(--espacio-1) var(--espacio-2) var(--espacio-3);
+    color: var(--color-texto-apagado);
   }
 
   .panel-admin-filtros {

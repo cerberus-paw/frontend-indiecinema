@@ -2,8 +2,8 @@
   Las reservas de una función para su organizador, en /funcion/organizador/funciones/{id}/reservas
   (E4-03), como la sección «Reservas de la función» del wireframe de la E2 (panel-organizador):
   las tarjetas de números, el registro de la asistencia, la tabla con el botón de cada fila y
-  «Exportar listado» (el CSV). Sin la barra lateral del panel, que todavía no existe: el armado es el
-  de «Mis funciones», de donde se llega. Queda afuera lo que todavía no hay: el nombre del
+  «Exportar listado» (el CSV). Va en el panel del organizador, con «Mis funciones» marcada en la
+  barra, que es de donde se llega (E4-10.12). Queda afuera lo que todavía no hay: el nombre del
   espectador (cuentas no tiene una consulta de varios usuarios juntos), el pago y el reparto.
 
   Variables:
@@ -17,11 +17,13 @@
   - registrada: (string|null) el código que se acaba de registrar.
   - error_general: (string, opcional) por qué no se registró la asistencia.
 #}
-{% extends 'base.html.twig' %}
+{% extends 'organizador.html.twig' %}
 
 {% block titulo %}Reservas · {{ funcion.titulo }}{% endblock %}
 
-{% block contenido %}
+{% block seccion %}funciones{% endblock %}
+
+{% block panel %}
 {% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
 {# data-panel-de-reservas: el enganche del componente que registra la asistencia sin recargar (E4-05.5). #}
 <div class="contenedor panel-reservas" data-panel-de-reservas>

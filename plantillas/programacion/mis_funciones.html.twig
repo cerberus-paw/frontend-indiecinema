@@ -25,11 +25,13 @@
     reservas siguen confirmadas (E4-03.4).
   - votacion_cerrada: (bool) aviso de que se acaba de cerrar la votación de títulos de una función (IC-150 / E3-12.4).
 #}
-{% extends 'base.html.twig' %}
+{% extends 'organizador.html.twig' %}
 
 {% block titulo %}Mis funciones{% endblock %}
 
-{% block contenido %}
+{% block seccion %}funciones{% endblock %}
+
+{% block panel %}
 <div class="contenedor">
   <nav class="navegacion-migas" aria-label="Migas de pan">
     <ol class="lista-migas">
