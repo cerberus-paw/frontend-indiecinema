@@ -24,7 +24,9 @@
       - dia: (string|null) la fecha sola ('Sáb 19 sep'), o null si todavía no se acordó.
       - horario: (string|null) de inicio a fin ('20:30 a 23:30'): termina cuando terminan sus
         obras. null si todavía no se acordó la fecha.
-      - duracion_total: (int) la suma de las duraciones de sus obras, en minutos.
+      - duracion_total: (int|null) la suma de las duraciones de sus obras elegidas, en minutos;
+        null mientras los títulos están en votación, que ahí las obras son las candidatas y la
+        función todavía no tiene una duración.
       - obras_elegidas: (bool) si las obras son las elegidas; si no, son las candidatas.
       - sala: url (de su ficha), nombre, descripcion, direccion, localidad, capacidad e imagen
         (la URL de la foto, o null).
