@@ -72,6 +72,14 @@ de prueba.
 | O-5 | Abre una búsqueda sin funciones y la borra | Aparece «Ordenar por», que no estaba |
 | O-6 | Sin JavaScript, elige «Precio: menor a mayor» y aprieta «Ordenar» | Carga la cartelera de la más barata a la más cara |
 
+## Filtrar por precio
+
+Sin sesión, con los datos de prueba: hay funciones a la gorra (precio 0).
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| PR-1 | Escribe 0 en «Precio hasta» y deja de escribir | Sin recargar, sólo funciones «A la gorra», y la dirección lleva `precio_max=0` |
+
 ## Lo que todavía no cubren
 
 Votar títulos, proponer y votar franjas, confirmar la franja ganadora y el panel de reservas del
