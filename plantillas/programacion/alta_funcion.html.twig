@@ -287,16 +287,21 @@
         </legend>
 
         <div class="fila-campos-doble">
-          {# Campo: Precio de la entrada #}
+          {# Campo: Precio de la entrada.
+             Va en un campo de texto y no numérico (E4-09.4): en un campo numérico Chromium descarta
+             la coma sin avisar y «1500,50» queda en 150050, y además no aplica el pattern. Como texto
+             sí vale el patrón que manda el back, que acepta la coma y el punto, y con inputmode="decimal"
+             el celular sigue abriendo el teclado numérico. #}
           {% include 'parciales/campo.html.twig' with reglas.precio|merge({
             nombre: 'precio',
             etiqueta: 'Precio de la entrada ($)',
-            tipo: 'number',
+            tipo: 'text',
+            modo_de_entrada: 'decimal',
             valor: valores.precio ?? '',
-            placeholder: 'Ej: 1500',
+            placeholder: 'Ej: 1500,50',
             requerido: true,
             errores: errores,
-            ayuda: 'Poné 0 para función gratuita o a la gorra.'
+            ayuda: 'Los centavos van con coma o con punto. Poné 0 para función gratuita o a la gorra.'
           }) only %}
 
           {# Campo: Cupo de butacas disponibles #}
