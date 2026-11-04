@@ -2981,40 +2981,35 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
-   19. FICHA DE LA SALA: FOTO, DATOS Y PRÓXIMAS FUNCIONES (IC-90)
-   Componentes de programacion/sala.html.twig
+   19. FICHA DE LA SALA: PORTADA, DATOS, PRÓXIMAS FUNCIONES Y COSTADO (IC-90, IC-335)
+   Componentes de programacion/sala.html.twig y parciales/fila_funcion.html.twig, en el orden
+   del wireframe «sala-indie» de Figma
    -------------------------------------------------------------------------- */
 
-/* La foto y los datos de la sala, lado a lado en escritorio */
-.ficha-sala-cabecera {
-  /* Cuadrícula de dos columnas: la foto un poco más ancha */
-  display: grid;
-  /* Foto y datos */
-  grid-template-columns: 3fr 2fr;
-  /* Separación entre las columnas */
-  gap: var(--espacio-8);
-  /* Los datos arrancan arriba, a la altura de la foto */
-  align-items: start;
-  /* Separación con las funciones */
-  margin: var(--espacio-6) 0 var(--espacio-10);
+/* La portada empieza pegada al encabezado: sin el relleno superior del main */
+.contenido-principal:has(> .ficha-sala:first-child) {
+  /* Sin relleno arriba */
+  padding-top: 0;
 }
 
-/* Marco de la foto, apaisado como una pantalla */
-.ficha-sala-foto {
-  /* Proporción de pantalla */
-  aspect-ratio: 16 / 9;
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-lg);
-  /* La imagen no se sale de las esquinas */
-  overflow: hidden;
+/* Foto de portada de borde a borde de la ventana; el body corta lo que se sale a los costados */
+.ficha-sala-portada {
+  /* Todo el ancho de la ventana */
+  width: 100vw;
+  /* Sale del ancho máximo del main, centrada */
+  margin-left: calc(50% - 50vw);
+  /* Alto de franja, como el wireframe (300 de 1440), con piso y techo */
+  height: clamp(160px, 21vw, 360px);
   /* Fondo mientras carga o sin foto */
   background-color: var(--color-superficie);
-  /* Borde tenue */
-  border: 1px solid var(--color-borde);
+  /* Línea inferior tenue */
+  border-bottom: 1px solid var(--color-borde);
+  /* La imagen no se sale */
+  overflow: hidden;
 }
 
-/* La foto ocupa todo el marco sin deformarse */
-.ficha-sala-foto-imagen {
+/* La foto llena la franja sin deformarse */
+.ficha-sala-portada-imagen {
   /* Ancho completo */
   width: 100%;
   /* Alto completo */
@@ -3025,16 +3020,30 @@ dd {
   display: block;
 }
 
-/* Nombre, dirección, capacidad y descripción, en columna */
-.ficha-sala-datos {
-  /* En columna */
+/* Marcador de la portada sin foto, con el texto del wireframe */
+.ficha-sala-portada-marcador {
+  /* Llena la franja */
+  height: 100%;
+  /* Centra el texto */
   display: flex;
-  /* Dirección vertical */
-  flex-direction: column;
-  /* Separación entre los datos */
-  gap: var(--espacio-3);
-  /* Evita desborde con nombres largos */
-  min-width: 0;
+  /* Centrado vertical */
+  align-items: center;
+  /* Centrado horizontal */
+  justify-content: center;
+  /* Fondo neutro degradado, como el marcador del afiche */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%);
+}
+
+/* Las migas, separadas de la portada */
+.ficha-sala-migas {
+  /* Aire arriba */
+  margin-top: var(--espacio-6);
+}
+
+/* Nombre y dirección de la sala */
+.ficha-sala-cabecera {
+  /* Separación con las columnas */
+  margin: var(--espacio-2) 0 var(--espacio-8);
 }
 
 /* Nombre de la sala */
@@ -3045,41 +3054,346 @@ dd {
   font-size: var(--texto-3xl);
   /* Interlineado compacto */
   line-height: 1.15;
-  /* Sin margen propio: lo da el gap */
-  margin: 0;
+  /* Separación con la dirección */
+  margin: 0 0 var(--espacio-3);
   /* Corta palabras muy largas */
   overflow-wrap: anywhere;
 }
 
-/* Título de la sección de funciones */
-.ficha-sala-funciones-titulo {
+/* Dirección y localidad debajo del nombre, con el pin */
+.ficha-sala-ubicacion-linea {
+  /* Pin y texto en fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación entre el pin y el texto */
+  gap: var(--espacio-2);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Tamaño chico */
+  font-size: var(--texto-sm);
+  /* Sin margen propio */
+  margin: 0;
+}
+
+/* Columna principal y costado, como el wireframe (780 y 268 de 1440) */
+.ficha-sala-columnas {
+  /* Cuadrícula de dos columnas */
+  display: grid;
+  /* La principal ocupa lo que queda; el costado, un ancho fijo con piso */
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  /* Separación entre las columnas */
+  gap: var(--espacio-8);
+  /* Cada columna arranca arriba */
+  align-items: start;
+}
+
+/* Las secciones de la columna principal, apiladas */
+.ficha-sala-seccion + .ficha-sala-seccion {
+  /* Separación entre «Sobre la sala» y las funciones */
+  margin-top: var(--espacio-10);
+}
+
+/* Título de cada sección de la columna principal */
+.ficha-sala-seccion-titulo {
   /* Tipografía de títulos */
   font-family: var(--fuente-titulos);
   /* Tamaño de sección */
-  font-size: var(--texto-2xl);
-  /* Separación con la cuadrícula */
-  margin: 0 0 var(--espacio-6);
+  font-size: var(--texto-xl);
+  /* Separación con el contenido */
+  margin: 0 0 var(--espacio-4);
 }
 
-/* En tablet y celular, la foto arriba y los datos debajo */
-@media (max-width: 768px) {
-  .ficha-sala-cabecera {
-    /* Una sola columna */
-    grid-template-columns: 1fr;
-    /* Menos separación */
-    gap: var(--espacio-5);
-    /* Menos margen con las funciones */
-    margin-bottom: var(--espacio-8);
-  }
+/* La descripción de la sala */
+.ficha-sala-sobre {
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Interlineado cómodo para leer */
+  line-height: 1.7;
+  /* Ancho de lectura */
+  max-width: 65ch;
+  /* Sin margen propio */
+  margin: 0;
+}
 
+/* Lista de próximas funciones, sin viñetas, con una línea entre fila y fila */
+.lista-filas-funcion {
+  /* Sin viñetas */
+  list-style: none;
+  /* Sin margen */
+  margin: 0;
+  /* Sin relleno */
+  padding: 0;
+  /* Línea arriba de la primera fila */
+  border-top: 1px solid var(--color-borde);
+}
+
+/* Una función: afiche, datos y, a la derecha, lugares, estado y «Ver» */
+.fila-funcion {
+  /* En fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación entre las partes */
+  gap: var(--espacio-4);
+  /* Relleno vertical */
+  padding: var(--espacio-4) 0;
+  /* Línea entre filas */
+  border-bottom: 1px solid var(--color-borde);
+}
+
+/* El afiche chico, vertical como uno de verdad */
+.fila-funcion-afiche {
+  /* Ancho fijo, como el wireframe */
+  flex: 0 0 48px;
+  /* Proporción de afiche */
+  aspect-ratio: 2 / 3;
+  /* Centra el marcador */
+  display: flex;
+  /* Centrado vertical */
+  align-items: center;
+  /* Centrado horizontal */
+  justify-content: center;
+  /* Fondo del marcador */
+  background-color: var(--color-superficie-elevada);
+  /* Esquinas apenas redondeadas */
+  border-radius: var(--radio-sm);
+  /* La imagen no se sale */
+  overflow: hidden;
+}
+
+/* La palabra AFICHE del marcador, más chica para que entre en el recuadro */
+.fila-funcion-afiche .afiche-placeholder-texto {
+  /* Tamaño mínimo */
+  font-size: 0.5rem;
+  /* Menos espaciado entre letras */
+  letter-spacing: 0.05em;
+}
+
+/* La imagen del afiche llena el recuadro */
+.fila-funcion-afiche-imagen {
+  /* Ancho completo */
+  width: 100%;
+  /* Alto completo */
+  height: 100%;
+  /* Recorta en lugar de deformar */
+  object-fit: cover;
+  /* Sin espacio de línea */
+  display: block;
+}
+
+/* Título y fecha */
+.fila-funcion-datos {
+  /* Ocupa lo que queda */
+  flex: 1;
+  /* Deja achicarse con títulos largos */
+  min-width: 0;
+}
+
+/* Título de la función */
+.fila-funcion-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño de texto destacado */
+  font-size: var(--texto-base);
+  /* Peso medio */
+  font-weight: 600;
+  /* Separación con la fecha */
+  margin: 0 0 var(--espacio-1);
+  /* Corta palabras muy largas */
+  overflow-wrap: anywhere;
+}
+
+/* Fecha con el calendario */
+.fila-funcion-fecha {
+  /* Ícono y texto en fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación */
+  gap: var(--espacio-2);
+  /* Texto chico */
+  font-size: var(--texto-sm);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Sin margen */
+  margin: 0;
+}
+
+/* Lugares, insignia y «Ver», a la derecha */
+.fila-funcion-estado {
+  /* En fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación */
+  gap: var(--espacio-4);
+  /* No se achica */
+  flex-shrink: 0;
+}
+
+/* «5 de 80 lugares libres» */
+.fila-funcion-lugares {
+  /* Texto chico */
+  font-size: var(--texto-sm);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Sin margen */
+  margin: 0;
+}
+
+/* Agotada, en el color de error */
+.fila-funcion-agotada {
+  /* Rojo de estado */
+  color: var(--color-error);
+  /* Peso medio */
+  font-weight: 600;
+}
+
+/* El costado: los recuadros apilados */
+.ficha-sala-costado {
+  /* En columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación entre recuadros */
+  gap: var(--espacio-4);
+}
+
+/* Cada recuadro del costado */
+.ficha-sala-recuadro {
+  /* Fondo de superficie */
+  background-color: var(--color-superficie);
+  /* Borde tenue */
+  border: 1px solid var(--color-borde);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-md);
+  /* Relleno interno */
+  padding: var(--espacio-4);
+}
+
+/* Título del recuadro, en versalitas monoespaciadas como el wireframe */
+.ficha-sala-recuadro-titulo {
+  /* Tipografía monoespaciada */
+  font-family: var(--fuente-codigo);
+  /* Texto extra chico */
+  font-size: var(--texto-xs);
+  /* Mayúsculas */
+  text-transform: uppercase;
+  /* Espaciado entre letras */
+  letter-spacing: 0.08em;
+  /* Peso normal */
+  font-weight: 500;
+  /* Texto atenuado */
+  color: var(--color-texto-apagado);
+  /* Separación con el contenido */
+  margin: 0 0 var(--espacio-3);
+}
+
+/* La dirección, destacada */
+.ficha-sala-direccion {
+  /* Peso medio */
+  font-weight: 600;
+  /* Separación con la localidad */
+  margin: 0 0 var(--espacio-1);
+}
+
+/* La localidad, debajo */
+.ficha-sala-localidad {
+  /* Texto chico */
+  font-size: var(--texto-sm);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Sin margen */
+  margin: 0;
+}
+
+/* Lista de parámetros: el nombre a la izquierda y el valor a la derecha. Sin la tarjeta que el
+   dl tiene por defecto: ya está dentro del recuadro */
+.ficha-sala-parametros {
+  /* Sin margen */
+  margin: 0;
+  /* Sin relleno */
+  padding: 0;
+  /* Sin fondo */
+  background: none;
+  /* Sin borde */
+  border: 0;
+  /* Sin redondeo */
+  border-radius: 0;
+  /* En columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación entre parámetros */
+  gap: var(--espacio-2);
+  /* Texto chico */
+  font-size: var(--texto-sm);
+}
+
+/* Un parámetro */
+.ficha-sala-parametro {
+  /* Nombre y valor en fila */
+  display: flex;
+  /* A los extremos */
+  justify-content: space-between;
+  /* Separación mínima */
+  gap: var(--espacio-3);
+}
+
+/* El nombre del parámetro */
+.ficha-sala-parametro dt {
+  /* Peso normal, como el wireframe: el valor es lo que se destaca */
+  font-weight: 400;
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+}
+
+/* El valor del parámetro */
+.ficha-sala-parametro dd {
+  /* Sin la sangría de dd */
+  margin: 0;
+  /* Peso medio */
+  font-weight: 600;
+  /* Alineado a la derecha */
+  text-align: right;
+}
+
+/* En tablet y celular, una sola columna: el costado después de las funciones */
+@media (max-width: 900px) {
+  .ficha-sala-columnas {
+    /* Una sola columna */
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* En el celular, cada fila acomoda los lugares, el estado y «Ver» debajo del título */
+@media (max-width: 600px) {
   .ficha-sala-nombre {
     /* Título más chico */
     font-size: var(--texto-2xl);
   }
 
-  .ficha-sala-funciones-titulo {
-    /* Título de sección más chico */
-    font-size: var(--texto-xl);
+  .fila-funcion {
+    /* Pueden bajar de renglón */
+    flex-wrap: wrap;
+    /* Arriba, porque las alturas cambian */
+    align-items: flex-start;
+  }
+
+  .fila-funcion-estado {
+    /* Todo el ancho, debajo del afiche y el título */
+    flex-basis: 100%;
+    /* Que se acomode si no entra */
+    flex-wrap: wrap;
+    /* Menos separación */
+    gap: var(--espacio-3);
+  }
+
+  /* «Ver» se va a la derecha */
+  .fila-funcion-ver {
+    /* Empuja a la derecha */
+    margin-left: auto;
   }
 }
 

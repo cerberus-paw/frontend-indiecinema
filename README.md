@@ -34,6 +34,7 @@ frontend-indiecinema/
 │   │   ├── mensaje.html.twig   # Alertas de éxito, error, advertencia e información
 │   │   ├── boton.html.twig     # Botón o enlace con variantes visuales y tamaños
 │   │   ├── tarjeta_funcion.html.twig # Tarjeta de función para home y cartelera
+│   │   ├── fila_funcion.html.twig # Próxima función en una fila, para la ficha de la sala
 │   │   ├── menu_administracion.html.twig # Barra lateral del panel del administrador
 │   │   └── tarjeta_sala.html.twig    # Tarjeta de sala indie para catálogo y «Mis salas»
 │   ├── cuentas/                # Plantillas del subsistema cuentas
@@ -249,6 +250,27 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 } %}
 ```
 
+### 7.5.1 Fila de función (`parciales/fila_funcion.html.twig`)
+
+Las próximas funciones de la ficha de la sala, una por fila, como el wireframe `sala-indie`: el afiche chico (o el recuadro `AFICHE`), el título, la fecha, `N de M lugares libres` (sólo si se conocen; `Agotada` si no queda ninguno), la insignia del estado y `Ver`, que lleva a `/cartelera/{id}`. Es un `<li>`: va dentro de una lista. Va aparte de la tarjeta de función para que cada una cambie con su pantalla (IC-335).
+
+```twig
+<ul class="lista-filas-funcion">
+  {% include 'parciales/fila_funcion.html.twig' with {
+    funcion: {
+      id: 12,
+      titulo: 'Ciclo Nuevo Cine Argentino',
+      afiche: null,
+      estado: 'PROGRAMADA',
+      fecha: 'Sáb 19 sep · 20:30',
+      lugares_libres: 18,
+      cupo: 48,
+      agotada: false
+    }
+  } only %}
+</ul>
+```
+
 ### 7.6 Pantallas completas que implementan los parciales
 
 - **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y casilla de términos sin tildar por defecto (`marcado: valores.terminos ?? false`), mensajes de error y botón principal.
@@ -267,7 +289,7 @@ Componente para mostrar salas de cine independiente tanto en el listado público
 - **`plantillas/programacion/mis_funciones.html.twig`**: «Mis funciones» para organizadores en `/organizador/funciones`, con migas de pan: una tabla con las funciones de sus salas en cualquier estado, también las canceladas y las que todavía no tienen fecha, con la sala, la fecha (o «Sin fecha todavía»), el estado y la entrada. La columna de acciones tiene «Editar» sólo en las programadas que todavía no se dieron (IC-122 / E3-11.3) y «Cancelar» en las que están en votación o programadas y todavía no se dieron (IC-123 / E3-11.4), con el aviso al volver de cancelar. Sólo enlaza a la ficha de la función y a la de la sala si la sala está habilitada, y muestra un mensaje si no tiene ninguna función (IC-120).
 - **`plantillas/programacion/mis_salas.html.twig`**: Vista de «Mis salas» para organizadores en `/organizador/salas` con migas de pan, botón para publicar sala y cuadrícula de tarjetas editables (IC-38).
 - **`plantillas/programacion/salas.html.twig`**: Catálogo público de salas indie habilitadas en `/salas` con cuadrícula de tarjetas de sala (IC-39), y un buscador GET por nombre y localidad que funciona sin JavaScript, con el aviso si la búsqueda no es válida y un mensaje propio sin resultados (IC-91).
-- **`plantillas/programacion/sala.html.twig`**: Ficha pública de una sala en `/salas/{id}`: la foto, la dirección, la capacidad, la descripción y sus próximas funciones con la tarjeta de función, o un mensaje si no tiene. Si todavía no está publicada (la ve sólo su organizador), lo avisa. Las tarjetas de sala enlazan a su ficha (IC-90).
+- **`plantillas/programacion/sala.html.twig`**: Ficha pública de una sala en `/salas/{id}`, en el orden del wireframe `sala-indie`: la foto de portada a todo el ancho (o un marcador), las migas, el nombre, la dirección y la localidad; en la columna principal «Sobre la sala» y las próximas funciones en filas (`parciales/fila_funcion.html.twig`), o un mensaje si no tiene; al costado «Dónde queda» y los parámetros de la sala (capacidad, películas por función, duración máxima y tiempo entre funciones). En el celular, una sola columna. Si todavía no está publicada (la ve sólo su organizador), lo avisa. Las tarjetas de sala enlazan a su ficha (IC-90, IC-335).
 
 ---
 
