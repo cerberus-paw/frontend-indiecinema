@@ -210,7 +210,9 @@ class PAW {
     if (!(elemento instanceof HTMLElement)) {
       return;
     }
-    if (!elemento.hasAttribute('tabindex')) {
+    const focoNatural = ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(elemento.tagName)
+      || (elemento.tagName === 'A' && elemento.hasAttribute('href'));
+    if (!elemento.hasAttribute('tabindex') && !focoNatural) {
       elemento.tabIndex = -1;
     }
     elemento.focus();
