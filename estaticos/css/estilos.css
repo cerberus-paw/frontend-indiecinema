@@ -6534,7 +6534,8 @@ a.tabla-admin-principal:focus-visible {
 
 .ficha-obra-fila {
   display: flex;
-  align-items: center;
+  /* Arriba y no al centro: con la sinopsis la fila es alta y el afiche va junto al título */
+  align-items: flex-start;
   gap: var(--espacio-4);
   padding: var(--espacio-3) var(--espacio-4);
   background: var(--color-superficie);
@@ -6608,6 +6609,15 @@ a.tabla-admin-principal:focus-visible {
   gap: var(--espacio-2);
   flex: 1;
   min-width: 0;
+}
+
+/* La sinopsis de cada obra y la descripción de la sala, debajo de sus datos */
+.ficha-obra-fila-sinopsis,
+.ficha-sala-fila-descripcion {
+  margin: var(--espacio-2) 0 0;
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+  color: var(--color-texto);
 }
 
 /* En tablet y celular, una columna: la reserva baja después del detalle */

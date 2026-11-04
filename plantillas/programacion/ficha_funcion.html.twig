@@ -785,6 +785,12 @@
                 <div>
                   <h3 class="ficha-titulo-nombre">{{ obra.titulo }}</h3>
                   <p class="ficha-titulo-datos">{{ ([obra.anio, obra.generos|join(', ')]|filter(dato => dato is not empty)|join(' · ')) }} · {{ obra.duracion }} min</p>
+                  {% if obra.director ?? null %}
+                    <p class="ficha-titulo-datos">Dirección: <strong>{{ obra.director }}</strong></p>
+                  {% endif %}
+                  {% if obra.sinopsis ?? null %}
+                    <p class="ficha-obra-fila-sinopsis">{{ obra.sinopsis }}</p>
+                  {% endif %}
                 </div>
               </li>
             {% endfor %}
@@ -820,6 +826,10 @@
                 {% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'ficha-sala-icono' } only %}
                 <span>{{ funcion.sala.direccion }}, {{ funcion.sala.localidad }}</span>
               </p>
+              <p class="ficha-titulo-datos">{{ funcion.sala.capacidad }} butacas</p>
+              {% if funcion.sala.descripcion %}
+                <p class="ficha-sala-fila-descripcion">{{ funcion.sala.descripcion }}</p>
+              {% endif %}
             </div>
             {% include 'parciales/boton.html.twig' with {
               texto: 'Ver sala',
