@@ -280,7 +280,11 @@ class PAW {
    * @returns {string}
    */
   static mensajeDeError(datos, generico, campo = null) {
-    const mensaje = (campo === null ? null : datos?.errores?.[campo]) ?? datos?.error;
+    const errorEspecifico = campo === null ? null : datos?.errores?.[campo];
+    const primerError = typeof datos?.errores === 'object' && datos?.errores !== null
+      ? Object.values(datos.errores).find((e) => typeof e === 'string' && e !== '')
+      : null;
+    const mensaje = errorEspecifico ?? datos?.error ?? primerError;
 
     return typeof mensaje === 'string' && mensaje !== '' ? mensaje : generico;
   }
