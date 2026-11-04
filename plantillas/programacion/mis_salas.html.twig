@@ -39,6 +39,8 @@
       mensaje: 'Todavía no cargaste ninguna sala.'
     } %}
   {% else %}
+    {# El h2 de las tarjetas (h3) para el lector de pantalla (E4-10.2) #}
+    <h2 class="sr-only">Salas</h2>
     <div class="cuadricula-funciones">
       {% for sala in salas %}
         {% include 'parciales/tarjeta_sala.html.twig' with { sala: sala, editable: true } only %}

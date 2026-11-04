@@ -97,7 +97,10 @@
     {% endif %}
   {% endset %}
 
-  <section id="resultados-cartelera" class="cartelera-resultados-seccion" aria-label="Funciones de la cartelera">
+  {# El h2 de las tarjetas (h3) para el lector de pantalla (E4-10.2): queda afuera de la sección
+     porque el buscador la vuelve a dibujar entera. #}
+  <h2 id="titulo-resultados-cartelera" class="sr-only">Funciones</h2>
+  <section id="resultados-cartelera" class="cartelera-resultados-seccion" aria-labelledby="titulo-resultados-cartelera">
   {% if avisos is not empty %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'advertencia',
