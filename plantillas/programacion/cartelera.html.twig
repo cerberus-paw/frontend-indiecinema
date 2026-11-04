@@ -7,12 +7,13 @@
 
   Variables:
   - funciones: lista de funciones como las recibe parciales/tarjeta_funcion.html.twig.
-  - filtros: los filtros aplicados (q, localidad, fecha en AAAA-MM-DD y genero, por su nombre); falta el que no se aplicó.
-  - filtrada: si hay algún filtro aplicado.
+  - filtros: los filtros aplicados (q, localidad, fecha en AAAA-MM-DD, genero por su nombre y orden); falta el que no se aplicó.
+  - filtrada: si hay algún filtro aplicado (el orden no cuenta: no saca funciones).
   - avisos: lista de textos, uno por cada filtro inválido que se dejó afuera.
   - localidades: lista de nombres de localidad con funciones, para el filtro.
   - generos: lista de géneros (id, nombre), para el filtro. Cada opción manda el nombre, como la
     localidad, así la URL se lee y se puede escribir a mano: /cartelera?genero=Comedia.
+  - ordenes: lista de opciones de orden (valor, etiqueta); el orden por defecto lleva valor vacío.
   - paginado: numero, total_paginas, total_funciones, y las URL anterior y siguiente (null si no hay).
   - csv: la URL de la cartelera en CSV con los mismos filtros, todas las páginas.
 #}
@@ -38,7 +39,7 @@
     {% set opciones_genero = opciones_genero|merge([{valor: genero.nombre, etiqueta: genero.nombre}]) %}
   {% endfor %}
 
-  <form class="filtros-cartelera" action="/cartelera" method="get" role="search" aria-label="Filtrar la cartelera">
+  <form class="filtros-cartelera" action="/cartelera" method="get" id="filtros-cartelera" role="search" aria-label="Filtrar la cartelera">
     {% include 'parciales/campo.html.twig' with {
       nombre: 'q',
       etiqueta: 'Buscar',
@@ -74,6 +75,28 @@
     </div>
   </form>
 
+  {#
+    «Ordenar por», arriba a la derecha de la grilla. Está afuera del formulario y se asocia con
+    form=, así viaja con los filtros. Sin funciones no hay nada que ordenar: va oculto, para que
+    BuscadorDeCartelera lo muestre cuando vuelvan los resultados sin armar las opciones de nuevo.
+    Sin JavaScript, cambiarlo no hace nada solo: el botón del <noscript> manda el formulario.
+  #}
+  {% set selector_orden %}
+    {% if ordenes|default([]) is not empty %}
+      <div class="cartelera-orden"{{ funciones is empty ? ' hidden' : '' }}>
+        <label class="cartelera-orden-etiqueta" for="cartelera-orden">Ordenar por</label>
+        <select id="cartelera-orden" name="orden" form="filtros-cartelera" class="campo-control control-select">
+          {% for opcion in ordenes %}
+            <option value="{{ opcion.valor }}"{{ (filtros.orden ?? '') == opcion.valor ? ' selected' : '' }}>{{ opcion.etiqueta }}</option>
+          {% endfor %}
+        </select>
+        <noscript>
+          <button type="submit" form="filtros-cartelera" class="boton boton-secundario boton-chico"><span class="boton-texto">Ordenar</span></button>
+        </noscript>
+      </div>
+    {% endif %}
+  {% endset %}
+
   <section id="resultados-cartelera" class="cartelera-resultados-seccion" aria-label="Funciones de la cartelera">
   {% if avisos is not empty %}
     {% include 'parciales/mensaje.html.twig' with {
@@ -90,11 +113,13 @@
         ? 'No hay funciones que coincidan con la búsqueda. Probá con otros filtros.'
         : 'Todavía no hay funciones programadas.'
     } only %}
+    {{ selector_orden }}
   {% else %}
-    <div class="cartelera-resumen">
+    <div class="cartelera-resumen cartelera-barra">
       <p class="cartelera-resultados" role="status">
         {{ paginado.total_funciones }} {{ paginado.total_funciones == 1 ? 'función' : 'funciones' }}
       </p>
+      {{ selector_orden }}
       <a href="{{ csv }}" class="boton boton-secundario boton-chico" download>Descargar CSV</a>
     </div>
     <div class="cuadricula-funciones">

@@ -59,6 +59,9 @@ class BuscadorDeCartelera {
     this.espera = null;
     // La búsqueda que se está mostrando: la de la página cargada, después la última que llegó.
     this.urlMostrada = window.location.pathname + window.location.search;
+    // «Ordenar por» lo dibuja la plantilla (oculto si no hay funciones) y se reusa en cada resumen.
+    this.orden = this.resultados.querySelector('.cartelera-orden');
+    this.selectorOrden = this.orden?.querySelector('select[name="orden"]') ?? null;
     this.indicador = this.nodo('p', { class: 'aviso-flotante', role: 'status' }, [
       this.nodo('span', { class: 'aviso-flotante-icono', 'aria-hidden': 'true' }),
       'Buscando funciones…',
@@ -83,6 +86,13 @@ class BuscadorDeCartelera {
         this.mostrarCargando(true);
         clearTimeout(this.espera);
         this.espera = setTimeout(() => this.buscar(this.urlDelFormulario()), BuscadorDeCartelera.ESPERA_AL_ESCRIBIR);
+      }
+    });
+    // El selector de orden está en la sección de resultados, asociado al formulario con form=: su
+    // «change» sube por la sección, no por el formulario.
+    this.resultados.addEventListener('change', (evento) => {
+      if (evento.target.name === 'orden') {
+        this.buscar(this.urlDelFormulario());
       }
     });
     this.resultados.addEventListener('click', (evento) => {
@@ -114,6 +124,9 @@ class BuscadorDeCartelera {
         campo.value = consulta.get(campo.name) ?? '';
       }
     }
+    if (this.selectorOrden) {
+      this.selectorOrden.value = consulta.get('orden') ?? '';
+    }
   }
 
   /**
@@ -127,6 +140,10 @@ class BuscadorDeCartelera {
       if (String(valor).trim() !== '') {
         consulta.append(nombre, valor);
       }
+    }
+    // Sin funciones, el selector queda afuera del documento y FormData no lo ve: el orden sigue.
+    if (this.selectorOrden && !consulta.has('orden') && this.selectorOrden.value.trim() !== '') {
+      consulta.append('orden', this.selectorOrden.value);
     }
     const accion = this.formulario.getAttribute('action');
 
@@ -182,7 +199,7 @@ class BuscadorDeCartelera {
     const partes = [];
     const total = datos.paginado.total_funciones;
     if (total === 0) {
-      partes.push(Object.keys(datos.filtros).length > 0
+      partes.push(BuscadorDeCartelera.filtrada(datos)
         ? 'No hay funciones que coincidan con la búsqueda.'
         : 'Todavía no hay funciones programadas.');
     } else {
@@ -247,14 +264,17 @@ class BuscadorDeCartelera {
    * @param {{funciones: Array<Object>, filtros: Object, avisos: Array<string>, paginado: Object, csv: string}} datos
    */
   mostrar(datos) {
+    const teniaFocoOrden = Boolean(this.selectorOrden && document.activeElement === this.selectorOrden);
+    if (this.selectorOrden) {
+      this.selectorOrden.value = datos.filtros?.orden ?? '';
+    }
     const partes = [];
     if (datos.avisos.length > 0) {
       partes.push(this.alerta('advertencia', 'alert', { titulo: 'Algunos filtros no se aplicaron', detalles: datos.avisos }));
     }
     if (datos.funciones.length === 0) {
-      const filtrada = Object.keys(datos.filtros).length > 0;
       partes.push(this.alerta('info', 'status', {
-        texto: filtrada
+        texto: BuscadorDeCartelera.filtrada(datos)
           ? 'No hay funciones que coincidan con la búsqueda. Probá con otros filtros.'
           : 'Todavía no hay funciones programadas.',
       }));
@@ -266,7 +286,20 @@ class BuscadorDeCartelera {
       }
     }
     this.resultados.replaceChildren(...partes);
-    this.mostrarLimpiar(Object.keys(datos.filtros).length > 0);
+    if (teniaFocoOrden && datos.funciones.length > 0) {
+      this.selectorOrden.focus();
+    }
+    this.mostrarLimpiar(BuscadorDeCartelera.filtrada(datos));
+  }
+
+  /**
+   * Si la búsqueda recortó la cartelera, como «filtrada» en la plantilla: el orden no cuenta.
+   *
+   * @param {{filtros: Object}} datos
+   * @returns {boolean}
+   */
+  static filtrada(datos) {
+    return Object.keys(datos.filtros).some((nombre) => nombre !== 'orden');
   }
 
   /**
@@ -288,8 +321,13 @@ class BuscadorDeCartelera {
   }
 
   resumen(total, csv) {
-    return this.nodo('div', { class: 'cartelera-resumen' }, [
+    if (this.orden) {
+      this.orden.hidden = false;
+    }
+
+    return this.nodo('div', { class: 'cartelera-resumen cartelera-barra' }, [
       this.nodo('p', { class: 'cartelera-resultados', role: 'status' }, [`${total} ${total === 1 ? 'función' : 'funciones'}`]),
+      ...(this.orden ? [this.orden] : []),
       this.nodo('a', { href: csv, class: 'boton boton-secundario boton-chico', download: '' }, ['Descargar CSV']),
     ]);
   }
