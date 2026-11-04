@@ -7031,6 +7031,10 @@ a.tabla-admin-principal:focus-visible {
    Componentes para plantillas/programacion/alta_obra.html.twig y mis_obras.html.twig
    -------------------------------------------------------------------------- */
 
+/* Formulario buscador de obras en catálogo (E4-08.2) */
+.buscador-obras {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
 /* Insignia para tipo de obra (Película / Cortometraje) */
 .insignia-tipo-obra {
   background-color: var(--color-superficie-elevada);
