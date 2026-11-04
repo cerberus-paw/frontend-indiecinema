@@ -37,6 +37,12 @@ se pueden correr muchas veces contra el mismo sitio sin agotar las funciones.
 | C-1 | Cancela la reserva desde «Mis reservas» y confirma | La reserva queda «cancelada», ya no se puede cancelar y los lugares vuelven a la función |
 | C-2 | Entra a cancelar y elige «Conservar la reserva» | La reserva sigue «confirmada» |
 
+## Teclado
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| T-1 | Sin sesión, abre la portada y aprieta Tab, y después Enter | Con Tab, el foco está en «Saltar al contenido», que se ve; con Enter, el foco pasa al contenido principal |
+
 ## Lo que todavía no cubren
 
 Votar títulos, proponer y votar franjas, confirmar la franja ganadora y el panel de reservas del
