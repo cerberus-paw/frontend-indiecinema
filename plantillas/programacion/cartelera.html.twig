@@ -16,6 +16,8 @@
   - ordenes: lista de opciones de orden (valor, etiqueta); el orden por defecto lleva valor vacío.
   - paginado: numero, total_paginas, total_funciones, las URL anterior y siguiente (null si no hay) y
     paginas: los números de la barra (numero, url, actual), con null donde se saltean páginas.
+  - max_ultimas_busquedas: cuántas búsquedas recientes guarda el navegador (5).
+  - busqueda: la búsqueda actual (url, etiqueta y filtros) para las últimas búsquedas, o null si no recorta la cartelera.
   - csv: la URL de la cartelera en CSV con los mismos filtros, todas las páginas.
 #}
 {% extends 'base.html.twig' %}
@@ -23,7 +25,7 @@
 {% block titulo %}Cartelera{% endblock %}
 
 {% block contenido %}
-<div class="contenedor" data-cartelera>
+<div class="contenedor" data-cartelera data-max-ultimas-busquedas="{{ max_ultimas_busquedas|default(5) }}"{% if busqueda|default(null) %} data-busqueda="{{ busqueda|json_encode }}"{% endif %}>
   <header class="encabezado-formulario-solicitud">
     <div class="solicitud-texto-cabecera">
       <h1 class="solicitud-titulo">Cartelera</h1>
@@ -91,6 +93,14 @@
       {% endif %}
     </div>
   </form>
+
+  <section class="ultimas-busquedas" aria-label="Últimas búsquedas" data-ultimas-busquedas hidden>
+    <div class="ultimas-busquedas-cabecera">
+      <span class="ultimas-busquedas-titulo">Últimas búsquedas:</span>
+      <button type="button" class="ultimas-busquedas-limpiar" data-limpiar-busquedas>Borrar historial</button>
+    </div>
+    <ul class="ultimas-busquedas-lista" data-ultimas-busquedas-lista></ul>
+  </section>
 
   {#
     «Ordenar por», arriba a la derecha de la grilla. Está afuera del formulario y se asocia con
