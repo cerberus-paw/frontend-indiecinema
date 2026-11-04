@@ -10,45 +10,45 @@
   - usuario: el usuario en sesión.
   - csrf: el token del formulario para salir.
 #}
-<aside class="panel-admin-menu">
+<aside class="panel-menu">
   {# El logo lleva al inicio del panel: la portada pública redirige ahí al administrador #}
-  <a href="/cuenta/administracion/usuarios" class="panel-admin-marca" aria-label="IndieCinema: inicio del panel">
+  <a href="/cuenta/administracion/usuarios" class="panel-marca" aria-label="IndieCinema: inicio del panel">
     <img src="/estaticos/img/logo-horizontal-dark.svg" alt="IndieCinema" width="140" height="60">
   </a>
 
   <nav aria-label="Administración">
-    <p class="panel-admin-menu-titulo">Administración</p>
-    <ul class="panel-admin-menu-lista">
+    <p class="panel-menu-titulo">Administración</p>
+    <ul class="panel-menu-lista">
       <li>
-        <a href="/cuenta/administracion/usuarios" class="panel-admin-menu-enlace{% if activa == 'usuarios' %} activo{% endif %}"{% if activa == 'usuarios' %} aria-current="page"{% endif %}>Usuarios y roles</a>
+        <a href="/cuenta/administracion/usuarios" class="panel-menu-enlace{% if activa == 'usuarios' %} activo{% endif %}"{% if activa == 'usuarios' %} aria-current="page"{% endif %}>Usuarios y roles</a>
       </li>
       <li>
-        <a href="/funcion/administracion/reservas" class="panel-admin-menu-enlace{% if activa == 'reservas' %} activo{% endif %}"{% if activa == 'reservas' %} aria-current="page"{% endif %}>Reservas</a>
+        <a href="/funcion/administracion/reservas" class="panel-menu-enlace{% if activa == 'reservas' %} activo{% endif %}"{% if activa == 'reservas' %} aria-current="page"{% endif %}>Reservas</a>
       </li>
     </ul>
   </nav>
 
   <nav aria-label="Moderación">
-    <p class="panel-admin-menu-titulo">Moderación</p>
-    <ul class="panel-admin-menu-lista">
+    <p class="panel-menu-titulo">Moderación</p>
+    <ul class="panel-menu-lista">
       <li>
-        <a href="/administracion/solicitudes" class="panel-admin-menu-enlace{% if activa == 'solicitudes' %} activo{% endif %}"{% if activa == 'solicitudes' %} aria-current="page"{% endif %}>Solicitudes de sala</a>
+        <a href="/administracion/solicitudes" class="panel-menu-enlace{% if activa == 'solicitudes' %} activo{% endif %}"{% if activa == 'solicitudes' %} aria-current="page"{% endif %}>Solicitudes de sala</a>
       </li>
     </ul>
   </nav>
 
   {% if usuario %}
-    <div class="panel-admin-sesion">
-      <div class="panel-admin-sesion-usuario">
+    <div class="panel-sesion">
+      <div class="panel-sesion-usuario">
         <span class="usuario-avatar" aria-hidden="true">{{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}</span>
-        <div class="panel-admin-sesion-datos">
-          <span class="panel-admin-sesion-nombre">{{ usuario.nombre }}</span>
+        <div class="panel-sesion-datos">
+          <span class="panel-sesion-nombre">{{ usuario.nombre }}</span>
           <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
         </div>
       </div>
       <form action="/cuenta/salir" method="POST">
         <input type="hidden" name="_csrf" value="{{ csrf }}">
-        <button type="submit" class="boton boton-secundario boton-chico panel-admin-salir">Cerrar sesión</button>
+        <button type="submit" class="boton boton-secundario boton-chico panel-salir">Cerrar sesión</button>
       </form>
     </div>
   {% endif %}

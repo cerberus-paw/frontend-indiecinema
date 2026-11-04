@@ -48,26 +48,26 @@
     } only %}
   </header>
 
-  <dl class="panel-admin-resumen">
-    <div class="panel-admin-dato">
+  <dl class="panel-resumen">
+    <div class="panel-dato">
       <dt>Lugares reservados</dt>
-      <dd class="panel-admin-dato-valor" data-resumen="reservados">{{ resumen.reservados }}</dd>
-      <dd class="panel-admin-dato-nota">de {{ funcion.cupo }} · {{ resumen.reservas }} {{ resumen.reservas == 1 ? 'reserva' : 'reservas' }}</dd>
+      <dd class="panel-dato-valor" data-resumen="reservados">{{ resumen.reservados }}</dd>
+      <dd class="panel-dato-nota">de {{ funcion.cupo }} · {{ resumen.reservas }} {{ resumen.reservas == 1 ? 'reserva' : 'reservas' }}</dd>
     </div>
-    <div class="panel-admin-dato">
+    <div class="panel-dato">
       <dt>Lugares libres</dt>
-      <dd class="panel-admin-dato-valor" data-resumen="libres">{{ resumen.libres }}</dd>
-      <dd class="panel-admin-dato-nota">{{ resumen.libres == 0 ? 'agotada' : 'para reservar' }}</dd>
+      <dd class="panel-dato-valor" data-resumen="libres">{{ resumen.libres }}</dd>
+      <dd class="panel-dato-nota">{{ resumen.libres == 0 ? 'agotada' : 'para reservar' }}</dd>
     </div>
-    <div class="panel-admin-dato">
+    <div class="panel-dato">
       <dt>Asistentes registrados</dt>
-      <dd class="panel-admin-dato-valor" data-resumen="asistentes">{{ resumen.asistentes }}</dd>
-      <dd class="panel-admin-dato-nota">de {{ resumen.reservados }} lugares reservados</dd>
+      <dd class="panel-dato-valor" data-resumen="asistentes">{{ resumen.asistentes }}</dd>
+      <dd class="panel-dato-nota">de {{ resumen.reservados }} lugares reservados</dd>
     </div>
-    <div class="panel-admin-dato">
+    <div class="panel-dato">
       <dt>Total de las reservas</dt>
-      <dd class="panel-admin-dato-valor" data-resumen="recaudado">{{ resumen.recaudado }}</dd>
-      <dd class="panel-admin-dato-nota">sin las canceladas</dd>
+      <dd class="panel-dato-valor" data-resumen="recaudado">{{ resumen.recaudado }}</dd>
+      <dd class="panel-dato-nota">sin las canceladas</dd>
     </div>
   </dl>
 
