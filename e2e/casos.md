@@ -58,6 +58,20 @@ sesión y en el registro, que tiene ayudas, placeholders y errores.
 | K-2 | Abre el registro | El placeholder de un campo da al menos 4,5:1 contra el fondo del campo |
 | K-3 | Manda el registro vacío | El error de un campo da al menos 4,5:1 contra su fondo |
 
+## Ordenar la cartelera
+
+Sin sesión. Necesitan al menos dos páginas de cartelera (más de 12 funciones), como en los datos
+de prueba.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| O-1 | En la cartelera, elige «Precio: mayor a menor» en «Ordenar por» | Sin recargar, las funciones van de la más cara a la más barata, la dirección lleva el orden y no aparece «Limpiar» |
+| O-2 | Con ese orden, pasa a la página siguiente | La dirección y el desplegable conservan el orden, y los precios siguen bajando desde el último de la primera página |
+| O-3 | Elige un orden, después otro, y aprieta «Atrás» | Vuelve el primer orden, en el desplegable y en las funciones |
+| O-4 | Con un orden elegido, busca algo que no hay y después borra la búsqueda | Sin funciones no está «Ordenar por»; al volver las funciones, vuelve con el mismo orden |
+| O-5 | Abre una búsqueda sin funciones y la borra | Aparece «Ordenar por», que no estaba |
+| O-6 | Sin JavaScript, elige «Precio: menor a mayor» y aprieta «Ordenar» | Carga la cartelera de la más barata a la más cara |
+
 ## Lo que todavía no cubren
 
 Votar títulos, proponer y votar franjas, confirmar la franja ganadora y el panel de reservas del
