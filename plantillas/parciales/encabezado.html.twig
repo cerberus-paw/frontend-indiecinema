@@ -61,6 +61,10 @@
         <li>
           <a href="/cartelera" class="nav-enlace{% if ruta == '/cartelera' or ruta starts with '/cartelera' %} activo{% endif %}">Cartelera</a>
         </li>
+        {# Enlace al catálogo de obras: ruta /obras (E4-08.3) #}
+        <li>
+          <a href="/obras" class="nav-enlace{% if ruta starts with '/obras' %} activo{% endif %}">Películas</a>
+        </li>
         {# Enlace a la sección de Salas indie registradas #}
         <li>
           <a href="/salas" class="nav-enlace{% if ruta starts with '/salas' %} activo{% endif %}">Salas</a>
@@ -150,6 +154,12 @@
               <div class="menu-seccion-titulo">Panel del Organizador</div>
               <a href="/organizador/salas" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">🏛️</span> Mis salas
+              </a>
+              <a href="/organizador/obras" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">🎬</span> Mis obras
+              </a>
+              <a href="/organizador/obras/nueva" class="menu-item" role="menuitem">
+                <span class="menu-icono" aria-hidden="true">➕</span> Cargar obra
               </a>
               <a href="/organizador/funciones" class="menu-item" role="menuitem">
                 <span class="menu-icono" aria-hidden="true">🎞️</span> Mis funciones

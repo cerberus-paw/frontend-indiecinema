@@ -760,13 +760,22 @@
         {% for obra in funcion.obras %}
           <article class="ficha-obra-tarjeta">
             <div class="ficha-obra-afiche-columna">
-              <div class="ficha-obra-afiche-placeholder" aria-hidden="true">
-                <span class="afiche-placeholder-texto">AFICHE</span>
-              </div>
+              {% if obra.afiche is defined and obra.afiche %}
+                <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="ficha-obra-afiche-imagen" loading="lazy">
+              {% else %}
+                <div class="ficha-obra-afiche-placeholder" aria-hidden="true">
+                  <span class="afiche-placeholder-texto">AFICHE</span>
+                </div>
+              {% endif %}
             </div>
             <div class="ficha-obra-cuerpo">
               <h2 class="ficha-obra-titulo">
-                {{ obra.titulo }} <span class="ficha-obra-anio">({{ obra.anio }})</span>
+                {% if obra.id is defined and obra.id %}
+                  <a href="/obras/{{ obra.id }}" class="ficha-obra-titulo-enlace">{{ obra.titulo }}</a>
+                {% else %}
+                  {{ obra.titulo }}
+                {% endif %}
+                <span class="ficha-obra-anio">({{ obra.anio }})</span>
               </h2>
               <div class="ficha-obra-metadatos">
                 <span class="ficha-obra-metadato">Dirección: <strong>{{ obra.director }}</strong></span>
