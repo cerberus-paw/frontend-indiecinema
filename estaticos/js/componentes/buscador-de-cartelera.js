@@ -45,6 +45,17 @@ class BuscadorDeCartelera {
     sin_quorum: ['ACUERDO SIN MÍNIMO', 'insignia-sin-quorum'],
   };
 
+  /** Los campos que se escriben de a una tecla y esperan antes de buscar. */
+  static CAMPOS_DE_ESCRITURA = ['q', 'precio_min', 'precio_max'];
+
+  /**
+   * @param {string} nombre
+   * @returns {boolean}
+   */
+  static esCampoDeEscritura(nombre) {
+    return BuscadorDeCartelera.CAMPOS_DE_ESCRITURA.includes(nombre);
+  }
+
   /**
    * @param {Element|string} pFormulario el formulario de filtros, o su selector
    * @param {Element|string} pResultados la sección que muestra las funciones, o su selector
@@ -74,14 +85,14 @@ class BuscadorDeCartelera {
       evento.preventDefault();
       this.buscar(this.urlDelFormulario());
     });
-    // Los desplegables y la fecha, al elegir; el texto, cuando se deja de escribir.
+    // Los desplegables y la fecha, al elegir; el texto y los precios, cuando se deja de escribir.
     this.formulario.addEventListener('change', (evento) => {
-      if (evento.target.name !== 'q') {
+      if (!BuscadorDeCartelera.esCampoDeEscritura(evento.target.name)) {
         this.buscar(this.urlDelFormulario());
       }
     });
     this.formulario.addEventListener('input', (evento) => {
-      if (evento.target.name === 'q') {
+      if (BuscadorDeCartelera.esCampoDeEscritura(evento.target.name)) {
         // Se ve que va a buscar desde la primera tecla, aunque el pedido salga después.
         this.mostrarCargando(true);
         clearTimeout(this.espera);
