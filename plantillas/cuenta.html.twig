@@ -1,0 +1,38 @@
+{#
+  Armado de las pantallas de «Mi cuenta» (E4-10.13), como los wireframes mi-cuenta-mis-datos y
+  mi-cuenta-mis-reservas: con el encabezado y el pie del sitio, porque quien entra sigue en el
+  sitio público; las migas, y debajo una barra lateral con las secciones y el contenido al lado.
+  La usan «Mis datos» (cuentas) y «Mis reservas» (funciones).
+
+  Bloques de la pantalla:
+  - seccion: la sección actual, 'datos' o 'reservas', para marcarla en la barra.
+  - miga: el nombre de la sección, la última miga.
+  - tarjeta: opcional, lo que va arriba de la barra (la tarjeta del usuario en «Mis datos»).
+  - panel: el contenido.
+#}
+{% extends 'base.html.twig' %}
+
+{% block contenido %}
+<div class="contenedor mi-cuenta">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga"><a href="/cuenta/" class="enlace-miga">Mi cuenta</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">{{ block('miga') }}</li>
+    </ol>
+  </nav>
+
+  <div class="mi-cuenta-cuerpo">
+    <div class="mi-cuenta-lateral">
+      {% block tarjeta %}{% endblock %}
+      {% include 'parciales/menu_cuenta.html.twig' with { activa: block('seccion'), usuario: usuario ?? null } only %}
+    </div>
+
+    <div class="mi-cuenta-contenido">
+      {% block panel %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

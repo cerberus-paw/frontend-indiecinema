@@ -6820,6 +6820,146 @@ a.tabla-admin-principal:focus-visible {
   gap: var(--espacio-2);
 }
 
+/* «Mi cuenta» (E4-10.13), como los wireframes mi-cuenta-mis-datos y mi-cuenta-mis-reservas: la
+   barra lateral a la izquierda y el contenido al lado, entre el encabezado y el pie del sitio */
+.mi-cuenta-cuerpo {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: var(--espacio-8);
+  align-items: start;
+}
+
+/* La tarjeta del usuario (en «Mis datos») arriba de las secciones */
+.mi-cuenta-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+/* La inicial y, al lado, el nombre sobre «Desde…»; los roles en el renglón de abajo */
+.mi-cuenta-tarjeta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--espacio-3) var(--espacio-4);
+  padding: var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* Más grande que el del encabezado, como la foto del wireframe */
+.mi-cuenta-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: var(--texto-xl);
+}
+
+.mi-cuenta-nombre {
+  margin: 0;
+  font-weight: 600;
+  /* Un nombre largo baja de renglón en vez de ensanchar la barra */
+  overflow-wrap: anywhere;
+}
+
+.mi-cuenta-desde {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.mi-cuenta-roles {
+  grid-column: 1 / -1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+/* Las secciones, una debajo de otra */
+.mi-cuenta-menu-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.mi-cuenta-menu-enlace {
+  display: block;
+  padding: var(--espacio-2) var(--espacio-3);
+  border-radius: var(--radio-md);
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.mi-cuenta-menu-enlace:hover {
+  background-color: var(--color-superficie-hover);
+  color: var(--color-texto);
+}
+
+/* La sección actual, llena como en el wireframe, igual que en el panel del administrador */
+.mi-cuenta-menu-enlace.activo {
+  background-color: var(--color-texto);
+  color: var(--color-texto-inverso);
+  font-weight: 600;
+}
+
+/* «Mis datos», en su recuadro como el wireframe */
+.mi-cuenta-panel {
+  padding: var(--espacio-8);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* «Información personal», con la línea debajo del wireframe */
+.mi-cuenta-subtitulo {
+  margin: var(--espacio-6) 0 var(--espacio-4);
+  padding-bottom: var(--espacio-2);
+  border-bottom: 1px solid var(--color-borde);
+  font-size: var(--texto-md);
+}
+
+/* Cada dato con su nombre arriba, como las etiquetas del formulario del wireframe */
+.mi-cuenta-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin: 0;
+}
+
+.mi-cuenta-datos dt {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.mi-cuenta-datos dd {
+  margin: var(--espacio-1) 0 0;
+  color: var(--color-texto-brillante);
+  overflow-wrap: anywhere;
+}
+
+/* En tablet y celular, una sola columna: la tarjeta y las secciones en fila arriba del contenido */
+@media (max-width: 900px) {
+  .mi-cuenta-cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-6);
+  }
+
+  .mi-cuenta-menu-lista {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .mi-cuenta-panel {
+    padding: var(--espacio-5);
+  }
+}
+
 /* El comprobante en papel (E4-04.2): sólo el código y los datos de la reserva, en negro sobre
    blanco y sin el resto del sitio, para que entre en una hoja y se lea en la puerta */
 @media print {
