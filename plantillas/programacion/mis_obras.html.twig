@@ -1,14 +1,14 @@
 {#
-  «Mis obras» del organizador, en /organizador/obras (E4-08.1 / Wireframe «mi-cuenta-mis-obras»).
-  Lista las obras registradas por el organizador para usarlas en sus funciones, con enlaces para ver ficha
-  y editar.
+  «Mis obras» del organizador, en /organizador/obras (E4-08.1 / E4-08.4 - Wireframe «mi-cuenta-mis-obras»).
+  Lista las obras registradas por el organizador para usarlas en sus funciones, con enlaces para ver ficha,
+  editar y dar de baja (solo si no tienen funciones futuras programadas).
 
   Variables:
   - obras: lista de obras del organizador.
   - creada: (bool) aviso de que se acaba de cargar una obra nueva.
   - guardada: (bool) aviso de que se guardaron los cambios de una obra.
   - dada_de_baja: (bool) aviso de que la obra fue dada de baja lógicamente.
-  - error_baja: (?string) error si la baja fue rechazada.
+  - error_baja: (?string) error si la baja fue rechazada (ej. por funciones futuras).
   - csrf: token de protección contra ataques CSRF.
 #}
 {% extends 'base.html.twig' %}
@@ -84,6 +84,7 @@
 
     <div class="cuadricula-funciones mis-obras-cuadricula">
       {% for obra in obras %}
+        {% set tiene_futuras = obra.tiene_funciones_futuras|default(false) %}
         {% set duracion_obra = obra.duracion_minutos ?? (obra.duracion ?? null) %}
         <article class="tarjeta-funcion tarjeta-obra tarjeta-mi-obra" aria-label="{{ obra.titulo }}{% if obra.anio %} ({{ obra.anio }}){% endif %}">
           <div class="tarjeta-funcion-afiche">
@@ -144,12 +145,27 @@
               </div>
             {% endif %}
 
-            {# Acciones: Ver ficha y Editar #}
+            {# Acciones: Ver ficha, Editar y Dar de baja #}
             <div class="tarjeta-mi-obra-acciones">
               <div class="acciones-fila-enlaces">
                 <a href="/obras/{{ obra.id }}" class="boton boton-secundario boton-chico">Ver ficha</a>
                 <a href="/organizador/obras/{{ obra.id }}/editar" class="boton boton-secundario boton-chico">Editar</a>
               </div>
+
+              {# Formulario POST seguro con CSRF para dar de baja la obra (E4-08.4) #}
+              <form action="/organizador/obras/{{ obra.id }}/baja" method="POST" class="formulario-baja-obra" onsubmit="return confirm('¿Confirmás que querés dar de baja esta obra? Ya no podrá usarse en nuevas funciones.');">
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                {% if tiene_futuras %}
+                  <button type="button" class="boton boton-peligro-suave boton-chico boton-bloque" disabled title="No se puede dar de baja porque tiene funciones futuras programadas" aria-disabled="true">
+                    Con funciones futuras
+                  </button>
+                  <span class="baja-ayuda-bloqueo">Tiene funciones futuras</span>
+                {% else %}
+                  <button type="submit" class="boton boton-peligro-suave boton-chico boton-bloque">
+                    Dar de baja
+                  </button>
+                {% endif %}
+              </form>
             </div>
           </div>
         </article>

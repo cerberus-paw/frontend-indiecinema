@@ -18,6 +18,7 @@
 {% block contenido %}
 {% set duracion_obra = obra.duracion_minutos ?? (obra.duracion ?? null) %}
 {% set es_editable = obra.editable|default(false) %}
+{% set tiene_futuras = obra.tiene_funciones_futuras|default(false) %}
 <div class="contenedor ficha-sala ficha-pelicula">
   <nav class="navegacion-migas" aria-label="Migas de pan">
     <ol class="lista-migas">
@@ -116,6 +117,19 @@
           <a href="/organizador/obras/{{ obra.id }}/editar" class="boton boton-primario">
             Editar obra
           </a>
+
+          <form action="/organizador/obras/{{ obra.id }}/baja" method="POST" class="formulario-baja-obra-inline" onsubmit="return confirm('¿Confirmás que querés dar de baja esta obra del catálogo?');">
+            <input type="hidden" name="_csrf" value="{{ csrf }}">
+            {% if tiene_futuras %}
+              <button type="button" class="boton boton-secundario" disabled title="No se puede dar de baja porque tiene funciones futuras programadas" aria-disabled="true">
+                Dar de baja (bloqueado)
+              </button>
+            {% else %}
+              <button type="submit" class="boton boton-peligro-suave">
+                Dar de baja
+              </button>
+            {% endif %}
+          </form>
         </div>
       {% endif %}
     </div>
