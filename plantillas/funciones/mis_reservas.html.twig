@@ -1,8 +1,9 @@
 {#
   «Mis reservas» del espectador, en /funcion/reservas (E4-04.1), como el wireframe
-  mi-cuenta-mis-reservas: las migas, el título con «Ir a la cartelera», la tabla con la función, la
-  sala, la fecha, los lugares, el estado y las acciones de cada una, y el paginado numerado. Queda
-  afuera lo que todavía no tiene datos: la barra lateral de «Mi cuenta», las tarjetas de conducta,
+  mi-cuenta-mis-reservas: con la barra lateral de «Mi cuenta» (E4-10.13), el título con «Ir a la
+  cartelera», la tabla con la función, la sala, la fecha, los lugares, el estado y las acciones de
+  cada una, y el paginado numerado. Queda afuera lo que todavía no tiene datos: la tarjeta del
+  usuario arriba de la barra (funciones no tiene la fecha de alta), las tarjetas de conducta,
   actividad y beneficios, las pestañas, los filtros y el pago.
 
   Variables:
@@ -14,21 +15,15 @@
   - paginado: numero, total_paginas, total, anterior y siguiente (URL o null) y paginas: lista de
     {numero, url, actual}.
 #}
-{% extends 'base.html.twig' %}
+{% extends 'cuenta.html.twig' %}
 
 {% block titulo %}Mis reservas{% endblock %}
+{% block seccion %}reservas{% endblock %}
+{% block miga %}Mis reservas{% endblock %}
 
-{% block contenido %}
+{% block panel %}
 {% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
-<div class="contenedor panel-reservas mis-reservas">
-  <nav class="navegacion-migas" aria-label="Migas de pan">
-    <ol class="lista-migas">
-      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
-      <li class="separador-miga" aria-hidden="true">/</li>
-      <li class="item-miga miga-activa" aria-current="page">Mis reservas</li>
-    </ol>
-  </nav>
-
+<div class="panel-reservas mis-reservas">
   <header class="encabezado-formulario-solicitud">
     <div class="solicitud-texto-cabecera">
       <h1 class="solicitud-titulo">Mis reservas</h1>
