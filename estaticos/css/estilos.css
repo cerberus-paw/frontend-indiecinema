@@ -297,6 +297,12 @@ select {
   top: 1rem;
 }
 
+/* El contenido principal toma el foco al saltar (tabindex -1) sólo para que Tab siga desde ahí */
+.contenido-principal:focus {
+  /* Sin el contorno del foco: marcaría la página entera */
+  outline: none;
+}
+
 /* --------------------------------------------------------------------------
    4. TIPOGRAFÍA Y JERARQUÍA VISUAL
    -------------------------------------------------------------------------- */
