@@ -17,11 +17,13 @@
   - error_general: (string, opcional) Mensaje de error general si falló la validación.
   - mensaje_exito: (string, opcional) Mensaje tras guardar exitosamente la función.
 #}
-{% extends 'base.html.twig' %}
+{% extends 'organizador.html.twig' %}
 
 {% block titulo %}{{ es_edicion ?? false ? 'Editar función' : 'Programar una función' }}{% endblock %}
 
-{% block contenido %}
+{% block seccion %}{{ es_edicion ?? false ? 'funciones' : 'programar' }}{% endblock %}
+
+{% block panel %}
 <div class="contenedor">
   {# Migas de pan para ubicación dentro del panel de organizador #}
   <nav class="navegacion-migas" aria-label="Migas de pan">

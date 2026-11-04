@@ -24,12 +24,12 @@
 {% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
 {# data-panel-de-reservas: el enganche del componente que anula sin recargar la lista (E4-05.5). #}
 <div data-panel-de-reservas>
-<header class="panel-admin-cabecera">
-  <h1 class="panel-admin-titulo">Reservas</h1>
-  <p class="panel-admin-bajada">Las reservas de todas las funciones. Anular una la cancela y libera sus lugares.</p>
+<header class="panel-cabecera">
+  <h1 class="panel-titulo">Reservas</h1>
+  <p class="panel-bajada">Las reservas de todas las funciones. Anular una la cancela y libera sus lugares.</p>
 </header>
 
-<form class="panel-admin-filtros" action="/funcion/administracion/reservas" method="get" role="search" aria-label="Filtrar reservas" data-enviar-al-elegir>
+<form class="panel-filtros" action="/funcion/administracion/reservas" method="get" role="search" aria-label="Filtrar reservas" data-enviar-al-elegir>
   <label>
     <span class="sr-only">Estado</span>
     <select name="estado" class="campo-control control-select">

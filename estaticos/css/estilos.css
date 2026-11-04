@@ -5565,7 +5565,7 @@ dd {
 
 /* Tarjetas de números arriba de la tabla, como el wireframe: del ancho de cuatro por fila, aunque
    haya dos */
-.panel-admin-resumen {
+.panel-resumen {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--espacio-4);
@@ -5576,7 +5576,7 @@ dd {
   background: none;
 }
 
-.panel-admin-dato {
+.panel-dato {
   padding: var(--espacio-4) var(--espacio-5);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
@@ -5584,7 +5584,7 @@ dd {
 }
 
 /* «USUARIOS REGISTRADOS», en versalitas como los títulos de las columnas */
-.panel-admin-dato dt {
+.panel-dato dt {
   font-size: var(--texto-xs);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -5592,11 +5592,11 @@ dd {
   color: var(--color-texto-apagado);
 }
 
-.panel-admin-dato dd {
+.panel-dato dd {
   margin: 0;
 }
 
-.panel-admin-dato-valor {
+.panel-dato-valor {
   margin-top: var(--espacio-2);
   font-family: var(--fuente-titulos);
   font-size: var(--texto-3xl);
@@ -5605,20 +5605,20 @@ dd {
   color: var(--color-texto-brillante);
 }
 
-.panel-admin-dato-nota {
+.panel-dato-nota {
   font-size: var(--texto-sm);
   color: var(--color-texto-secundario);
 }
 
 /* En tablet, dos por fila; en el celular, una */
 @media (max-width: 900px) {
-  .panel-admin-resumen {
+  .panel-resumen {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 480px) {
-  .panel-admin-resumen {
+  .panel-resumen {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -5626,21 +5626,21 @@ dd {
 /* El body corta lo que se sale a los costados con overflow-x: hidden, que lo vuelve un contenedor
    con desplazamiento propio: la barra lateral (sticky) se pegaba a él, que nunca se desplaza, y se
    iba con la página. clip corta igual sin eso */
-.cuerpo-app:has(.panel-admin) {
+.cuerpo-app:has(.panel) {
   overflow-x: clip;
 }
 
-/* Sin encabezado ni pie, el panel del administrador ocupa toda la pantalla, como el wireframe */
-.contenido-principal:has(> .panel-admin) {
+/* Sin encabezado ni pie, el panel (panel.html.twig) ocupa toda la pantalla, como el wireframe */
+.contenido-principal:has(> .panel) {
   max-width: none;
   padding: 0;
   display: flex;
 }
 
-/* Panel del administrador: la barra lateral y el contenido, como el wireframe. El fondo de la
+/* Los paneles: la barra lateral y el contenido, como el wireframe. El fondo de la
    columna de la barra lo pinta el panel, así sigue hasta abajo aunque la página sea más alta que
    la pantalla (la barra es del alto de la pantalla) */
-.panel-admin {
+.panel {
   flex: 1;
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
@@ -5648,7 +5648,7 @@ dd {
 }
 
 /* Barra lateral: el logo, las secciones y, al pie, la sesión */
-.panel-admin-menu {
+.panel-menu {
   display: flex;
   flex-direction: column;
   gap: var(--espacio-6);
@@ -5662,17 +5662,17 @@ dd {
   overflow-y: auto;
 }
 
-.panel-admin-marca {
+.panel-marca {
   align-self: flex-start;
   padding-left: var(--espacio-2);
 }
 
-.panel-admin-marca img {
+.panel-marca img {
   display: block;
 }
 
 /* Quién está en sesión y, debajo, el botón para salir, abajo de todo */
-.panel-admin-sesion {
+.panel-sesion {
   margin-top: auto;
   display: flex;
   flex-direction: column;
@@ -5682,14 +5682,14 @@ dd {
 }
 
 /* El avatar y, al lado, el nombre sobre el rol */
-.panel-admin-sesion-usuario {
+.panel-sesion-usuario {
   display: flex;
   align-items: center;
   gap: var(--espacio-3);
   min-width: 0;
 }
 
-.panel-admin-sesion-datos {
+.panel-sesion-datos {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -5698,7 +5698,7 @@ dd {
 }
 
 /* Un nombre largo se corta con puntos suspensivos en vez de ensanchar la barra */
-.panel-admin-sesion-nombre {
+.panel-sesion-nombre {
   max-width: 100%;
   font-weight: 600;
   font-size: var(--texto-sm);
@@ -5707,18 +5707,18 @@ dd {
   white-space: nowrap;
 }
 
-.panel-admin-salir {
+.panel-salir {
   width: 100%;
 }
 
 /* El contenido, en todo el ancho que deja la barra, como el wireframe */
-.panel-admin-contenido {
+.panel-contenido {
   min-width: 0;
   padding: var(--espacio-8) var(--espacio-10) var(--espacio-12);
 }
 
 /* «ADMINISTRACIÓN», sobre las secciones */
-.panel-admin-menu-titulo {
+.panel-menu-titulo {
   margin: 0 0 var(--espacio-3);
   font-size: var(--texto-xs);
   letter-spacing: 0.08em;
@@ -5727,7 +5727,7 @@ dd {
 }
 
 /* Las secciones, una debajo de otra */
-.panel-admin-menu-lista {
+.panel-menu-lista {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -5737,7 +5737,7 @@ dd {
 }
 
 /* Cada sección */
-.panel-admin-menu-enlace {
+.panel-menu-enlace {
   display: block;
   padding: var(--espacio-2) var(--espacio-3);
   border-radius: var(--radio-md);
@@ -5745,37 +5745,51 @@ dd {
   text-decoration: none;
 }
 
-.panel-admin-menu-enlace:hover {
+.panel-menu-enlace:hover {
   background-color: var(--color-superficie-hover);
   color: var(--color-texto);
 }
 
 /* La sección actual, llena como en el wireframe: con los colores invertidos, como la página
    actual del paginado */
-.panel-admin-menu-enlace.activo {
+.panel-menu-enlace.activo {
   background-color: var(--color-texto);
   color: var(--color-texto-inverso);
   font-weight: 600;
 }
 
+/* Un grupo de secciones dentro de la lista, como «Funciones» en el panel del organizador: el
+   nombre del grupo, que no es un enlace, y sus secciones debajo con sangría */
+.panel-menu-subtitulo {
+  display: block;
+  padding: var(--espacio-2) var(--espacio-3) var(--espacio-1);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.panel-menu-grupo .panel-menu-lista {
+  padding-left: var(--espacio-3);
+}
+
 /* Título y bajada del contenido */
-.panel-admin-cabecera {
+.panel-cabecera {
   margin-bottom: var(--espacio-6);
 }
 
 /* Más chico que el título de las páginas públicas: acá manda la tabla, no el título */
-.panel-admin-titulo {
+.panel-titulo {
   margin: 0;
   font-size: var(--texto-2xl);
 }
 
-.panel-admin-bajada {
+.panel-bajada {
   margin: var(--espacio-1) 0 0;
   color: var(--color-texto-secundario);
 }
 
 /* Buscador y filtros en una fila: el buscador más ancho */
-.panel-admin-filtros {
+.panel-filtros {
   display: grid;
   grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(140px, 1fr)) auto;
   gap: var(--espacio-3);
@@ -5784,11 +5798,11 @@ dd {
 }
 
 /* El buscador con la lupa adentro */
-.panel-admin-busqueda {
+.panel-busqueda {
   position: relative;
 }
 
-.panel-admin-busqueda-icono {
+.panel-busqueda-icono {
   position: absolute;
   left: 0.85rem;
   top: 50%;
@@ -5797,7 +5811,7 @@ dd {
   pointer-events: none;
 }
 
-.panel-admin-busqueda .campo-control {
+.panel-busqueda .campo-control {
   /* Lugar para la lupa */
   padding-left: 2.4rem;
 }
@@ -5848,14 +5862,14 @@ dd {
 
 /* En tablet y celular, la barra lateral pasa arriba y en fila, y los filtros uno debajo de otro */
 @media (max-width: 900px) {
-  .panel-admin {
+  .panel {
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
     background: none;
   }
 
   /* Arriba: el logo y la sesión en un renglón y las secciones debajo */
-  .panel-admin-menu {
+  .panel-menu {
     position: static;
     height: auto;
     display: grid;
@@ -5867,17 +5881,17 @@ dd {
   }
 
   /* El logo y la sesión en el primer renglón; cada grupo de secciones, en uno propio debajo */
-  .panel-admin-marca {
+  .panel-marca {
     grid-row: 1;
     grid-column: 1;
   }
 
-  .panel-admin-menu nav {
+  .panel-menu nav {
     grid-column: 1 / -1;
   }
 
   /* En el renglón del logo queda sólo el botón para salir: el nombre no entra */
-  .panel-admin-sesion {
+  .panel-sesion {
     grid-row: 1;
     grid-column: 2;
     margin-top: 0;
@@ -5886,24 +5900,40 @@ dd {
     align-items: flex-end;
   }
 
-  .panel-admin-sesion-usuario {
+  .panel-sesion-usuario {
     display: none;
   }
 
-  .panel-admin-salir {
+  .panel-salir {
     width: auto;
   }
 
-  .panel-admin-contenido {
+  .panel-contenido {
     padding: var(--espacio-6) var(--espacio-4) var(--espacio-12);
   }
 
-  .panel-admin-menu-lista {
+  .panel-menu-lista {
     flex-direction: row;
     flex-wrap: wrap;
   }
 
-  .panel-admin-filtros {
+  /* El grupo sigue en la fila: su nombre y sus secciones al lado, sin la sangría */
+  .panel-menu-grupo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .panel-menu-grupo .panel-menu-lista {
+    padding-left: 0;
+  }
+
+  .panel-menu-subtitulo {
+    padding: var(--espacio-2) var(--espacio-1) var(--espacio-2) var(--espacio-3);
+    color: var(--color-texto-apagado);
+  }
+
+  .panel-filtros {
     grid-template-columns: minmax(0, 1fr);
   }
 }

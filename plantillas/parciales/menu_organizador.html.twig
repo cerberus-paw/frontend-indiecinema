@@ -1,0 +1,59 @@
+{#
+  Barra lateral de las pantallas del organizador, como el wireframe de la E2 (panel-organizador):
+  el logo, las secciones que ya tienen pantalla y, al pie, quién está en sesión y el botón para
+  salir. Reemplaza al encabezado del sitio, así que el cierre de sesión tiene que estar acá. Las
+  secciones del wireframe que todavía no tienen pantalla (Resumen, Recaudación, Usuarios
+  bloqueados…) no van, para no llevar a una página que no existe.
+
+  Parámetros recibidos:
+  - activa: (string) la sección actual: 'salas', 'funciones' o 'programar'.
+  - usuario: el usuario en sesión.
+  - csrf: el token del formulario para salir.
+#}
+<aside class="panel-menu" aria-label="Panel del organizador">
+  {# El logo lleva a la portada pública: el organizador también usa la cartelera y las salas #}
+  <a href="/" class="panel-marca" aria-label="IndieCinema: portada">
+    <img src="/estaticos/img/logo-horizontal-dark.svg" alt="IndieCinema" width="140" height="60">
+  </a>
+
+  <nav aria-label="Secciones del panel">
+    <p class="panel-menu-titulo">Panel del organizador</p>
+    <ul class="panel-menu-lista">
+      <li>
+        <a href="/organizador/salas" class="panel-menu-enlace{% if activa == 'salas' %} activo{% endif %}"{% if activa == 'salas' %} aria-current="page"{% endif %}>Mis salas</a>
+      </li>
+      {# «Funciones», con lo que tiene pantalla: el listado y el alta #}
+      <li class="panel-menu-grupo">
+        <span class="panel-menu-subtitulo" id="menu-organizador-funciones">Funciones</span>
+        <ul class="panel-menu-lista" aria-labelledby="menu-organizador-funciones">
+          <li>
+            <a href="/organizador/funciones" class="panel-menu-enlace{% if activa == 'funciones' %} activo{% endif %}"{% if activa == 'funciones' %} aria-current="page"{% endif %}>Mis funciones</a>
+          </li>
+          <li>
+            <a href="/organizador/funciones/nueva" class="panel-menu-enlace{% if activa == 'programar' %} activo{% endif %}"{% if activa == 'programar' %} aria-current="page"{% endif %}>Programar función</a>
+          </li>
+        </ul>
+      </li>
+      {# Otra sala pasa por la solicitud, como la primera: es una página del sitio, fuera del panel #}
+      <li>
+        <a href="/solicitar-sala" class="panel-menu-enlace">Publicar una sala</a>
+      </li>
+    </ul>
+  </nav>
+
+  {% if usuario %}
+    <div class="panel-sesion">
+      <div class="panel-sesion-usuario">
+        <span class="usuario-avatar" aria-hidden="true">{{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}</span>
+        <div class="panel-sesion-datos">
+          <span class="panel-sesion-nombre">{{ usuario.nombre }}</span>
+          <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
+        </div>
+      </div>
+      <form action="/cuenta/salir" method="POST">
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+        <button type="submit" class="boton boton-secundario boton-chico panel-salir">Cerrar sesión</button>
+      </form>
+    </div>
+  {% endif %}
+</aside>

@@ -16,11 +16,13 @@
   - csrf: (string, obligatorio) Token CSRF para validar la petición POST.
   - accion: (string, opcional) URL de destino del POST (por defecto '/organizador/funciones/{id}/cancelar').
 #}
-{% extends 'base.html.twig' %}
+{% extends 'organizador.html.twig' %}
 
 {% block titulo %}Cancelar función: {{ funcion.titulo }}{% endblock %}
 
-{% block contenido %}
+{% block seccion %}funciones{% endblock %}
+
+{% block panel %}
 <div class="contenedor contenedor-confirmacion-cancelacion">
   {# Migas de pan para navegación de retorno hacia Mis funciones #}
   <nav class="navegacion-migas" aria-label="Migas de pan">
