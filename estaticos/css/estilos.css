@@ -7027,6 +7027,117 @@ a.tabla-admin-principal:focus-visible {
 }
 
 /* --------------------------------------------------------------------------
+   CATÁLOGO DE OBRAS: ALTA, EDICIÓN Y MIS OBRAS (E4-08.1)
+   Componentes para plantillas/programacion/alta_obra.html.twig y mis_obras.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Insignia para tipo de obra (Película / Cortometraje) */
+.insignia-tipo-obra {
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  color: var(--color-texto);
+}
+
+/* Año en cabecera de tarjeta de obra */
+.tarjeta-obra-anio {
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto-secundario);
+}
+
+/* Chips de géneros en tarjeta de obra */
+.tarjeta-obra-generos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1);
+  margin-bottom: var(--espacio-3);
+}
+
+/* Acciones en tarjeta de Mis Obras */
+.tarjeta-mi-obra-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-top: auto;
+}
+
+.tarjeta-mi-obra-acciones .acciones-fila-enlaces {
+  display: flex;
+  gap: var(--espacio-2);
+}
+
+.tarjeta-mi-obra-acciones .acciones-fila-enlaces .boton {
+  flex: 1;
+  text-align: center;
+}
+
+/* Formulario de alta y edición de obra (E4-08.1) */
+.formulario-alta-obra .generos-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.formulario-alta-obra .generos-leyenda {
+  margin-bottom: var(--espacio-1);
+}
+
+.campo-generos-cuadricula {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-2);
+}
+
+.genero-opcion-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: var(--espacio-1) var(--espacio-3);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.genero-opcion-item:hover {
+  background-color: var(--color-superficie-hover);
+  border-color: var(--color-primario);
+}
+
+.afiche-vista-previa-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-4);
+}
+
+.afiche-vista-previa-titulo {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+  font-weight: 600;
+}
+
+.afiche-vista-previa {
+  width: 140px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radio-md);
+  overflow: hidden;
+  border: 1px solid var(--color-borde-medio);
+  background-color: var(--color-superficie);
+}
+
+.afiche-miniatura {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
    -------------------------------------------------------------------------- */
