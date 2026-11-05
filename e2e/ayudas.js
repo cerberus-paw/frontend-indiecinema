@@ -26,6 +26,23 @@ export const codigoEscrito = (codigo) => `${codigo.slice(0, 4)}-${codigo.slice(4
  */
 export const ARCHIVO_DE_SESION = new URL(`./.sesion/${process.env.E2E_CORREO ?? 'espectador'}.json`, import.meta.url).pathname;
 
+/**
+ * Las cuentas del organizador y del administrador, para las pruebas de sus paneles. Opcionales: sin
+ * ellas, esas pruebas se saltean. Cada una guarda su sesión en su archivo, como la del espectador.
+ */
+export const CUENTAS_DEL_PANEL = {
+  organizador: {
+    correo: process.env.E2E_ORGANIZADOR_CORREO,
+    clave: process.env.E2E_ORGANIZADOR_CLAVE,
+    archivo: new URL('./.sesion/organizador.json', import.meta.url).pathname,
+  },
+  administrador: {
+    correo: process.env.E2E_ADMINISTRADOR_CORREO,
+    clave: process.env.E2E_ADMINISTRADOR_CLAVE,
+    archivo: new URL('./.sesion/administrador.json', import.meta.url).pathname,
+  },
+};
+
 export async function ingresar(page, { correo, clave } = cuenta()) {
   await page.goto('/cuenta/ingresar');
   await page.getByLabel('Correo electrónico').fill(correo);
