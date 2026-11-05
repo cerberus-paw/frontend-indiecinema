@@ -7,7 +7,7 @@
 
   Variables:
   - funciones: lista de funciones como las recibe parciales/tarjeta_funcion.html.twig.
-  - filtros: los filtros aplicados (q, localidad, fecha en AAAA-MM-DD, genero por su nombre y orden); falta el que no se aplicó.
+  - filtros: los filtros aplicados (q, localidad, fecha en AAAA-MM-DD, genero por su nombre, precio_min, precio_max y orden); falta el que no se aplicó.
   - filtrada: si hay algún filtro aplicado (el orden no cuenta: no saca funciones).
   - avisos: lista de textos, uno por cada filtro inválido que se dejó afuera.
   - localidades: lista de nombres de localidad con funciones, para el filtro.
@@ -66,6 +66,22 @@
       tipo: 'select',
       valor: filtros.genero ?? '',
       opciones: opciones_genero
+    } only %}
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'precio_min',
+      etiqueta: 'Precio desde ($)',
+      tipo: 'number',
+      valor: filtros.precio_min ?? '',
+      valor_minimo: 0,
+      placeholder: '0 (incluye a la gorra)'
+    } only %}
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'precio_max',
+      etiqueta: 'Precio hasta ($)',
+      tipo: 'number',
+      valor: filtros.precio_max ?? '',
+      valor_minimo: 0,
+      placeholder: 'Sin tope'
     } only %}
     <div class="filtros-cartelera-acciones">
       {% include 'parciales/boton.html.twig' with { texto: 'Filtrar', variante: 'primario' } only %}
