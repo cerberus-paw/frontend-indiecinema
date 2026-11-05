@@ -422,7 +422,8 @@ class BuscadorDeCartelera {
       ]),
       this.nodo('div', { class: 'tarjeta-funcion-cuerpo' }, [
         this.nodo('div', { class: 'tarjeta-funcion-cabecera' }, [
-          this.nodo('span', { class: `insignia-estado ${insignia}`, 'aria-label': `Estado: ${etiqueta}` }, [
+          this.nodo('span', { class: `insignia-estado ${insignia}` }, [
+            this.nodo('span', { class: 'sr-only' }, ['Estado: ']),
             ...(esVotacion ? [this.nodo('span', { class: 'insignia-icono', 'aria-hidden': 'true' }, ['🗳️'])] : []),
             ...(esAcuerdo ? [this.nodo('span', { class: 'insignia-icono', 'aria-hidden': 'true' }, ['🤝'])] : []),
             ...(esSinQuorum ? [this.nodo('span', { class: 'insignia-icono', 'aria-hidden': 'true' }, ['⚠️'])] : []),
