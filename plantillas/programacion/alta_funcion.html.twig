@@ -52,14 +52,13 @@
     </div>
   </header>
 
-  {# Alerta de error general si algún dato no superó las reglas de negocio #}
-  {% if error_general is defined and error_general %}
-    {% include 'parciales/mensaje.html.twig' with {
-      tipo: 'error',
-      titulo: es_edicion ?? false ? 'No se pudo guardar la función' : 'No se pudo programar la función',
-      mensaje: error_general
-    } only %}
-  {% endif %}
+  {# Si el envío volvió con errores: «Revisá N campos» con un link a cada uno, o la regla de negocio
+     que no se cumplió, como que se pisa con otra función de la sala (E4-10.5) #}
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    errores: errores ?? {},
+    error_general: error_general ?? null,
+    titulo: es_edicion ?? false ? 'No se pudo guardar la función' : 'No se pudo programar la función'
+  } only %}
 
   {# Alerta de confirmación exitosa #}
   {% if mensaje_exito is defined and mensaje_exito %}
@@ -102,7 +101,8 @@
       {# MODO DE PUBLICACIÓN: PROGRAMADA VS VOTACIÓN (E3-12.1 / IC-147)       #}
       {# ==================================================================== #}
       {% if not (es_edicion ?? false) %}
-      <fieldset class="seccion-formulario seccion-modo-funcion" data-seccion-modo>
+      {# id="modo": el link del resumen de errores trae acá (E4-10.5) #}
+      <fieldset id="modo" class="seccion-formulario seccion-modo-funcion" data-seccion-modo>
         <legend class="seccion-leyenda">
           <span class="seccion-titulo">Modo de publicación</span>
           <span class="seccion-subtitulo">Elegí si la función ya tiene fecha fija o si abrís una votación de títulos.</span>
@@ -181,7 +181,7 @@
           opciones: opciones_salas,
           valor: valores.sala_id ?? '',
           requerido: true,
-          errores: errores,
+          errores: errores ?? {},
           ayuda: 'Solo se listan las salas propias que ya fueron habilitadas.'
         }) only %}
       </fieldset>
@@ -189,7 +189,8 @@
       {# ==================================================================== #}
       {# SECCIÓN 2: OBRAS DEL CATÁLOGO                                        #}
       {# ==================================================================== #}
-      <fieldset class="seccion-formulario">
+      {# id="obras": el link del resumen de errores trae acá (E4-10.5) #}
+      <fieldset id="obras" class="seccion-formulario">
         <legend class="seccion-leyenda">
           <span class="seccion-titulo">Obras del catálogo</span>
           <span class="seccion-subtitulo" data-obras-subtitulo>{{ es_votacion ? 'Elegí las obras candidatas que participarán de la votación.' : 'Elegí la obra o los títulos a proyectar en la función.' }}</span>
@@ -252,14 +253,16 @@
         </legend>
 
         <div class="fila-campos-doble">
-          {# Campo: Fecha de proyección #}
+          {# Campo: Fecha de proyección. Sin autocompletar: que el navegador no sugiera fechas de otras
+             funciones (E4-10.5) #}
           {% include 'parciales/campo.html.twig' with reglas.fecha|merge({
             nombre: 'fecha',
             etiqueta: 'Fecha de proyección',
             tipo: 'date',
             valor: valores.fecha ?? '',
             requerido: (es_edicion ?? false) or not es_votacion,
-            errores: errores,
+            errores: errores ?? {},
+            autocompletar: 'off',
             ayuda: 'La fecha debe ser a partir de hoy o futura.'
           }) only %}
 
@@ -271,7 +274,7 @@
             valor: valores.hora ?? '',
             placeholder: 'Ej: 20:30',
             requerido: (es_edicion ?? false) or not es_votacion,
-            errores: errores,
+            errores: errores ?? {},
             ayuda: 'Hora estimada en la que comienza la función.'
           }) only %}
         </div>
@@ -295,7 +298,7 @@
             valor: valores.precio ?? '',
             placeholder: 'Ej: 1500',
             requerido: true,
-            errores: errores,
+            errores: errores ?? {},
             ayuda: 'Poné 0 para función gratuita o a la gorra.'
           }) only %}
 
@@ -307,7 +310,7 @@
             valor: valores.cupo ?? '',
             placeholder: 'Ej: 50',
             requerido: true,
-            errores: errores,
+            errores: errores ?? {},
             ayuda: 'Cantidad de entradas disponibles. No puede superar la capacidad de la sala.'
           }) only %}
         </div>

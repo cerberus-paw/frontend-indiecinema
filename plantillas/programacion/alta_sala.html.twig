@@ -50,14 +50,12 @@
     } %}
   {% endif %}
 
-  {# Alerta de error general #}
-  {% if error_general is defined and error_general %}
-    {% include 'parciales/mensaje.html.twig' with {
-      tipo: 'error',
-      titulo: 'No se pudo guardar la sala',
-      mensaje: error_general
-    } %}
-  {% endif %}
+  {# Si el envío volvió con errores: «Revisá N campos» con un link a cada uno (E4-10.5) #}
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    errores: errores ?? {},
+    error_general: error_general ?? null,
+    titulo: 'No se pudo guardar la sala'
+  } only %}
 
   {# Alerta de confirmación exitosa #}
   {% if mensaje_exito is defined and mensaje_exito %}
