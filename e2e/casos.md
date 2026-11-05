@@ -104,6 +104,19 @@ Sin sesión. Cada prueba arranca con el navegador vacío, sin búsquedas guardad
 | U-4 | Elige sólo un orden, sin filtros | No se guarda: un orden no es una búsqueda |
 | U-5 | Aprieta «Borrar historial» | Desaparecen las búsquedas y la sección |
 
+## Anchos de pantalla
+
+Cada pantalla, a 360 px (un celular), 768 px (una tableta) y 1280 px (la compu). Se usa si no
+hay que desplazarse de costado, si nada queda cortado fuera de la pantalla y si las tablas más
+anchas se desplazan dentro de su recuadro. La cartelera se suma cuando siga el wireframe.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| A-1 | Sin sesión, abre la portada, una ficha, las salas, una sala, ingresar y registro | Cada una se usa a los tres anchos |
+| A-2 | Con sesión, abre la reserva de una función y «Mis reservas» | Cada una se usa a los tres anchos |
+| A-3 | Como organizador, abre «Mis salas», «Mis funciones» y las reservas de una función | Cada una se usa a los tres anchos; las tablas se desplazan en su recuadro |
+| A-4 | Como administrador, abre los usuarios, las reservas y las solicitudes | Cada una se usa a los tres anchos; las tablas se desplazan en su recuadro |
+
 ## Lo que todavía no cubren
 
 Votar títulos, proponer y votar franjas, confirmar la franja ganadora y el panel de reservas del
