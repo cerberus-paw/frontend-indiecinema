@@ -48,6 +48,9 @@ class BuscadorDeCartelera {
   /** Los campos que se escriben de a una tecla y esperan antes de buscar. */
   static CAMPOS_DE_ESCRITURA = ['q', 'precio_min', 'precio_max'];
 
+  /** Dónde se guarda la preferencia del visitante sobre el modo de paginado (E4-06.3). */
+  static CLAVE_MODO_PAGINADO = 'indiecinema:cartelera:paginado';
+
   /**
    * @param {string} nombre
    * @returns {boolean}
@@ -67,12 +70,33 @@ class BuscadorDeCartelera {
       return;
     }
     this.pedido = null;
+    this.pedidoMas = null;
     this.espera = null;
     // La búsqueda que se está mostrando: la de la página cargada, después la última que llegó.
     this.urlMostrada = window.location.pathname + window.location.search;
     // «Ordenar por» lo dibuja la plantilla (oculto si no hay funciones) y se reusa en cada resumen.
     this.orden = this.resultados.querySelector('.cartelera-orden');
     this.selectorOrden = this.orden?.querySelector('select[name="orden"]') ?? null;
+    this.urlSiguiente = this.resultados.querySelector('.paginado a[rel="next"]')?.getAttribute('href') ?? null;
+    this.modoPaginado = this.modoDePaginadoInicial();
+    // «Paginado» también lo dibuja la plantilla, oculto: sin JavaScript no hace nada.
+    this.controlModoPaginado = this.resultados.querySelector('.cartelera-paginado-modo');
+    this.selectorModoPaginado = this.controlModoPaginado?.querySelector('[data-paginado-selector]') ?? null;
+    if (this.controlModoPaginado && this.resultados.querySelector('.cartelera-resumen')) {
+      this.controlModoPaginado.hidden = false;
+    }
+    this.centinela = this.resultados.querySelector('[data-cartelera-centinela]')
+      ?? this.nodo('div', { class: 'cartelera-centinela', 'data-cartelera-centinela': '', hidden: '' });
+    this.cargandoMas = this.resultados.querySelector('[data-cartelera-cargando-mas]')
+      ?? this.nodo('p', { class: 'cartelera-cargando-mas', 'data-cartelera-cargando-mas': '', hidden: '', 'aria-live': 'polite' }, ['Cargando más funciones…']);
+    this.observador = null;
+    if ('IntersectionObserver' in window) {
+      this.observador = new IntersectionObserver((entradas) => {
+        if (entradas.some((entrada) => entrada.isIntersecting)) {
+          this.cargarSiguientePagina();
+        }
+      }, { rootMargin: '200px 0px' });
+    }
     this.indicador = this.nodo('p', { class: 'aviso-flotante', role: 'status' }, [
       this.nodo('span', { class: 'aviso-flotante-icono', 'aria-hidden': 'true' }),
       'Buscando funciones…',
@@ -99,15 +123,17 @@ class BuscadorDeCartelera {
         this.espera = setTimeout(() => this.buscar(this.urlDelFormulario()), BuscadorDeCartelera.ESPERA_AL_ESCRIBIR);
       }
     });
-    // El selector de orden está en la sección de resultados, asociado al formulario con form=: su
-    // «change» sube por la sección, no por el formulario.
+    // El selector de orden y el de modo de paginado están en la sección de resultados, asociados
+    // al formulario con form=: su «change» sube por la sección, no por el formulario.
     this.resultados.addEventListener('change', (evento) => {
       if (evento.target.name === 'orden') {
         this.buscar(this.urlDelFormulario());
+      } else if (evento.target.matches('[data-paginado-selector]')) {
+        this.cambiarModoPaginado(evento.target.value);
       }
     });
     this.resultados.addEventListener('click', (evento) => {
-      const enlace = evento.target.closest('.paginado a');
+      const enlace = evento.target.closest('.paginado a, [data-cartelera-paginado] a');
       if (enlace) {
         evento.preventDefault();
         this.buscar(enlace.getAttribute('href'));
@@ -122,6 +148,128 @@ class BuscadorDeCartelera {
         this.buscar(url, { historial: false });
       }
     });
+    this.aplicarModoPaginado();
+  }
+
+  /**
+   * El modo de paginado inicial (E4-06.3): lo que eligió el visitante, guardado en localStorage; si
+   * no eligió, scroll infinito en el celular y tradicional en las pantallas más anchas.
+   *
+   * @returns {'tradicional'|'infinito'}
+   */
+  modoDePaginadoInicial() {
+    try {
+      const guardado = window.localStorage.getItem(BuscadorDeCartelera.CLAVE_MODO_PAGINADO);
+      if (guardado === 'tradicional' || guardado === 'infinito') {
+        return guardado;
+      }
+    } catch {
+      // Sin acceso a localStorage se sigue con el modo por defecto.
+    }
+    if (window.matchMedia?.('(max-width: 768px)').matches) {
+      return 'infinito';
+    }
+
+    return 'tradicional';
+  }
+
+  /**
+   * @param {string} modo
+   */
+  cambiarModoPaginado(modo) {
+    this.modoPaginado = modo === 'infinito' ? 'infinito' : 'tradicional';
+    try {
+      window.localStorage.setItem(BuscadorDeCartelera.CLAVE_MODO_PAGINADO, this.modoPaginado);
+    } catch {
+      // Ignora si el navegador bloquea el almacenamiento.
+    }
+    this.aplicarModoPaginado();
+  }
+
+  aplicarModoPaginado() {
+    if (this.selectorModoPaginado && this.selectorModoPaginado.value !== this.modoPaginado) {
+      this.selectorModoPaginado.value = this.modoPaginado;
+    }
+    const nav = this.resultados.querySelector('[data-cartelera-paginado], .paginado');
+    if (this.modoPaginado === 'infinito') {
+      if (nav) {
+        nav.hidden = true;
+      }
+      this.actualizarCentinela();
+    } else {
+      this.pedidoMas?.abort();
+      this.pedidoMas = null;
+      this.observador?.disconnect();
+      this.centinela.hidden = true;
+      this.cargandoMas.hidden = true;
+      if (nav) {
+        nav.hidden = false;
+      }
+    }
+  }
+
+  actualizarCentinela() {
+    this.observador?.disconnect();
+    const hayMas = this.modoPaginado === 'infinito' && Boolean(this.urlSiguiente);
+    this.centinela.hidden = !hayMas;
+    if (hayMas && this.centinela.isConnected) {
+      this.observador?.observe(this.centinela);
+    }
+  }
+
+  async cargarSiguientePagina() {
+    if (this.modoPaginado !== 'infinito' || !this.urlSiguiente || this.pedidoMas || this.pedido) {
+      return;
+    }
+    const url = this.urlSiguiente;
+    this.pedidoMas = new AbortController();
+    this.cargandoMas.hidden = false;
+    try {
+      const respuesta = await PAW.enviar(url, {
+        headers: { Accept: 'application/json' },
+        signal: this.pedidoMas.signal,
+      });
+      if (!respuesta.ok) {
+        throw new Error(`La cartelera respondió ${respuesta.status}.`);
+      }
+      const datos = await respuesta.json();
+      this.agregarResultados(datos);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        this.decir(BuscadorDeCartelera.MENSAJE_DE_ERROR);
+      }
+    } finally {
+      this.pedidoMas = null;
+      this.cargandoMas.hidden = true;
+      this.actualizarCentinela();
+    }
+  }
+
+  /**
+   * Agrega las tarjetas de la página siguiente al final de la grilla (scroll infinito, E4-06.3).
+   *
+   * @param {{funciones: Array<Object>, filtros: Object, avisos: Array<string>, paginado: Object, csv: string}} datos
+   */
+  agregarResultados(datos) {
+    const cuadricula = this.resultados.querySelector('.cuadricula-funciones');
+    if (!cuadricula) {
+      this.mostrar(datos);
+      return;
+    }
+    cuadricula.append(...datos.funciones.map((funcion) => this.tarjeta(funcion)));
+    this.urlSiguiente = datos.paginado?.siguiente ?? null;
+    const navExistente = this.resultados.querySelector('[data-cartelera-paginado], .paginado');
+    if (datos.paginado?.total_paginas > 1) {
+      const nuevoNav = this.paginado(datos.paginado);
+      if (navExistente) {
+        navExistente.replaceWith(nuevoNav);
+      } else {
+        cuadricula.after(nuevoNav);
+      }
+    } else {
+      navExistente?.remove();
+    }
+    this.anunciar(datos);
   }
 
   /**
@@ -172,6 +320,9 @@ class BuscadorDeCartelera {
   async buscar(url, { historial = true } = {}) {
     clearTimeout(this.espera);
     this.espera = null;
+    this.pedidoMas?.abort();
+    this.pedidoMas = null;
+    this.cargandoMas.hidden = true;
     this.pedido?.abort();
     this.pedido = new AbortController();
     this.mostrarCargando(true);
@@ -184,6 +335,7 @@ class BuscadorDeCartelera {
         throw new Error(`La cartelera respondió ${respuesta.status}.`);
       }
       const datos = await respuesta.json();
+      this.pedido = null;
       this.mostrar(datos);
       // Si mientras volvía se siguió escribiendo, falta otra búsqueda: el indicador sigue.
       this.mostrarCargando(this.espera !== null);
@@ -193,6 +345,7 @@ class BuscadorDeCartelera {
       this.urlMostrada = url;
       this.anunciar(datos);
     } catch (error) {
+      this.pedido = null;
       if (error.name !== 'AbortError') {
         this.mostrarError(url);
         this.decir(BuscadorDeCartelera.MENSAJE_DE_ERROR);
@@ -276,9 +429,11 @@ class BuscadorDeCartelera {
    */
   mostrar(datos) {
     const teniaFocoOrden = Boolean(this.selectorOrden && document.activeElement === this.selectorOrden);
+    const teniaFocoModo = Boolean(this.selectorModoPaginado && document.activeElement === this.selectorModoPaginado);
     if (this.selectorOrden) {
       this.selectorOrden.value = datos.filtros?.orden ?? '';
     }
+    this.urlSiguiente = datos.paginado?.siguiente ?? null;
     const partes = [];
     if (datos.avisos.length > 0) {
       partes.push(this.alerta('advertencia', 'alert', { titulo: 'Algunos filtros no se aplicaron', detalles: datos.avisos }));
@@ -295,10 +450,15 @@ class BuscadorDeCartelera {
       if (datos.paginado.total_paginas > 1) {
         partes.push(this.paginado(datos.paginado));
       }
+      partes.push(this.centinela);
+      partes.push(this.cargandoMas);
     }
     this.resultados.replaceChildren(...partes);
+    this.aplicarModoPaginado();
     if (teniaFocoOrden && datos.funciones.length > 0) {
       this.selectorOrden.focus();
+    } else if (teniaFocoModo && datos.funciones.length > 0) {
+      this.selectorModoPaginado.focus();
     }
     this.mostrarLimpiar(BuscadorDeCartelera.filtrada(datos));
   }
@@ -335,10 +495,14 @@ class BuscadorDeCartelera {
     if (this.orden) {
       this.orden.hidden = false;
     }
+    if (this.controlModoPaginado) {
+      this.controlModoPaginado.hidden = false;
+    }
 
     return this.nodo('div', { class: 'cartelera-resumen cartelera-barra' }, [
       this.nodo('p', { class: 'cartelera-resultados', role: 'status' }, [`${total} ${total === 1 ? 'función' : 'funciones'}`]),
       ...(this.orden ? [this.orden] : []),
+      ...(this.controlModoPaginado ? [this.controlModoPaginado] : []),
       this.nodo('a', { href: csv, class: 'boton boton-secundario boton-chico', download: '' }, ['Descargar CSV']),
     ]);
   }
@@ -348,12 +512,37 @@ class BuscadorDeCartelera {
     if (paginado.anterior) {
       partes.push(this.nodo('a', { href: paginado.anterior, class: 'boton boton-secundario boton-chico', rel: 'prev' }, ['Anterior']));
     }
-    partes.push(this.nodo('span', { class: 'paginado-actual', 'aria-current': 'page' }, [`Página ${paginado.numero} de ${paginado.total_paginas}`]));
+    if (Array.isArray(paginado.paginas) && paginado.paginas.length > 0) {
+      const items = paginado.paginas.map((item) => {
+        if (item === null) {
+          return this.nodo('li', { class: 'paginado-elipsis', 'aria-hidden': 'true' }, ['…']);
+        }
+        if (item.actual) {
+          return this.nodo('li', { class: 'paginado-item' }, [
+            this.nodo('span', { class: 'paginado-enlace activo', 'aria-current': 'page' }, [String(item.numero)]),
+          ]);
+        }
+
+        return this.nodo('li', { class: 'paginado-item' }, [
+          this.nodo('a', { href: item.url, class: 'paginado-enlace' }, [String(item.numero)]),
+        ]);
+      });
+      partes.push(this.nodo('ul', { class: 'paginado-lista' }, items));
+    }
+    partes.push(this.nodo('span', { class: 'paginado-actual sr-only' }, [`Página ${paginado.numero} de ${paginado.total_paginas}`]));
     if (paginado.siguiente) {
       partes.push(this.nodo('a', { href: paginado.siguiente, class: 'boton boton-secundario boton-chico', rel: 'next' }, ['Siguiente']));
     }
+    const nav = this.nodo('nav', {
+      class: 'paginado paginado-numerado',
+      'aria-label': 'Páginas de la cartelera',
+      'data-cartelera-paginado': '',
+    }, partes);
+    if (this.modoPaginado === 'infinito') {
+      nav.hidden = true;
+    }
 
-    return this.nodo('nav', { class: 'paginado', 'aria-label': 'Páginas de la cartelera' }, partes);
+    return nav;
   }
 
   /**
