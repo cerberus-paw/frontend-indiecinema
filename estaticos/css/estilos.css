@@ -2993,6 +2993,101 @@ dd {
   gap: var(--espacio-2);
 }
 
+/* Historial de las ultimas 5 busquedas en localStorage (E4-06.4) */
+.ultimas-busquedas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  padding: var(--espacio-3) var(--espacio-4);
+  margin-bottom: var(--espacio-6);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.ultimas-busquedas[hidden] {
+  display: none;
+}
+
+.ultimas-busquedas-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+.ultimas-busquedas-titulo {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ultimas-busquedas-limpiar {
+  background: transparent;
+  border: none;
+  padding: var(--espacio-1) var(--espacio-2);
+  border-radius: var(--radio-sm);
+  color: var(--color-texto-secundario);
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--texto-xs);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+.ultimas-busquedas-limpiar:hover {
+  color: var(--color-texto);
+  background-color: var(--color-superficie-hover);
+}
+
+.ultimas-busquedas-limpiar:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+.ultimas-busquedas-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.ultimas-busquedas-item {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.ultimas-busquedas-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: var(--espacio-1) var(--espacio-3);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  text-decoration: none;
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida), color var(--transicion-rapida);
+}
+
+.ultimas-busquedas-chip:hover {
+  background-color: var(--color-primario-suave);
+  border-color: var(--color-primario);
+  color: var(--color-texto-brillante);
+}
+
+.ultimas-busquedas-chip:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
 /* El buscador del listado de salas usa la misma grilla, con un solo campo un poco más ancho */
 .buscador-salas {
   /* El campo y los botones, de mínimo 240px */

@@ -92,6 +92,18 @@ prueba.
 | PG-3 | En el celular, elige «Tradicional» en «Paginado» y recarga | Sigue en «Tradicional», con los números de página |
 | PG-4 | Sin JavaScript, abre la cartelera | No ve «Paginado», y los números de página llevan a cada página |
 
+## Últimas búsquedas
+
+Sin sesión. Cada prueba arranca con el navegador vacío, sin búsquedas guardadas.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| U-1 | Hace seis búsquedas distintas | Quedan las últimas cinco, la más nueva primero: la primera desapareció |
+| U-2 | Escribe una palabra de a poco, sin salir del campo, y después sale | Mientras escribe no se guarda nada; al salir queda una sola búsqueda, la de la palabra entera |
+| U-3 | Aprieta una de las últimas búsquedas | Sin recargar, la cartelera de esa búsqueda, con los filtros puestos en el formulario |
+| U-4 | Elige sólo un orden, sin filtros | No se guarda: un orden no es una búsqueda |
+| U-5 | Aprieta «Borrar historial» | Desaparecen las búsquedas y la sección |
+
 ## Lo que todavía no cubren
 
 Votar títulos, proponer y votar franjas, confirmar la franja ganadora y el panel de reservas del
