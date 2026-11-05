@@ -62,9 +62,12 @@
       <a href="{{ funcion.url }}" class="boton boton-secundario">Volver a la función</a>
     </div>
   {% else %}
-    {% if error_general is defined %}
-      {% include 'parciales/mensaje.html.twig' with { tipo: 'error', mensaje: error_general } only %}
-    {% endif %}
+    {# Si la reserva volvió con errores: «Revisá 1 campo» con el link a la cantidad, o la regla que
+       no se cumplió, como «Quedan 3 lugares.» (E4-10.5) #}
+    {% include 'parciales/resumen_de_errores.html.twig' with {
+      errores: errores ?? {},
+      error_general: error_general ?? null
+    } only %}
 
     <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="formulario-reserva">
       <input type="hidden" name="_csrf" value="{{ csrf }}">

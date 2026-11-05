@@ -61,14 +61,12 @@
     } only %}
   {% endif %}
 
-  {# Mensaje de error general si falló la validación #}
-  {% if error_general is defined and error_general %}
-    {% include 'parciales/mensaje.html.twig' with {
-      tipo: 'error',
-      titulo: 'No se pudieron guardar las franjas',
-      mensaje: error_general
-    } only %}
-  {% endif %}
+  {# Si el envío volvió con errores: «Revisá N campos» con un link a cada uno (E4-10.5) #}
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    errores: errores ?? {},
+    error_general: error_general ?? null,
+    titulo: 'No se pudieron guardar las franjas'
+  } only %}
 
   <div class="panel-organizador-grid">
     <div class="panel-organizador-principal">
@@ -96,7 +94,7 @@
               valor_minimo: 1,
               valor_maximo: cupo_max,
               requerido: true,
-              errores: errores,
+              errores: errores ?? {},
               ayuda: 'Debe ser al menos 1 persona y no superar el cupo total de la sala (' ~ cupo_max ~ ' butacas).'
             } only %}
           </div>
@@ -114,7 +112,7 @@
           {# Contenedor dinámico de opciones de franjas #}
           {# aria-describedby: el error del conjunto se lee al entrar a la lista, no sólo al
              aparecer (E4-09.3). #}
-          <div class="lista-franjas-formulario" data-contenedor-franjas role="list" aria-label="Lista de franjas horarias propuestas"{% if errores.franjas is defined and errores.franjas %} aria-describedby="error-franjas"{% endif %}>
+          <div id="franjas" class="lista-franjas-formulario" data-contenedor-franjas role="list" aria-label="Lista de franjas horarias propuestas"{% if errores.franjas is defined and errores.franjas %} aria-describedby="error-franjas"{% endif %}>
             {# El error del conjunto suele hablar de una opción puntual («A la opción 2 le falta la
              fecha…»): además de la lista, que no recibe el foco, lo describen la fecha y el inicio de
              cada opción, así se lee al tabular por ellas (E4-09.3). El fin no: su aria-describedby lo
@@ -148,6 +146,7 @@
                     </label>
                     <input
                       type="date"
+                      autocomplete="off"
                       id="franja-fecha-{{ idx }}"
                       name="franjas[{{ idx }}][fecha]"
                       value="{{ franja.fecha|default('') }}"
@@ -314,6 +313,7 @@
         </label>
         <input
           type="date"
+          autocomplete="off"
           id="franja-fecha-__INDICE__"
           name="franjas[__INDICE__][fecha]"
           value=""

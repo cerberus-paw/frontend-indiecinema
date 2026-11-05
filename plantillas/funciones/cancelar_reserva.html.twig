@@ -29,7 +29,8 @@
   </header>
 
   {% if error_general is defined %}
-    {% include 'parciales/mensaje.html.twig' with { tipo: 'error', mensaje: error_general } only %}
+    {# Por qué no se pudo, con el foco, como el resumen de errores de los formularios (E4-10.5) #}
+    {% include 'parciales/resumen_de_errores.html.twig' with { error_general: error_general } only %}
   {% else %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'advertencia',
