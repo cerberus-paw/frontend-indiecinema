@@ -243,6 +243,15 @@ select {
   max-width: 100%;
 }
 
+/* El atributo hidden oculta siempre (IC-448). El navegador lo aplica con «[hidden] { display:
+   none }», que tiene la misma especificidad que cualquier regla de clase: un «display: flex» en
+   la clase del elemento le gana por venir después, y el elemento se ve igual aunque el
+   JavaScript lo haya marcado como oculto. Con !important deja de depender del orden, y ningún
+   componente necesita repetir la regla para su propia clase. */
+[hidden] {
+  display: none !important;
+}
+
 /* --------------------------------------------------------------------------
    3. ACCESIBILIDAD Y UTILIDADES
    -------------------------------------------------------------------------- */
@@ -2059,12 +2068,6 @@ dd {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
-/* Oculto con el atributo hidden mientras no hay nada que avisar: el display de arriba le ganaría */
-.aviso-flotante[hidden] {
-  /* Fuera de la pantalla */
-  display: none;
-}
-
 /* Círculo que gira */
 .aviso-flotante-icono {
   /* Tamaño del ícono */
@@ -3003,10 +3006,6 @@ dd {
   background-color: var(--color-superficie);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
-}
-
-.ultimas-busquedas[hidden] {
-  display: none;
 }
 
 .ultimas-busquedas-cabecera {
@@ -4009,12 +4008,6 @@ dd {
   gap: var(--espacio-2);
 }
 
-/* Sin funciones no hay nada que ordenar: la plantilla lo deja oculto */
-.cartelera-orden[hidden] {
-  /* El display: flex de arriba le ganaría al atributo hidden */
-  display: none;
-}
-
 /* Etiqueta «Ordenar por» y «Paginado» */
 .cartelera-orden-etiqueta {
   /* Texto secundario legible */
@@ -4067,14 +4060,6 @@ dd {
   gap: var(--espacio-3);
   /* Separación con la cuadrícula */
   margin-top: var(--espacio-8);
-}
-
-/* Oculta el paginado tradicional, su selector, el centinela o el aviso cuando tienen [hidden] */
-.paginado[hidden],
-.cartelera-paginado-modo[hidden],
-.cartelera-centinela[hidden],
-.cartelera-cargando-mas[hidden] {
-  display: none;
 }
 
 /* Lista numerada del paginado tradicional de la cartelera (E4-06.3) */
@@ -6420,11 +6405,6 @@ a.tabla-admin-principal:focus-visible {
   line-height: 1.4;
 }
 
-/* Oculta la sección de fecha y hora cuando se elige votación de títulos con JS */
-.seccion-formulario[hidden] {
-  display: none;
-}
-
 /* Cuadrícula interactiva de selección de obras del catálogo */
 .cuadricula-seleccion-obras {
   display: grid;
@@ -6569,11 +6549,6 @@ a.tabla-admin-principal:focus-visible {
   display: flex;
   flex-direction: column;
   gap: var(--espacio-3);
-}
-
-/* El display de arriba le gana al atributo hidden: sin esto, la sala que no se eligió se ve igual */
-.parametros-sala-grupo[hidden] {
-  display: none;
 }
 
 .parametros-sala-nombre {
@@ -6749,10 +6724,6 @@ a.tabla-admin-principal:focus-visible {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-}
-
-.franja-alerta-rango[hidden] {
-  display: none;
 }
 
 /* Acciones para agregar franjas */
@@ -8229,10 +8200,6 @@ a.tabla-admin-principal:focus-visible {
   gap: var(--espacio-3);
   background-color: rgba(23, 20, 28, 0.88);
   border-radius: var(--radio-lg);
-}
-
-.carrusel-carga[hidden] {
-  display: none;
 }
 
 .carrusel-carga-texto {
