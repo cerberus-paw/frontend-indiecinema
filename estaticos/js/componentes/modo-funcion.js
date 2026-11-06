@@ -1,3 +1,5 @@
+/* exported ModoFuncion */
+
 /**
  * Alterna el modo del formulario de alta de función entre «Función programada» y «Abrir a votación
  * de títulos» (E3-12.1 / IC-147).

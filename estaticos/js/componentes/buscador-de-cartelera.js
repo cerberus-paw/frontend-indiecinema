@@ -1,3 +1,5 @@
+/* exported BuscadorDeCartelera */
+
 /**
  * La búsqueda en vivo de la cartelera: al cambiar un filtro pide la misma URL que el formulario,
  * pero en JSON (Accept: application/json), y vuelve a dibujar la sección de resultados sin recargar

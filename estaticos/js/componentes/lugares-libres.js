@@ -1,3 +1,5 @@
+/* exported LugaresLibres */
+
 /**
  * Los lugares libres de la ficha, al día sin recargar (E4-05.2). Cada pocos segundos pide
  * /cartelera/{id}/lugares en JSON y, si el número cambió, actualiza la píldora de la cabecera, la

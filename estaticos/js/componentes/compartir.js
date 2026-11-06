@@ -1,3 +1,5 @@
+/* exported Compartir */
+
 /**
  * «Compartir», en la cabecera de la ficha de la función, como en los wireframes (E3-13.F10).
  *
