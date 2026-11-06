@@ -1,3 +1,5 @@
+/* exported VotacionTitulos */
+
 /**
  * Mejora interactiva para la votación de títulos en la ficha de la función (E3-12 / IC-148 / IC-149).
  *

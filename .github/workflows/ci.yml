@@ -33,13 +33,17 @@ jobs:
         run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --no-banner --redact --verbose
 
   javascript:
-    name: JavaScript (sintaxis)
+    name: JavaScript (ESLint)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # El Node que ya trae la máquina alcanza: sólo revisa que cada archivo se pueda leer.
-      - name: Revisar cada archivo
-        run: find estaticos/js -name '*.js' -print0 | xargs -0 -n1 node --check
+      # Sólo las reglas recomendadas (eslint.config.mjs), que encuentran errores y no cuestiones
+      # de estilo: un método repetido en una clase, un nombre que no existe, una variable que
+      # sobra. Reemplaza al `node --check` de antes, que sólo revisaba la sintaxis.
+      - name: Instalar ESLint
+        run: npm ci --no-audit --no-fund
+      - name: Revisar el JavaScript
+        run: npm run js
 
   css:
     name: CSS (stylelint)

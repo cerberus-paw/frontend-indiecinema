@@ -1,3 +1,5 @@
+/* exported BotonImprimir */
+
 /**
  * El botón «Imprimir» del comprobante de la reserva: abre el diálogo de impresión del navegador.
  * Va en un contenedor [data-imprimir] que llega oculto (hidden), así sin JavaScript no queda un

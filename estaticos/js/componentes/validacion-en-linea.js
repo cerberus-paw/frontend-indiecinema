@@ -1,3 +1,5 @@
+/* exported ValidacionEnLinea */
+
 /**
  * La validación en línea de los formularios de carga (E4-09.1 y E4-09.3): mientras se escribe, el
  * campo que no cumple muestra su error debajo, y un submit con algo mal no sale.

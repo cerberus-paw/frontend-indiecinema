@@ -1,3 +1,5 @@
+/* exported ParametrosDeSala */
+
 /**
  * Los parámetros que la función hereda de la sala, al lado del formulario de alta: muestra sólo
  * los de la sala elegida en el desplegable, y un aviso mientras no hay ninguna. Sin JavaScript se

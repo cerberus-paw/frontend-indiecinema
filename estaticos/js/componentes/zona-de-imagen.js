@@ -1,3 +1,5 @@
+/* exported ZonaDeImagen */
+
 /**
  * La zona para arrastrar y soltar una imagen, con vista previa (E4-09.2): la foto de la sala y,
  * cuando exista, el afiche de la obra.
