@@ -17,6 +17,10 @@ class App {
     if (carruseles.length > 0) {
       PAW.cargarScript('Carrusel', `${App.COMPONENTES}/carrusel.js`, () => carruseles.forEach((contenedor) => new Carrusel(contenedor)));
     }
+    // El resumen de errores de un formulario que volvió del servidor (E4-10.5): recibe el foco.
+    if (document.querySelector('[data-resumen-de-errores]')) {
+      PAW.cargarScript('ResumenDeErrores', `${App.COMPONENTES}/resumen-de-errores.js`, () => new ResumenDeErrores('[data-resumen-de-errores]'));
+    }
     // El menú del usuario, sólo con sesión.
     if (document.querySelector('#menu-usuario')) {
       PAW.cargarScript('MenuUsuario', `${App.COMPONENTES}/menu-usuario.js`, () => new MenuUsuario('#menu-usuario'));

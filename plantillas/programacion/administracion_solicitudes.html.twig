@@ -119,6 +119,8 @@
       {# En una pendiente, el formulario abarca la resolución y el motivo, que en el wireframe
          están en lugares distintos de la pantalla #}
       {% if elegida.estado == 'pendiente' %}
+        {# Si la resolución volvió con errores: «Revisá N campos» con un link a cada uno (E4-10.5) #}
+        {% include 'parciales/resumen_de_errores.html.twig' with { errores: errores } only %}
         <form action="/administracion/solicitudes/{{ elegida.id }}/resolver" method="post">
         <input type="hidden" name="_csrf" value="{{ csrf }}">
       {% endif %}
@@ -166,7 +168,7 @@
 
         <div>
           {% if elegida.estado == 'pendiente' %}
-              <fieldset class="bandeja-caja{% if errores.resolucion is defined %} con-error{% endif %}">
+              <fieldset id="resolucion" class="bandeja-caja{% if errores.resolucion is defined %} con-error{% endif %}">
                 <legend class="bandeja-caja-titulo">Resolución</legend>
                 {% for valor, texto in { aprobar: 'Aprobar y publicar la sala', rechazar: 'Rechazar la solicitud' } %}
                   <label class="bandeja-opcion">

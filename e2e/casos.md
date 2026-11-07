@@ -47,6 +47,12 @@ se pueden correr muchas veces contra el mismo sitio sin agotar las funciones.
 | Caso | Qué hace | Qué tiene que ver |
 | --- | --- | --- |
 | U-1 | Con sesión, abre el menú del encabezado con Enter, lo recorre con Tab, lo cierra con Esc, lo vuelve a abrir con Espacio y hace clic afuera | Se abre; Tab pasa por «Panel de mi cuenta» y «Mis reservas»; Esc lo cierra con el foco de vuelta en el botón; Espacio lo abre y el clic afuera lo cierra |
+## Formularios con errores
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| F-1 | Sin sesión, manda el registro vacío, aprieta Tab y después Enter | Vuelve con el foco en el resumen «Revisá N campos», con un link por campo; con Tab, el foco pasa al primer link; con Enter, al campo «Nombre» |
+
 ## Contraste
 
 Miden el color que calcula el navegador contra el fondo real del texto (WCAG 1.4.3, 4,5:1), sin

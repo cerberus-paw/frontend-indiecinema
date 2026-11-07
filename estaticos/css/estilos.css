@@ -1955,6 +1955,20 @@ dd {
   margin-bottom: 0.2rem;
 }
 
+/* El resumen de errores de un formulario (E4-10.5): recibe el foco al cargar, y se tiene que
+   ver dónde quedó, aunque haya llegado sin el teclado */
+.resumen-de-errores:focus {
+  /* Contorno en el color primario, como los demás focos */
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+/* Los links del resumen llevan a cada campo: subrayados, en el color del texto del error */
+.resumen-de-errores a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 /* Botón para descartar la alerta */
 .alerta-cerrar {
   /* Fondo transparente */
