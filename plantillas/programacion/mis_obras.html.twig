@@ -1,0 +1,176 @@
+{#
+  «Mis obras» del organizador, en /organizador/obras (E4-08.1 / E4-08.4 - Wireframe «mi-cuenta-mis-obras»).
+  Lista las obras registradas por el organizador para usarlas en sus funciones, con enlaces para ver ficha,
+  editar y dar de baja (solo si no tienen funciones futuras programadas).
+
+  Variables:
+  - obras: lista de obras del organizador.
+  - creada: (bool) aviso de que se acaba de cargar una obra nueva.
+  - guardada: (bool) aviso de que se guardaron los cambios de una obra.
+  - dada_de_baja: (bool) aviso de que la obra fue dada de baja lógicamente.
+  - error_baja: (?string) error si la baja fue rechazada (ej. por funciones futuras).
+  - csrf: token de protección contra ataques CSRF.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Mis obras{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Mis obras</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Mis obras</h1>
+      <p class="solicitud-bajada">Las películas y cortometrajes que cargaste para programar en tus funciones comunitarias.</p>
+    </div>
+    {% include 'parciales/boton.html.twig' with {
+      texto: 'Cargar obra',
+      url: '/organizador/obras/nueva',
+      variante: 'primario'
+    } only %}
+  </header>
+
+  {# Alertas de estado #}
+  {% if creada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: '¡Obra cargada!',
+      mensaje: 'La obra se cargó exitosamente en el catálogo y ya podés seleccionarla al proponer funciones.'
+    } only %}
+  {% endif %}
+
+  {% if guardada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: '¡Cambios guardados!',
+      mensaje: 'La información de la obra se actualizó correctamente.'
+    } only %}
+  {% endif %}
+
+  {% if dada_de_baja|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: 'Obra dada de baja',
+      mensaje: 'La obra fue eliminada del catálogo y ya no aparecerá disponible para nuevas funciones.'
+    } only %}
+  {% endif %}
+
+  {% if error_baja is defined and error_baja %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'error',
+      titulo: 'No se pudo dar de baja la obra',
+      mensaje: error_baja
+    } only %}
+  {% endif %}
+
+  {% if obras is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'Todavía no cargaste ninguna obra en el catálogo. Podés registrar tu primera película o cortometraje con el botón «Cargar obra».'
+    } only %}
+  {% else %}
+    <div class="cartelera-resumen cartelera-barra">
+      <p class="cartelera-resultados" role="status">
+        {{ obras|length }} {{ obras|length == 1 ? 'obra registrada' : 'obras registradas' }}
+      </p>
+    </div>
+
+    <div class="cuadricula-funciones mis-obras-cuadricula">
+      {% for obra in obras %}
+        {% set tiene_futuras = obra.tiene_funciones_futuras|default(false) %}
+        {% set duracion_obra = obra.duracion_minutos ?? (obra.duracion ?? null) %}
+        <article class="tarjeta-funcion tarjeta-obra tarjeta-mi-obra" aria-label="{{ obra.titulo }}{% if obra.anio %} ({{ obra.anio }}){% endif %}">
+          <div class="tarjeta-funcion-afiche">
+            <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">
+              {% if obra.afiche ?? false %}
+                <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="tarjeta-funcion-imagen" loading="lazy">
+              {% else %}
+                <div class="tarjeta-funcion-afiche-placeholder">
+                  <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+                  <span class="afiche-placeholder-texto">AFICHE</span>
+                </div>
+              {% endif %}
+            </a>
+          </div>
+
+          <div class="tarjeta-funcion-cuerpo">
+            <div class="tarjeta-funcion-cabecera">
+              {% if obra.tipo is defined and obra.tipo %}
+                <span class="insignia-estado insignia-tipo-obra">
+                  {{ obra.tipo_etiqueta ?? (obra.tipo == 'cortometraje' ? 'CORTOMETRAJE' : 'PELÍCULA') }}
+                </span>
+              {% endif %}
+              {% if obra.anio is defined and obra.anio %}
+                <span class="tarjeta-obra-anio">{{ obra.anio }}</span>
+              {% endif %}
+            </div>
+
+            <h3 class="tarjeta-funcion-titulo">
+              <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-titulo-enlace">{{ obra.titulo }}</a>
+            </h3>
+
+            <div class="tarjeta-funcion-meta">
+              {% if obra.director is defined and obra.director %}
+                <p class="tarjeta-funcion-dato meta-director">
+                  <span class="meta-icono" aria-hidden="true">🎬</span>
+                  <span class="meta-texto">{{ obra.director }}</span>
+                </p>
+              {% endif %}
+              {% if duracion_obra %}
+                <p class="tarjeta-funcion-dato meta-duracion">
+                  <span class="meta-icono" aria-hidden="true">⏱️</span>
+                  <span class="meta-texto">{{ duracion_obra }} min</span>
+                </p>
+              {% endif %}
+              {% if obra.origen_copia is defined and obra.origen_copia %}
+                <p class="tarjeta-funcion-dato meta-copia">
+                  <span class="meta-icono" aria-hidden="true">📜</span>
+                  <span class="meta-texto">{{ obra.origen_copia_etiqueta ?? obra.origen_copia }}</span>
+                </p>
+              {% endif %}
+            </div>
+
+            {% if obra.generos is defined and obra.generos is not empty %}
+              <div class="tarjeta-obra-generos" aria-label="Géneros">
+                {% for genero in obra.generos %}
+                  <span class="ficha-genero-chip">{{ genero }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            {# Acciones: Ver ficha, Editar y Dar de baja #}
+            <div class="tarjeta-mi-obra-acciones">
+              <div class="acciones-fila-enlaces">
+                <a href="/obras/{{ obra.id }}" class="boton boton-secundario boton-chico">Ver ficha</a>
+                <a href="/organizador/obras/{{ obra.id }}/editar" class="boton boton-secundario boton-chico">Editar</a>
+              </div>
+
+              {# Formulario POST seguro con CSRF para dar de baja la obra (E4-08.4) #}
+              <form action="/organizador/obras/{{ obra.id }}/baja" method="POST" class="formulario-baja-obra" data-confirmar="¿Confirmás que querés dar de baja esta obra? Ya no podrá usarse en nuevas funciones.">
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                {% if tiene_futuras %}
+                  <button type="button" class="boton boton-peligro-suave boton-chico boton-bloque" disabled title="No se puede dar de baja porque tiene funciones futuras programadas" aria-disabled="true">
+                    Con funciones futuras
+                  </button>
+                  <span class="baja-ayuda-bloqueo">Tiene funciones futuras</span>
+                {% else %}
+                  <button type="submit" class="boton boton-peligro-suave boton-chico boton-bloque">
+                    Dar de baja
+                  </button>
+                {% endif %}
+              </form>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
