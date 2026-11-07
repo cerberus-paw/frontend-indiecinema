@@ -1,7 +1,7 @@
 // Caso F-1 de e2e/casos.md: el resumen de errores de un formulario que volvió del servidor
 // (E4-10.5). Sin sesión: el registro no tiene validación en línea, así que el envío vacío llega
 // al servidor y vuelve con los errores.
-import { test, expect } from '@playwright/test';
+import { testSinSesion as test, expect } from '../ayudas.js';
 
 test('F-1 · el resumen de errores recibe el foco y cada link lleva a su campo', async ({ page }) => {
   await page.goto('/cuenta/registro');

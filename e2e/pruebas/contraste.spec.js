@@ -1,6 +1,6 @@
 // Casos K-1 a K-3 de e2e/casos.md: el contraste de los textos que más cuesta leer, medido con los
 // colores que calcula el navegador contra el fondo real de cada uno (E4-10.4, WCAG 1.4.3: 4,5:1).
-import { test, expect } from '@playwright/test';
+import { testSinSesion as test, expect } from '../ayudas.js';
 
 // El registro es para quien no tiene cuenta: sin la sesión que guarda sesion.setup.js.
 test.use({ storageState: { cookies: [], origins: [] } });

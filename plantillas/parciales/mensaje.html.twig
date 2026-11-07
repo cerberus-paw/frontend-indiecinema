@@ -84,8 +84,8 @@
         class="alerta-cerrar"
         {# Etiqueta legible para tecnologías de asistencia #}
         aria-label="Cerrar notificación"
-        {# Remueve la alerta contenedora al pulsar el botón #}
-        onclick="this.closest('.alerta').remove();"
+        {# Lo saca app.js al pulsarlo: un onclick en el HTML lo bloquearía la Content-Security-Policy, que no admite código en línea #}
+        data-cerrar-alerta
       {# Cierre de la etiqueta de apertura del botón #}
       >
         {# Carácter visual de cierre oculto a lectores de pantalla #}

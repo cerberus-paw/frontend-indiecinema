@@ -1,7 +1,7 @@
 // Casos FC-1 a FC-7 de e2e/casos.md: la cartelera como el wireframe (E4-10.9). Lo que ya prueba
 // PHPUnit (los grupos en orden, el resumen y «Filtrar» sin JavaScript) no se repite: acá va lo que
 // depende del ancho y del JavaScript, que pliega la columna en el celular. Sin sesión.
-import { test, expect } from '@playwright/test';
+import { testSinSesion as test, expect } from '../ayudas.js';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 

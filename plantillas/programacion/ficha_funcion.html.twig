@@ -630,7 +630,8 @@
                   </div>
                   <div class="ficha-franja-progreso">
                     <div class="ficha-barra" role="progressbar" aria-valuemin="0" aria-valuemax="{{ minimo }}" aria-valuenow="{{ min(votos_franja, minimo) }}" aria-label="Compromisos para el {{ franja.fecha }}">
-                      <span class="ficha-barra-relleno" style="width: {{ min(100, (votos_franja * 100 / minimo)|round) }}%"></span>
+                      {# El ancho lo pone app.js desde data-porcentaje: un style en el HTML lo bloquearía la Content-Security-Policy, que no admite estilos en línea #}
+                      <span class="ficha-barra-relleno" data-porcentaje="{{ min(100, (votos_franja * 100 / minimo)|round) }}"></span>
                     </div>
                     <p class="ficha-franja-conteo">
                       <span><strong>{{ votos_franja }}</strong> de {{ minimo }} {{ minimo == 1 ? 'comprometido' : 'comprometidos' }}</span>

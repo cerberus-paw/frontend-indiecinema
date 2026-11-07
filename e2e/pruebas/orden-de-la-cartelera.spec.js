@@ -2,7 +2,7 @@
 // PHPUnit (cada orden en la base, los links y el CSV) no se repite: acá va lo que pasa sólo en el
 // navegador, con el buscador en vivo que redibuja la sección sin recargar, y lo que hace sin
 // JavaScript. Sin sesión: la cartelera es pública.
-import { test, expect } from '@playwright/test';
+import { testSinSesion as test, expect } from '../ayudas.js';
 
 const resultados = (page) => page.locator('#resultados-cartelera');
 const ordenarPor = (page) => page.getByLabel('Ordenar por');

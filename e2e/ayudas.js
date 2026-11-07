@@ -1,6 +1,32 @@
 // Lo que comparten las pruebas: la cuenta, ingresar, encontrar una función que se pueda reservar,
 // reservar y cancelar. Todo pasa por las páginas, como lo haría un espectador.
-import { test as base, expect } from '@playwright/test';
+import { test as playwright, expect } from '@playwright/test';
+
+/**
+ * `test` de Playwright, que además hace fallar la prueba si alguna página registró una violación
+ * de la Content-Security-Policy: un estilo o un script en línea, o un recurso de otro origen, que
+ * el navegador bloqueó. Se ve como un error de la consola, o como una excepción si lo bloqueado era
+ * un eval. Es automático: lo controla cada prueba que importa `test` o `testSinSesion` de acá, sin
+ * nombrarlo. Contra un sitio sin la cabecera no hay nada que bloquear y siempre pasa.
+ */
+export const testSinSesion = playwright.extend({
+  violacionesDeCsp: [async ({ page }, use) => {
+    const violaciones = [];
+    const esDeCsp = (texto) => /Content[- ]Security[- ]Policy/i.test(texto);
+    page.on('console', (mensaje) => {
+      if (esDeCsp(mensaje.text())) {
+        violaciones.push(`${page.url()}: ${mensaje.text()}`);
+      }
+    });
+    page.on('pageerror', (error) => {
+      if (esDeCsp(error.message)) {
+        violaciones.push(`${page.url()}: ${error.message}`);
+      }
+    });
+    await use(violaciones);
+    expect(violaciones, 'ninguna página tiene que violar la Content-Security-Policy').toEqual([]);
+  }, { auto: true }],
+});
 
 /**
  * La cuenta de espectador con la que se prueba. Sale del entorno y no del código: en Actions son
@@ -173,7 +199,7 @@ export async function cancelar(page, codigo, { siPuede = false } = {}) {
  * `reservas` donde cada prueba anota los códigos de lo que reserva: al terminar, pase o falle, se
  * cancelan. Así se puede correr una y otra vez contra el mismo sitio sin agotar las funciones.
  */
-export const test = base.extend({
+export const test = testSinSesion.extend({
   storageState: ARCHIVO_DE_SESION,
   reservas: async ({ page }, use) => {
     const codigos = [];

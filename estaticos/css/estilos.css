@@ -5,6 +5,57 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   0. FUENTES
+   Fira Sans Condensed servida desde el sitio y no desde Google Fonts: así la Content-Security-Policy
+   sólo admite recursos propios (font-src y style-src 'self'), y Google Fonts tampoco admitiría
+   Subresource Integrity, porque devuelve un CSS distinto según el navegador. Son los mismos pesos
+   que se pedían a Google, sólo el subconjunto latino (alcanza para el español) y en woff2, que leen
+   todos los navegadores actuales. Licencia OFL en estaticos/fuentes/OFL.txt.
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-300-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-800-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-400-italic.woff2') format('woff2');
+}
+
+/* --------------------------------------------------------------------------
    1. VARIABLES DE DISEÑO (DESIGN TOKENS) EN :ROOT
    Centralizan los valores de la identidad visual de la Entrega 1.
    -------------------------------------------------------------------------- */

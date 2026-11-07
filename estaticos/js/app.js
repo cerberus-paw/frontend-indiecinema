@@ -12,6 +12,18 @@ class App {
   }
 
   iniciar() {
+    // Lo que antes iba en el HTML como onclick o style, que la Content-Security-Policy bloquea: no
+    // admite código ni estilos en línea, pero sí lo que se asigna desde un script propio.
+    // La cruz de una alerta descartable la cierra. Escucha en el documento y no en cada botón, así
+    // sirve también para una alerta que se agregue después.
+    document.addEventListener('click', (evento) => {
+      const boton = evento.target.closest('[data-cerrar-alerta]');
+      boton?.closest('.alerta')?.remove();
+    });
+    // Las barras de compromisos del acuerdo de fecha: el ancho viene en data-porcentaje.
+    for (const barra of document.querySelectorAll('[data-porcentaje]')) {
+      barra.style.width = `${barra.dataset.porcentaje}%`;
+    }
     // Los carruseles, como el de destacadas de la portada (E4-07): cada uno recibe su contenedor.
     const carruseles = document.querySelectorAll('[data-carrusel]');
     if (carruseles.length > 0) {

@@ -31,6 +31,9 @@ E2E_URL=http://localhost:8080 E2E_CORREO=eva@indiecinema.test E2E_CLAVE=espectad
   ingresar 5 veces por minuto desde la misma IP. Cada corrida ingresa 2 veces (una bien y una con
   la contraseña equivocada), y una más por cada cuenta del panel que esté en el entorno: si se
   corre muchas veces seguidas, el ingreso da 429 y hay que esperar un minuto.
+- **Con la CSP:** cada prueba falla también si alguna página registró una violación de la
+  Content-Security-Policy, aunque lo demás haya salido bien. Por eso todas importan `test` (con la
+  sesión del espectador) o `testSinSesion` de `ayudas.js`, y no directo de Playwright.
 - **De a una:** comparten la cuenta y cuentan los lugares libres, así que no corren en paralelo.
   Dos corridas a la vez (en Actions, la del back y la del front) necesitan cada una su cuenta y
   su `E2E_FUNCION`.
