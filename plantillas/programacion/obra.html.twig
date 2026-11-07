@@ -118,7 +118,7 @@
             Editar obra
           </a>
 
-          <form action="/organizador/obras/{{ obra.id }}/baja" method="POST" class="formulario-baja-obra-inline" onsubmit="return confirm('¿Confirmás que querés dar de baja esta obra del catálogo?');">
+          <form action="/organizador/obras/{{ obra.id }}/baja" method="POST" class="formulario-baja-obra-inline" data-confirmar="¿Confirmás que querés dar de baja esta obra del catálogo?">
             <input type="hidden" name="_csrf" value="{{ csrf }}">
             {% if tiene_futuras %}
               <button type="button" class="boton boton-secundario" disabled title="No se puede dar de baja porque tiene funciones futuras programadas" aria-disabled="true">

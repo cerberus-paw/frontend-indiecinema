@@ -153,7 +153,7 @@
               </div>
 
               {# Formulario POST seguro con CSRF para dar de baja la obra (E4-08.4) #}
-              <form action="/organizador/obras/{{ obra.id }}/baja" method="POST" class="formulario-baja-obra" onsubmit="return confirm('¿Confirmás que querés dar de baja esta obra? Ya no podrá usarse en nuevas funciones.');">
+              <form action="/organizador/obras/{{ obra.id }}/baja" method="POST" class="formulario-baja-obra" data-confirmar="¿Confirmás que querés dar de baja esta obra? Ya no podrá usarse en nuevas funciones.">
                 <input type="hidden" name="_csrf" value="{{ csrf }}">
                 {% if tiene_futuras %}
                   <button type="button" class="boton boton-peligro-suave boton-chico boton-bloque" disabled title="No se puede dar de baja porque tiene funciones futuras programadas" aria-disabled="true">
