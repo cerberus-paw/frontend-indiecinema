@@ -45,7 +45,7 @@ test('U-3 · una búsqueda guardada se vuelve a hacer con sus filtros en el form
 
   await expect(page).toHaveURL(/\/cartelera\?localidad=Luj%C3%A1n$/);
   await esperarResultados(page);
-  await expect(page.getByLabel('Localidad')).toHaveValue('Luján');
+  await expect(page.getByLabel('Localidad', { exact: true })).toHaveValue('Luján');
   expect(await page.evaluate(() => window.sinRecargar === true), 'la página no se tenía que recargar').toBe(true);
 });
 

@@ -1,4 +1,4 @@
-// Casos FC-1 a FC-3 y FC-6 de e2e/casos.md: la cartelera como el wireframe (E4-10.9). Lo que ya prueba
+// Casos FC-1 a FC-7 de e2e/casos.md: la cartelera como el wireframe (E4-10.9). Lo que ya prueba
 // PHPUnit (los grupos en orden, el resumen y «Filtrar» sin JavaScript) no se repite: acá va lo que
 // depende del ancho y del JavaScript, que pliega la columna en el celular. Sin sesión.
 import { test, expect } from '@playwright/test';
@@ -45,6 +45,44 @@ test('FC-3 · el resumen de arriba cambia con el orden, sin recargar', async ({ 
   expect(await page.evaluate(() => window.sinRecargar)).toBe(true);
 });
 
+test('FC-4 · quitar una etiqueta con Enter filtra sin recargar y el foco no se pierde', async ({ page }) => {
+  await page.goto('/cartelera?localidad=Luj%C3%A1n&precio_max=2000');
+  await page.evaluate(() => { window.sinRecargar = true; });
+  const etiquetas = page.locator('[data-filtros-activos] a[data-quitar-filtro]');
+  await expect(etiquetas).toHaveCount(2);
+
+  await page.getByRole('link', { name: 'Quitar el filtro Localidad: Luján' }).focus();
+  await page.keyboard.press('Enter');
+
+  await expect(etiquetas).toHaveCount(1);
+  const queda = page.getByRole('link', { name: 'Quitar el filtro Hasta $ 2.000' });
+  await expect(queda).toBeFocused();
+  await expect(page.getByLabel('Localidad', { exact: true })).toHaveValue('');
+  await expect(page).toHaveURL(/\/cartelera\?precio_max=2000$/);
+
+  await page.keyboard.press('Enter');
+
+  await expect(etiquetas).toHaveCount(0);
+  await expect(page.locator('[data-filtros-activos]')).toBeHidden();
+  await expect(page.locator('#titulo-resultados-cartelera')).toBeFocused();
+  await expect(page.getByLabel('Precio hasta ($)')).toHaveValue('');
+  expect(await page.evaluate(() => window.sinRecargar)).toBe(true);
+});
+
+test('FC-5 · elegir un filtro en la columna agrega su etiqueta, sin recargar', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/cartelera');
+  await page.evaluate(() => { window.sinRecargar = true; });
+  await expect(page.locator('[data-filtros-activos]')).toBeHidden();
+
+  await page.getByLabel('Localidad', { exact: true }).selectOption('Luján');
+
+  await expect(page.getByRole('link', { name: 'Quitar el filtro Localidad: Luján' })).toBeVisible();
+  await expect(page.locator('[data-filtros-activos] a[data-quitar-todos]')).toHaveAttribute('href', '/cartelera');
+  await expect(columna(page).locator('summary')).toHaveText('Filtros (1)');
+  expect(await page.evaluate(() => window.sinRecargar)).toBe(true);
+});
+
 test('FC-6 · sin funciones el resumen de arriba no se ve, y vuelve con resultados', async ({ page }) => {
   await page.goto('/cartelera?q=zzz-ninguna-funcion-se-llama-asi');
   const resumen = page.locator('[data-cartelera-resumen]');
@@ -56,4 +94,26 @@ test('FC-6 · sin funciones el resumen de arriba no se ve, y vuelve con resultad
 
   await expect(resumen).toBeVisible();
   await expect(resumen).toContainText(/\d+ funci(ón|ones)/);
+});
+
+test('FC-7 · si se escribe mientras llega la respuesta de una etiqueta, el foco no se va del campo', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/cartelera?localidad=Luj%C3%A1n&precio_max=2000');
+  // La respuesta de quitar la localidad tarda hasta que la soltamos.
+  let soltar;
+  const demorada = new Promise((resolver) => { soltar = resolver; });
+  await page.route((url) => url.pathname === '/cartelera' && url.search === '?precio_max=2000', async (ruta) => {
+    await demorada;
+    await ruta.continue();
+  });
+
+  await page.getByRole('link', { name: 'Quitar el filtro Localidad: Luján' }).focus();
+  await page.keyboard.press('Enter');
+  await buscar(page).focus();
+  await page.keyboard.type('a');
+  soltar();
+
+  await expect(page.locator('[data-filtros-activos] a[data-quitar-filtro]')).not.toHaveCount(2);
+  await page.waitForTimeout(800);
+  await expect(buscar(page)).toBeFocused();
 });

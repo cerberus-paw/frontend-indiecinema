@@ -108,6 +108,12 @@ class BuscadorDeCartelera {
     this.contenedorLimpiar = document.querySelector('[data-filtros-limpiar]');
     this.columna = document.querySelector('[data-filtros-cartelera]');
     this.plegarSegunElAncho();
+    // Las etiquetas de los filtros activos, también afuera de la sección (E4-10.9).
+    this.filtrosActivos = document.querySelector('[data-filtros-activos]');
+    this.cantidadDeFiltros = this.columna?.querySelector('[data-cantidad-filtros]') ?? null;
+    // Adónde va el foco después de quitar una etiqueta con el foco en ella: la posición que tenía
+    // y la búsqueda que la quita. Se olvida si se busca otra cosa o se escribe en un campo.
+    this.focoAlQuitar = null;
     this.centinela = this.resultados.querySelector('[data-cartelera-centinela]')
       ?? this.nodo('div', { class: 'cartelera-centinela', 'data-cartelera-centinela': '', hidden: '' });
     this.cargandoMas = this.resultados.querySelector('[data-cartelera-cargando-mas]')
@@ -143,6 +149,8 @@ class BuscadorDeCartelera {
       }
     });
     this.formulario.addEventListener('input', (evento) => {
+      // Quien escribe tiene el foco en el campo: la etiqueta que quitó antes no se lo lleva.
+      this.focoAlQuitar = null;
       if (BuscadorDeCartelera.esCampoDeEscritura(evento.target.name)) {
         // Se ve que va a buscar desde la primera tecla, aunque el pedido salga después.
         this.mostrarCargando(true);
@@ -166,6 +174,24 @@ class BuscadorDeCartelera {
       if (limpiarHistorial) {
         this.limpiarUltimasBusquedas();
       }
+    });
+    // Quitar una etiqueta o todas: la misma búsqueda que si se vaciara el campo (E4-10.9).
+    this.filtrosActivos?.addEventListener('click', (evento) => {
+      const enlace = evento.target.closest('[data-quitar-filtro], [data-quitar-todos]');
+      if (!enlace) {
+        return;
+      }
+      evento.preventDefault();
+      if (document.activeElement === enlace) {
+        const etiquetas = [...this.filtrosActivos.querySelectorAll('[data-quitar-filtro]')];
+        this.focoAlQuitar = {
+          indice: enlace.matches('[data-quitar-todos]') ? -1 : etiquetas.indexOf(enlace),
+          url: enlace.getAttribute('href'),
+        };
+      }
+      const url = enlace.getAttribute('href');
+      this.completarFormulario(new URL(url, window.location.origin).searchParams);
+      this.buscar(url);
     });
     // El selector de orden y el de modo de paginado están en la sección de resultados, asociados
     // al formulario con form=: su «change» sube por la sección, no por el formulario.
@@ -500,6 +526,10 @@ class BuscadorDeCartelera {
    * @param {{historial?: boolean, guardar?: boolean}} [opciones]
    */
   async buscar(url, { historial = true, guardar = true } = {}) {
+    // Otra búsqueda que la de la etiqueta quitada: el foco ya no tiene que ir a su vecina.
+    if (this.focoAlQuitar && this.focoAlQuitar.url !== url) {
+      this.focoAlQuitar = null;
+    }
     clearTimeout(this.espera);
     this.espera = null;
     this.pedidoMas?.abort();
@@ -584,6 +614,8 @@ class BuscadorDeCartelera {
   mostrarError(url) {
     clearTimeout(this.espera);
     this.espera = null;
+    // La etiqueta no se quitó: el foco queda donde está.
+    this.focoAlQuitar = null;
     const error = this.alerta('error', 'alert', { texto: BuscadorDeCartelera.MENSAJE_DE_ERROR });
     error.querySelector('.alerta-contenido').append(this.nodo('p', { class: 'alerta-texto' }, [
       this.nodo('a', { href: url, class: 'alerta-enlace' }, ['Cargar esta búsqueda de nuevo']),
@@ -693,6 +725,61 @@ class BuscadorDeCartelera {
     }
     this.mostrarLimpiar(BuscadorDeCartelera.filtrada(datos));
     this.mostrarResumenArriba(datos);
+    this.mostrarFiltrosActivos(datos);
+  }
+
+  /**
+   * Las etiquetas de los filtros activos y «Quitar todos», como en la plantilla, y cuántos hay en
+   * «Filtros». Si se acaba de quitar una con el foco en ella, el foco pasa a la que quedó en su
+   * lugar (la siguiente o, si era la última, la anterior); sin ninguna, a los resultados.
+   *
+   * @param {{filtros_activos?: Array<{texto: string, url: string}>, quitar_filtros?: string}} datos
+   */
+  mostrarFiltrosActivos(datos) {
+    if (!this.filtrosActivos) {
+      return;
+    }
+    const activos = datos.filtros_activos ?? [];
+    const lista = this.filtrosActivos.querySelector('.filtros-activos-lista');
+    lista?.replaceChildren(...activos.map((filtro) => this.nodo('li', {}, [
+      this.nodo('a', {
+        href: filtro.url,
+        class: 'etiqueta-filtro',
+        'data-quitar-filtro': '',
+        'aria-label': `Quitar el filtro ${filtro.texto}`,
+      }, [
+        `${filtro.texto} `,
+        this.nodo('span', { class: 'etiqueta-filtro-quitar', 'aria-hidden': 'true' }, ['×']),
+      ]),
+    ])));
+    let quitarTodos = this.filtrosActivos.querySelector('[data-quitar-todos]');
+    if (activos.length > 0) {
+      if (!quitarTodos) {
+        quitarTodos = this.nodo('a', { class: 'filtros-activos-quitar', 'data-quitar-todos': '' }, ['Quitar todos']);
+        this.filtrosActivos.append(quitarTodos);
+      }
+      quitarTodos.setAttribute('href', datos.quitar_filtros ?? this.formulario.getAttribute('action'));
+    } else {
+      quitarTodos?.remove();
+    }
+    this.filtrosActivos.hidden = activos.length === 0;
+    if (this.cantidadDeFiltros) {
+      this.cantidadDeFiltros.textContent = activos.length > 0 ? ` (${activos.length})` : '';
+    }
+
+    if (this.focoAlQuitar !== null) {
+      const etiquetas = lista ? [...lista.querySelectorAll('[data-quitar-filtro]')] : [];
+      const { indice } = this.focoAlQuitar;
+      const vecina = indice >= 0 ? etiquetas[Math.min(indice, etiquetas.length - 1)] : null;
+      this.focoAlQuitar = null;
+      if (vecina) {
+        vecina.focus();
+      } else {
+        const titulo = document.getElementById('titulo-resultados-cartelera');
+        titulo?.setAttribute('tabindex', '-1');
+        titulo?.focus();
+      }
+    }
   }
 
   /**

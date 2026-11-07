@@ -125,7 +125,10 @@ celular se pliega.
 | FC-1 | En un celular de 360 px, abre la cartelera, va a «Filtros» con Tab y aprieta Enter | Arranca cerrada, sin los campos a la vista; con Enter se abre y se ve «Buscar» |
 | FC-2 | En la compu (1280 px), abre la cartelera | La columna está abierta, a la izquierda de las funciones, con los grupos Buscar, Localidad, Fecha, Género y Precio; arriba dice cuántas funciones hay y cómo están ordenadas |
 | FC-3 | En la cartelera, elige «Precio: menor a mayor» en «Ordenar por» | Sin recargar, arriba dice «ordenadas por precio: menor a mayor» |
+| FC-4 | Con «Localidad: Luján» y «Hasta $ 2.000» aplicados, va con Tab a la etiqueta de la localidad y aprieta Enter; después, Enter en la que queda | Sin recargar, queda sólo «Hasta $ 2.000», la localidad vuelve a «Todas» y el foco está en esa etiqueta; con el segundo Enter no quedan etiquetas y el foco va a los resultados |
+| FC-5 | Sin filtros, elige «Luján» en «Localidad» | Sin recargar, aparece la etiqueta «Localidad: Luján» con «Quitar todos», y «Filtros» dice «(1)» |
 | FC-6 | Abre la cartelera con una búsqueda que no encuentra nada, y después busca algo que sí | Sin funciones no se ve «0 funciones · ordenadas por …», sólo el aviso; con funciones, vuelve el resumen |
+| FC-7 | Con dos filtros, quita una etiqueta con Enter y, antes de que llegue la respuesta, empieza a escribir en «Buscar» | El foco se queda en «Buscar»: la etiqueta quitada no se lo lleva cuando llega su respuesta |
 
 ## Anchos de pantalla
 
