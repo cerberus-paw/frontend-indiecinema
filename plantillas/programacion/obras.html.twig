@@ -86,6 +86,8 @@
       </p>
     </div>
 
+    {# El h2 de las tarjetas (h3) para el lector de pantalla (E4-10.2) #}
+    <h2 class="sr-only">Películas</h2>
     <div class="cuadricula-funciones">
       {% for obra in obras %}
         {% include 'parciales/tarjeta_obra.html.twig' with { obra: obra } only %}
