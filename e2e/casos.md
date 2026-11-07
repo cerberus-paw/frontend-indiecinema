@@ -9,6 +9,10 @@ cuenta de espectador que ya existe (`E2E_CORREO` y `E2E_CLAVE`) y una función d
 se pueda reservar, con al menos 3 lugares libres. Lo que reservan lo cancelan al terminar, así
 se pueden correr muchas veces contra el mismo sitio sin agotar las funciones.
 
+En todos los casos, además, ninguna página puede violar la Content-Security-Policy: si el
+navegador bloquea un estilo o un script en línea, o un recurso de otro origen, la prueba falla
+aunque lo demás haya salido bien (`testSinSesion` en `ayudas.js`).
+
 ## Ingresar
 
 | Caso | Qué hace | Qué tiene que ver |

@@ -1,7 +1,7 @@
 // Casos U-1 a U-5 de e2e/casos.md: las últimas búsquedas, que viven en el localStorage del
 // navegador. Cómo se lee cada búsqueda lo prueba PHPUnit. Cada prueba arranca con el navegador
 // vacío (Playwright abre un contexto nuevo).
-import { test, expect } from '@playwright/test';
+import { testSinSesion as test, expect } from '../ayudas.js';
 
 const seccion = (page) => page.getByRole('region', { name: 'Últimas búsquedas' });
 const busquedas = (page) => seccion(page).getByRole('listitem');

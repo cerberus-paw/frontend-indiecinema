@@ -1,6 +1,6 @@
 // Caso PR-1 de e2e/casos.md: el rango de precio con el buscador en vivo. Qué funciones entran en
 // cada rango (con las gratuitas) lo prueba PHPUnit; acá, que los campos buscan al dejar de escribir.
-import { test, expect } from '@playwright/test';
+import { testSinSesion as test, expect } from '../ayudas.js';
 
 test('PR-1 · «Precio hasta» 0 muestra sólo las funciones a la gorra, sin recargar', async ({ page }) => {
   await page.goto('/cartelera');
