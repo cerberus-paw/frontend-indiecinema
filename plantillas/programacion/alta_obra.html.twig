@@ -8,7 +8,7 @@
   - valores: (array) datos cargados previamente
   - errores: (array) mensajes de validación por campo
   - reglas: (array) reglas de validación del backend para sincronización
-  - error_general: (?string) error global si falló la operación
+  - error_general: (?string) un error que no es de un campo, sin link en el resumen
   - mensaje_exito: (?string) confirmación exitosa
   - generos: lista de géneros disponibles en el catálogo (id, nombre)
   - tipos_obra: lista de tipos [{valor: 'pelicula', etiqueta: 'Película'}, ...]
@@ -43,14 +43,12 @@
     </div>
   </header>
 
-  {# Alerta de error general #}
-  {% if error_general is defined and error_general %}
-    {% include 'parciales/mensaje.html.twig' with {
-      tipo: 'error',
-      titulo: 'No se pudo guardar la obra',
-      mensaje: error_general
-    } only %}
-  {% endif %}
+  {# Si el envío volvió con errores: «Revisá N campos» con un link a cada uno (E4-10.5) #}
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    errores: errores ?? {},
+    error_general: error_general ?? null,
+    titulo: 'No se pudo guardar la obra'
+  } only %}
 
   {# Alerta de éxito #}
   {% if mensaje_exito is defined and mensaje_exito %}
@@ -172,7 +170,8 @@
       {# Selección múltiple de géneros mediante checkboxes accesibles #}
       {% set error_generos = errores.generos ?? null %}
       <div class="grupo-campo grupo-campo-generos{% if error_generos %} con-error{% endif %}">
-        <fieldset class="generos-fieldset">
+        {# id="generos": el link del resumen de errores trae acá (E4-10.5) #}
+        <fieldset id="generos" class="generos-fieldset">
           <legend class="campo-etiqueta generos-leyenda">
             Géneros cinematográficos
             <span class="campo-requerido" aria-hidden="true" title="Campo obligatorio">*</span>
