@@ -12,11 +12,13 @@
   - error_general: (string, opcional) Mensaje de error general si falló la validación.
   - votacion_cerrada: (bool, opcional) si llega recién cerrada la votación de títulos (E3-13.F1).
 #}
-{% extends 'base.html.twig' %}
+{% extends 'organizador.html.twig' %}
 
 {% block titulo %}Proponer franjas horarias · {{ funcion.titulo }} · IndieCinema{% endblock %}
 
-{% block contenido %}
+{% block seccion %}funciones{% endblock %}
+
+{% block panel %}
 <div class="contenedor contenedor-proponer-franjas">
   {# Migas de pan de navegación #}
   <nav class="navegacion-migas" aria-label="Migas de pan">

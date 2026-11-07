@@ -41,10 +41,17 @@ export async function ingresar(page, { correo, clave } = cuenta()) {
   await page.waitForLoadState();
 }
 
+/**
+ * El menú del usuario del encabezado: un desplegable con listas de enlaces, no un menú de
+ * aplicación. Se busca adentro porque el pie repite algunas opciones, como «Mis reservas».
+ */
+export const menuDelUsuario = (page) => page.locator('header details');
+
 /** Abre «Mis reservas» desde el menú del usuario, como lo haría él. */
 export async function abrirMisReservas(page) {
-  await page.locator('header summary').click();
-  await page.getByRole('menuitem', { name: 'Mis reservas' }).click();
+  const menu = menuDelUsuario(page);
+  await menu.locator('summary').click();
+  await menu.getByRole('link', { name: 'Mis reservas' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Mis reservas' })).toBeVisible();
 }
 
