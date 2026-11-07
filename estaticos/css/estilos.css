@@ -1153,6 +1153,23 @@ button.menu-item {
   box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
 }
 
+/* Botón peligro suave para bajas lógicas y acciones destructivas secundarias */
+.boton-peligro-suave {
+  background-color: var(--color-acento-suave);
+  color: #fca5a5;
+  border: 1px solid rgba(225, 29, 72, 0.4);
+}
+
+.boton-peligro-suave:hover:not(:disabled) {
+  background-color: var(--color-acento);
+  color: var(--color-texto-brillante);
+  border-color: var(--color-acento);
+}
+
+.boton-peligro-suave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 /* Botón variante fantasma o contorno */
 .boton-fantasma {
   /* Fondo completamente transparente */
@@ -7615,6 +7632,13 @@ a.tabla-admin-principal:focus-visible {
 .tarjeta-mi-obra-acciones .acciones-fila-enlaces .boton {
   flex: 1;
   text-align: center;
+}
+
+.baja-ayuda-bloqueo {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-apagado);
+  text-align: center;
+  display: block;
 }
 
 /* Formulario de alta y edición de obra (E4-08.1) */
