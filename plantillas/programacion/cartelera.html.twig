@@ -20,7 +20,7 @@
   - max_ultimas_busquedas: cuántas búsquedas recientes guarda el navegador (5).
   - busqueda: la búsqueda actual (url, etiqueta y filtros) para las últimas búsquedas, o null si no recorta la cartelera.
   - csv: la URL de la cartelera en CSV con los mismos filtros, todas las páginas.
-  - orden: el orden aplicado (valor, etiqueta), para «ordenadas por …» del resumen de arriba.
+  - orden: el orden aplicado (valor, etiqueta y leida, como va después de «ordenadas por»), para el resumen de arriba.
 #}
 {% extends 'base.html.twig' %}
 
@@ -43,10 +43,9 @@
       {# Cuántas hay y cómo están ordenadas (E4-10.9). Afuera de la sección de resultados: el
          buscador la actualiza con cada búsqueda. Sin role="status": la cantidad la anuncia el
          buscador en su propia región, y así no se lee dos veces. #}
-      {% set orden_aplicado = orden.etiqueta|default('') %}
       <div class="cartelera-resumen-linea" data-cartelera-resumen{{ funciones is empty ? ' hidden' : '' }}>
         <p class="cartelera-resultados">{{ paginado.total_funciones }} {{ paginado.total_funciones == 1 ? 'función' : 'funciones' }}</p>
-        <p class="cartelera-orden-aplicado">· ordenadas por <span data-cartelera-orden-aplicado>{{ orden_aplicado|slice(0, 1)|lower ~ orden_aplicado|slice(1) }}</span></p>
+        <p class="cartelera-orden-aplicado">· ordenadas por <span data-cartelera-orden-aplicado>{{ orden.leida|default('') }}</span></p>
       </div>
     </div>
   </header>

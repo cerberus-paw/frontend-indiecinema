@@ -3009,6 +3009,12 @@ dd {
   margin-top: var(--espacio-2);
 }
 
+/* Oculto sin funciones (lo explica el aviso de la sección): el display flex no tiene que ganarle
+   al atributo */
+.cartelera-resumen-linea[hidden] {
+  display: none;
+}
+
 /* En el resumen de arriba, la cantidad no empuja nada: va pegada al orden */
 .cartelera-resumen-linea .cartelera-resultados {
   margin-right: 0;
@@ -3092,7 +3098,8 @@ dd {
   transform: rotate(90deg);
 }
 
-/* Desde 768 px la columna no se cierra: «Filtros» es sólo el título, sin flecha */
+/* Desde 768 px la columna no se cierra (con JavaScript la vuelve a abrir el buscador): «Filtros»
+   es sólo el título, sin flecha ni cursor de mano */
 @media (min-width: 768px) {
   .filtros-columna-titulo {
     cursor: default;
@@ -3115,18 +3122,34 @@ dd {
   font-size: var(--texto-sm);
 }
 
-/* Formulario GET de filtros: los grupos uno debajo del otro */
+/* Formulario GET de filtros sobre la cuadrícula: lo usan también los buscadores de salas y de
+   obras (.buscador-salas, .buscador-obras), que cambian sólo las columnas */
 .filtros-cartelera {
+  /* Cuadrícula de columnas automáticas: cuatro en escritorio, una en móvil */
   display: grid;
-  /* Separación entre grupos */
+  /* Cada campo de mínimo 180px */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  /* Separación entre campos */
   gap: var(--espacio-4);
-  /* Separación con «Limpiar» */
+  /* Alinea los botones con el pie de los campos */
+  align-items: end;
+  /* Separación con los resultados */
+  margin-bottom: var(--espacio-6);
+}
+
+/* En la columna de la cartelera (E4-10.9), los grupos uno debajo del otro */
+.filtros-columna .filtros-cartelera {
+  grid-template-columns: minmax(0, 1fr);
+  /* Cada grupo con su alto: no hay botones que alinear */
+  align-items: stretch;
+  /* La separación con los resultados la da .cartelera-cuerpo; arriba, la de «Limpiar» */
+  margin-bottom: 0;
   margin-top: var(--espacio-2);
 }
 
 /* De 768 a 1023 px, la columna va arriba de la grilla: los grupos en dos columnas */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .filtros-cartelera {
+  .filtros-columna .filtros-cartelera {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -4153,7 +4176,9 @@ dd {
   }
 }
 
-/* Cantidad de funciones encontradas, orden y descarga en CSV (E4-06.1) */
+/* Cantidad de funciones encontradas, orden y descarga en CSV (E4-06.1). En la cartelera la
+   cantidad está en el resumen de arriba (E4-10.9) y la barra sólo tiene los controles: ver
+   .cartelera-principal .cartelera-barra */
 .cartelera-resumen,
 .cartelera-barra {
   /* En fila */
@@ -4180,6 +4205,12 @@ dd {
   margin: 0;
   /* Empuja los controles de orden, paginado y CSV hacia la derecha */
   margin-right: auto;
+}
+
+/* En la cartelera la barra ya no empieza con la cantidad, que empujaba los controles: van
+   agrupados a la derecha por su cuenta (E4-10.9) */
+.cartelera-principal .cartelera-barra {
+  justify-content: flex-end;
 }
 
 /* Selectores «Ordenar por» y «Paginado» arriba a la derecha de la grilla (E4-06.1 / E4-06.3) */
@@ -4224,7 +4255,7 @@ dd {
 @media (max-width: 600px) {
   .cartelera-orden,
   .cartelera-paginado-modo {
-    /* En celular ocupan su propia fila debajo del contador */
+    /* En celular cada uno ocupa su propia fila */
     width: 100%;
     justify-content: space-between;
   }
