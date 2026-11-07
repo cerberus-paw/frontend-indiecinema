@@ -3,7 +3,8 @@
   cualquiera, con o sin sesión. Los filtros son un formulario GET, así viajan en la URL y
   funcionan sin JavaScript. Con JavaScript, el componente BuscadorDeCartelera recibe el formulario
   y la sección #resultados-cartelera, y la vuelve a dibujar con el JSON de la misma URL sin recargar:
-  lo que cambie acá adentro de la sección tiene que cambiar también en el componente.
+  lo que cambie acá adentro de la sección tiene que cambiar también en el componente. El resumen
+  de arriba, «Limpiar» de la columna y la columna plegable (E4-10.9) también los maneja el componente.
 
   Variables:
   - funciones: lista de funciones como las recibe parciales/tarjeta_funcion.html.twig.
@@ -19,6 +20,7 @@
   - max_ultimas_busquedas: cuántas búsquedas recientes guarda el navegador (5).
   - busqueda: la búsqueda actual (url, etiqueta y filtros) para las últimas búsquedas, o null si no recorta la cartelera.
   - csv: la URL de la cartelera en CSV con los mismos filtros, todas las páginas.
+  - orden: el orden aplicado (valor, etiqueta y leida, como va después de «ordenadas por»), para el resumen de arriba.
 #}
 {% extends 'base.html.twig' %}
 
@@ -26,10 +28,25 @@
 
 {% block contenido %}
 <div class="contenedor" data-cartelera data-max-ultimas-busquedas="{{ max_ultimas_busquedas|default(5) }}"{% if busqueda|default(null) %} data-busqueda="{{ busqueda|json_encode }}"{% endif %}>
-  <header class="encabezado-formulario-solicitud">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Cartelera</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud cartelera-cabecera">
     <div class="solicitud-texto-cabecera">
       <h1 class="solicitud-titulo">Cartelera</h1>
       <p class="solicitud-bajada">Las próximas funciones de cine independiente en las salas de la comunidad.</p>
+      {# Cuántas hay y cómo están ordenadas (E4-10.9). Afuera de la sección de resultados: el
+         buscador la actualiza con cada búsqueda. Sin role="status": la cantidad la anuncia el
+         buscador en su propia región, y así no se lee dos veces. #}
+      <div class="cartelera-resumen-linea" data-cartelera-resumen{{ funciones is empty ? ' hidden' : '' }}>
+        <p class="cartelera-resultados">{{ paginado.total_funciones }} {{ paginado.total_funciones == 1 ? 'función' : 'funciones' }}</p>
+        <p class="cartelera-orden-aplicado">· ordenadas por <span data-cartelera-orden-aplicado>{{ orden.leida|default('') }}</span></p>
+      </div>
     </div>
   </header>
 
@@ -42,57 +59,6 @@
     {% set opciones_genero = opciones_genero|merge([{valor: genero.nombre, etiqueta: genero.nombre}]) %}
   {% endfor %}
 
-  <form class="filtros-cartelera" action="/cartelera" method="get" id="filtros-cartelera" role="search" aria-label="Filtrar la cartelera">
-    {% include 'parciales/campo.html.twig' with {
-      nombre: 'q',
-      etiqueta: 'Buscar',
-      tipo: 'search',
-      valor: filtros.q ?? '',
-      placeholder: 'Película, director o sala'
-    } only %}
-    {% include 'parciales/campo.html.twig' with {
-      nombre: 'localidad',
-      etiqueta: 'Localidad',
-      tipo: 'select',
-      valor: filtros.localidad ?? '',
-      opciones: opciones_localidad
-    } only %}
-    {% include 'parciales/campo.html.twig' with {
-      nombre: 'fecha',
-      etiqueta: 'Fecha',
-      tipo: 'date',
-      valor: filtros.fecha ?? ''
-    } only %}
-    {% include 'parciales/campo.html.twig' with {
-      nombre: 'genero',
-      etiqueta: 'Género',
-      tipo: 'select',
-      valor: filtros.genero ?? '',
-      opciones: opciones_genero
-    } only %}
-    {% include 'parciales/campo.html.twig' with {
-      nombre: 'precio_min',
-      etiqueta: 'Precio desde ($)',
-      tipo: 'number',
-      valor: filtros.precio_min ?? '',
-      valor_minimo: 0,
-      placeholder: '0 (incluye a la gorra)'
-    } only %}
-    {% include 'parciales/campo.html.twig' with {
-      nombre: 'precio_max',
-      etiqueta: 'Precio hasta ($)',
-      tipo: 'number',
-      valor: filtros.precio_max ?? '',
-      valor_minimo: 0,
-      placeholder: 'Sin tope'
-    } only %}
-    <div class="filtros-cartelera-acciones">
-      {% include 'parciales/boton.html.twig' with { texto: 'Filtrar', variante: 'primario' } only %}
-      {% if filtrada %}
-        {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/cartelera', variante: 'fantasma' } only %}
-      {% endif %}
-    </div>
-  </form>
 
   <section class="ultimas-busquedas" aria-label="Últimas búsquedas" data-ultimas-busquedas hidden>
     <div class="ultimas-busquedas-cabecera">
@@ -101,6 +67,84 @@
     </div>
     <ul class="ultimas-busquedas-lista" data-ultimas-busquedas-lista></ul>
   </section>
+
+  {# La columna de filtros y los resultados: al costado desde 1024 px, una debajo de la otra antes. #}
+  <div class="cartelera-cuerpo">
+    <details class="filtros-columna" data-filtros-cartelera open>
+      {# Llega abierta, así se usa sin JavaScript; con JavaScript, BuscadorDeCartelera la cierra en
+         el celular y la deja abierta desde 768 px (E4-10.9). #}
+      <summary class="filtros-columna-titulo">Filtros</summary>
+      <div class="filtros-columna-cuerpo">
+        <div class="filtros-columna-acciones" data-filtros-limpiar>
+          {% if filtrada %}
+            <a href="/cartelera" class="filtros-limpiar">Limpiar</a>
+          {% endif %}
+        </div>
+        <form class="filtros-cartelera" action="/cartelera" method="get" id="filtros-cartelera" role="search" aria-label="Filtrar la cartelera">
+          <div class="filtros-grupo">
+            {% include 'parciales/campo.html.twig' with {
+              nombre: 'q',
+              etiqueta: 'Buscar',
+              tipo: 'search',
+              valor: filtros.q ?? '',
+              placeholder: 'Película, director o sala'
+            } only %}
+          </div>
+          <div class="filtros-grupo">
+            {% include 'parciales/campo.html.twig' with {
+              nombre: 'localidad',
+              etiqueta: 'Localidad',
+              tipo: 'select',
+              valor: filtros.localidad ?? '',
+              opciones: opciones_localidad
+            } only %}
+          </div>
+          <div class="filtros-grupo">
+            {% include 'parciales/campo.html.twig' with {
+              nombre: 'fecha',
+              etiqueta: 'Fecha',
+              tipo: 'date',
+              valor: filtros.fecha ?? ''
+            } only %}
+          </div>
+          <div class="filtros-grupo">
+            {% include 'parciales/campo.html.twig' with {
+              nombre: 'genero',
+              etiqueta: 'Género',
+              tipo: 'select',
+              valor: filtros.genero ?? '',
+              opciones: opciones_genero
+            } only %}
+          </div>
+          <fieldset class="filtros-grupo filtros-grupo-precio">
+            <legend class="filtros-grupo-titulo">Precio</legend>
+            {% include 'parciales/campo.html.twig' with {
+              nombre: 'precio_min',
+              etiqueta: 'Precio desde ($)',
+              tipo: 'number',
+              valor: filtros.precio_min ?? '',
+              valor_minimo: 0,
+              placeholder: '0 (incluye a la gorra)'
+            } only %}
+            {% include 'parciales/campo.html.twig' with {
+              nombre: 'precio_max',
+              etiqueta: 'Precio hasta ($)',
+              tipo: 'number',
+              valor: filtros.precio_max ?? '',
+              valor_minimo: 0,
+              placeholder: 'Sin tope'
+            } only %}
+          </fieldset>
+          {# Con JavaScript los filtros se aplican solos; sin él, hace falta mandar el formulario. #}
+          <noscript>
+            <div class="filtros-cartelera-acciones">
+              {% include 'parciales/boton.html.twig' with { texto: 'Filtrar', variante: 'primario' } only %}
+            </div>
+          </noscript>
+        </form>
+      </div>
+    </details>
+    <div class="cartelera-principal">
 
   {#
     «Ordenar por», arriba a la derecha de la grilla. Está afuera del formulario y se asocia con
@@ -161,9 +205,6 @@
     {{ selector_paginado }}
   {% else %}
     <div class="cartelera-resumen cartelera-barra">
-      <p class="cartelera-resultados" role="status">
-        {{ paginado.total_funciones }} {{ paginado.total_funciones == 1 ? 'función' : 'funciones' }}
-      </p>
       {{ selector_orden }}
       {{ selector_paginado }}
       <a href="{{ csv }}" class="boton boton-secundario boton-chico" download>Descargar CSV</a>
@@ -202,5 +243,7 @@
     <p class="cartelera-cargando-mas" data-cartelera-cargando-mas hidden aria-live="polite">Cargando más funciones…</p>
   {% endif %}
   </section>
+    </div>
+  </div>
 </div>
 {% endblock %}

@@ -115,11 +115,23 @@ Sin sesión. Cada prueba arranca con el navegador vacío, sin búsquedas guardad
 | U-4 | Elige sólo un orden, sin filtros | No se guarda: un orden no es una búsqueda |
 | U-5 | Aprieta «Borrar historial» | Desaparecen las búsquedas y la sección |
 
+## Columna de filtros
+
+Sin sesión. La cartelera como el wireframe (E4-10.9): los filtros en una columna que en el
+celular se pliega.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| FC-1 | En un celular de 360 px, abre la cartelera, va a «Filtros» con Tab y aprieta Enter | Arranca cerrada, sin los campos a la vista; con Enter se abre y se ve «Buscar» |
+| FC-2 | En la compu (1280 px), abre la cartelera | La columna está abierta, a la izquierda de las funciones, con los grupos Buscar, Localidad, Fecha, Género y Precio; arriba dice cuántas funciones hay y cómo están ordenadas |
+| FC-3 | En la cartelera, elige «Precio: menor a mayor» en «Ordenar por» | Sin recargar, arriba dice «ordenadas por precio: menor a mayor» |
+| FC-6 | Abre la cartelera con una búsqueda que no encuentra nada, y después busca algo que sí | Sin funciones no se ve «0 funciones · ordenadas por …», sólo el aviso; con funciones, vuelve el resumen |
+
 ## Anchos de pantalla
 
 Cada pantalla, a 360 px (un celular), 768 px (una tableta) y 1280 px (la compu). Se usa si no
 hay que desplazarse de costado, si nada queda cortado fuera de la pantalla y si las tablas más
-anchas se desplazan dentro de su recuadro. La cartelera se suma cuando siga el wireframe.
+anchas se desplazan dentro de su recuadro.
 
 | Caso | Qué hace | Qué tiene que ver |
 | --- | --- | --- |
