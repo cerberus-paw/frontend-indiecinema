@@ -1,5 +1,5 @@
 // Casos A-1 a A-4 de e2e/casos.md: las pantallas principales se usan en un celular de 360 px, en
-// una tableta y en la compu (E4-10.8). La cartelera va aparte, cuando siga el wireframe (IC-333).
+// una tableta y en la compu (E4-10.8).
 //
 // «Se usa» quiere decir:
 // - la página no es más ancha que la ventana, así no hay que desplazarse de costado;
@@ -10,7 +10,7 @@
 // - si una tabla es más ancha, se desplaza adentro de su recuadro.
 // Lo que está adentro de un contenedor que se desplaza de costado (las tablas, las miniaturas del
 // carrusel) o de una diapositiva que no se ve (inert) queda afuera de la segunda regla.
-import { test, expect, CUENTAS_DEL_PANEL } from '../ayudas.js';
+import { test, expect, CUENTAS_DEL_PANEL, buscarFuncionReservable } from '../ayudas.js';
 
 const ANCHOS = { celular: 360, tableta: 768, escritorio: 1280 };
 
@@ -71,7 +71,11 @@ function recorrer(caso, direcciones) {
     test(`${caso} · en ${dispositivo} (${ancho} px)`, async ({ page }) => {
       await page.setViewportSize({ width: ancho, height: 800 });
       for (const direccion of await direcciones(page)) {
-        await page.goto(direccion);
+        const respuesta = await page.goto(direccion);
+        // Que sea la pantalla que se pidió: una sesión vencida lleva a ingresar, y un 404 también
+        // se usa a 360 px, pero no es lo que se quería revisar.
+        expect(respuesta?.status(), `${direccion} tiene que responder 200`).toBe(200);
+        expect(new URL(page.url()).pathname, `${direccion} no tiene que redirigir`).toBe(new URL(direccion, page.url()).pathname);
         expect(await problemas(page), direccion).toEqual([]);
       }
     });
@@ -90,21 +94,33 @@ async function primerLink(page, desde, patron) {
 test.describe('sin sesión', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  recorrer('A-1 · portada, ficha, salas, ingresar y registro', async (page) => [
+  recorrer('A-1 · portada, cartelera, ficha, salas, obras, ingresar y registro', async (page) => [
     '/',
+    '/cartelera',
+    '/cartelera?q=zzzz',
     await primerLink(page, '/cartelera', '/cartelera/'),
     '/salas',
     await primerLink(page, '/salas', '/salas/'),
+    '/obras',
+    await primerLink(page, '/obras', '/obras/'),
     '/cuenta/ingresar',
     '/cuenta/registro',
   ]);
 });
 
 test.describe('el espectador', () => {
-  recorrer('A-2 · reserva y Mis reservas', async (page) => [
-    (await primerLink(page, '/cartelera', '/cartelera/')).replace('/cartelera/', '/funcion/reservar/'),
-    '/funcion/reservas',
-  ]);
+  // Una función que se puede reservar, así la ficha y la página de la reserva tienen el formulario.
+  recorrer('A-2 · ficha con el formulario de reserva, la reserva, Mis reservas y solicitar sala', async (page) => {
+    // Con E2E_FUNCION devuelve la dirección entera; si la busca en la cartelera, sólo la ruta.
+    const ficha = new URL(await buscarFuncionReservable(page, 1), page.url()).pathname;
+
+    return [
+      ficha,
+      ficha.replace('/cartelera/', '/funcion/reservar/'),
+      '/funcion/reservas',
+      '/solicitar-sala',
+    ];
+  });
 });
 
 test.describe('el organizador', () => {
@@ -112,9 +128,12 @@ test.describe('el organizador', () => {
   test.skip(!correo, 'Sin E2E_ORGANIZADOR_CORREO.');
   test.use({ storageState: archivo });
 
-  recorrer('A-3 · Mis salas, Mis funciones y las reservas de una función', async (page) => [
+  recorrer('A-3 · Mis salas, Mis obras, Mis funciones, sus formularios y las reservas de una función', async (page) => [
     '/organizador/salas',
+    '/organizador/obras',
+    '/organizador/obras/nueva',
     '/organizador/funciones',
+    '/organizador/funciones/nueva',
     await primerLink(page, '/organizador/funciones', '/funcion/organizador/funciones/'),
   ]);
 });
