@@ -42,6 +42,11 @@ se pueden correr muchas veces contra el mismo sitio sin agotar las funciones.
 | Caso | Qué hace | Qué tiene que ver |
 | --- | --- | --- |
 | T-1 | Sin sesión, abre la portada y aprieta Tab, y después Enter | Con Tab, el foco está en «Saltar al contenido», que se ve; con Enter, el foco pasa al contenido principal |
+| T-2 | En la portada, con el foco en «Diapositiva siguiente» aprieta Enter, y en «Diapositiva anterior», Espacio | Con Enter pasa a la segunda diapositiva y con Espacio vuelve a la primera; la miniatura marcada acompaña |
+| T-3 | En la portada, con el foco en la miniatura de la tercera diapositiva aprieta Enter | Se ve la tercera diapositiva |
+| T-4 | En la portada, con el foco en «Pausar el pase automático» aprieta Enter, y después Espacio | Con Enter se pausa (el botón pasa a «Reanudar el pase automático») y con Espacio se reanuda |
+| T-5 | En la portada, recorre el carrusel con Tab de punta a punta | El foco nunca cae en una diapositiva que no se ve |
+| T-6 | Con sesión, en la ficha de una función escribe 1 en la cantidad y aprieta Enter | «Reserva confirmada», sin tocar el mouse; la reserva se cancela al terminar |
 ## Menú del usuario
 
 | Caso | Qué hace | Qué tiene que ver |
