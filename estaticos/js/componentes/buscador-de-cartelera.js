@@ -111,7 +111,8 @@ class BuscadorDeCartelera {
     // Las etiquetas de los filtros activos, también afuera de la sección (E4-10.9).
     this.filtrosActivos = document.querySelector('[data-filtros-activos]');
     this.cantidadDeFiltros = this.columna?.querySelector('[data-cantidad-filtros]') ?? null;
-    // Adónde va el foco después de quitar una etiqueta con el foco en ella: la posición que tenía.
+    // Adónde va el foco después de quitar una etiqueta con el foco en ella: la posición que tenía
+    // y la búsqueda que la quita. Se olvida si se busca otra cosa o se escribe en un campo.
     this.focoAlQuitar = null;
     this.centinela = this.resultados.querySelector('[data-cartelera-centinela]')
       ?? this.nodo('div', { class: 'cartelera-centinela', 'data-cartelera-centinela': '', hidden: '' });
@@ -148,6 +149,8 @@ class BuscadorDeCartelera {
       }
     });
     this.formulario.addEventListener('input', (evento) => {
+      // Quien escribe tiene el foco en el campo: la etiqueta que quitó antes no se lo lleva.
+      this.focoAlQuitar = null;
       if (BuscadorDeCartelera.esCampoDeEscritura(evento.target.name)) {
         // Se ve que va a buscar desde la primera tecla, aunque el pedido salga después.
         this.mostrarCargando(true);
@@ -181,7 +184,10 @@ class BuscadorDeCartelera {
       evento.preventDefault();
       if (document.activeElement === enlace) {
         const etiquetas = [...this.filtrosActivos.querySelectorAll('[data-quitar-filtro]')];
-        this.focoAlQuitar = enlace.matches('[data-quitar-todos]') ? -1 : etiquetas.indexOf(enlace);
+        this.focoAlQuitar = {
+          indice: enlace.matches('[data-quitar-todos]') ? -1 : etiquetas.indexOf(enlace),
+          url: enlace.getAttribute('href'),
+        };
       }
       const url = enlace.getAttribute('href');
       this.completarFormulario(new URL(url, window.location.origin).searchParams);
@@ -520,6 +526,10 @@ class BuscadorDeCartelera {
    * @param {{historial?: boolean, guardar?: boolean}} [opciones]
    */
   async buscar(url, { historial = true, guardar = true } = {}) {
+    // Otra búsqueda que la de la etiqueta quitada: el foco ya no tiene que ir a su vecina.
+    if (this.focoAlQuitar && this.focoAlQuitar.url !== url) {
+      this.focoAlQuitar = null;
+    }
     clearTimeout(this.espera);
     this.espera = null;
     this.pedidoMas?.abort();
@@ -759,7 +769,8 @@ class BuscadorDeCartelera {
 
     if (this.focoAlQuitar !== null) {
       const etiquetas = lista ? [...lista.querySelectorAll('[data-quitar-filtro]')] : [];
-      const vecina = this.focoAlQuitar >= 0 ? etiquetas[Math.min(this.focoAlQuitar, etiquetas.length - 1)] : null;
+      const { indice } = this.focoAlQuitar;
+      const vecina = indice >= 0 ? etiquetas[Math.min(indice, etiquetas.length - 1)] : null;
       this.focoAlQuitar = null;
       if (vecina) {
         vecina.focus();
