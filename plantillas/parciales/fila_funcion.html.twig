@@ -1,0 +1,77 @@
+{#
+  Una próxima función en una fila, como en el wireframe «sala-indie»: el afiche chico, el título,
+  la fecha, «N de M lugares libres», la insignia del estado y «Ver», que lleva a su ficha. Es un
+  ítem de lista: va dentro de un <ul>.
+
+  Va aparte de parciales/tarjeta_funcion, la de la cartelera y la portada: cada una cambia con su
+  pantalla sin pisar a la otra.
+
+  Encabezado: h3 el título, debajo del h2 de la lista.
+
+  Parámetros:
+  - funcion: lo que da FilaDeFuncion en el back:
+      - id, titulo y afiche (la URL, o null: entonces el recuadro del wireframe).
+      - estado: 'PROGRAMADA' | 'EN_VOTACION_TITULOS' | 'EN_ACUERDO_FECHA' | 'ACUERDO_SIN_MINIMO'.
+      - fecha: (string|null) «Sáb 19 sep · 20:30»; null mientras no está programada.
+      - lugares_libres y cupo: los lugares sólo salen si lugares_libres no es null (en votación no
+        se reserva, y si funciones no respondió no se saben).
+      - agotada: (bool) si no queda ningún lugar.
+      - franjas_propuestas: (string, opcional) en acuerdo de fecha, «3 franjas propuestas».
+#}
+{% set estado = funcion.estado ?? 'PROGRAMADA' %}
+{% set insignia = {
+  PROGRAMADA: { texto: 'Programada', clase: 'insignia-programada' },
+  EN_VOTACION_TITULOS: { texto: 'En votación', clase: 'insignia-votacion' },
+  EN_ACUERDO_FECHA: { texto: 'En acuerdo de fecha', clase: 'insignia-acuerdo' },
+  ACUERDO_SIN_MINIMO: { texto: 'Acuerdo sin mínimo', clase: 'insignia-sin-quorum' },
+}[estado] ?? { texto: 'Programada', clase: 'insignia-programada' } %}
+{% set url = '/cartelera/' ~ funcion.id %}
+<li class="fila-funcion">
+  <div class="fila-funcion-afiche">
+    {# El título va al lado: el afiche es decorativo. #}
+    {% if funcion.afiche ?? false %}
+      <img src="{{ funcion.afiche }}" alt="" class="fila-funcion-afiche-imagen" loading="lazy">
+    {% else %}
+      <span class="afiche-placeholder-texto">AFICHE</span>
+    {% endif %}
+  </div>
+
+  <div class="fila-funcion-datos">
+    <h3 class="fila-funcion-titulo">{{ funcion.titulo }}</h3>
+    <p class="fila-funcion-fecha">
+      {% include 'parciales/icono.html.twig' with { nombre: 'calendario', clase: 'meta-icono' } only %}
+      <span>
+        {%- if estado == 'EN_VOTACION_TITULOS' -%}
+          Fecha a definir tras la votación
+        {%- elseif estado == 'EN_ACUERDO_FECHA' -%}
+          {{ funcion.franjas_propuestas ?? 'Fecha en acuerdo' }}
+        {%- elseif estado == 'ACUERDO_SIN_MINIMO' -%}
+          Sin quórum · No programada
+        {%- else -%}
+          {{ funcion.fecha ?? 'Próximamente' }}
+        {%- endif -%}
+      </span>
+    </p>
+  </div>
+
+  <div class="fila-funcion-estado">
+    {% if (funcion.lugares_libres ?? null) is not null %}
+      <p class="fila-funcion-lugares{% if funcion.agotada ?? false %} fila-funcion-agotada{% endif %}">
+        {%- if funcion.agotada ?? false -%}
+          Agotada
+        {%- else -%}
+          {{ funcion.lugares_libres }} de {{ funcion.cupo }} lugares libres
+        {%- endif -%}
+      </p>
+    {% endif %}
+    <span class="insignia-estado {{ insignia.clase }}">{{ insignia.texto }}</span>
+    {% include 'parciales/boton.html.twig' with {
+      texto: 'Ver',
+      url: url,
+      variante: 'secundario',
+      tamano: 'chico',
+      clase: 'fila-funcion-ver',
+      aria_label: 'Ver la función ' ~ funcion.titulo
+    } only %}
+  </div>
+</li>
