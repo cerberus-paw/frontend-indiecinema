@@ -782,10 +782,20 @@
           <ul class="ficha-obras-filas">
             {% for obra in funcion.obras %}
               <li class="ficha-obra-fila">
-                {# Todavía no hay una ruta que sirva el afiche: va el marcador, como en el acuerdo. #}
-                <span class="ficha-titulo-afiche ficha-titulo-afiche-vacio" aria-hidden="true">Afiche</span>
+                {# El afiche lo sirve /obras/{id}/afiche; sin afiche cargado, el marcador. #}
+                {% if obra.afiche ?? null %}
+                  <img src="{{ obra.afiche }}" alt="" class="ficha-titulo-afiche" loading="lazy">
+                {% else %}
+                  <span class="ficha-titulo-afiche ficha-titulo-afiche-vacio" aria-hidden="true">Afiche</span>
+                {% endif %}
                 <div>
-                  <h3 class="ficha-titulo-nombre">{{ obra.titulo }}</h3>
+                  <h3 class="ficha-titulo-nombre">
+                    {%- if obra.url ?? null -%}
+                      <a href="{{ obra.url }}">{{ obra.titulo }}</a>
+                    {%- else -%}
+                      {{ obra.titulo }}
+                    {%- endif -%}
+                  </h3>
                   <p class="ficha-titulo-datos">{{ ([obra.anio, obra.generos|join(', ')]|filter(dato => dato is not empty)|join(' · ')) }} · {{ obra.duracion }} min</p>
                   {% if obra.director ?? null %}
                     <p class="ficha-titulo-datos">Dirección: <strong>{{ obra.director }}</strong></p>
