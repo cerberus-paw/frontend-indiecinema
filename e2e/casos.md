@@ -125,6 +125,7 @@ celular se pliega.
 | FC-1 | En un celular de 360 px, abre la cartelera, va a «Filtros» con Tab y aprieta Enter | Arranca cerrada, sin los campos a la vista; con Enter se abre y se ve «Buscar» |
 | FC-2 | En la compu (1280 px), abre la cartelera | La columna está abierta, a la izquierda de las funciones, con los grupos Buscar, Localidad, Fecha, Género y Precio; arriba dice cuántas funciones hay y cómo están ordenadas |
 | FC-3 | En la cartelera, elige «Precio: menor a mayor» en «Ordenar por» | Sin recargar, arriba dice «ordenadas por precio: menor a mayor» |
+| FC-6 | Abre la cartelera con una búsqueda que no encuentra nada, y después busca algo que sí | Sin funciones no se ve «0 funciones · ordenadas por …», sólo el aviso; con funciones, vuelve el resumen |
 
 ## Anchos de pantalla
 

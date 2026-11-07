@@ -1,4 +1,4 @@
-// Casos FC-1 a FC-3 de e2e/casos.md: la cartelera como el wireframe (E4-10.9). Lo que ya prueba
+// Casos FC-1 a FC-3 y FC-6 de e2e/casos.md: la cartelera como el wireframe (E4-10.9). Lo que ya prueba
 // PHPUnit (los grupos en orden, el resumen y «Filtrar» sin JavaScript) no se repite: acá va lo que
 // depende del ancho y del JavaScript, que pliega la columna en el celular. Sin sesión.
 import { test, expect } from '@playwright/test';
@@ -43,4 +43,17 @@ test('FC-3 · el resumen de arriba cambia con el orden, sin recargar', async ({ 
 
   await expect(page.locator('[data-cartelera-resumen]')).toContainText(/ordenadas por precio: menor a mayor/);
   expect(await page.evaluate(() => window.sinRecargar)).toBe(true);
+});
+
+test('FC-6 · sin funciones el resumen de arriba no se ve, y vuelve con resultados', async ({ page }) => {
+  await page.goto('/cartelera?q=zzz-ninguna-funcion-se-llama-asi');
+  const resumen = page.locator('[data-cartelera-resumen]');
+
+  await expect(resumen).toBeHidden();
+
+  await buscar(page).fill('');
+  await buscar(page).press('Enter');
+
+  await expect(resumen).toBeVisible();
+  await expect(resumen).toContainText(/\d+ funci(ón|ones)/);
 });
