@@ -12,11 +12,13 @@
   - error_general: (string, opcional) Mensaje de error general de la operación.
   - mensaje_exito: (string, opcional) Mensaje de confirmación tras guardar la sala.
 #}
-{% extends 'base.html.twig' %}
+{% extends 'organizador.html.twig' %}
 
 {% block titulo %}{{ es_edicion ?? false ? 'Editar sala indie' : 'Nueva sala indie' }}{% endblock %}
 
-{% block contenido %}
+{% block seccion %}salas{% endblock %}
+
+{% block panel %}
 <div class="contenedor-formulario-amplio">
   {# Ruta de navegación secundaria (migas de pan) #}
   <nav class="navegacion-migas" aria-label="Migas de pan">
