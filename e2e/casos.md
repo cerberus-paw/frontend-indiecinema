@@ -42,6 +42,67 @@ se pueden correr muchas veces contra el mismo sitio sin agotar las funciones.
 | Caso | Qué hace | Qué tiene que ver |
 | --- | --- | --- |
 | T-1 | Sin sesión, abre la portada y aprieta Tab, y después Enter | Con Tab, el foco está en «Saltar al contenido», que se ve; con Enter, el foco pasa al contenido principal |
+## Menú del usuario
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| U-1 | Con sesión, abre el menú del encabezado con Enter, lo recorre con Tab, lo cierra con Esc, lo vuelve a abrir con Espacio y hace clic afuera | Se abre; Tab pasa por «Panel de mi cuenta» y «Mis reservas»; Esc lo cierra con el foco de vuelta en el botón; Espacio lo abre y el clic afuera lo cierra |
+## Contraste
+
+Miden el color que calcula el navegador contra el fondo real del texto (WCAG 1.4.3, 4,5:1), sin
+sesión y en el registro, que tiene ayudas, placeholders y errores.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| K-1 | Abre el registro | La ayuda de un campo da al menos 4,5:1 contra su fondo |
+| K-2 | Abre el registro | El placeholder de un campo da al menos 4,5:1 contra el fondo del campo |
+| K-3 | Manda el registro vacío | El error de un campo da al menos 4,5:1 contra su fondo |
+
+## Ordenar la cartelera
+
+Sin sesión. Necesitan al menos dos páginas de cartelera (más de 12 funciones), como en los datos
+de prueba.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| O-1 | En la cartelera, elige «Precio: mayor a menor» en «Ordenar por» | Sin recargar, las funciones van de la más cara a la más barata, la dirección lleva el orden y no aparece «Limpiar» |
+| O-2 | Con ese orden, pasa a la página siguiente | La dirección y el desplegable conservan el orden, y los precios siguen bajando desde el último de la primera página |
+| O-3 | Elige un orden, después otro, y aprieta «Atrás» | Vuelve el primer orden, en el desplegable y en las funciones |
+| O-4 | Con un orden elegido, busca algo que no hay y después borra la búsqueda | Sin funciones no está «Ordenar por»; al volver las funciones, vuelve con el mismo orden |
+| O-5 | Abre una búsqueda sin funciones y la borra | Aparece «Ordenar por», que no estaba |
+| O-6 | Sin JavaScript, elige «Precio: menor a mayor» y aprieta «Ordenar» | Carga la cartelera de la más barata a la más cara |
+
+## Filtrar por precio
+
+Sin sesión, con los datos de prueba: hay funciones a la gorra (precio 0).
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| PR-1 | Escribe 0 en «Precio hasta» y deja de escribir | Sin recargar, sólo funciones «A la gorra», y la dirección lleva `precio_max=0` |
+
+## Paginado de la cartelera
+
+Sin sesión. Necesitan más de una página de cartelera (más de 12 funciones), como en los datos de
+prueba.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| PG-1 | En la compu, aprieta el número 2 del paginado | Sin recargar, la página 2, con el 2 marcado como la actual |
+| PG-2 | En el celular, baja hasta el final de la cartelera | Sin números de página, se agregan las funciones de la página siguiente |
+| PG-3 | En el celular, elige «Tradicional» en «Paginado» y recarga | Sigue en «Tradicional», con los números de página |
+| PG-4 | Sin JavaScript, abre la cartelera | No ve «Paginado», y los números de página llevan a cada página |
+
+## Últimas búsquedas
+
+Sin sesión. Cada prueba arranca con el navegador vacío, sin búsquedas guardadas.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| U-1 | Hace seis búsquedas distintas | Quedan las últimas cinco, la más nueva primero: la primera desapareció |
+| U-2 | Escribe una palabra de a poco, sin salir del campo, y después sale | Mientras escribe no se guarda nada; al salir queda una sola búsqueda, la de la palabra entera |
+| U-3 | Aprieta una de las últimas búsquedas | Sin recargar, la cartelera de esa búsqueda, con los filtros puestos en el formulario |
+| U-4 | Elige sólo un orden, sin filtros | No se guarda: un orden no es una búsqueda |
+| U-5 | Aprieta «Borrar historial» | Desaparecen las búsquedas y la sección |
 
 ## Lo que todavía no cubren
 

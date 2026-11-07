@@ -94,27 +94,27 @@
       {% if usr %}
         {# Se utiliza la etiqueta HTML5 nativa 'details' para accesibilidad y funcionamiento sin JS #}
         <details class="usuario-desplegable" id="menu-usuario">
-          {# Elemento summary interactivo que sirve como disparador accesible del menú desplegable #}
-          <summary class="usuario-resumen" aria-haspopup="menu" aria-label="Menú de usuario">
+          {# Elemento summary interactivo que abre y cierra el desplegable; se anuncia como botón que despliega contenido #}
+          <summary class="usuario-resumen" aria-label="Menú de usuario">
             {# Avatar circular generado dinámicamente con la primera letra del nombre #}
             <span class="usuario-avatar" aria-hidden="true">
               {{ usr.nombre ? usr.nombre|slice(0, 1)|upper : 'U' }}
             </span>
-            {# Contenedor con los datos textuales de la sesión #}
-            <div class="usuario-info">
+            {# Los datos textuales de la sesión, en span: el summary sólo admite contenido de frase (IC-301) #}
+            <span class="usuario-info">
               {# Muestra el nombre público del usuario #}
               <span class="usuario-nombre">{{ usr.nombre ?? 'Usuario' }}</span>
               {# Insignia visual con el rol #}
               <span class="usuario-rol rol-{{ usr.rol.value }}">{{ usr.rol.value }}</span>
             {# Cierre de información del usuario #}
-            </div>
+            </span>
             {# Flecha indicadora de apertura #}
             <span class="desplegable-flecha" aria-hidden="true">▾</span>
           {# Cierre de summary #}
           </summary>
 
-          {# Menú flotante con lista completa de acciones disponibles para el usuario según su rol #}
-          <div class="usuario-menu-flotante" role="menu">
+          {# Panel flotante con las opciones del usuario según su rol: listas de enlaces que se recorren con Tab, no un menú de aplicación (IC-301) #}
+          <div class="usuario-menu-flotante">
             {# Encabezado informativo del menú #}
             <div class="menu-cabecera">
               <strong class="menu-usuario-nombre">{{ usr.nombre ?? 'Usuario' }}</strong>
@@ -124,62 +124,86 @@
             {# «Mi cuenta» es del sitio público: el administrador tiene sólo su panel #}
             {% if not es_admin %}
             {# Línea divisoria visual #}
-            <div class="menu-separador" role="separator"></div>
+            <div class="menu-separador"></div>
 
-            {# Título de la sección de Mi Cuenta #}
-            <div class="menu-seccion-titulo">Mi cuenta</div>
-            {# Enlace al panel principal de cuenta #}
-            <a href="/cuenta/" class="menu-item" role="menuitem">
-              <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
-            </a>
-            {# Las reservas del espectador, con el comprobante de cada una (E4-04.1) #}
-            <a href="/funcion/reservas" class="menu-item" role="menuitem">
-              <span class="menu-icono" aria-hidden="true">🎟️</span> Mis reservas
-            </a>
-            {% endif %}
-            {# Quien todavía no es organizador puede pedirlo con la solicitud #}
-            {% if not usr.alcanza('organizador') %}
-              <a href="/solicitar-sala" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">🎬</span> Abrir una sala
-              </a>
+            {# Título de la sección de Mi Cuenta, que nombra a su lista #}
+            <div class="menu-seccion-titulo" id="menu-seccion-cuenta">Mi cuenta</div>
+            <ul class="menu-seccion" aria-labelledby="menu-seccion-cuenta">
+              {# Enlace al panel principal de cuenta #}
+              <li>
+                <a href="/cuenta/" class="menu-item">
+                  <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
+                </a>
+              </li>
+              {# Las reservas del espectador, con el comprobante de cada una (E4-04.1) #}
+              <li>
+                <a href="/funcion/reservas" class="menu-item">
+                  <span class="menu-icono" aria-hidden="true">🎟️</span> Mis reservas
+                </a>
+              </li>
+              {# Quien todavía no es organizador puede pedirlo con la solicitud #}
+              {% if not usr.alcanza('organizador') %}
+              <li>
+                <a href="/solicitar-sala" class="menu-item">
+                  <span class="menu-icono" aria-hidden="true">🎬</span> Abrir una sala
+                </a>
+              </li>
+              {% endif %}
+            </ul>
             {% endif %}
 
             {# Sección condicional de opciones del Organizador, también para el moderador #}
             {% if usr.alcanza('organizador') and not es_admin %}
-              <div class="menu-separador" role="separator"></div>
-              <div class="menu-seccion-titulo">Panel del Organizador</div>
-              <a href="/organizador/salas" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">🏛️</span> Mis salas
-              </a>
-              <a href="/organizador/funciones" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">🎞️</span> Mis funciones
-              </a>
-              <a href="/organizador/funciones/nueva" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">🎬</span> Programar función
-              </a>
-              <a href="/solicitar-sala" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">➕</span> Publicar una sala
-              </a>
+              <div class="menu-separador"></div>
+              <div class="menu-seccion-titulo" id="menu-seccion-organizador">Panel del Organizador</div>
+              <ul class="menu-seccion" aria-labelledby="menu-seccion-organizador">
+                <li>
+                  <a href="/organizador/salas" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">🏛️</span> Mis salas
+                  </a>
+                </li>
+                <li>
+                  <a href="/organizador/funciones" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">🎞️</span> Mis funciones
+                  </a>
+                </li>
+                <li>
+                  <a href="/organizador/funciones/nueva" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">🎬</span> Programar función
+                  </a>
+                </li>
+                <li>
+                  <a href="/solicitar-sala" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">➕</span> Publicar una sala
+                  </a>
+                </li>
+              </ul>
             {% endif %}
 
             {# Sección de administración: sólo el administrador, el único rol que alcanza esas rutas #}
             {% if usr.alcanza('administrador') %}
-              <div class="menu-separador" role="separator"></div>
-              <div class="menu-seccion-titulo">Administración</div>
-              <a href="/cuenta/administracion/usuarios" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
-              </a>
-              <a href="/administracion/solicitudes" class="menu-item" role="menuitem">
-                <span class="menu-icono" aria-hidden="true">📨</span> Solicitudes de sala
-              </a>
+              <div class="menu-separador"></div>
+              <div class="menu-seccion-titulo" id="menu-seccion-administracion">Administración</div>
+              <ul class="menu-seccion" aria-labelledby="menu-seccion-administracion">
+                <li>
+                  <a href="/cuenta/administracion/usuarios" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
+                  </a>
+                </li>
+                <li>
+                  <a href="/administracion/solicitudes" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">📨</span> Solicitudes de sala
+                  </a>
+                </li>
+              </ul>
             {% endif %}
 
             {# Separador visual antes del botón de cierre de sesión #}
-            <div class="menu-separador" role="separator"></div>
+            <div class="menu-separador"></div>
             {# Formulario POST con token CSRF para invalidar la sesión de forma segura contra ataques CSRF #}
             <form action="/cuenta/salir" method="POST" class="form-menu-item form-cerrar-sesion">
               <input type="hidden" name="_csrf" value="{{ csrf }}">
-              <button type="submit" class="menu-item menu-item-cerrar" role="menuitem">
+              <button type="submit" class="menu-item menu-item-cerrar">
                 <span class="menu-icono" aria-hidden="true">🚪</span> Cerrar sesión
               </button>
             </form>

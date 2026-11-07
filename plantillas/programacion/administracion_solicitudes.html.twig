@@ -36,10 +36,10 @@
 {% set estados = { pendiente: 'Pendiente', aprobada: 'Aprobada', rechazada: 'Rechazada' } %}
 {% set clases = { pendiente: 'estado-cuenta', aprobada: 'estado-cuenta estado-cuenta-activa', rechazada: 'estado-cuenta estado-cuenta-suspendida' } %}
 
-<header class="panel-admin-cabecera bandeja-cabecera">
+<header class="panel-cabecera bandeja-cabecera">
   <div>
-    <h1 class="panel-admin-titulo">Bandeja de solicitudes</h1>
-    <p class="panel-admin-bajada">Revisá los datos del espacio y resolvé con un motivo registrado.</p>
+    <h1 class="panel-titulo">Bandeja de solicitudes</h1>
+    <p class="panel-bajada">Revisá los datos del espacio y resolvé con un motivo registrado.</p>
   </div>
   {% if historial %}
     <a href="/administracion/solicitudes" class="boton boton-secundario">Volver a las pendientes</a>
@@ -66,9 +66,9 @@
   <section class="bandeja-lista" aria-label="{{ historial ? 'Solicitudes resueltas' : 'Solicitudes pendientes' }}">
     <form class="bandeja-buscador" action="/administracion/solicitudes" method="get" role="search">
       {% if historial %}<input type="hidden" name="ver" value="historial">{% endif %}
-      <label class="panel-admin-busqueda">
+      <label class="panel-busqueda">
         <span class="sr-only">Buscar solicitud o solicitante</span>
-        <span class="panel-admin-busqueda-icono" aria-hidden="true">🔍</span>
+        <span class="panel-busqueda-icono" aria-hidden="true">🔍</span>
         <input type="search" name="q" value="{{ q }}" placeholder="Buscar solicitud o solicitante" maxlength="100" class="campo-control">
       </label>
     </form>
