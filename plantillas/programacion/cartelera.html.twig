@@ -21,6 +21,8 @@
   - busqueda: la búsqueda actual (url, etiqueta y filtros) para las últimas búsquedas, o null si no recorta la cartelera.
   - csv: la URL de la cartelera en CSV con los mismos filtros, todas las páginas.
   - orden: el orden aplicado (valor, etiqueta y leida, como va después de «ordenadas por»), para el resumen de arriba.
+  - filtros_activos: los filtros aplicados, uno por etiqueta (texto, url sin ese filtro).
+  - quitar_filtros: la URL de «Quitar todos»: sin filtros, con el orden si se eligió otro.
 #}
 {% extends 'base.html.twig' %}
 
@@ -60,6 +62,25 @@
   {% endfor %}
 
 
+  {# Los filtros activos como etiquetas que se quitan (E4-10.9). Cada una es un link a la
+     cartelera sin ese filtro, así funciona sin JavaScript; con él, el buscador la intercepta. El
+     contenedor va siempre, oculto sin filtros, para que el buscador lo llene. #}
+  <div class="filtros-activos" data-filtros-activos{{ filtros_activos is empty ? ' hidden' : '' }}>
+    <p class="filtros-activos-titulo" id="titulo-filtros-activos">Filtros activos:</p>
+    <ul class="filtros-activos-lista" aria-labelledby="titulo-filtros-activos">
+      {% for filtro in filtros_activos %}
+        <li>
+          <a href="{{ filtro.url }}" class="etiqueta-filtro" data-quitar-filtro aria-label="Quitar el filtro {{ filtro.texto }}">
+            {{ filtro.texto }} <span class="etiqueta-filtro-quitar" aria-hidden="true">×</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if filtros_activos is not empty %}
+      <a href="{{ quitar_filtros }}" class="filtros-activos-quitar" data-quitar-todos>Quitar todos</a>
+    {% endif %}
+  </div>
+
   <section class="ultimas-busquedas" aria-label="Últimas búsquedas" data-ultimas-busquedas hidden>
     <div class="ultimas-busquedas-cabecera">
       <span class="ultimas-busquedas-titulo">Últimas búsquedas:</span>
@@ -73,7 +94,7 @@
     <details class="filtros-columna" data-filtros-cartelera open>
       {# Llega abierta, así se usa sin JavaScript; con JavaScript, BuscadorDeCartelera la cierra en
          el celular y la deja abierta desde 768 px (E4-10.9). #}
-      <summary class="filtros-columna-titulo">Filtros</summary>
+      <summary class="filtros-columna-titulo">Filtros<span data-cantidad-filtros>{{ filtros_activos is empty ? '' : ' (' ~ filtros_activos|length ~ ')' }}</span></summary>
       <div class="filtros-columna-cuerpo">
         <div class="filtros-columna-acciones" data-filtros-limpiar>
           {% if filtrada %}
