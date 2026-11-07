@@ -26,7 +26,7 @@ test.describe('en el celular', () => {
   test('PG-2 · al llegar al final se agregan las funciones de la página siguiente', async ({ page }) => {
     await page.goto('/cartelera');
     const enLaPrimera = await tarjetas(page).count();
-    const total = Number.parseInt(await resultados(page).locator('.cartelera-resultados').textContent(), 10);
+    const total = Number.parseInt(await page.locator('[data-cartelera-resumen] .cartelera-resultados').textContent(), 10);
     test.skip(total <= enLaPrimera, 'la cartelera tiene una sola página');
 
     await expect(page.getByLabel('Paginado')).toHaveValue('infinito');
