@@ -1153,6 +1153,23 @@ button.menu-item {
   box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
 }
 
+/* Botón peligro suave para bajas lógicas y acciones destructivas secundarias */
+.boton-peligro-suave {
+  background-color: var(--color-acento-suave);
+  color: #fca5a5;
+  border: 1px solid rgba(225, 29, 72, 0.4);
+}
+
+.boton-peligro-suave:hover:not(:disabled) {
+  background-color: var(--color-acento);
+  color: var(--color-texto-brillante);
+  border-color: var(--color-acento);
+}
+
+.boton-peligro-suave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 /* Botón variante fantasma o contorno */
 .boton-fantasma {
   /* Fondo completamente transparente */
@@ -3007,6 +3024,101 @@ dd {
   gap: var(--espacio-2);
 }
 
+/* Historial de las ultimas 5 busquedas en localStorage (E4-06.4) */
+.ultimas-busquedas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  padding: var(--espacio-3) var(--espacio-4);
+  margin-bottom: var(--espacio-6);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.ultimas-busquedas[hidden] {
+  display: none;
+}
+
+.ultimas-busquedas-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+.ultimas-busquedas-titulo {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ultimas-busquedas-limpiar {
+  background: transparent;
+  border: none;
+  padding: var(--espacio-1) var(--espacio-2);
+  border-radius: var(--radio-sm);
+  color: var(--color-texto-secundario);
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--texto-xs);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+.ultimas-busquedas-limpiar:hover {
+  color: var(--color-texto);
+  background-color: var(--color-superficie-hover);
+}
+
+.ultimas-busquedas-limpiar:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+.ultimas-busquedas-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.ultimas-busquedas-item {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.ultimas-busquedas-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: var(--espacio-1) var(--espacio-3);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  text-decoration: none;
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida), color var(--transicion-rapida);
+}
+
+.ultimas-busquedas-chip:hover {
+  background-color: var(--color-primario-suave);
+  border-color: var(--color-primario);
+  color: var(--color-texto-brillante);
+}
+
+.ultimas-busquedas-chip:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
 /* El buscador del listado de salas usa la misma grilla, con un solo campo un poco más ancho */
 .buscador-salas {
   /* El campo y los botones, de mínimo 240px */
@@ -3913,18 +4025,19 @@ dd {
   font-size: var(--texto-sm);
   /* Sin margen propio: lo da .cartelera-resumen */
   margin: 0;
+  /* Empuja los controles de orden, paginado y CSV hacia la derecha */
+  margin-right: auto;
 }
 
-/* Selector «Ordenar por» arriba a la derecha de la grilla (E4-06.1) */
-.cartelera-orden {
+/* Selectores «Ordenar por» y «Paginado» arriba a la derecha de la grilla (E4-06.1 / E4-06.3) */
+.cartelera-orden,
+.cartelera-paginado-modo {
   /* Etiqueta y desplegable en fila */
   display: flex;
   /* Centrado vertical */
   align-items: center;
   /* Separación entre la etiqueta y el select */
   gap: var(--espacio-2);
-  /* Se ubica a la derecha junto al botón de exportar CSV */
-  margin-left: auto;
 }
 
 /* Sin funciones no hay nada que ordenar: la plantilla lo deja oculto */
@@ -3933,7 +4046,7 @@ dd {
   display: none;
 }
 
-/* Etiqueta «Ordenar por» */
+/* Etiqueta «Ordenar por» y «Paginado» */
 .cartelera-orden-etiqueta {
   /* Texto secundario legible */
   color: var(--color-texto-secundario);
@@ -3943,8 +4056,9 @@ dd {
   white-space: nowrap;
 }
 
-/* Desplegable de orden compacto, alineado en altura con .boton-chico */
-.cartelera-orden .control-select {
+/* Desplegables compactos, alineados en altura con .boton-chico */
+.cartelera-orden .control-select,
+.cartelera-paginado-modo .control-select {
   /* Ancho ajustado al contenido */
   width: auto;
   /* Relleno vertical compacto */
@@ -3955,14 +4069,15 @@ dd {
 }
 
 @media (max-width: 600px) {
-  .cartelera-orden {
-    /* En celular ocupa su propia fila debajo del contador */
-    margin-left: 0;
+  .cartelera-orden,
+  .cartelera-paginado-modo {
+    /* En celular ocupan su propia fila debajo del contador */
     width: 100%;
     justify-content: space-between;
   }
 
-  .cartelera-orden .control-select {
+  .cartelera-orden .control-select,
+  .cartelera-paginado-modo .control-select {
     /* Se adapta al ancho disponible sin desbordar a 360 px */
     flex: 1;
     min-width: 0;
@@ -3973,14 +4088,85 @@ dd {
 .paginado {
   /* En fila */
   display: flex;
+  /* En pantallas chicas puede quebrar línea */
+  flex-wrap: wrap;
   /* Centrado */
   justify-content: center;
   /* Alineación vertical */
   align-items: center;
   /* Separación entre elementos */
-  gap: var(--espacio-4);
+  gap: var(--espacio-3);
   /* Separación con la cuadrícula */
   margin-top: var(--espacio-8);
+}
+
+/* Oculta el paginado tradicional, su selector, el centinela o el aviso cuando tienen [hidden] */
+.paginado[hidden],
+.cartelera-paginado-modo[hidden],
+.cartelera-centinela[hidden],
+.cartelera-cargando-mas[hidden] {
+  display: none;
+}
+
+/* Lista numerada del paginado tradicional de la cartelera (E4-06.3) */
+.paginado .paginado-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.paginado-item {
+  display: inline-flex;
+}
+
+.paginado-enlace {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 var(--espacio-2);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-sm);
+  color: var(--color-texto);
+  text-decoration: none;
+  font-size: var(--texto-sm);
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida), color var(--transicion-rapida);
+}
+
+.paginado-enlace:hover {
+  background-color: var(--color-superficie-hover);
+  color: var(--color-texto);
+}
+
+.paginado-enlace.activo {
+  background-color: var(--color-primario);
+  border-color: var(--color-primario);
+  color: var(--color-texto-inverso);
+  font-weight: 700;
+}
+
+.paginado-elipsis {
+  color: var(--color-texto-apagado);
+  padding: 0 var(--espacio-1);
+}
+
+/* Centinela e indicador de carga para el scroll infinito (E4-06.3) */
+.cartelera-centinela {
+  width: 100%;
+  height: 1px;
+}
+
+.cartelera-cargando-mas {
+  text-align: center;
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  margin: var(--espacio-6) 0 0;
 }
 
 /* Página actual */
@@ -7412,6 +7598,210 @@ a.tabla-admin-principal:focus-visible {
   }
 }
 
+/* --------------------------------------------------------------------------
+   CATÁLOGO DE OBRAS: ALTA, EDICIÓN Y MIS OBRAS (E4-08.1)
+   Componentes para plantillas/programacion/alta_obra.html.twig y mis_obras.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Formulario buscador de obras en catálogo (E4-08.2) */
+.buscador-obras {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+/* Insignia para tipo de obra (Película / Cortometraje) */
+.insignia-tipo-obra {
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  color: var(--color-texto);
+}
+
+/* Año en cabecera de tarjeta de obra */
+.tarjeta-obra-anio {
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto-secundario);
+}
+
+/* Chips de géneros en tarjeta de obra */
+.tarjeta-obra-generos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1);
+  margin-bottom: var(--espacio-3);
+}
+
+/* Acciones en tarjeta de Mis Obras */
+.tarjeta-mi-obra-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-top: auto;
+}
+
+.tarjeta-mi-obra-acciones .acciones-fila-enlaces {
+  display: flex;
+  gap: var(--espacio-2);
+}
+
+.tarjeta-mi-obra-acciones .acciones-fila-enlaces .boton {
+  flex: 1;
+  text-align: center;
+}
+
+.baja-ayuda-bloqueo {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-apagado);
+  text-align: center;
+  display: block;
+}
+
+/* Formulario de alta y edición de obra (E4-08.1) */
+.formulario-alta-obra .generos-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.formulario-alta-obra .generos-leyenda {
+  margin-bottom: var(--espacio-1);
+}
+
+.campo-generos-cuadricula {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-2);
+}
+
+.genero-opcion-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: var(--espacio-1) var(--espacio-3);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.genero-opcion-item:hover {
+  background-color: var(--color-superficie-hover);
+  border-color: var(--color-primario);
+}
+
+.afiche-vista-previa-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-4);
+}
+
+.afiche-vista-previa-titulo {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+  font-weight: 600;
+}
+
+.afiche-vista-previa {
+  width: 140px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radio-md);
+  overflow: hidden;
+  border: 1px solid var(--color-borde-medio);
+  background-color: var(--color-superficie);
+}
+
+.afiche-miniatura {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Ficha pública de la obra (E4-08.3 - Wireframe «ficha-pelicula») */
+.ficha-obra-cabecera {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--espacio-8);
+  align-items: start;
+  margin: var(--espacio-6) 0 var(--espacio-10);
+}
+
+.ficha-obra-portada {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radio-lg);
+  overflow: hidden;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+}
+
+.ficha-obra-portada-imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ficha-obra-placeholder {
+  height: 100%;
+  min-height: 320px;
+}
+
+.ficha-obra-encabezado-titulo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-2);
+}
+
+.ficha-obra-metas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-3);
+}
+
+.ficha-obra-sinopsis-bloque {
+  margin-top: var(--espacio-3);
+  margin-bottom: var(--espacio-5);
+}
+
+.ficha-obra-sinopsis-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-xl);
+  color: var(--color-texto);
+  margin-bottom: var(--espacio-2);
+}
+
+.ficha-obra-sinopsis-texto {
+  color: var(--color-texto-secundario);
+  line-height: 1.6;
+}
+
+.ficha-obra-acciones-organizador {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-4);
+}
+
+@media (max-width: 768px) {
+  .ficha-obra-cabecera {
+    grid-template-columns: 1fr;
+    gap: var(--espacio-5);
+    margin-bottom: var(--espacio-8);
+  }
+
+  .ficha-obra-portada {
+    max-width: 220px;
+    margin: 0 auto;
+  }
+}
 /* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.

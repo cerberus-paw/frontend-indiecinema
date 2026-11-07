@@ -7,14 +7,17 @@
 
   Variables:
   - funciones: lista de funciones como las recibe parciales/tarjeta_funcion.html.twig.
-  - filtros: los filtros aplicados (q, localidad, fecha en AAAA-MM-DD, genero por su nombre y orden); falta el que no se aplicó.
+  - filtros: los filtros aplicados (q, localidad, fecha en AAAA-MM-DD, genero por su nombre, precio_min, precio_max y orden); falta el que no se aplicó.
   - filtrada: si hay algún filtro aplicado (el orden no cuenta: no saca funciones).
   - avisos: lista de textos, uno por cada filtro inválido que se dejó afuera.
   - localidades: lista de nombres de localidad con funciones, para el filtro.
   - generos: lista de géneros (id, nombre), para el filtro. Cada opción manda el nombre, como la
     localidad, así la URL se lee y se puede escribir a mano: /cartelera?genero=Comedia.
   - ordenes: lista de opciones de orden (valor, etiqueta); el orden por defecto lleva valor vacío.
-  - paginado: numero, total_paginas, total_funciones, y las URL anterior y siguiente (null si no hay).
+  - paginado: numero, total_paginas, total_funciones, las URL anterior y siguiente (null si no hay) y
+    paginas: los números de la barra (numero, url, actual), con null donde se saltean páginas.
+  - max_ultimas_busquedas: cuántas búsquedas recientes guarda el navegador (5).
+  - busqueda: la búsqueda actual (url, etiqueta y filtros) para las últimas búsquedas, o null si no recorta la cartelera.
   - csv: la URL de la cartelera en CSV con los mismos filtros, todas las páginas.
 #}
 {% extends 'base.html.twig' %}
@@ -22,7 +25,7 @@
 {% block titulo %}Cartelera{% endblock %}
 
 {% block contenido %}
-<div class="contenedor">
+<div class="contenedor" data-cartelera data-max-ultimas-busquedas="{{ max_ultimas_busquedas|default(5) }}"{% if busqueda|default(null) %} data-busqueda="{{ busqueda|json_encode }}"{% endif %}>
   <header class="encabezado-formulario-solicitud">
     <div class="solicitud-texto-cabecera">
       <h1 class="solicitud-titulo">Cartelera</h1>
@@ -67,6 +70,22 @@
       valor: filtros.genero ?? '',
       opciones: opciones_genero
     } only %}
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'precio_min',
+      etiqueta: 'Precio desde ($)',
+      tipo: 'number',
+      valor: filtros.precio_min ?? '',
+      valor_minimo: 0,
+      placeholder: '0 (incluye a la gorra)'
+    } only %}
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'precio_max',
+      etiqueta: 'Precio hasta ($)',
+      tipo: 'number',
+      valor: filtros.precio_max ?? '',
+      valor_minimo: 0,
+      placeholder: 'Sin tope'
+    } only %}
     <div class="filtros-cartelera-acciones">
       {% include 'parciales/boton.html.twig' with { texto: 'Filtrar', variante: 'primario' } only %}
       {% if filtrada %}
@@ -74,6 +93,14 @@
       {% endif %}
     </div>
   </form>
+
+  <section class="ultimas-busquedas" aria-label="Últimas búsquedas" data-ultimas-busquedas hidden>
+    <div class="ultimas-busquedas-cabecera">
+      <span class="ultimas-busquedas-titulo">Últimas búsquedas:</span>
+      <button type="button" class="ultimas-busquedas-limpiar" data-limpiar-busquedas>Borrar historial</button>
+    </div>
+    <ul class="ultimas-busquedas-lista" data-ultimas-busquedas-lista></ul>
+  </section>
 
   {#
     «Ordenar por», arriba a la derecha de la grilla. Está afuera del formulario y se asocia con
@@ -97,7 +124,24 @@
     {% endif %}
   {% endset %}
 
-  <section id="resultados-cartelera" class="cartelera-resultados-seccion" aria-label="Funciones de la cartelera">
+  {#
+    «Paginado»: tradicional (numerado) o scroll infinito, la elección queda en el navegador. Sin
+    JavaScript no hace nada, así que va oculto y BuscadorDeCartelera lo muestra con las funciones.
+  #}
+  {% set selector_paginado %}
+    <div class="cartelera-paginado-modo" hidden>
+      <label class="cartelera-orden-etiqueta" for="cartelera-paginado-modo">Paginado</label>
+      <select id="cartelera-paginado-modo" class="campo-control control-select" data-paginado-selector>
+        <option value="tradicional">Tradicional</option>
+        <option value="infinito">Scroll infinito</option>
+      </select>
+    </div>
+  {% endset %}
+
+  {# El h2 de las tarjetas (h3) para el lector de pantalla (E4-10.2): queda afuera de la sección
+     porque el buscador la vuelve a dibujar entera. #}
+  <h2 id="titulo-resultados-cartelera" class="sr-only">Funciones</h2>
+  <section id="resultados-cartelera" class="cartelera-resultados-seccion" aria-labelledby="titulo-resultados-cartelera">
   {% if avisos is not empty %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'advertencia',
@@ -114,12 +158,14 @@
         : 'Todavía no hay funciones programadas.'
     } only %}
     {{ selector_orden }}
+    {{ selector_paginado }}
   {% else %}
     <div class="cartelera-resumen cartelera-barra">
       <p class="cartelera-resultados" role="status">
         {{ paginado.total_funciones }} {{ paginado.total_funciones == 1 ? 'función' : 'funciones' }}
       </p>
       {{ selector_orden }}
+      {{ selector_paginado }}
       <a href="{{ csv }}" class="boton boton-secundario boton-chico" download>Descargar CSV</a>
     </div>
     <div class="cuadricula-funciones">
@@ -129,16 +175,31 @@
     </div>
 
     {% if paginado.total_paginas > 1 %}
-      <nav class="paginado" aria-label="Páginas de la cartelera">
+      <nav class="paginado paginado-numerado" aria-label="Páginas de la cartelera" data-cartelera-paginado>
         {% if paginado.anterior %}
           <a href="{{ paginado.anterior }}" class="boton boton-secundario boton-chico" rel="prev">Anterior</a>
         {% endif %}
-        <span class="paginado-actual" aria-current="page">Página {{ paginado.numero }} de {{ paginado.total_paginas }}</span>
+        {% if paginado.paginas is defined and paginado.paginas is not empty %}
+          <ul class="paginado-lista">
+            {% for item in paginado.paginas %}
+              {% if item is null %}
+                <li class="paginado-elipsis" aria-hidden="true">…</li>
+              {% elseif item.actual %}
+                <li class="paginado-item"><span class="paginado-enlace activo" aria-current="page">{{ item.numero }}</span></li>
+              {% else %}
+                <li class="paginado-item"><a href="{{ item.url }}" class="paginado-enlace">{{ item.numero }}</a></li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <span class="paginado-actual sr-only">Página {{ paginado.numero }} de {{ paginado.total_paginas }}</span>
         {% if paginado.siguiente %}
           <a href="{{ paginado.siguiente }}" class="boton boton-secundario boton-chico" rel="next">Siguiente</a>
         {% endif %}
       </nav>
     {% endif %}
+    <div class="cartelera-centinela" data-cartelera-centinela hidden></div>
+    <p class="cartelera-cargando-mas" data-cartelera-cargando-mas hidden aria-live="polite">Cargando más funciones…</p>
   {% endif %}
   </section>
 </div>

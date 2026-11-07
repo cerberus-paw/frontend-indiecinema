@@ -79,6 +79,10 @@ class App {
     if (document.querySelector('[data-panel-de-reservas]')) {
       PAW.cargarScript('AccionesDeReserva', `${App.COMPONENTES}/acciones-de-reserva.js`, () => new AccionesDeReserva('[data-panel-de-reservas]'));
     }
+    // Los formularios que piden confirmación antes de mandarse, como la baja de una obra (E4-08.4).
+    for (const formulario of document.querySelectorAll('form[data-confirmar]')) {
+      PAW.cargarScript('ConfirmarEnvio', `${App.COMPONENTES}/confirmar-envio.js`, () => new ConfirmarEnvio(formulario));
+    }
     // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
     if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
       PAW.cargarScript('AcuerdoFecha', `${App.COMPONENTES}/acuerdo-fecha.js`, () => new AcuerdoFecha('[data-seccion-acuerdo-fecha]'));

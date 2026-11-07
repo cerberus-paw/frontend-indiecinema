@@ -109,9 +109,10 @@
   <div class="tarjeta-funcion-cuerpo">
     {# Barra superior con la insignia de estado y el precio #}
     <div class="tarjeta-funcion-cabecera">
-      {# Insignia de píldora que indica el estado del ciclo o función #}
-      <span class="insignia-estado {{ clase_insignia }}" aria-label="Estado: {{ etiqueta_estado }}">
-        {{ etiqueta_estado }}
+      {# Insignia de píldora que indica el estado del ciclo o función. «Estado:» lo lee sólo el lector
+         de pantalla: un span sin rol no puede llevar aria-label (validador del W3C, E4-10.7). #}
+      <span class="insignia-estado {{ clase_insignia }}">
+        <span class="sr-only">Estado: </span>{{ etiqueta_estado }}
       </span>
       {# Valor monetario o modalidad de cobro de la entrada #}
       <span class="tarjeta-funcion-precio">{{ texto_precio }}</span>
