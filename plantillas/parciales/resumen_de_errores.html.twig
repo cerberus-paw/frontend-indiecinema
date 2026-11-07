@@ -1,0 +1,44 @@
+{#
+  Resumen de errores de un formulario (E4-10.5), como el de GOV.UK: va arriba del formulario
+  cuando el envío vuelve con errores, y reemplaza al aviso de error general.
+
+  - Dice «Revisá N campos», con un link a cada campo que falló y su mismo mensaje. Los mensajes de
+    cada campo (parciales/campo.html.twig) quedan como están.
+  - Lo que no es de un campo (correo o contraseña incorrectos, «Quedan 2 lugares.») va sin link.
+  - role="alert": el lector de pantalla lo anuncia al cargar, también sin JavaScript. tabindex="-1"
+    y data-resumen-de-errores: el componente resumen-de-errores le pasa el foco.
+  - Sin errores no dibuja nada.
+
+  Parámetros recibidos:
+  - errores: (map, opcional) El error de cada campo, por su name (que es también su id).
+  - error_general: (string, opcional) Un error que no es de un campo.
+  - titulo: (string, opcional) El título cuando no hay errores de campos, como «No pudimos iniciar
+    tu sesión». Con errores de campos, el título es «Revisá N campos».
+#}
+{% set errores_de_campos = errores|default({})|filter(mensaje => mensaje) %}
+{% set cantidad = errores_de_campos|length %}
+{% set general = error_general|default(null) %}
+{% if cantidad > 0 or general %}
+  <div class="alerta alerta-error resumen-de-errores" role="alert" tabindex="-1" data-resumen-de-errores>
+    <div class="alerta-icono" aria-hidden="true">
+      <span class="icono-simbolo">✕</span>
+    </div>
+    <div class="alerta-contenido">
+      {% if cantidad > 0 %}
+        <strong class="alerta-titulo">Revisá {{ cantidad }} {{ cantidad == 1 ? 'campo' : 'campos' }}</strong>
+      {% elseif titulo is defined %}
+        <strong class="alerta-titulo">{{ titulo }}</strong>
+      {% endif %}
+      {% if general %}
+        <p class="alerta-texto resumen-de-errores-texto">{{ general }}</p>
+      {% endif %}
+      {% if cantidad > 0 %}
+        <ul class="alerta-lista-detalles">
+          {% for campo, mensaje in errores_de_campos %}
+            <li class="alerta-item-detalle"><a href="#{{ campo }}">{{ mensaje }}</a></li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

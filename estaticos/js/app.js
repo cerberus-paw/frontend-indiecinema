@@ -17,6 +17,10 @@ class App {
     if (carruseles.length > 0) {
       PAW.cargarScript('Carrusel', `${App.COMPONENTES}/carrusel.js`, () => carruseles.forEach((contenedor) => new Carrusel(contenedor)));
     }
+    // El resumen de errores de un formulario que volvió del servidor (E4-10.5): recibe el foco.
+    if (document.querySelector('[data-resumen-de-errores]')) {
+      PAW.cargarScript('ResumenDeErrores', `${App.COMPONENTES}/resumen-de-errores.js`, () => new ResumenDeErrores('[data-resumen-de-errores]'));
+    }
     // El menú del usuario, sólo con sesión.
     if (document.querySelector('#menu-usuario')) {
       PAW.cargarScript('MenuUsuario', `${App.COMPONENTES}/menu-usuario.js`, () => new MenuUsuario('#menu-usuario'));
@@ -74,6 +78,10 @@ class App {
     // Las acciones de los paneles de reservas, sin recargar la lista (E4-05.5 / IC-276).
     if (document.querySelector('[data-panel-de-reservas]')) {
       PAW.cargarScript('AccionesDeReserva', `${App.COMPONENTES}/acciones-de-reserva.js`, () => new AccionesDeReserva('[data-panel-de-reservas]'));
+    }
+    // Los formularios que piden confirmación antes de mandarse, como la baja de una obra (E4-08.4).
+    for (const formulario of document.querySelectorAll('form[data-confirmar]')) {
+      PAW.cargarScript('ConfirmarEnvio', `${App.COMPONENTES}/confirmar-envio.js`, () => new ConfirmarEnvio(formulario));
     }
     // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
     if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
