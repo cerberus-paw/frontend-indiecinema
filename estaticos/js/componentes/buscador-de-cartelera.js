@@ -656,7 +656,7 @@ class BuscadorDeCartelera {
    * «N funciones · ordenadas por …» arriba de la columna, como en la plantilla; oculto sin
    * funciones, porque lo explica el aviso de la sección.
    *
-   * @param {{funciones: Array<Object>, paginado: Object, orden?: {etiqueta: string}}} datos
+   * @param {{funciones: Array<Object>, paginado: Object, orden?: {leida: string}}} datos
    */
   mostrarResumenArriba(datos) {
     if (!this.resumenArriba) {
@@ -669,16 +669,16 @@ class BuscadorDeCartelera {
       cantidad.textContent = `${total} ${total === 1 ? 'función' : 'funciones'}`;
     }
     const orden = this.resumenArriba.querySelector('[data-cartelera-orden-aplicado]');
-    const etiqueta = datos.orden?.etiqueta ?? '';
-    if (orden && etiqueta) {
-      orden.textContent = etiqueta.charAt(0).toLowerCase() + etiqueta.slice(1);
+    // Ya en minúscula, como la arma el back para la plantilla.
+    if (orden && datos.orden?.leida) {
+      orden.textContent = datos.orden.leida;
     }
   }
 
   /**
    * Vuelve a dibujar la sección como lo hace programacion/cartelera.html.twig.
    *
-   * @param {{funciones: Array<Object>, filtros: Object, avisos: Array<string>, paginado: Object, csv: string, orden?: {valor: string, etiqueta: string}}} datos
+   * @param {{funciones: Array<Object>, filtros: Object, avisos: Array<string>, paginado: Object, csv: string, orden?: {valor: string, etiqueta: string, leida: string}}} datos
    */
   mostrar(datos) {
     const teniaFocoOrden = Boolean(this.selectorOrden && document.activeElement === this.selectorOrden);
