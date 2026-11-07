@@ -49,8 +49,8 @@ test('T-4 · el pase automático se pausa con Enter y se reanuda con Espacio', a
 
 test('T-5 · con Tab el foco nunca cae en una diapositiva que no se ve', async ({ page }) => {
   // Arranca en el link de la diapositiva que se ve, el primer control del carrusel: las demás
-  // diapositivas vienen justo después, antes que las flechas, así que si no fueran inert el
-  // próximo Tab caería en una de ellas.
+  // diapositivas vienen justo después, antes que las flechas, así que si algo dejara de sacarlas
+  // del recorrido (el inert y su visibility: hidden), el próximo Tab caería en una de ellas.
   await carrusel(page).locator('.carrusel-diapositiva.es-actual .carrusel-titulo-enlace').focus();
   // Hasta salir del carrusel, anotando dónde queda el foco en cada Tab.
   const recorrido = [];
