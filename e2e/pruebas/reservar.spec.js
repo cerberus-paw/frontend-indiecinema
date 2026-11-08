@@ -98,4 +98,13 @@ test('R-6 · no se pueden reservar más de 6 lugares por persona', async ({ page
   await expect(page.locator('.campo-error, [role="alert"]')).toContainText('Ya tenés 2 lugares reservados: podés sumar hasta 4 lugares más (máximo 6 por persona).');
   await expect(avisoDeReserva(page)).toHaveCount(0);
   expect(await lugaresLibres(page, { recargar: true })).toBe(antes - 2);
+
+  // Reservar los 4 restantes: el espectador alcanza los 6 lugares máximos por función.
+  reservas.push(await reservar(page, 4));
+
+  // Volver a la ficha: el campo y el botón quedan deshabilitados porque ya no le quedan lugares.
+  await page.reload();
+  const formLleno = formularioDeReserva(page);
+  expect(await formLleno.campo.isDisabled()).toBe(true);
+  expect(await formLleno.boton.isDisabled()).toBe(true);
 });

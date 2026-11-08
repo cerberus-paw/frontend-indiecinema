@@ -118,6 +118,9 @@ class FormularioDeReserva {
 
           return `Ya tenés ${textoYa}: podés sumar ${textoSumar} (máximo ${maximoPorPersona} por persona).`;
         }
+        if (max <= 0) {
+          return `Ya tenés reservados los ${maximoPorPersona} lugares máximos por persona para esta función.`;
+        }
       }
 
       const limiteLugares = Number.isNaN(libres) ? max : libres;

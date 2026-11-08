@@ -63,7 +63,13 @@ class LugaresLibres {
       }
       const maximoPorPersona = Number.parseInt(this.contenedor.dataset.maximoPorPersona ?? '6', 10);
       const max = Number.parseInt(campo.getAttribute('max') ?? '', 10);
-      campo.dataset.restantesUsuario = String(Number.isInteger(max) ? max : maximoPorPersona);
+      const tope = Number.isInteger(max) ? max : maximoPorPersona;
+      campo.dataset.restantesUsuario = String(tope);
+      if (tope === 0) {
+        campo.setAttribute('disabled', '');
+        const boton = this.contenedor.querySelector('.ficha-reserva-formulario button[type="submit"]');
+        boton?.setAttribute('disabled', '');
+      }
     }
     // Afuera de lo que se redibuja: la región tiene que existir antes del cambio para que un
     // lector de pantalla la lea.
@@ -288,11 +294,13 @@ class LugaresLibres {
    */
   pintarCampo(libres, agotada, restantesUsuario = null) {
     const campo = this.contenedor.querySelector('input[name="cantidad"]');
+    let tope = null;
     if (campo) {
       const maximoPorPersona = Number.parseInt(this.contenedor.dataset.maximoPorPersona ?? '6', 10);
-      const tope = Number.isInteger(restantesUsuario)
+      const enDataset = Number.parseInt(campo.dataset.restantesUsuario ?? '', 10);
+      tope = Number.isInteger(restantesUsuario)
         ? restantesUsuario
-        : (Number.parseInt(campo.dataset.restantesUsuario ?? '', 10) || maximoPorPersona);
+        : (!Number.isNaN(enDataset) ? enDataset : maximoPorPersona);
       const maximoCampo = Math.max(Math.min(libres, tope), 1);
 
       campo.setAttribute('max', String(maximoCampo));
@@ -306,7 +314,7 @@ class LugaresLibres {
       }
     }
     const boton = this.contenedor.querySelector('.ficha-reserva-formulario button[type="submit"]');
-    boton?.toggleAttribute('disabled', agotada);
+    boton?.toggleAttribute('disabled', agotada || tope === 0);
   }
 
   /**

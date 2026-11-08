@@ -254,7 +254,8 @@
             } only %}
             {% include 'parciales/boton.html.twig' with {
               texto: 'Reservar mis lugares',
-              tipo: 'submit'
+              tipo: 'submit',
+              deshabilitado: (funcion.maximo_reserva is defined and funcion.maximo_reserva == 0)
             } only %}
           </form>
         {% else %}
