@@ -5,6 +5,57 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   0. FUENTES
+   Fira Sans Condensed servida desde el sitio y no desde Google Fonts: así la Content-Security-Policy
+   sólo admite recursos propios (font-src y style-src 'self'), y Google Fonts tampoco admitiría
+   Subresource Integrity, porque devuelve un CSS distinto según el navegador. Son los mismos pesos
+   que se pedían a Google, sólo el subconjunto latino (alcanza para el español) y en woff2, que leen
+   todos los navegadores actuales. Licencia OFL en estaticos/fuentes/OFL.txt.
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-300-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-800-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-400-italic.woff2') format('woff2');
+}
+
+/* --------------------------------------------------------------------------
    1. VARIABLES DE DISEÑO (DESIGN TOKENS) EN :ROOT
    Centralizan los valores de la identidad visual de la Entrega 1.
    -------------------------------------------------------------------------- */
@@ -1162,6 +1213,23 @@ button.menu-item {
   box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
 }
 
+/* Botón peligro suave para bajas lógicas y acciones destructivas secundarias */
+.boton-peligro-suave {
+  background-color: var(--color-acento-suave);
+  color: #fca5a5;
+  border: 1px solid rgba(225, 29, 72, 0.4);
+}
+
+.boton-peligro-suave:hover:not(:disabled) {
+  background-color: var(--color-acento);
+  color: var(--color-texto-brillante);
+  border-color: var(--color-acento);
+}
+
+.boton-peligro-suave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 /* Botón variante fantasma o contorno */
 .boton-fantasma {
   /* Fondo completamente transparente */
@@ -1945,6 +2013,20 @@ dd {
 .alerta-item-detalle {
   /* Margen inferior sutil entre ítems */
   margin-bottom: 0.2rem;
+}
+
+/* El resumen de errores de un formulario (E4-10.5): recibe el foco al cargar, y se tiene que
+   ver dónde quedó, aunque haya llegado sin el teclado */
+.resumen-de-errores:focus {
+  /* Contorno en el color primario, como los demás focos */
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+/* Los links del resumen llevan a cada campo: subrayados, en el color del texto del error */
+.resumen-de-errores a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 /* Botón para descartar la alerta */
@@ -2968,7 +3050,201 @@ dd {
    Componentes de programacion/cartelera.html.twig
    -------------------------------------------------------------------------- */
 
-/* Formulario GET de filtros sobre la cuadrícula de funciones */
+/* «N funciones · ordenadas por …» debajo del título (E4-10.9) */
+.cartelera-resumen-linea {
+  /* La cantidad y el orden en una línea, que baja si no entra */
+  display: flex;
+  flex-wrap: wrap;
+  /* Alineados por la base del texto */
+  align-items: baseline;
+  /* Separación entre la cantidad y el orden */
+  gap: var(--espacio-1);
+  /* Separación con la bajada */
+  margin-top: var(--espacio-2);
+}
+
+/* Oculto sin funciones (lo explica el aviso de la sección): el display flex no tiene que ganarle
+   al atributo */
+.cartelera-resumen-linea[hidden] {
+  display: none;
+}
+
+/* En el resumen de arriba, la cantidad no empuja nada: va pegada al orden */
+.cartelera-resumen-linea .cartelera-resultados {
+  margin-right: 0;
+  /* La cantidad, más fuerte que el orden */
+  color: var(--color-texto);
+  font-weight: 600;
+}
+
+/* «· ordenadas por …» */
+.cartelera-orden-aplicado {
+  /* Texto secundario y chico, como la cantidad */
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  margin: 0;
+}
+
+/* «Filtros activos:» y sus etiquetas, debajo del título (E4-10.9) */
+.filtros-activos {
+  /* El título, las etiquetas y «Quitar todos» en una fila que baja si no entra */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2);
+  /* Separación con lo que sigue */
+  margin-bottom: var(--espacio-4);
+}
+
+/* Oculto sin filtros: el display flex no tiene que ganarle al atributo */
+.filtros-activos[hidden] {
+  display: none;
+}
+
+.filtros-activos-titulo {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  margin: 0;
+}
+
+/* La lista, sin viñetas y en fila */
+.filtros-activos-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Cada etiqueta: una píldora oscura con la ×, como el wireframe */
+.etiqueta-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  /* Un área cómoda para el dedo */
+  min-height: 2rem;
+  padding: var(--espacio-1) var(--espacio-3);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  background: var(--color-superficie-interactiva);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  text-decoration: none;
+}
+
+.etiqueta-filtro:hover {
+  border-color: var(--color-primario);
+}
+
+/* La ×, más apagada que el texto */
+.etiqueta-filtro-quitar {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-md);
+  line-height: 1;
+}
+
+/* «Quitar todos»: un link discreto, como «Limpiar» */
+.filtros-activos-quitar {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+/* La columna de filtros y los resultados: una debajo de la otra hasta 1024 px */
+.cartelera-cuerpo {
+  display: grid;
+  /* Separación entre la columna y los resultados */
+  gap: var(--espacio-6);
+}
+
+/* Desde 1024 px, la columna al costado de los resultados, como el wireframe */
+@media (min-width: 1024px) {
+  .cartelera-cuerpo {
+    /* Una columna angosta y los resultados con el resto */
+    grid-template-columns: 15rem minmax(0, 1fr);
+    /* La columna no se estira hasta el alto de la grilla */
+    align-items: start;
+  }
+}
+
+/* Los resultados no desbordan su celda de la grilla */
+.cartelera-principal {
+  min-width: 0;
+}
+
+/* La columna plegable de filtros */
+.filtros-columna {
+  /* Recuadro como el de las tarjetas */
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie);
+  /* Aire adentro */
+  padding: var(--espacio-3) var(--espacio-4);
+}
+
+/* «Filtros»: el título de la columna, y en el celular lo que la abre */
+.filtros-columna-titulo {
+  /* Como un título chico */
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-md);
+  font-weight: 600;
+  /* Se puede tocar */
+  cursor: pointer;
+  /* Un área cómoda para el dedo */
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  /* El espacio antes de «(N)», que en flex no se ve */
+  gap: 0.3em;
+  /* Sin el triángulo del navegador: la flecha la pone ::after */
+  list-style: none;
+}
+
+/* Sin el triángulo del navegador, que el display: flex no muestra igual en todos */
+.filtros-columna-titulo::-webkit-details-marker {
+  display: none;
+}
+
+/* En el celular, una flecha dice que «Filtros» se abre; apunta hacia abajo con la columna abierta */
+.filtros-columna-titulo::after {
+  content: "›";
+  /* A la derecha del título */
+  margin-left: auto;
+  font-size: var(--texto-xl);
+  color: var(--color-texto-secundario);
+  transition: transform var(--transicion-rapida);
+}
+
+.filtros-columna[open] > .filtros-columna-titulo::after {
+  transform: rotate(90deg);
+}
+
+/* Desde 768 px la columna no se cierra (con JavaScript la vuelve a abrir el buscador): «Filtros»
+   es sólo el título, sin flecha ni cursor de mano */
+@media (min-width: 768px) {
+  .filtros-columna-titulo {
+    cursor: default;
+  }
+
+  .filtros-columna-titulo::after {
+    content: none;
+  }
+}
+
+/* «Limpiar», arriba a la derecha de la columna */
+.filtros-columna-acciones {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* «Limpiar»: un link discreto */
+.filtros-limpiar {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+/* Formulario GET de filtros sobre la cuadrícula: lo usan también los buscadores de salas y de
+   obras (.buscador-salas, .buscador-obras), que cambian sólo las columnas */
 .filtros-cartelera {
   /* Cuadrícula de columnas automáticas: cuatro en escritorio, una en móvil */
   display: grid;
@@ -2980,6 +3256,55 @@ dd {
   align-items: end;
   /* Separación con los resultados */
   margin-bottom: var(--espacio-6);
+}
+
+/* En la columna de la cartelera (E4-10.9), los grupos uno debajo del otro */
+.filtros-columna .filtros-cartelera {
+  grid-template-columns: minmax(0, 1fr);
+  /* Cada grupo con su alto: no hay botones que alinear */
+  align-items: stretch;
+  /* La separación con los resultados la da .cartelera-cuerpo; arriba, la de «Limpiar» */
+  margin-bottom: 0;
+  margin-top: var(--espacio-2);
+}
+
+/* De 768 a 1023 px, la columna va arriba de la grilla: los grupos en dos columnas */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .filtros-columna .filtros-cartelera {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Cada grupo de la columna, separado por una línea como en el wireframe */
+.filtros-grupo {
+  /* Sin el recuadro del navegador para el fieldset de precio */
+  border: 0;
+  margin: 0;
+  padding: 0 0 var(--espacio-4);
+  border-bottom: 1px solid var(--color-borde);
+  /* Lo de adentro no desborda */
+  min-width: 0;
+}
+
+/* El título del grupo de precio, como la etiqueta de los otros grupos (.campo-etiqueta) */
+.filtros-grupo-titulo {
+  font-family: var(--fuente-cuerpo);
+  font-weight: 600;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-brillante);
+  padding: 0;
+  margin-bottom: var(--espacio-1);
+}
+
+/* Los dos campos de precio, uno al lado del otro */
+.filtros-grupo-precio {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espacio-2);
+}
+
+.filtros-grupo-precio .filtros-grupo-titulo {
+  grid-column: 1 / -1;
 }
 
 /* Los campos del filtro no llevan el margen inferior de un formulario largo */
@@ -3968,7 +4293,9 @@ dd {
   }
 }
 
-/* Cantidad de funciones encontradas, orden y descarga en CSV (E4-06.1) */
+/* Cantidad de funciones encontradas, orden y descarga en CSV (E4-06.1). En la cartelera la
+   cantidad está en el resumen de arriba (E4-10.9) y la barra sólo tiene los controles: ver
+   .cartelera-principal .cartelera-barra */
 .cartelera-resumen,
 .cartelera-barra {
   /* En fila */
@@ -3995,6 +4322,12 @@ dd {
   margin: 0;
   /* Empuja los controles de orden, paginado y CSV hacia la derecha */
   margin-right: auto;
+}
+
+/* En la cartelera la barra ya no empieza con la cantidad, que empujaba los controles: van
+   agrupados a la derecha por su cuenta (E4-10.9) */
+.cartelera-principal .cartelera-barra {
+  justify-content: flex-end;
 }
 
 /* Selectores «Ordenar por» y «Paginado» arriba a la derecha de la grilla (E4-06.1 / E4-06.3) */
@@ -4033,7 +4366,7 @@ dd {
 @media (max-width: 600px) {
   .cartelera-orden,
   .cartelera-paginado-modo {
-    /* En celular ocupan su propia fila debajo del contador */
+    /* En celular cada uno ocupa su propia fila */
     width: 100%;
     justify-content: space-between;
   }
@@ -7538,6 +7871,210 @@ a.tabla-admin-principal:focus-visible {
   }
 }
 
+/* --------------------------------------------------------------------------
+   CATÁLOGO DE OBRAS: ALTA, EDICIÓN Y MIS OBRAS (E4-08.1)
+   Componentes para plantillas/programacion/alta_obra.html.twig y mis_obras.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Formulario buscador de obras en catálogo (E4-08.2) */
+.buscador-obras {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+/* Insignia para tipo de obra (Película / Cortometraje) */
+.insignia-tipo-obra {
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  color: var(--color-texto);
+}
+
+/* Año en cabecera de tarjeta de obra */
+.tarjeta-obra-anio {
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto-secundario);
+}
+
+/* Chips de géneros en tarjeta de obra */
+.tarjeta-obra-generos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1);
+  margin-bottom: var(--espacio-3);
+}
+
+/* Acciones en tarjeta de Mis Obras */
+.tarjeta-mi-obra-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-top: auto;
+}
+
+.tarjeta-mi-obra-acciones .acciones-fila-enlaces {
+  display: flex;
+  gap: var(--espacio-2);
+}
+
+.tarjeta-mi-obra-acciones .acciones-fila-enlaces .boton {
+  flex: 1;
+  text-align: center;
+}
+
+.baja-ayuda-bloqueo {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-apagado);
+  text-align: center;
+  display: block;
+}
+
+/* Formulario de alta y edición de obra (E4-08.1) */
+.formulario-alta-obra .generos-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.formulario-alta-obra .generos-leyenda {
+  margin-bottom: var(--espacio-1);
+}
+
+.campo-generos-cuadricula {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-2);
+}
+
+.genero-opcion-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: var(--espacio-1) var(--espacio-3);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.genero-opcion-item:hover {
+  background-color: var(--color-superficie-hover);
+  border-color: var(--color-primario);
+}
+
+.afiche-vista-previa-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-4);
+}
+
+.afiche-vista-previa-titulo {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+  font-weight: 600;
+}
+
+.afiche-vista-previa {
+  width: 140px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radio-md);
+  overflow: hidden;
+  border: 1px solid var(--color-borde-medio);
+  background-color: var(--color-superficie);
+}
+
+.afiche-miniatura {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Ficha pública de la obra (E4-08.3 - Wireframe «ficha-pelicula») */
+.ficha-obra-cabecera {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--espacio-8);
+  align-items: start;
+  margin: var(--espacio-6) 0 var(--espacio-10);
+}
+
+.ficha-obra-portada {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radio-lg);
+  overflow: hidden;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+}
+
+.ficha-obra-portada-imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ficha-obra-placeholder {
+  height: 100%;
+  min-height: 320px;
+}
+
+.ficha-obra-encabezado-titulo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-2);
+}
+
+.ficha-obra-metas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-3);
+}
+
+.ficha-obra-sinopsis-bloque {
+  margin-top: var(--espacio-3);
+  margin-bottom: var(--espacio-5);
+}
+
+.ficha-obra-sinopsis-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-xl);
+  color: var(--color-texto);
+  margin-bottom: var(--espacio-2);
+}
+
+.ficha-obra-sinopsis-texto {
+  color: var(--color-texto-secundario);
+  line-height: 1.6;
+}
+
+.ficha-obra-acciones-organizador {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-4);
+}
+
+@media (max-width: 768px) {
+  .ficha-obra-cabecera {
+    grid-template-columns: 1fr;
+    gap: var(--espacio-5);
+    margin-bottom: var(--espacio-8);
+  }
+
+  .ficha-obra-portada {
+    max-width: 220px;
+    margin: 0 auto;
+  }
+}
 /* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.

@@ -18,6 +18,8 @@ E2E_URL=http://localhost:8080 E2E_CORREO=eva@indiecinema.test E2E_CLAVE=espectad
 | --- | --- |
 | `E2E_URL` | El sitio, sin la barra final. Sin ella, `http://localhost:8080` |
 | `E2E_CORREO` y `E2E_CLAVE` | La cuenta de espectador (en local, la de Eva de los datos de prueba) |
+| `E2E_ORGANIZADOR_CORREO` y `E2E_ORGANIZADOR_CLAVE` | Opcional: una cuenta de organizador con salas y funciones, para A-3 (en local, la de los datos de prueba). Sin ella, A-3 se saltea |
+| `E2E_ADMINISTRADOR_CORREO` y `E2E_ADMINISTRADOR_CLAVE` | Opcional: la cuenta del administrador, para A-4. Sin ella, A-4 se saltea |
 | `E2E_FUNCION` | Opcional: el id de la función donde reservan. Sin ella, la primera de la cartelera que se pueda reservar |
 
 - **Qué dejan:** en `resultados/`, la traza y la captura de cada prueba que falló
@@ -27,8 +29,11 @@ E2E_URL=http://localhost:8080 E2E_CORREO=eva@indiecinema.test E2E_CLAVE=espectad
   función de la cartelera que se pueda reservar con al menos 3 lugares libres.
 - **Un solo ingreso:** se ingresa una vez y las demás pruebas reusan la sesión, porque nginx deja
   ingresar 5 veces por minuto desde la misma IP. Cada corrida ingresa 2 veces (una bien y una con
-  la contraseña equivocada): si se corre muchas veces seguidas, el ingreso da 429 y hay que
-  esperar un minuto.
+  la contraseña equivocada), y una más por cada cuenta del panel que esté en el entorno: si se
+  corre muchas veces seguidas, el ingreso da 429 y hay que esperar un minuto.
+- **Con la CSP:** cada prueba falla también si alguna página registró una violación de la
+  Content-Security-Policy, aunque lo demás haya salido bien. Por eso todas importan `test` (con la
+  sesión del espectador) o `testSinSesion` de `ayudas.js`, y no directo de Playwright.
 - **De a una:** comparten la cuenta y cuentan los lugares libres, así que no corren en paralelo.
   Dos corridas a la vez (en Actions, la del back y la del front) necesitan cada una su cuenta y
   su `E2E_FUNCION`.

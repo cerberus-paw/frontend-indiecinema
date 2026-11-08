@@ -85,9 +85,12 @@
     </p>
     <p><a href="/cartelera" class="enlace-destacado">Volver a la cartelera</a></p>
   {% else %}
-    {% if error_general is defined %}
-      {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se pudo enviar la solicitud', mensaje: error_general } only %}
-    {% endif %}
+    {# Si el envío volvió con errores: «Revisá N campos» con un link a cada uno (E4-10.5) #}
+    {% include 'parciales/resumen_de_errores.html.twig' with {
+      errores: errores ?? {},
+      error_general: error_general ?? null,
+      titulo: 'No se pudo enviar la solicitud'
+    } only %}
 
     {# Sin novalidate: el navegador avisa antes de mandar, y el backend vuelve a validar todo #}
     {# data-validar-en-linea: los errores mientras se carga, con los mensajes del backend (E4-09.1) #}
