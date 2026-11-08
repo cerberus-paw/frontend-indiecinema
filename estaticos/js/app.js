@@ -1,6 +1,6 @@
 /* global AccionesDeReserva, AcuerdoFecha, BotonImprimir, BuscadorDeCartelera, Carrusel, Compartir,
-   EnviarAlElegir, FormularioDeReserva, GestorFranjas, LugaresLibres, MenuUsuario, ModoFuncion,
-   ParametrosDeSala, ValidacionEnLinea, VotacionTitulos, ZonaDeImagen */
+   ConfirmarEnvio, EnviarAlElegir, FormularioDeReserva, GestorFranjas, LugaresLibres, MenuUsuario,
+   ModoFuncion, ParametrosDeSala, ResumenDeErrores, ValidacionEnLinea, VotacionTitulos, ZonaDeImagen */
 
 /**
  * La aplicación: cuando el DOM está listo, carga e inicia los componentes que la página necesita.
