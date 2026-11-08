@@ -236,7 +236,7 @@ class PAW {
    * @param {boolean} bloqueado
    * @param {string} [selector='button[type="submit"]'] los controles que se deshabilitan
    * @param {boolean} [restaurarFoco=true] si devolver el foco al control previo al desbloquear
-   * @returns {?Element} al bloquear, lo que tenia el foco; al desbloquear, null
+   * @returns {?Element} al bloquear, lo que tenía el foco; al desbloquear, null
    */
   static bloquear(formulario, bloqueado, selector = 'button[type="submit"]', restaurarFoco = true) {
     if (!formulario) {
@@ -259,7 +259,7 @@ class PAW {
         }
       }
     }
-    // En los botones de envio, ademas, que es lo que el lector de pantalla anuncia como ocupado.
+    // En los botones de envío, además, que es lo que el lector de pantalla anuncia como ocupado.
     for (const boton of formulario.querySelectorAll('button[type="submit"], input[type="submit"]')) {
       boton.toggleAttribute('aria-busy', bloqueado);
     }

@@ -152,17 +152,17 @@ class FormularioDeReserva {
     }
     PAW.mostrarAviso(this.carga, false);
     this.enviando = false;
-    // Si el 422 fue porque quedan menos lugares, el numero que vuelve ya es el de ahora.
+    // Si el 422 fue porque quedan menos lugares, el número que vuelve ya es el de ahora.
     this.avisarLugares(datos);
-    // Si con ese numero la funcion quedo agotada, LugaresLibres cambio el recuadro por el aviso
-    // de Â«Funcion agotadaÂ» y este formulario salio del documento (IC-446): el foco va directo al
-    // titulo del aviso sin pasar por el boton de submit.
+    // Si con ese número la función quedó agotada, LugaresLibres cambió el recuadro por el aviso
+    // de «Función agotada» y este formulario salió del documento (IC-446): el foco va directo al
+    // título del aviso sin pasar por el botón de envío.
     if (!this.formulario.isConnected) {
       PAW.enfocar(document.getElementById('ficha-reserva-titulo'));
 
       return;
     }
-    // Se desbloquea sin forzar el foco al boton porque mostrarError() se lo da al campo con error.
+    // Se desbloquea sin forzar el foco al botón porque mostrarError() se lo da al campo con error.
     this.bloquear(false, false);
     this.mostrarError(PAW.mensajeDeError(datos, FormularioDeReserva.MENSAJE_DE_ERROR, 'cantidad'));
   }
