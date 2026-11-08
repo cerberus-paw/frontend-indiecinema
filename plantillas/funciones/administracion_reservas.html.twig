@@ -48,9 +48,11 @@
 {% if anulada %}
   {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'La reserva ' ~ anulada ~ ' quedó anulada y sus lugares, libres.' } only %}
 {% endif %}
-{% if error_general is defined %}
-  {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se anuló la reserva', mensaje: error_general } only %}
-{% endif %}
+{# Por qué no se anuló, con el foco, como el resumen de errores de los formularios (E4-10.5) #}
+{% include 'parciales/resumen_de_errores.html.twig' with {
+  error_general: error_general ?? null,
+  titulo: 'No se anuló la reserva'
+} only %}
 
 {# data-avisos: acá pone el componente el resultado de anular sin recargar. Vacía y en la página
    desde el principio, para que un lector de pantalla lea lo que aparece. #}

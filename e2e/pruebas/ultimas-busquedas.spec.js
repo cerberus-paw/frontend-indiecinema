@@ -1,7 +1,7 @@
 // Casos U-1 a U-5 de e2e/casos.md: las últimas búsquedas, que viven en el localStorage del
 // navegador. Cómo se lee cada búsqueda lo prueba PHPUnit. Cada prueba arranca con el navegador
 // vacío (Playwright abre un contexto nuevo).
-import { test, expect } from '@playwright/test';
+import { testSinSesion as test, expect } from '../ayudas.js';
 
 const seccion = (page) => page.getByRole('region', { name: 'Últimas búsquedas' });
 const busquedas = (page) => seccion(page).getByRole('listitem');
@@ -45,7 +45,7 @@ test('U-3 · una búsqueda guardada se vuelve a hacer con sus filtros en el form
 
   await expect(page).toHaveURL(/\/cartelera\?localidad=Luj%C3%A1n$/);
   await esperarResultados(page);
-  await expect(page.getByLabel('Localidad')).toHaveValue('Luján');
+  await expect(page.getByLabel('Localidad', { exact: true })).toHaveValue('Luján');
   expect(await page.evaluate(() => window.sinRecargar === true), 'la página no se tenía que recargar').toBe(true);
 });
 

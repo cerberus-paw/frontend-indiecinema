@@ -34,7 +34,7 @@
 
     {% if es_admin %}
     <div class="pie-columna">
-      <h3 class="pie-subtitulo">Administración</h3>
+      <h2 class="pie-subtitulo">Administración</h2>
       <ul class="pie-enlaces">
         <li><a href="/cuenta/administracion/usuarios">Usuarios y roles</a></li>
         <li><a href="/administracion/solicitudes">Solicitudes de sala</a></li>
@@ -44,11 +44,12 @@
     {# Columna 2: Enlaces de exploración y catálogo público del backlog E3 #}
     <div class="pie-columna">
       {# Título de la columna #}
-      <h3 class="pie-subtitulo">Explorar</h3>
+      <h2 class="pie-subtitulo">Explorar</h2>
       {# Lista de enlaces activos de exploración #}
       <ul class="pie-enlaces">
         {# Enlace canónico a la cartelera de funciones activas #}
         <li><a href="/cartelera">Cartelera</a></li>
+        <li><a href="/obras">Películas</a></li>
         {# Enlace al directorio de salas indie registradas #}
         <li><a href="/salas">Salas indie</a></li>
       {# Cierre de la lista de exploración #}
@@ -59,7 +60,7 @@
     {# Columna 3: Enlaces de participación comunitaria y gestión según el rol #}
     <div class="pie-columna">
       {# Título de la columna de participación #}
-      <h3 class="pie-subtitulo">Participar</h3>
+      <h2 class="pie-subtitulo">Participar</h2>
       {# Lista de enlaces de participación disponibles adaptados al rol activo #}
       <ul class="pie-enlaces">
         {% if usr %}
@@ -70,6 +71,8 @@
           {% endif %}
           {% if usr.alcanza('organizador') %}
             <li><a href="/organizador/salas">Mis salas</a></li>
+            <li><a href="/organizador/obras">Mis obras</a></li>
+            <li><a href="/organizador/obras/nueva">Cargar obra</a></li>
             <li><a href="/organizador/funciones">Mis funciones</a></li>
             <li><a href="/organizador/funciones/nueva">Programar una función</a></li>
             <li><a href="/solicitar-sala">Publicar una sala</a></li>
@@ -85,7 +88,7 @@
 
     {# Columna 4: Información de plataforma comunitaria (E3) #}
     <div class="pie-columna">
-      <h3 class="pie-subtitulo">Comunidad</h3>
+      <h2 class="pie-subtitulo">Comunidad</h2>
       <ul class="pie-enlaces">
         {# Las secciones de «Acerca de IndieCinema» #}
         <li><a href="/acerca-de#quienes-somos">Quiénes somos</a></li>

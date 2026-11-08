@@ -1,7 +1,8 @@
 // Casos I-2 a I-4 de e2e/casos.md: lo que ve quien no tiene sesión. El I-1, ingresar bien, es
 // sesion.setup.js: así se ingresa una vez menos.
-import { test, expect } from '@playwright/test';
-import { cuenta, ingresar, menuDelUsuario } from '../ayudas.js';
+import {
+  testSinSesion as test, expect, cuenta, ingresar, menuDelUsuario,
+} from '../ayudas.js';
 
 test('I-2 · con la contraseña equivocada no entra', async ({ page }) => {
   const { correo, clave } = cuenta();

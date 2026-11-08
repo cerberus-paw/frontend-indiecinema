@@ -22,14 +22,14 @@
       </p>
     </header>
 
-    {# Error general: correo o contraseña incorrectos (sin decir cuál de los dos) o cuenta suspendida #}
-    {% if error_general is defined %}
-      {% include 'parciales/mensaje.html.twig' with {
-        tipo: 'error',
-        titulo: 'No pudimos iniciar tu sesión',
-        mensaje: error_general
-      } %}
-    {% endif %}
+    {# Si el envío volvió con errores (E4-10.5): «Revisá N campos» con un link a cada uno, o el
+       motivo general, como un correo o una contraseña incorrectos (sin decir cuál de los dos) o
+       una cuenta suspendida #}
+    {% include 'parciales/resumen_de_errores.html.twig' with {
+      errores: errores ?? {},
+      error_general: error_general ?? null,
+      titulo: 'No pudimos iniciar tu sesión'
+    } only %}
 
     <form action="/cuenta/ingresar" method="POST" class="formulario-ingreso" novalidate>
       {# Campo oculto para el token de protección contra ataques CSRF #}
@@ -42,6 +42,7 @@
         valor: valores.email ?? '',
         placeholder: 'nombre@ejemplo.com',
         requerido: true,
+        autocompletar: 'email',
         error: errores.email ?? null
       } %}
 
@@ -51,6 +52,7 @@
         etiqueta: 'Contraseña',
         tipo: 'password',
         requerido: true,
+        autocompletar: 'current-password',
         error: errores.password ?? null
       } %}
 

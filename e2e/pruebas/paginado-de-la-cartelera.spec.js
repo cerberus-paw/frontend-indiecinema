@@ -1,6 +1,6 @@
 // Casos PG-1 a PG-4 de e2e/casos.md: el paginado numerado y el scroll infinito. Qué números arma la
 // barra lo prueba PHPUnit; acá, lo que hace el navegador con ellos y con el ancho de la pantalla.
-import { test, expect } from '@playwright/test';
+import { testSinSesion as test, expect } from '../ayudas.js';
 
 const resultados = (page) => page.locator('#resultados-cartelera');
 const tarjetas = (page) => resultados(page).locator('.tarjeta-funcion');
@@ -26,7 +26,7 @@ test.describe('en el celular', () => {
   test('PG-2 · al llegar al final se agregan las funciones de la página siguiente', async ({ page }) => {
     await page.goto('/cartelera');
     const enLaPrimera = await tarjetas(page).count();
-    const total = Number.parseInt(await resultados(page).locator('.cartelera-resultados').textContent(), 10);
+    const total = Number.parseInt(await page.locator('[data-cartelera-resumen] .cartelera-resultados').textContent(), 10);
     test.skip(total <= enLaPrimera, 'la cartelera tiene una sola página');
 
     await expect(page.getByLabel('Paginado')).toHaveValue('infinito');

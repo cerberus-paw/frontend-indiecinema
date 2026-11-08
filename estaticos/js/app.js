@@ -16,10 +16,26 @@ class App {
   }
 
   iniciar() {
+    // Lo que antes iba en el HTML como onclick o style, que la Content-Security-Policy bloquea: no
+    // admite código ni estilos en línea, pero sí lo que se asigna desde un script propio.
+    // La cruz de una alerta descartable la cierra. Escucha en el documento y no en cada botón, así
+    // sirve también para una alerta que se agregue después.
+    document.addEventListener('click', (evento) => {
+      const boton = evento.target.closest('[data-cerrar-alerta]');
+      boton?.closest('.alerta')?.remove();
+    });
+    // Las barras de compromisos del acuerdo de fecha: el ancho viene en data-porcentaje.
+    for (const barra of document.querySelectorAll('[data-porcentaje]')) {
+      barra.style.width = `${barra.dataset.porcentaje}%`;
+    }
     // Los carruseles, como el de destacadas de la portada (E4-07): cada uno recibe su contenedor.
     const carruseles = document.querySelectorAll('[data-carrusel]');
     if (carruseles.length > 0) {
       PAW.cargarScript('Carrusel', `${App.COMPONENTES}/carrusel.js`, () => carruseles.forEach((contenedor) => new Carrusel(contenedor)));
+    }
+    // El resumen de errores de un formulario que volvió del servidor (E4-10.5): recibe el foco.
+    if (document.querySelector('[data-resumen-de-errores]')) {
+      PAW.cargarScript('ResumenDeErrores', `${App.COMPONENTES}/resumen-de-errores.js`, () => new ResumenDeErrores('[data-resumen-de-errores]'));
     }
     // El menú del usuario, sólo con sesión.
     if (document.querySelector('#menu-usuario')) {
@@ -78,6 +94,10 @@ class App {
     // Las acciones de los paneles de reservas, sin recargar la lista (E4-05.5 / IC-276).
     if (document.querySelector('[data-panel-de-reservas]')) {
       PAW.cargarScript('AccionesDeReserva', `${App.COMPONENTES}/acciones-de-reserva.js`, () => new AccionesDeReserva('[data-panel-de-reservas]'));
+    }
+    // Los formularios que piden confirmación antes de mandarse, como la baja de una obra (E4-08.4).
+    for (const formulario of document.querySelectorAll('form[data-confirmar]')) {
+      PAW.cargarScript('ConfirmarEnvio', `${App.COMPONENTES}/confirmar-envio.js`, () => new ConfirmarEnvio(formulario));
     }
     // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
     if (document.querySelector('[data-seccion-acuerdo-fecha]')) {

@@ -74,9 +74,11 @@
   {% if registrada %}
     {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Se registró la asistencia de la reserva ' ~ registrada ~ '.' } only %}
   {% endif %}
-  {% if error_general is defined %}
-    {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se registró la asistencia', mensaje: error_general } only %}
-  {% endif %}
+  {# Por qué no se registró, con el foco, como el resumen de errores de los formularios (E4-10.5) #}
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    error_general: error_general ?? null,
+    titulo: 'No se registró la asistencia'
+  } only %}
   {# data-avisos: acá pone el componente el resultado de registrar sin recargar. Vacía y en la
      página desde el principio, para que un lector de pantalla lea lo que aparece. #}
   <div data-avisos aria-live="polite"></div>
