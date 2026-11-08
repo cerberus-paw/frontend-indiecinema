@@ -3063,12 +3063,6 @@ dd {
   margin-top: var(--espacio-2);
 }
 
-/* Oculto sin funciones (lo explica el aviso de la sección): el display flex no tiene que ganarle
-   al atributo */
-.cartelera-resumen-linea[hidden] {
-  display: none;
-}
-
 /* En el resumen de arriba, la cantidad no empuja nada: va pegada al orden */
 .cartelera-resumen-linea .cartelera-resultados {
   margin-right: 0;
@@ -3094,11 +3088,6 @@ dd {
   gap: var(--espacio-2);
   /* Separación con lo que sigue */
   margin-bottom: var(--espacio-4);
-}
-
-/* Oculto sin filtros: el display flex no tiene que ganarle al atributo */
-.filtros-activos[hidden] {
-  display: none;
 }
 
 .filtros-activos-titulo {
