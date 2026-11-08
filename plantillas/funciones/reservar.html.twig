@@ -79,7 +79,8 @@
         errores: errores,
         requerido: true,
         valor_minimo: reglas.cantidad.minimo,
-        valor_maximo: reglas.cantidad.maximo
+        valor_maximo: reglas.cantidad.maximo,
+        ayuda: 'Máximo ' ~ (reglas.cantidad.maximo_por_persona ?? reglas.cantidad.maximo) ~ ' lugares por persona.'
       } only %}
 
       <div class="pie-formulario-acciones">

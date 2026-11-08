@@ -1,4 +1,4 @@
-// Casos R-1 a R-5 de e2e/casos.md: reservar desde la ficha, con sus bordes. Lo que se reserva se
+// Casos R-1 a R-6 de e2e/casos.md: reservar desde la ficha, con sus bordes. Lo que se reserva se
 // anota en `reservas` y se cancela al terminar.
 import {
   test, expect, buscarFuncionReservable, lugaresLibres, formularioDeReserva, avisoDeReserva, reservar, codigoDelAviso,
@@ -66,4 +66,36 @@ test('R-5 · con letras en la cantidad no se reserva', async ({ page }) => {
     await campo.fill('');
     await campo.pressSequentially('abc');
   });
+});
+
+test('R-6 · no se pueden reservar más de 6 lugares por persona', async ({ page, reservas }) => {
+  await buscarFuncionReservable(page, 7);
+  const antes = await lugaresLibres(page);
+  const { campo, boton } = formularioDeReserva(page);
+
+  // Intentar pedir 7 lugares de una vez supera el máximo de 6 por persona.
+  await campo.fill('7');
+  await boton.click();
+
+  expect(await campo.evaluate((c) => !c.validity.valid || c.getAttribute('aria-invalid') === 'true')).toBe(true);
+  await expect(page.locator('.campo-error, [role="alert"]')).toContainText('Se pueden reservar hasta 6 lugares por persona en cada función.');
+  await expect(avisoDeReserva(page)).toHaveCount(0);
+  expect(await lugaresLibres(page, { recargar: true })).toBe(antes);
+
+  // Reservar 2 lugares: quedan 4 para este espectador.
+  reservas.push(await reservar(page, 2));
+
+  // Volver a la ficha: el máximo del campo ahora es 4.
+  await page.reload();
+  const formNuevo = formularioDeReserva(page);
+  expect(await formNuevo.campo.getAttribute('max')).toBe('4');
+
+  // Intentar pedir 5 lugares supera lo que le queda (4).
+  await formNuevo.campo.fill('5');
+  await formNuevo.boton.click();
+
+  expect(await formNuevo.campo.evaluate((c) => !c.validity.valid || c.getAttribute('aria-invalid') === 'true')).toBe(true);
+  await expect(page.locator('.campo-error, [role="alert"]')).toContainText('Ya tenés 2 lugares reservados: podés sumar hasta 4 lugares más (máximo 6 por persona).');
+  await expect(avisoDeReserva(page)).toHaveCount(0);
+  expect(await lugaresLibres(page, { recargar: true })).toBe(antes - 2);
 });

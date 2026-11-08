@@ -56,6 +56,15 @@ class LugaresLibres {
     // cancela. Null mientras no esté agotada.
     this.recuadroGuardado = null;
     this.libres = this.leerLibres();
+    const campo = this.contenedor.querySelector('input[name="cantidad"]');
+    if (campo) {
+      if (this.libres !== null) {
+        campo.dataset.lugaresLibres = String(this.libres);
+      }
+      const maximoPorPersona = Number.parseInt(this.contenedor.dataset.maximoPorPersona ?? '6', 10);
+      const max = Number.parseInt(campo.getAttribute('max') ?? '', 10);
+      campo.dataset.restantesUsuario = String(Number.isInteger(max) ? max : maximoPorPersona);
+    }
     // Afuera de lo que se redibuja: la región tiene que existir antes del cambio para que un
     // lector de pantalla la lea.
     this.anuncio = PAW.nuevoElemento('p', '', { class: 'sr-only', role: 'status', 'aria-live': 'polite' });
@@ -91,6 +100,10 @@ class LugaresLibres {
    * @returns {?number}
    */
   leerLibres() {
+    const inicial = Number.parseInt(this.contenedor?.dataset.lugares ?? '', 10);
+    if (Number.isInteger(inicial)) {
+      return inicial;
+    }
     const campo = this.contenedor.querySelector('input[name="cantidad"]');
     const maximo = Number.parseInt(campo?.getAttribute('max') ?? '', 10);
 
@@ -153,24 +166,33 @@ class LugaresLibres {
    * Muestra los lugares que vinieron. Si el dato no está (funciones no respondió del lado del
    * servidor) se deja lo que hay: es mejor un número de hace un rato que ninguno.
    *
-   * @param {{lugares_libres: ?number, agotada?: boolean}} datos
+   * @param {{lugares_libres: ?number, agotada?: boolean, lugares_restantes_usuario?: number, maximo_reserva?: number}} datos
    */
   actualizar(datos) {
     const libres = datos.lugares_libres;
-    if (!Number.isInteger(libres) || libres === this.libres) {
+    const restantesUsuario = datos.maximo_reserva ?? datos.lugares_restantes_usuario;
+    if (!Number.isInteger(libres)) {
       return;
     }
     const agotada = datos.agotada ?? libres === 0;
+    const cambioLibres = libres !== this.libres;
+    const campo = this.contenedor.querySelector('input[name="cantidad"]');
+    const topeAnterior = Number.parseInt(campo?.dataset.restantesUsuario ?? '', 10);
+    const cambioTope = Number.isInteger(restantesUsuario) && restantesUsuario !== topeAnterior;
+
+    if (!cambioLibres && !cambioTope) {
+      return;
+    }
     // Sin sesión no hay campo de cantidad, así que no se sabe con qué número se cargó la página:
     // la primera respuesta se muestra, pero no se anuncia como un cambio que no se sabe si hubo.
-    const anunciar = this.libres !== null;
+    const anunciar = this.libres !== null && cambioLibres;
     this.libres = libres;
     this.pintarPildora(libres, agotada);
     // Antes que la barra y el campo: si el recuadro vuelve, los dos están adentro y hay que
     // pintarlos con el número de ahora y no con el que tenían cuando se agotó.
     this.pintarRecuadro(agotada);
     this.pintarBarra(libres);
-    this.pintarCampo(libres, agotada);
+    this.pintarCampo(libres, agotada, restantesUsuario);
     if (anunciar) {
       this.anunciar(libres, agotada);
     }
@@ -262,15 +284,25 @@ class LugaresLibres {
    *
    * @param {number} libres
    * @param {boolean} agotada
+   * @param {?number} [restantesUsuario]
    */
-  pintarCampo(libres, agotada) {
+  pintarCampo(libres, agotada, restantesUsuario = null) {
     const campo = this.contenedor.querySelector('input[name="cantidad"]');
     if (campo) {
-      campo.setAttribute('max', String(Math.max(libres, 1)));
-      campo.toggleAttribute('disabled', agotada);
+      const maximoPorPersona = Number.parseInt(this.contenedor.dataset.maximoPorPersona ?? '6', 10);
+      const tope = Number.isInteger(restantesUsuario)
+        ? restantesUsuario
+        : (Number.parseInt(campo.dataset.restantesUsuario ?? '', 10) || maximoPorPersona);
+      const maximoCampo = Math.max(Math.min(libres, tope), 1);
+
+      campo.setAttribute('max', String(maximoCampo));
+      campo.dataset.lugaresLibres = String(libres);
+      campo.dataset.restantesUsuario = String(tope);
+      campo.toggleAttribute('disabled', agotada || tope === 0);
+
       // Lo que ya tenía escrito puede haber quedado por encima de lo que queda.
-      if (!agotada && Number.parseInt(campo.value, 10) > libres) {
-        campo.value = String(libres);
+      if (!agotada && Number.parseInt(campo.value, 10) > maximoCampo) {
+        campo.value = String(maximoCampo);
       }
     }
     const boton = this.contenedor.querySelector('.ficha-reserva-formulario button[type="submit"]');

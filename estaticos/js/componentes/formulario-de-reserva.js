@@ -98,12 +98,33 @@ class FormularioDeReserva {
    */
   static mensajeDelCampo(campo) {
     if (campo.validity.rangeOverflow) {
-      const libres = Number.parseInt(campo.getAttribute('max') ?? '', 10);
+      const max = Number.parseInt(campo.getAttribute('max') ?? '', 10);
+      const contenedor = campo.closest('[data-maximo-por-persona]');
+      const maximoPorPersona = Number.parseInt(contenedor?.dataset.maximoPorPersona ?? '6', 10);
+      const libres = Number.parseInt(campo.dataset.lugaresLibres ?? '', 10);
 
-      switch (libres) {
+      const esPorTopePersona = !Number.isNaN(libres)
+        ? libres > max
+        : max <= maximoPorPersona;
+
+      if (esPorTopePersona) {
+        if (max === maximoPorPersona) {
+          return `Se pueden reservar hasta ${maximoPorPersona} lugares por persona en cada función.`;
+        }
+        if (max < maximoPorPersona && max > 0) {
+          const yaReservados = maximoPorPersona - max;
+          const textoYa = yaReservados === 1 ? '1 lugar reservado' : `${yaReservados} lugares reservados`;
+          const textoSumar = max === 1 ? '1 lugar más' : `hasta ${max} lugares más`;
+
+          return `Ya tenés ${textoYa}: podés sumar ${textoSumar} (máximo ${maximoPorPersona} por persona).`;
+        }
+      }
+
+      const limiteLugares = Number.isNaN(libres) ? max : libres;
+      switch (limiteLugares) {
         case 0: return 'La función está agotada.';
         case 1: return 'Queda 1 lugar.';
-        default: return `Quedan ${libres} lugares.`;
+        default: return `Quedan ${limiteLugares} lugares.`;
       }
     }
     if (campo.validity.valueMissing) {
