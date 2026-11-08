@@ -1,3 +1,5 @@
+/* exported FormularioDeReserva */
+
 /**
  * El formulario de reserva de la ficha, sin recargar (E4-05.3) y con la cantidad revisada contra
  * los lugares libres mientras se escribe (E4-05.4).

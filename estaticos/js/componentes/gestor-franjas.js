@@ -1,3 +1,5 @@
+/* exported GestorFranjas */
+
 /**
  * Componente interactivo y accesible para que el organizador proponga y administre
  * franjas horarias y el mínimo de asistentes requeridos (IC-154 / E3-13.2).
@@ -76,7 +78,7 @@ class GestorFranjas {
    */
   vincularFilasExistentes() {
     const filas = this.obtenerFilas();
-    filas.forEach((fila, indice) => this.vincularFila(fila, indice));
+    filas.forEach((fila) => this.vincularFila(fila));
   }
 
   /**
@@ -92,9 +94,8 @@ class GestorFranjas {
    * Vincula los eventos de eliminación y validación de rango horario a una fila.
    *
    * @param {HTMLElement} fila
-   * @param {number} indice
    */
-  vincularFila(fila, indice) {
+  vincularFila(fila) {
     const botonEliminar = fila.querySelector('[data-eliminar-franja]');
     if (botonEliminar) {
       botonEliminar.onclick = () => this.eliminarFranja(fila);
@@ -195,7 +196,7 @@ class GestorFranjas {
 
     if (nuevaFila) {
       this.lista.appendChild(nuevaFila);
-      this.vincularFila(nuevaFila, nuevoIndice);
+      this.vincularFila(nuevaFila);
       this.aplicarRestriccionFechas();
       this.actualizarIndicesYEtiquetas();
       this.actualizarEstadosBotones();

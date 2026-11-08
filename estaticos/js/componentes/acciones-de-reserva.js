@@ -1,3 +1,5 @@
+/* exported AccionesDeReserva */
+
 /**
  * Las acciones de los paneles de reservas, sin recargar la lista (E4-05.5): registrar la
  * asistencia en el panel del organizador y anular en el del administrador.

@@ -1,3 +1,5 @@
+/* exported ConfirmarEnvio */
+
 /**
  * Pide confirmación antes de mandar un formulario que hace algo que no se deshace desde la
  * pantalla, como dar de baja una obra. El texto va en data-confirmar del formulario. Reemplaza al

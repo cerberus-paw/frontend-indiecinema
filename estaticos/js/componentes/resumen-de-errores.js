@@ -1,3 +1,5 @@
+/* exported ResumenDeErrores */
+
 /**
  * El resumen de errores de un formulario (E4-10.5, parciales/resumen_de_errores.html.twig).
  *

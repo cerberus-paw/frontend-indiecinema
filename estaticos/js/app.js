@@ -1,3 +1,7 @@
+/* global AccionesDeReserva, AcuerdoFecha, BotonImprimir, BuscadorDeCartelera, Carrusel, Compartir,
+   ConfirmarEnvio, EnviarAlElegir, FormularioDeReserva, GestorFranjas, LugaresLibres, MenuUsuario,
+   ModoFuncion, ParametrosDeSala, ResumenDeErrores, ValidacionEnLinea, VotacionTitulos, ZonaDeImagen */
+
 /**
  * La aplicación: cuando el DOM está listo, carga e inicia los componentes que la página necesita.
  * Cada componente está en su archivo de componentes/ y recibe su contenedor; un script se carga
@@ -102,4 +106,4 @@ class App {
   }
 }
 
-const app = new App();
+new App();

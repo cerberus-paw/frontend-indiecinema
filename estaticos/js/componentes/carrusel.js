@@ -1,3 +1,5 @@
+/* exported Carrusel */
+
 /**
  * Carrusel propio, sin librerías (E4-07, el punto 1 del TP4): convierte la lista de un contenedor
  * en diapositivas, de a una por vez.

@@ -1,3 +1,5 @@
+/* exported PAW */
+
 /**
  * Utilidades comunes del JavaScript de IndieCinema, sin librerías: las usan la aplicación (app.js)
  * y los componentes (componentes/). Son métodos estáticos: la clase no se instancia.
