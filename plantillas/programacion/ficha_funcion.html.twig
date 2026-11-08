@@ -250,7 +250,8 @@
               requerido: true,
               valor_minimo: 1,
               valor_maximo: funcion.maximo_reserva ?? min(funcion.lugares_libres ?? funcion.cupo, funcion.maximo_por_persona ?? 6),
-              ayuda: 'Máximo ' ~ (funcion.maximo_por_persona ?? 6) ~ ' lugares por persona.'
+              ayuda: 'Máximo ' ~ (funcion.maximo_por_persona ?? 6) ~ ' lugares por persona.',
+              deshabilitado: (funcion.maximo_reserva is defined and funcion.maximo_reserva == 0)
             } only %}
             {% include 'parciales/boton.html.twig' with {
               texto: 'Reservar mis lugares',
