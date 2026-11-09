@@ -3,15 +3,15 @@
   (E4-03), como la sección «Reservas de la función» del wireframe de la E2 (panel-organizador):
   las tarjetas de números, el registro de la asistencia, la tabla con el botón de cada fila y
   «Exportar listado» (el CSV). Va en el panel del organizador, con «Mis funciones» marcada en la
-  barra, que es de donde se llega (E4-10.12). Queda afuera lo que todavía no hay: el nombre del
-  espectador (cuentas no tiene una consulta de varios usuarios juntos), el pago y el reparto.
+  barra, que es de donde se llega (E4-10.12). Queda afuera lo que todavía no hay: el pago y el
+  reparto.
 
   Variables:
   - funcion: id, titulo, url (de su ficha), fecha (o null), sala, estado y cupo.
   - resumen: reservados y libres (lugares), asistentes (lugares ya registrados), recaudado (ya
     escrito) y reservas (cuántas siguen en pie).
-  - reservas: lista de {id, codigo, cantidad, total, estado ('confirmada' | 'cancelada' |
-    'asistio'), estado_etiqueta, creada (ya escrita), registrable}.
+  - reservas: lista de {id, codigo, espectador (o null), cantidad, total, estado ('confirmada' |
+    'cancelada' | 'asistio'), estado_etiqueta, creada (ya escrita), registrable}.
   - registra_asistencia: (bool) si se puede registrar: la función no se canceló.
   - codigo: (string) lo que se había escrito, al volver con un error.
   - registrada: (string|null) el código que se acaba de registrar.
@@ -106,6 +106,7 @@
         <thead>
           <tr>
             <th scope="col">Código</th>
+            <th scope="col">Espectador</th>
             <th scope="col">Lugares</th>
             <th scope="col">Total</th>
             <th scope="col">Reservada</th>
@@ -117,6 +118,7 @@
           {% for reserva in reservas %}
             <tr data-reserva="{{ reserva.id }}">
               <td><span class="tabla-admin-principal panel-reservas-codigo">{{ reserva.codigo }}</span></td>
+              <td>{{ reserva.espectador ?? '—' }}</td>
               <td>{{ reserva.cantidad }}</td>
               <td>{{ reserva.total }}</td>
               <td>{{ reserva.creada }}</td>

@@ -105,11 +105,21 @@ export async function abrirMisReservas(page) {
  *
  * Con E2E_FUNCION, dos corridas a la vez (el back y el front mergeados juntos, cada uno con su
  * cuenta) no cuentan los lugares de la misma función.
+ *
+ * Con `todoElTope`, además, la cuenta no tiene que tener lugares reservados en ella: le queda el
+ * tope por persona entero (IC-463). Lo que reservan las pruebas se cancela al terminar, pero una
+ * reserva hecha a mano con la misma cuenta cambiaría lo que espera R-6.
  */
-export async function buscarFuncionReservable(page, minimo = 3) {
+export async function buscarFuncionReservable(page, minimo = 3, { todoElTope = false } = {}) {
   const elegida = process.env.E2E_FUNCION;
-  const sirve = async () => (await page.locator('form[data-formulario-reserva]').count()) > 0
-    && (await lugaresLibres(page)) >= minimo;
+  const formulario = page.locator('form[data-formulario-reserva]');
+  const tieneTodoElTope = async () => {
+    const tope = await formulario.getAttribute('data-maximo-por-persona');
+    return tope !== null && tope === await formulario.getAttribute('data-restantes-usuario');
+  };
+  const sirve = async () => (await formulario.count()) > 0
+    && (await lugaresLibres(page)) >= minimo
+    && (!todoElTope || await tieneTodoElTope());
   if (elegida) {
     await page.goto(`/cartelera/${elegida}`);
     if (!(await sirve())) {

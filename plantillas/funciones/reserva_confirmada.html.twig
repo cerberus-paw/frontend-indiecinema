@@ -53,7 +53,7 @@
 
     {% if reserva.estado != 'pendiente_pago' %}
       <p class="comprobante-codigo-rotulo" id="comprobante-codigo">Código de la reserva</p>
-      <p class="comprobante-codigo" aria-labelledby="comprobante-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</p>
+      <p class="comprobante-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</p>
     {% endif %}
 
     <dl class="comprobante-datos">

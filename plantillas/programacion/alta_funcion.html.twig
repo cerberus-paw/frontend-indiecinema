@@ -222,7 +222,7 @@
                   {% if error_obras %}aria-invalid="true" aria-describedby="error-obras"{% endif %}
                   {% if marcada %}checked{% endif %}
                 >
-                <div class="info-seleccion-obra">
+                <span class="info-seleccion-obra">
                   <span class="titulo-seleccion-obra">{{ obra.titulo }}</span>
                   <span class="meta-seleccion-obra">
                     {{ obra.anio ?? '' }}
@@ -230,7 +230,7 @@
                     {% if dur %} · {{ dur }} min{% endif %}
                     {% if obra.director is defined and obra.director %} · Dir: {{ obra.director }}{% endif %}
                   </span>
-                </div>
+                </span>
               </label>
             {% endfor %}
           </div>
