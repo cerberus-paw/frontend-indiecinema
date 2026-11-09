@@ -21,8 +21,8 @@
   - programada: (bool) aviso de que se acaba de programar una. El de la edición no va acá: al
     guardar se vuelve a la ficha de la función, que es la que lo muestra.
   - cancelada: (bool) aviso de que se acaba de cancelar una.
-  - reservas_pendientes: (bool) se canceló, pero el subsistema funciones no respondió y sus
-    reservas siguen confirmadas (E4-03.4).
+  - cancelacion_fallida: (bool) no se pudo cancelar: el subsistema funciones no respondió, así que
+    no se podían cancelar sus reservas, y la función quedó como estaba (F-01.7).
   - votacion_cerrada: (bool) aviso de que se acaba de cerrar la votación de títulos de una función (IC-150 / E3-12.4).
 #}
 {% extends 'organizador.html.twig' %}
@@ -69,12 +69,13 @@
     } only %}
   {% endif %}
 
-  {# Se canceló, pero el subsistema funciones no respondió: sus reservas siguen en pie (E4-03.4) #}
-  {% if reservas_pendientes|default(false) %}
+  {# No se pudo cancelar: el subsistema funciones no respondió, y una función cancelada con sus
+     reservas en pie dejaba a los espectadores sin aviso. La función quedó como estaba (F-01.7). #}
+  {% if cancelacion_fallida|default(false) %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'advertencia',
-      titulo: 'Las reservas de la función no se cancelaron',
-      mensaje: 'La función quedó cancelada, pero no pudimos cancelar sus reservas ni avisarles a los espectadores. Avisale al equipo de IndieCinema para que lo resuelva.'
+      titulo: 'No se pudo cancelar la función',
+      mensaje: 'El sistema de reservas no respondió, así que la función y sus reservas quedaron como estaban. Probá de nuevo en unos minutos.'
     } only %}
   {% endif %}
 

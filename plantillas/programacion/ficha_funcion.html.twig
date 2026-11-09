@@ -286,8 +286,8 @@
       <section class="ficha-seccion ficha-votacion" aria-labelledby="ficha-votacion-titulo" data-seccion-votacion>
         <div class="ficha-votacion-cabecera">
           <div class="ficha-votacion-intro">
-            <span class="insignia-estado insignia-votacion" aria-label="Fase de la función: Votación de títulos abierta">
-              VOTACIÓN ABIERTA
+            <span class="insignia-estado insignia-votacion">
+              <span class="sr-only">Fase de la función: </span>VOTACIÓN ABIERTA
             </span>
             <h2 id="ficha-votacion-titulo" class="ficha-votacion-titulo">Votación de títulos</h2>
             <p id="ficha-funcion-obras-titulo" class="ficha-obras-etiqueta">Obras candidatas en votación</p>
@@ -396,7 +396,7 @@
                   {% if obra.sinopsis is defined and obra.sinopsis %}
                     <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
                   {% endif %}
-                  <p class="candidata-conteo-votos" aria-label="Cantidad de votos acumulados">
+                  <p class="candidata-conteo-votos">
                     <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
                   </p>
                   <div class="candidata-accion">
@@ -473,7 +473,7 @@
                   {% if obra.sinopsis is defined and obra.sinopsis %}
                     <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
                   {% endif %}
-                  <p class="candidata-conteo-votos" aria-label="Cantidad de votos acumulados">
+                  <p class="candidata-conteo-votos">
                     <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
                   </p>
                   <div class="candidata-accion">
