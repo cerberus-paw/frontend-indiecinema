@@ -17,9 +17,12 @@
     muestra (su sala se dio de baja).
   - cancelada: (bool) aviso al volver de cancelarla.
   - con_pago: (bool) si la reserva se cobra con Mercado Pago: entonces son tres pasos.
+  - regreso: (string, opcional) al volver de Mercado Pago (X-01.3), en qué quedó la reserva según
+    la base: 'acreditado', 'esperando' (el aviso del pago todavía no llegó), 'vencido' o
+    'cancelada'. Sólo informa: lo que dice la dirección de regreso no cambia nada.
 
-  cancelable, cancelada, con_pago y los del pago llevan |default: el paquete front se mergea antes
-  que el back.
+  cancelable, cancelada, con_pago, regreso y los del pago llevan |default: el paquete front se
+  mergea antes que el back.
 #}
 {% extends 'base.html.twig' %}
 
@@ -38,6 +41,27 @@
     {% include 'funciones/pasos_reserva.html.twig' with {
       actual: reserva.estado == 'pendiente_pago' ? 2 : (con_pago ? 3 : 2),
       con_pago: con_pago
+    } only %}
+  {% endif %}
+
+  {% set regreso = regreso|default(null) %}
+  {% if regreso == 'acreditado' %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: 'Pago acreditado',
+      mensaje: 'Tu reserva está confirmada. El código también te llega por correo.'
+    } only %}
+  {% elseif regreso == 'esperando' %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      titulo: 'Estamos esperando la confirmación de Mercado Pago',
+      mensaje: 'Si ya pagaste, la reserva se confirma en unos segundos: recargá esta página. Si el pago no salió, podés intentarlo de nuevo.'
+    } only %}
+  {% elseif regreso == 'cancelada' %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      titulo: 'La reserva está cancelada',
+      mensaje: 'Ya no hay nada que pagar. Si todavía quedan lugares, podés reservar de nuevo desde la función.'
     } only %}
   {% endif %}
 
