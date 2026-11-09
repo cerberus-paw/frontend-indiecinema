@@ -3,15 +3,23 @@
   wireframe reserva-pago-comprobante, con el código para la puerta. Sólo la ve quien reservó.
   Se imprime limpia (E4-04.2): en papel quedan sólo el código y los datos de la reserva.
 
+  Si todavía espera el pago (X-01), es el paso «Pago»: el enlace a Mercado Pago y hasta qué hora
+  se puede pagar. Es un enlace y no un formulario: la CSP del sitio no deja que un formulario
+  termine en otro sitio. El código todavía no sirve en la puerta, así que no se muestra.
+
   Variables:
   - reserva: id, codigo (8 caracteres; se muestra en dos grupos de 4 para dictarlo), cantidad,
-    total (ya escrito), estado ('confirmada' | 'cancelada' | 'asistio') y cancelable (si todavía
-    se puede cancelar: confirmada y antes de que empiece la función).
+    total (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio'),
+    cancelable (si todavía se puede cancelar: confirmada o pendiente, y antes de que empiece la
+    función), y en una pendiente que todavía está a tiempo, enlace_de_pago (a Mercado Pago) y vence
+    (la hora, ya escrita); si no, null.
   - funcion: id, titulo, url, fecha (o null), sala y localidad; null si programación ya no la
     muestra (su sala se dio de baja).
   - cancelada: (bool) aviso al volver de cancelarla.
+  - con_pago: (bool) si la reserva se cobra con Mercado Pago: entonces son tres pasos.
 
-  cancelable y cancelada llevan |default(false): el paquete front se mergea antes que el back.
+  cancelable, cancelada, con_pago y los del pago llevan |default: el paquete front se mergea antes
+  que el back.
 #}
 {% extends 'base.html.twig' %}
 
@@ -26,19 +34,27 @@
       mensaje: 'Tus lugares quedaron libres para otros espectadores.'
     } only %}
   {% else %}
-    {% include 'funciones/pasos_reserva.html.twig' with { actual: 2 } only %}
+    {% set con_pago = con_pago|default(false) %}
+    {% include 'funciones/pasos_reserva.html.twig' with {
+      actual: reserva.estado == 'pendiente_pago' ? 2 : (con_pago ? 3 : 2),
+      con_pago: con_pago
+    } only %}
   {% endif %}
 
   <article class="tarjeta-comprobante">
     {# Desde «Mis reservas» se puede volver a una que ya se canceló. #}
     {% if reserva.estado == 'cancelada' %}
       <h1 class="comprobante-titulo">Reserva cancelada</h1>
+    {% elseif reserva.estado == 'pendiente_pago' %}
+      <h1 class="comprobante-titulo">Pagá tu reserva</h1>
     {% else %}
       <h1 class="comprobante-titulo"><span aria-hidden="true">✓</span> Reserva confirmada</h1>
     {% endif %}
 
-    <p class="comprobante-codigo-rotulo" id="comprobante-codigo">Código de la reserva</p>
-    <p class="comprobante-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</p>
+    {% if reserva.estado != 'pendiente_pago' %}
+      <p class="comprobante-codigo-rotulo" id="comprobante-codigo">Código de la reserva</p>
+      <p class="comprobante-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</p>
+    {% endif %}
 
     <dl class="comprobante-datos">
       <div>
@@ -66,6 +82,12 @@
     </dl>
 
     <div class="comprobante-acciones">
+      {% if reserva.enlace_de_pago|default(null) %}
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Pagar con Mercado Pago',
+          url: reserva.enlace_de_pago
+        } only %}
+      {% endif %}
       {# Imprimir necesita JavaScript: sin él no aparece, y queda el «Imprimir» del navegador (E4-04.2) #}
       <span data-imprimir hidden>
         {% include 'parciales/boton.html.twig' with {
@@ -89,6 +111,18 @@
       tipo: 'info',
       mensaje: 'Presentá este código en la puerta: el organizador registra la asistencia con él.'
     } only %}
+  {% elseif reserva.estado == 'pendiente_pago' %}
+    {% if reserva.vence|default(null) %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'info',
+        mensaje: 'Tus lugares quedan reservados hasta las ' ~ reserva.vence ~ '. Con el pago acreditado, la reserva se confirma y te llega el código por correo.'
+      } only %}
+    {% else %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'advertencia',
+        mensaje: 'Venció el plazo para pagar: los lugares quedaron libres. Si todavía hay, podés reservar de nuevo.'
+      } only %}
+    {% endif %}
   {% endif %}
 </div>
 {% endblock %}

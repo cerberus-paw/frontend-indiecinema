@@ -8,8 +8,9 @@
 
   Variables:
   - reservas: lista de {id, codigo (8 caracteres; se muestra en dos grupos de 4), cantidad, total
-    (ya escrito), estado ('confirmada' | 'cancelada' | 'asistio'), estado_etiqueta, cancelable,
-    funcion}. funcion es {id, titulo, url, fecha (o null), precio, sala, localidad}, o null si
+    (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio'),
+    estado_etiqueta, cancelable, enlace_de_pago (a Mercado Pago, sólo en una pendiente que todavía
+    está a tiempo; si no, null), funcion}. funcion es {id, titulo, url, fecha (o null), precio, sala, localidad}, o null si
     programación no la devolvió.
   - sin_programacion: (bool) programación no respondió: ninguna fila tiene los datos de su función.
   - paginado: numero, total_paginas, total, anterior y siguiente (URL o null) y paginas: lista de
@@ -22,7 +23,8 @@
 {% block miga %}Mis reservas{% endblock %}
 
 {% block panel %}
-{% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
+{# La pendiente de pago va con la píldora de contorno, sin modificador. #}
+{% set clases_estado = { pendiente_pago: '', confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
 <div class="panel-reservas mis-reservas">
   <header class="encabezado-formulario-solicitud">
     <div class="solicitud-texto-cabecera">
@@ -77,9 +79,17 @@
               {% endif %}
               <td>{{ reserva.cantidad }}</td>
               <td><span class="panel-reservas-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</span></td>
-              <td><span class="estado-cuenta {{ clases_estado[reserva.estado] }}">{{ reserva.estado_etiqueta }}</span></td>
+              <td><span class="estado-cuenta {{ clases_estado[reserva.estado] ?? '' }}">{{ reserva.estado_etiqueta }}</span></td>
               <td>
                 <div class="mis-reservas-acciones">
+                  {% if reserva.enlace_de_pago|default(null) %}
+                    {% include 'parciales/boton.html.twig' with {
+                      texto: 'Pagar',
+                      url: reserva.enlace_de_pago,
+                      tamano: 'chico',
+                      aria_label: 'Pagar la reserva ' ~ reserva.codigo ~ ' con Mercado Pago'
+                    } only %}
+                  {% endif %}
                   {% include 'parciales/boton.html.twig' with {
                     texto: 'Ver comprobante',
                     url: '/funcion/reservas/' ~ reserva.id,
