@@ -1,3 +1,5 @@
+/* exported FormularioDeReserva */
+
 /**
  * El formulario de reserva de la ficha, sin recargar (E4-05.3) y con la cantidad revisada contra
  * los lugares libres mientras se escribe (E4-05.4).
@@ -21,6 +23,10 @@
  * required, el min y el max que valida el navegador. Este componente sólo intercepta lo que ya
  * funciona: el novalidate lo pone el JavaScript, no la plantilla, justamente para no sacarle la
  * validación nativa a quien no lo tenga.
+ *
+ * El mensaje de error que manda el servidor y el foco al bloquear no los resuelve este componente:
+ * los pone PAW.mensajeDeError() y PAW.bloquear() (E4-05.8), que son los mismos que usa
+ * AccionesDeReserva. Estaban escritos dos veces, y las dos veces hubo que arreglarlos.
  *
  * Lo que no es de esta subtarea: el indicador de carga y el aviso de error genérico con la red
  * cortada son E4-05.6.
@@ -92,12 +98,22 @@ class FormularioDeReserva {
    */
   static mensajeDelCampo(campo) {
     if (campo.validity.rangeOverflow) {
-      const libres = Number.parseInt(campo.getAttribute('max') ?? '', 10);
+      const max = Number.parseInt(campo.getAttribute('max') ?? '', 10);
+      const libres = Number.parseInt(campo.dataset.lugaresLibres ?? '', 10);
+      // El tope por persona y lo que le queda los manda el servidor en el formulario (IC-463).
+      // Frena el tope cuando le queda menos que los libres; si son iguales, el servidor dice
+      // primero lo de la sala, y acá también.
+      const maximoPorPersona = Number.parseInt(campo.form?.dataset.maximoPorPersona ?? '', 10);
+      const restantes = Number.parseInt(campo.form?.dataset.restantesUsuario ?? '', 10);
+      if (Number.isInteger(maximoPorPersona) && Number.isInteger(restantes)
+        && (!Number.isInteger(libres) || restantes < libres)) {
+        return FormularioDeReserva.mensajeDelTope(maximoPorPersona - restantes, restantes, maximoPorPersona);
+      }
 
-      switch (libres) {
+      switch (Number.isInteger(libres) ? libres : max) {
         case 0: return 'La función está agotada.';
         case 1: return 'Queda 1 lugar.';
-        default: return `Quedan ${libres} lugares.`;
+        default: return `Quedan ${Number.isInteger(libres) ? libres : max} lugares.`;
       }
     }
     if (campo.validity.valueMissing) {
@@ -147,41 +163,20 @@ class FormularioDeReserva {
       // Sin red, o con una respuesta que no es JSON: queda el mensaje genérico.
     }
     PAW.mostrarAviso(this.carga, false);
-    // En este orden: primero se habilita, porque LugaresLibres deshabilita el campo si con el
-    // número nuevo la función quedó agotada, y bloquear(false) lo volvería a habilitar; y el error
-    // va último, porque un campo deshabilitado no toma el foco que le da mostrarError().
     this.enviando = false;
-    this.bloquear(false);
     // Si el 422 fue porque quedan menos lugares, el número que vuelve ya es el de ahora.
     this.avisarLugares(datos);
     // Si con ese número la función quedó agotada, LugaresLibres cambió el recuadro por el aviso
-    // de «Función agotada» y este formulario salió del documento (IC-446): no hay campo donde
-    // mostrar el error, y el foco, que estaba en el botón, se iría al principio de la página. Va
-    // al título del aviso, que es lo que ahora ocupa su lugar.
+    // de «Función agotada» y este formulario salió del documento (IC-446): el foco va directo al
+    // título del aviso sin pasar por el botón de envío.
     if (!this.formulario.isConnected) {
-      const titulo = document.getElementById('ficha-reserva-titulo');
-      if (titulo) {
-        titulo.tabIndex = -1;
-        titulo.focus();
-      }
+      PAW.enfocar(document.getElementById('ficha-reserva-titulo'));
 
       return;
     }
-    this.mostrarError(FormularioDeReserva.mensajeDe(datos));
-  }
-
-  /**
-   * El error que mandó el servidor, que en JSON viene para el espectador y sin detalles internos
-   * (E4-05.1): el del campo o el de la regla en un 422, «La página venció…» con el token vencido,
-   * «Tenés que ingresar…» con la sesión vencida. Si no trae ninguno, el genérico.
-   *
-   * @param {?{errores?: {cantidad?: string}, error?: string}} datos
-   * @returns {string}
-   */
-  static mensajeDe(datos) {
-    const mensaje = datos?.errores?.cantidad ?? datos?.error;
-
-    return typeof mensaje === 'string' && mensaje !== '' ? mensaje : FormularioDeReserva.MENSAJE_DE_ERROR;
+    // Se desbloquea sin forzar el foco al botón porque mostrarError() se lo da al campo con error.
+    this.bloquear(false, false);
+    this.mostrarError(PAW.mensajeDeError(datos, FormularioDeReserva.MENSAJE_DE_ERROR, 'cantidad'));
   }
 
   /**
@@ -207,7 +202,7 @@ class FormularioDeReserva {
     aviso.append(icono, contenido);
 
     this.formulario.replaceWith(aviso);
-    aviso.focus();
+    PAW.enfocar(aviso);
   }
 
   /**
@@ -259,6 +254,28 @@ class FormularioDeReserva {
   }
 
   /**
+   * El error del tope por persona, palabra por palabra el de
+   * ServicioDeReservas::mensajeDeMaximoPorPersona().
+   *
+   * @param {number} yaReservados
+   * @param {number} restantes
+   * @param {number} maximo
+   * @returns {string}
+   */
+  static mensajeDelTope(yaReservados, restantes, maximo) {
+    if (yaReservados === 0) {
+      return `Se pueden reservar hasta ${maximo} lugares por persona en cada función.`;
+    }
+    if (restantes === 0) {
+      return `Ya tenés reservados los ${maximo} lugares máximos por persona para esta función.`;
+    }
+    const textoYa = yaReservados === 1 ? '1 lugar reservado' : `${yaReservados} lugares reservados`;
+    const textoSumar = restantes === 1 ? '1 lugar más' : `hasta ${restantes} lugares más`;
+
+    return `Ya tenés ${textoYa}: podés sumar ${textoSumar} (máximo ${maximo} por persona).`;
+  }
+
+  /**
    * Le pasa a LugaresLibres el número que vino con la respuesta, si vino: es el de después de
    * reservar, y es mejor que esperar hasta la consulta siguiente.
    *
@@ -273,17 +290,18 @@ class FormularioDeReserva {
 
   /**
    * Deshabilita o vuelve a habilitar el campo y el botón mientras se manda, para que no salgan dos
-   * reservas con un doble clic.
+   * reservas con un doble clic. El campo también, y no sólo el botón, porque con Enter la reserva
+   * se manda desde ahí.
+   *
+   * Lo hace PAW.bloquear(), que además conserva el foco: al deshabilitar el control que lo tiene,
+   * el navegador lo manda al principio de la página.
    *
    * @param {boolean} bloqueado
+   * @returns {?Element} al bloquear, lo que tenía el foco
+   * @param {boolean} [restaurarFoco=true] si devolver el foco al control previo al desbloquear
    */
-  bloquear(bloqueado) {
-    const boton = this.formulario.querySelector('button[type="submit"]');
-    this.campo()?.toggleAttribute('disabled', bloqueado);
-    boton?.toggleAttribute('disabled', bloqueado);
-    if (boton) {
-      boton.toggleAttribute('aria-busy', bloqueado);
-    }
+  bloquear(bloqueado, restaurarFoco = true) {
+    return PAW.bloquear(this.formulario, bloqueado, 'input[name="cantidad"], button[type="submit"]', restaurarFoco);
   }
 
   /**

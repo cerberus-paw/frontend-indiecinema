@@ -1,3 +1,5 @@
+/* exported MenuUsuario */
+
 /**
  * El menú desplegable del usuario con sesión (<details id="menu-usuario"> del encabezado): se
  * cierra al hacer clic afuera y con Escape, que además devuelve el foco al botón (WCAG 2.1). Sin

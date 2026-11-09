@@ -1,3 +1,5 @@
+/* exported EnviarAlElegir */
+
 /**
  * Un formulario que se manda al elegir una opción de uno de sus desplegables, sin botón, como en
  * los wireframes del panel del administrador. Va en los <form data-enviar-al-elegir>; el texto de

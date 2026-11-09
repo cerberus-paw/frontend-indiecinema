@@ -5,6 +5,57 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   0. FUENTES
+   Fira Sans Condensed servida desde el sitio y no desde Google Fonts: así la Content-Security-Policy
+   sólo admite recursos propios (font-src y style-src 'self'), y Google Fonts tampoco admitiría
+   Subresource Integrity, porque devuelve un CSS distinto según el navegador. Son los mismos pesos
+   que se pedían a Google, sólo el subconjunto latino (alcanza para el español) y en woff2, que leen
+   todos los navegadores actuales. Licencia OFL en estaticos/fuentes/OFL.txt.
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-300-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-800-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fira Sans Condensed';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fuentes/fira-sans-condensed-latin-400-italic.woff2') format('woff2');
+}
+
+/* --------------------------------------------------------------------------
    1. VARIABLES DE DISEÑO (DESIGN TOKENS) EN :ROOT
    Centralizan los valores de la identidad visual de la Entrega 1.
    -------------------------------------------------------------------------- */
@@ -60,8 +111,9 @@
   --color-texto: #FBF4E7;
   /* Texto secundario (#D4C9B8): crema suave para descripciones, metadatos y subtítulos */
   --color-texto-secundario: #D4C9B8;
-  /* Texto atenuado (#8C8478): crema apagado para placeholders, iconos pasivos y pies de página */
-  --color-texto-apagado: #8C8478;
+  /* Texto atenuado (#A19B91): crema apagado para placeholders, ayudas, iconos pasivos y pies de
+     página. Da 4,5:1 hasta sobre la superficie interactiva, la más clara (E4-10.4) */
+  --color-texto-apagado: #A19B91;
   /* Texto inverso (#17141C): Tinta para lectura sobre botones con fondo primario ámbar */
   --color-texto-inverso: #17141C;
   /* Texto de máximo contraste y realce visual en blanco puro */
@@ -74,8 +126,9 @@
   --color-exito: #10b981;
   /* Advertencia (#F0A63B): ámbar para alertas de expiración y advertencias de moderación */
   --color-advertencia: #F0A63B;
-  /* Error (#ef4444): rojo vibrante para errores de validación, páginas 404/500 y cancelaciones */
-  --color-error: #ef4444;
+  /* Error (#F37878): rojo para errores de validación, páginas 404/500 y cancelaciones, como color
+     de texto: da 4,5:1 hasta sobre la superficie interactiva (E4-10.4) */
+  --color-error: #F37878;
 
   /* ── 1.6 Familias Tipográficas ────────────────────────────────────────── */
   /* Fira Sans Condensed: tipografía oficial de IndieCinema para títulos y branding */
@@ -241,6 +294,15 @@ select {
   max-width: 100%;
 }
 
+/* El atributo hidden oculta siempre (IC-448). El navegador lo aplica con «[hidden] { display:
+   none }», que tiene la misma especificidad que cualquier regla de clase: un «display: flex» en
+   la clase del elemento le gana por venir después, y el elemento se ve igual aunque el
+   JavaScript lo haya marcado como oculto. Con !important deja de depender del orden, y ningún
+   componente necesita repetir la regla para su propia clase. */
+[hidden] {
+  display: none !important;
+}
+
 /* --------------------------------------------------------------------------
    3. ACCESIBILIDAD Y UTILIDADES
    -------------------------------------------------------------------------- */
@@ -295,6 +357,12 @@ select {
 .skip-link:focus {
   /* Desciende el enlace para hacerlo visible */
   top: 1rem;
+}
+
+/* El contenido principal toma el foco al saltar (tabindex -1) sólo para que Tab siga desde ahí */
+.contenido-principal:focus {
+  /* Sin el contorno del foco: marcaría la página entera */
+  outline: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -942,6 +1010,16 @@ a:hover {
   font-weight: 700;
 }
 
+/* Lista de enlaces de una sección del menú, sin viñetas (IC-301) */
+.menu-seccion {
+  /* Sin viñetas */
+  list-style: none;
+  /* Sin margen propio de la lista */
+  margin: 0;
+  /* Sin sangría de la lista */
+  padding: 0;
+}
+
 /* Item de enlace del menú */
 .menu-item {
   /* Flexbox horizontal */
@@ -1116,8 +1194,9 @@ button.menu-item {
 
 /* Botón variante peligro para eliminaciones y acciones críticas */
 .boton-peligro {
-  /* Fondo rojo oscuro de alerta */
-  background-color: var(--color-error);
+  /* Fondo rojo oscuro de alerta: no el rojo de error, que es claro para leerse como texto, y
+     con el texto blanco daría menos de 4,5:1 (E4-10.4) */
+  background-color: #dc2626;
   /* Texto blanco de alto contraste */
   color: #ffffff;
   /* Borde transparente */
@@ -1127,13 +1206,30 @@ button.menu-item {
 /* Efecto hover de botón de peligro */
 .boton-peligro:hover {
   /* Fondo rojo más intenso */
-  background-color: #dc2626;
+  background-color: #b91c1c;
   /* Mantiene texto blanco */
   color: #ffffff;
   /* Sombra de resplandor rojizo */
   box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
 }
 
+/* Botón peligro suave para bajas lógicas y acciones destructivas secundarias */
+.boton-peligro-suave {
+  background-color: var(--color-acento-suave);
+  color: #fca5a5;
+  border: 1px solid rgba(225, 29, 72, 0.4);
+}
+
+.boton-peligro-suave:hover:not(:disabled) {
+  background-color: var(--color-acento);
+  color: var(--color-texto-brillante);
+  border-color: var(--color-acento);
+}
+
+.boton-peligro-suave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 /* Botón variante fantasma o contorno */
 .boton-fantasma {
   /* Fondo completamente transparente */
@@ -1757,6 +1853,69 @@ dd {
   line-height: 1.35;
 }
 
+/* Zona para arrastrar y soltar la imagen, con vista previa (IC-296). El campo de archivo queda
+   adentro: se llega con el tabulador y se abre con Enter, como siempre */
+.zona-de-imagen {
+  /* Vista previa, texto, campo y nombre, uno debajo del otro y centrados */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espacio-3);
+  /* Aire para que se vea como una zona y no como un campo más */
+  padding: var(--espacio-6) var(--espacio-4);
+  /* Borde punteado: la pista de que algo se puede soltar acá */
+  border: 2px dashed var(--color-borde-medio);
+  border-radius: var(--radio-md);
+  /* Apenas separada del fondo */
+  background-color: var(--color-superficie);
+  /* El resalte al arrastrar, suave */
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Mientras hay algo encima para soltar */
+.zona-de-imagen-encima {
+  /* Borde del color primario, lleno */
+  border-style: solid;
+  border-color: var(--color-primario);
+  /* Y el fondo elevado, para que se note que recibe */
+  background-color: var(--color-superficie-elevada);
+}
+
+/* La foto elegida, antes de mandarla */
+.zona-de-imagen-vista {
+  /* Entra en la zona sin deformarse */
+  max-width: 100%;
+  max-height: 14rem;
+  /* Recortada al centro si no es del mismo lado */
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+}
+
+/* «Arrastrá la imagen acá, o elegila:» */
+.zona-de-imagen-texto {
+  /* Sin margen propio: el gap de la zona separa */
+  margin: 0;
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+/* El nombre del archivo, para quien no ve la vista previa */
+.zona-de-imagen-nombre {
+  margin: 0;
+  color: var(--color-texto-atenuado);
+  font-size: var(--texto-xs);
+  /* Si es largo, que no estire la zona */
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Sin animación para quien la desactivó */
+@media (prefers-reduced-motion: reduce) {
+  .zona-de-imagen {
+    transition: none;
+  }
+}
+
 /* --------------------------------------------------------------------------
    14. MENSAJES Y ALERTAS REUTILIZABLES (IC-45)
    Componentes para mensaje.html.twig: éxito, error, advertencia e info
@@ -1854,6 +2013,20 @@ dd {
 .alerta-item-detalle {
   /* Margen inferior sutil entre ítems */
   margin-bottom: 0.2rem;
+}
+
+/* El resumen de errores de un formulario (E4-10.5): recibe el foco al cargar, y se tiene que
+   ver dónde quedó, aunque haya llegado sin el teclado */
+.resumen-de-errores:focus {
+  /* Contorno en el color primario, como los demás focos */
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+/* Los links del resumen llevan a cada campo: subrayados, en el color del texto del error */
+.resumen-de-errores a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 /* Botón para descartar la alerta */
@@ -1975,12 +2148,6 @@ dd {
   font-size: var(--texto-sm);
   /* Sombra para separarlo de lo que tiene abajo */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-}
-
-/* Oculto con el atributo hidden mientras no hay nada que avisar: el display de arriba le ganaría */
-.aviso-flotante[hidden] {
-  /* Fuera de la pantalla */
-  display: none;
 }
 
 /* Círculo que gira */
@@ -2111,6 +2278,30 @@ dd {
   object-position: center;
   /* Transición de zoom al posar ratón */
   transition: transform var(--transicion-base);
+}
+
+/* El afiche de una función se ve entero: es vertical y el recuadro apaisado, y recortado se
+   pierde el título. Va encima de su copia desenfocada, que llena los costados. */
+.tarjeta-funcion-imagen-entera {
+  /* Por encima del fondo */
+  position: relative;
+  /* Entero, sin recortar */
+  object-fit: contain;
+}
+
+/* La copia desenfocada del afiche, de fondo */
+.tarjeta-funcion-imagen-fondo {
+  /* Ocupa todo el recuadro, detrás del afiche */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Cubre el recuadro: los bordes no se ven nítidos igual */
+  object-fit: cover;
+  /* Desenfocada y oscurecida para que resalte el afiche */
+  filter: blur(18px) brightness(0.55);
+  /* Agrandada para que el desenfoque no deje los bordes claros */
+  transform: scale(1.2);
 }
 
 /* Zoom suave en la imagen al hacer hover sobre la tarjeta */
@@ -2859,7 +3050,190 @@ dd {
    Componentes de programacion/cartelera.html.twig
    -------------------------------------------------------------------------- */
 
-/* Formulario GET de filtros sobre la cuadrícula de funciones */
+/* «N funciones · ordenadas por …» debajo del título (E4-10.9) */
+.cartelera-resumen-linea {
+  /* La cantidad y el orden en una línea, que baja si no entra */
+  display: flex;
+  flex-wrap: wrap;
+  /* Alineados por la base del texto */
+  align-items: baseline;
+  /* Separación entre la cantidad y el orden */
+  gap: var(--espacio-1);
+  /* Separación con la bajada */
+  margin-top: var(--espacio-2);
+}
+
+/* En el resumen de arriba, la cantidad no empuja nada: va pegada al orden */
+.cartelera-resumen-linea .cartelera-resultados {
+  margin-right: 0;
+  /* La cantidad, más fuerte que el orden */
+  color: var(--color-texto);
+  font-weight: 600;
+}
+
+/* «· ordenadas por …» */
+.cartelera-orden-aplicado {
+  /* Texto secundario y chico, como la cantidad */
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  margin: 0;
+}
+
+/* «Filtros activos:» y sus etiquetas, debajo del título (E4-10.9) */
+.filtros-activos {
+  /* El título, las etiquetas y «Quitar todos» en una fila que baja si no entra */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2);
+  /* Separación con lo que sigue */
+  margin-bottom: var(--espacio-4);
+}
+
+.filtros-activos-titulo {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  margin: 0;
+}
+
+/* La lista, sin viñetas y en fila */
+.filtros-activos-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Cada etiqueta: una píldora oscura con la ×, como el wireframe */
+.etiqueta-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  /* Un área cómoda para el dedo */
+  min-height: 2rem;
+  padding: var(--espacio-1) var(--espacio-3);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  background: var(--color-superficie-interactiva);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  text-decoration: none;
+}
+
+.etiqueta-filtro:hover {
+  border-color: var(--color-primario);
+}
+
+/* La ×, más apagada que el texto */
+.etiqueta-filtro-quitar {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-md);
+  line-height: 1;
+}
+
+/* «Quitar todos»: un link discreto, como «Limpiar» */
+.filtros-activos-quitar {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+/* La columna de filtros y los resultados: una debajo de la otra hasta 1024 px */
+.cartelera-cuerpo {
+  display: grid;
+  /* Separación entre la columna y los resultados */
+  gap: var(--espacio-6);
+}
+
+/* Desde 1024 px, la columna al costado de los resultados, como el wireframe */
+@media (min-width: 1024px) {
+  .cartelera-cuerpo {
+    /* Una columna angosta y los resultados con el resto */
+    grid-template-columns: 15rem minmax(0, 1fr);
+    /* La columna no se estira hasta el alto de la grilla */
+    align-items: start;
+  }
+}
+
+/* Los resultados no desbordan su celda de la grilla */
+.cartelera-principal {
+  min-width: 0;
+}
+
+/* La columna plegable de filtros */
+.filtros-columna {
+  /* Recuadro como el de las tarjetas */
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie);
+  /* Aire adentro */
+  padding: var(--espacio-3) var(--espacio-4);
+}
+
+/* «Filtros»: el título de la columna, y en el celular lo que la abre */
+.filtros-columna-titulo {
+  /* Como un título chico */
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-md);
+  font-weight: 600;
+  /* Se puede tocar */
+  cursor: pointer;
+  /* Un área cómoda para el dedo */
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  /* El espacio antes de «(N)», que en flex no se ve */
+  gap: 0.3em;
+  /* Sin el triángulo del navegador: la flecha la pone ::after */
+  list-style: none;
+}
+
+/* Sin el triángulo del navegador, que el display: flex no muestra igual en todos */
+.filtros-columna-titulo::-webkit-details-marker {
+  display: none;
+}
+
+/* En el celular, una flecha dice que «Filtros» se abre; apunta hacia abajo con la columna abierta */
+.filtros-columna-titulo::after {
+  content: "›";
+  /* A la derecha del título */
+  margin-left: auto;
+  font-size: var(--texto-xl);
+  color: var(--color-texto-secundario);
+  transition: transform var(--transicion-rapida);
+}
+
+.filtros-columna[open] > .filtros-columna-titulo::after {
+  transform: rotate(90deg);
+}
+
+/* Desde 768 px la columna no se cierra (con JavaScript la vuelve a abrir el buscador): «Filtros»
+   es sólo el título, sin flecha ni cursor de mano */
+@media (min-width: 768px) {
+  .filtros-columna-titulo {
+    cursor: default;
+  }
+
+  .filtros-columna-titulo::after {
+    content: none;
+  }
+}
+
+/* «Limpiar», arriba a la derecha de la columna */
+.filtros-columna-acciones {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* «Limpiar»: un link discreto */
+.filtros-limpiar {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+/* Formulario GET de filtros sobre la cuadrícula: lo usan también los buscadores de salas y de
+   obras (.buscador-salas, .buscador-obras), que cambian sólo las columnas */
 .filtros-cartelera {
   /* Cuadrícula de columnas automáticas: cuatro en escritorio, una en móvil */
   display: grid;
@@ -2871,6 +3245,55 @@ dd {
   align-items: end;
   /* Separación con los resultados */
   margin-bottom: var(--espacio-6);
+}
+
+/* En la columna de la cartelera (E4-10.9), los grupos uno debajo del otro */
+.filtros-columna .filtros-cartelera {
+  grid-template-columns: minmax(0, 1fr);
+  /* Cada grupo con su alto: no hay botones que alinear */
+  align-items: stretch;
+  /* La separación con los resultados la da .cartelera-cuerpo; arriba, la de «Limpiar» */
+  margin-bottom: 0;
+  margin-top: var(--espacio-2);
+}
+
+/* De 768 a 1023 px, la columna va arriba de la grilla: los grupos en dos columnas */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .filtros-columna .filtros-cartelera {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Cada grupo de la columna, separado por una línea como en el wireframe */
+.filtros-grupo {
+  /* Sin el recuadro del navegador para el fieldset de precio */
+  border: 0;
+  margin: 0;
+  padding: 0 0 var(--espacio-4);
+  border-bottom: 1px solid var(--color-borde);
+  /* Lo de adentro no desborda */
+  min-width: 0;
+}
+
+/* El título del grupo de precio, como la etiqueta de los otros grupos (.campo-etiqueta) */
+.filtros-grupo-titulo {
+  font-family: var(--fuente-cuerpo);
+  font-weight: 600;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-brillante);
+  padding: 0;
+  margin-bottom: var(--espacio-1);
+}
+
+/* Los dos campos de precio, uno al lado del otro */
+.filtros-grupo-precio {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espacio-2);
+}
+
+.filtros-grupo-precio .filtros-grupo-titulo {
+  grid-column: 1 / -1;
 }
 
 /* Los campos del filtro no llevan el margen inferior de un formulario largo */
@@ -2887,6 +3310,97 @@ dd {
   gap: var(--espacio-2);
 }
 
+/* Historial de las ultimas 5 busquedas en localStorage (E4-06.4) */
+.ultimas-busquedas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  padding: var(--espacio-3) var(--espacio-4);
+  margin-bottom: var(--espacio-6);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.ultimas-busquedas-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+.ultimas-busquedas-titulo {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ultimas-busquedas-limpiar {
+  background: transparent;
+  border: none;
+  padding: var(--espacio-1) var(--espacio-2);
+  border-radius: var(--radio-sm);
+  color: var(--color-texto-secundario);
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--texto-xs);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color var(--transicion-rapida), background-color var(--transicion-rapida);
+}
+
+.ultimas-busquedas-limpiar:hover {
+  color: var(--color-texto);
+  background-color: var(--color-superficie-hover);
+}
+
+.ultimas-busquedas-limpiar:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+.ultimas-busquedas-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.ultimas-busquedas-item {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.ultimas-busquedas-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: var(--espacio-1) var(--espacio-3);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  text-decoration: none;
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida), color var(--transicion-rapida);
+}
+
+.ultimas-busquedas-chip:hover {
+  background-color: var(--color-primario-suave);
+  border-color: var(--color-primario);
+  color: var(--color-texto-brillante);
+}
+
+.ultimas-busquedas-chip:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
 /* El buscador del listado de salas usa la misma grilla, con un solo campo un poco más ancho */
 .buscador-salas {
   /* El campo y los botones, de mínimo 240px */
@@ -2894,40 +3408,35 @@ dd {
 }
 
 /* --------------------------------------------------------------------------
-   19. FICHA DE LA SALA: FOTO, DATOS Y PRÓXIMAS FUNCIONES (IC-90)
-   Componentes de programacion/sala.html.twig
+   19. FICHA DE LA SALA: PORTADA, DATOS, PRÓXIMAS FUNCIONES Y COSTADO (IC-90, IC-335)
+   Componentes de programacion/sala.html.twig y parciales/fila_funcion.html.twig, en el orden
+   del wireframe «sala-indie» de Figma
    -------------------------------------------------------------------------- */
 
-/* La foto y los datos de la sala, lado a lado en escritorio */
-.ficha-sala-cabecera {
-  /* Cuadrícula de dos columnas: la foto un poco más ancha */
-  display: grid;
-  /* Foto y datos */
-  grid-template-columns: 3fr 2fr;
-  /* Separación entre las columnas */
-  gap: var(--espacio-8);
-  /* Los datos arrancan arriba, a la altura de la foto */
-  align-items: start;
-  /* Separación con las funciones */
-  margin: var(--espacio-6) 0 var(--espacio-10);
+/* La portada empieza pegada al encabezado: sin el relleno superior del main */
+.contenido-principal:has(> .ficha-sala:first-child) {
+  /* Sin relleno arriba */
+  padding-top: 0;
 }
 
-/* Marco de la foto, apaisado como una pantalla */
-.ficha-sala-foto {
-  /* Proporción de pantalla */
-  aspect-ratio: 16 / 9;
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-lg);
-  /* La imagen no se sale de las esquinas */
-  overflow: hidden;
+/* Foto de portada de borde a borde de la ventana; el body corta lo que se sale a los costados */
+.ficha-sala-portada {
+  /* Todo el ancho de la ventana */
+  width: 100vw;
+  /* Sale del ancho máximo del main, centrada */
+  margin-left: calc(50% - 50vw);
+  /* Alto de franja, como el wireframe (300 de 1440), con piso y techo */
+  height: clamp(160px, 21vw, 360px);
   /* Fondo mientras carga o sin foto */
   background-color: var(--color-superficie);
-  /* Borde tenue */
-  border: 1px solid var(--color-borde);
+  /* Línea inferior tenue */
+  border-bottom: 1px solid var(--color-borde);
+  /* La imagen no se sale */
+  overflow: hidden;
 }
 
-/* La foto ocupa todo el marco sin deformarse */
-.ficha-sala-foto-imagen {
+/* La foto llena la franja sin deformarse */
+.ficha-sala-portada-imagen {
   /* Ancho completo */
   width: 100%;
   /* Alto completo */
@@ -2938,16 +3447,30 @@ dd {
   display: block;
 }
 
-/* Nombre, dirección, capacidad y descripción, en columna */
-.ficha-sala-datos {
-  /* En columna */
+/* Marcador de la portada sin foto, con el texto del wireframe */
+.ficha-sala-portada-marcador {
+  /* Llena la franja */
+  height: 100%;
+  /* Centra el texto */
   display: flex;
-  /* Dirección vertical */
-  flex-direction: column;
-  /* Separación entre los datos */
-  gap: var(--espacio-3);
-  /* Evita desborde con nombres largos */
-  min-width: 0;
+  /* Centrado vertical */
+  align-items: center;
+  /* Centrado horizontal */
+  justify-content: center;
+  /* Fondo neutro degradado, como el marcador del afiche */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%);
+}
+
+/* Las migas, separadas de la portada */
+.ficha-sala-migas {
+  /* Aire arriba */
+  margin-top: var(--espacio-6);
+}
+
+/* Nombre y dirección de la sala */
+.ficha-sala-cabecera {
+  /* Separación con las columnas */
+  margin: var(--espacio-2) 0 var(--espacio-8);
 }
 
 /* Nombre de la sala */
@@ -2958,41 +3481,346 @@ dd {
   font-size: var(--texto-3xl);
   /* Interlineado compacto */
   line-height: 1.15;
-  /* Sin margen propio: lo da el gap */
-  margin: 0;
+  /* Separación con la dirección */
+  margin: 0 0 var(--espacio-3);
   /* Corta palabras muy largas */
   overflow-wrap: anywhere;
 }
 
-/* Título de la sección de funciones */
-.ficha-sala-funciones-titulo {
+/* Dirección y localidad debajo del nombre, con el pin */
+.ficha-sala-ubicacion-linea {
+  /* Pin y texto en fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación entre el pin y el texto */
+  gap: var(--espacio-2);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Tamaño chico */
+  font-size: var(--texto-sm);
+  /* Sin margen propio */
+  margin: 0;
+}
+
+/* Columna principal y costado, como el wireframe (780 y 268 de 1440) */
+.ficha-sala-columnas {
+  /* Cuadrícula de dos columnas */
+  display: grid;
+  /* La principal ocupa lo que queda; el costado, un ancho fijo con piso */
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  /* Separación entre las columnas */
+  gap: var(--espacio-8);
+  /* Cada columna arranca arriba */
+  align-items: start;
+}
+
+/* Las secciones de la columna principal, apiladas */
+.ficha-sala-seccion + .ficha-sala-seccion {
+  /* Separación entre «Sobre la sala» y las funciones */
+  margin-top: var(--espacio-10);
+}
+
+/* Título de cada sección de la columna principal */
+.ficha-sala-seccion-titulo {
   /* Tipografía de títulos */
   font-family: var(--fuente-titulos);
   /* Tamaño de sección */
-  font-size: var(--texto-2xl);
-  /* Separación con la cuadrícula */
-  margin: 0 0 var(--espacio-6);
+  font-size: var(--texto-xl);
+  /* Separación con el contenido */
+  margin: 0 0 var(--espacio-4);
 }
 
-/* En tablet y celular, la foto arriba y los datos debajo */
-@media (max-width: 768px) {
-  .ficha-sala-cabecera {
-    /* Una sola columna */
-    grid-template-columns: 1fr;
-    /* Menos separación */
-    gap: var(--espacio-5);
-    /* Menos margen con las funciones */
-    margin-bottom: var(--espacio-8);
-  }
+/* La descripción de la sala */
+.ficha-sala-sobre {
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Interlineado cómodo para leer */
+  line-height: 1.7;
+  /* Ancho de lectura */
+  max-width: 65ch;
+  /* Sin margen propio */
+  margin: 0;
+}
 
+/* Lista de próximas funciones, sin viñetas, con una línea entre fila y fila */
+.lista-filas-funcion {
+  /* Sin viñetas */
+  list-style: none;
+  /* Sin margen */
+  margin: 0;
+  /* Sin relleno */
+  padding: 0;
+  /* Línea arriba de la primera fila */
+  border-top: 1px solid var(--color-borde);
+}
+
+/* Una función: afiche, datos y, a la derecha, lugares, estado y «Ver» */
+.fila-funcion {
+  /* En fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación entre las partes */
+  gap: var(--espacio-4);
+  /* Relleno vertical */
+  padding: var(--espacio-4) 0;
+  /* Línea entre filas */
+  border-bottom: 1px solid var(--color-borde);
+}
+
+/* El afiche chico, vertical como uno de verdad */
+.fila-funcion-afiche {
+  /* Ancho fijo, como el wireframe */
+  flex: 0 0 48px;
+  /* Proporción de afiche */
+  aspect-ratio: 2 / 3;
+  /* Centra el marcador */
+  display: flex;
+  /* Centrado vertical */
+  align-items: center;
+  /* Centrado horizontal */
+  justify-content: center;
+  /* Fondo del marcador */
+  background-color: var(--color-superficie-elevada);
+  /* Esquinas apenas redondeadas */
+  border-radius: var(--radio-sm);
+  /* La imagen no se sale */
+  overflow: hidden;
+}
+
+/* La palabra AFICHE del marcador, más chica para que entre en el recuadro */
+.fila-funcion-afiche .afiche-placeholder-texto {
+  /* Tamaño mínimo */
+  font-size: 0.5rem;
+  /* Menos espaciado entre letras */
+  letter-spacing: 0.05em;
+}
+
+/* La imagen del afiche llena el recuadro */
+.fila-funcion-afiche-imagen {
+  /* Ancho completo */
+  width: 100%;
+  /* Alto completo */
+  height: 100%;
+  /* Recorta en lugar de deformar */
+  object-fit: cover;
+  /* Sin espacio de línea */
+  display: block;
+}
+
+/* Título y fecha */
+.fila-funcion-datos {
+  /* Ocupa lo que queda */
+  flex: 1;
+  /* Deja achicarse con títulos largos */
+  min-width: 0;
+}
+
+/* Título de la función */
+.fila-funcion-titulo {
+  /* Tipografía de títulos */
+  font-family: var(--fuente-titulos);
+  /* Tamaño de texto destacado */
+  font-size: var(--texto-base);
+  /* Peso medio */
+  font-weight: 600;
+  /* Separación con la fecha */
+  margin: 0 0 var(--espacio-1);
+  /* Corta palabras muy largas */
+  overflow-wrap: anywhere;
+}
+
+/* Fecha con el calendario */
+.fila-funcion-fecha {
+  /* Ícono y texto en fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación */
+  gap: var(--espacio-2);
+  /* Texto chico */
+  font-size: var(--texto-sm);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Sin margen */
+  margin: 0;
+}
+
+/* Lugares, insignia y «Ver», a la derecha */
+.fila-funcion-estado {
+  /* En fila */
+  display: flex;
+  /* Alineados al centro */
+  align-items: center;
+  /* Separación */
+  gap: var(--espacio-4);
+  /* No se achica */
+  flex-shrink: 0;
+}
+
+/* «5 de 80 lugares libres» */
+.fila-funcion-lugares {
+  /* Texto chico */
+  font-size: var(--texto-sm);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Sin margen */
+  margin: 0;
+}
+
+/* Agotada, en el color de error */
+.fila-funcion-agotada {
+  /* Rojo de estado */
+  color: var(--color-error);
+  /* Peso medio */
+  font-weight: 600;
+}
+
+/* El costado: los recuadros apilados */
+.ficha-sala-costado {
+  /* En columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación entre recuadros */
+  gap: var(--espacio-4);
+}
+
+/* Cada recuadro del costado */
+.ficha-sala-recuadro {
+  /* Fondo de superficie */
+  background-color: var(--color-superficie);
+  /* Borde tenue */
+  border: 1px solid var(--color-borde);
+  /* Esquinas redondeadas */
+  border-radius: var(--radio-md);
+  /* Relleno interno */
+  padding: var(--espacio-4);
+}
+
+/* Título del recuadro, en versalitas monoespaciadas como el wireframe */
+.ficha-sala-recuadro-titulo {
+  /* Tipografía monoespaciada */
+  font-family: var(--fuente-codigo);
+  /* Texto extra chico */
+  font-size: var(--texto-xs);
+  /* Mayúsculas */
+  text-transform: uppercase;
+  /* Espaciado entre letras */
+  letter-spacing: 0.08em;
+  /* Peso normal */
+  font-weight: 500;
+  /* Texto atenuado */
+  color: var(--color-texto-apagado);
+  /* Separación con el contenido */
+  margin: 0 0 var(--espacio-3);
+}
+
+/* La dirección, destacada */
+.ficha-sala-direccion {
+  /* Peso medio */
+  font-weight: 600;
+  /* Separación con la localidad */
+  margin: 0 0 var(--espacio-1);
+}
+
+/* La localidad, debajo */
+.ficha-sala-localidad {
+  /* Texto chico */
+  font-size: var(--texto-sm);
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+  /* Sin margen */
+  margin: 0;
+}
+
+/* Lista de parámetros: el nombre a la izquierda y el valor a la derecha. Sin la tarjeta que el
+   dl tiene por defecto: ya está dentro del recuadro */
+.ficha-sala-parametros {
+  /* Sin margen */
+  margin: 0;
+  /* Sin relleno */
+  padding: 0;
+  /* Sin fondo */
+  background: none;
+  /* Sin borde */
+  border: 0;
+  /* Sin redondeo */
+  border-radius: 0;
+  /* En columna */
+  display: flex;
+  /* Dirección vertical */
+  flex-direction: column;
+  /* Separación entre parámetros */
+  gap: var(--espacio-2);
+  /* Texto chico */
+  font-size: var(--texto-sm);
+}
+
+/* Un parámetro */
+.ficha-sala-parametro {
+  /* Nombre y valor en fila */
+  display: flex;
+  /* A los extremos */
+  justify-content: space-between;
+  /* Separación mínima */
+  gap: var(--espacio-3);
+}
+
+/* El nombre del parámetro */
+.ficha-sala-parametro dt {
+  /* Peso normal, como el wireframe: el valor es lo que se destaca */
+  font-weight: 400;
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+}
+
+/* El valor del parámetro */
+.ficha-sala-parametro dd {
+  /* Sin la sangría de dd */
+  margin: 0;
+  /* Peso medio */
+  font-weight: 600;
+  /* Alineado a la derecha */
+  text-align: right;
+}
+
+/* En tablet y celular, una sola columna: el costado después de las funciones */
+@media (max-width: 900px) {
+  .ficha-sala-columnas {
+    /* Una sola columna */
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* En el celular, cada fila acomoda los lugares, el estado y «Ver» debajo del título */
+@media (max-width: 600px) {
   .ficha-sala-nombre {
     /* Título más chico */
     font-size: var(--texto-2xl);
   }
 
-  .ficha-sala-funciones-titulo {
-    /* Título de sección más chico */
-    font-size: var(--texto-xl);
+  .fila-funcion {
+    /* Pueden bajar de renglón */
+    flex-wrap: wrap;
+    /* Arriba, porque las alturas cambian */
+    align-items: flex-start;
+  }
+
+  .fila-funcion-estado {
+    /* Todo el ancho, debajo del afiche y el título */
+    flex-basis: 100%;
+    /* Que se acomode si no entra */
+    flex-wrap: wrap;
+    /* Menos separación */
+    gap: var(--espacio-3);
+  }
+
+  /* «Ver» se va a la derecha */
+  .fila-funcion-ver {
+    /* Empuja a la derecha */
+    margin-left: auto;
   }
 }
 
@@ -3454,18 +4282,21 @@ dd {
   }
 }
 
-/* Cantidad de funciones encontradas y descarga en CSV */
-.cartelera-resumen {
+/* Cantidad de funciones encontradas, orden y descarga en CSV (E4-06.1). En la cartelera la
+   cantidad está en el resumen de arriba (E4-10.9) y la barra sólo tiene los controles: ver
+   .cartelera-principal .cartelera-barra */
+.cartelera-resumen,
+.cartelera-barra {
   /* En fila */
   display: flex;
-  /* La cantidad a la izquierda, la descarga a la derecha */
+  /* La cantidad a la izquierda, el orden y la descarga a la derecha */
   justify-content: space-between;
   /* Alineación vertical */
   align-items: center;
-  /* En pantallas angostas, la descarga baja */
+  /* En pantallas angostas, los controles bajan */
   flex-wrap: wrap;
-  /* Separación entre los dos */
-  gap: var(--espacio-2);
+  /* Separación entre elementos */
+  gap: var(--espacio-3);
   /* Separación con la cuadrícula */
   margin-bottom: var(--espacio-4);
 }
@@ -3478,20 +4309,140 @@ dd {
   font-size: var(--texto-sm);
   /* Sin margen propio: lo da .cartelera-resumen */
   margin: 0;
+  /* Empuja los controles de orden, paginado y CSV hacia la derecha */
+  margin-right: auto;
+}
+
+/* En la cartelera la barra ya no empieza con la cantidad, que empujaba los controles: van
+   agrupados a la derecha por su cuenta (E4-10.9) */
+.cartelera-principal .cartelera-barra {
+  justify-content: flex-end;
+}
+
+/* Selectores «Ordenar por» y «Paginado» arriba a la derecha de la grilla (E4-06.1 / E4-06.3) */
+.cartelera-orden,
+.cartelera-paginado-modo {
+  /* Etiqueta y desplegable en fila */
+  display: flex;
+  /* Centrado vertical */
+  align-items: center;
+  /* Separación entre la etiqueta y el select */
+  gap: var(--espacio-2);
+}
+
+/* Etiqueta «Ordenar por» y «Paginado» */
+.cartelera-orden-etiqueta {
+  /* Texto secundario legible */
+  color: var(--color-texto-secundario);
+  /* Tamaño compacto */
+  font-size: var(--texto-sm);
+  /* Sin salto de línea */
+  white-space: nowrap;
+}
+
+/* Desplegables compactos, alineados en altura con .boton-chico */
+.cartelera-orden .control-select,
+.cartelera-paginado-modo .control-select {
+  /* Ancho ajustado al contenido */
+  width: auto;
+  /* Relleno vertical compacto */
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  /* Radio compacto consistente con .boton-chico */
+  border-radius: var(--radio-sm);
+}
+
+@media (max-width: 600px) {
+  .cartelera-orden,
+  .cartelera-paginado-modo {
+    /* En celular cada uno ocupa su propia fila */
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .cartelera-orden .control-select,
+  .cartelera-paginado-modo .control-select {
+    /* Se adapta al ancho disponible sin desbordar a 360 px */
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 /* Navegación entre páginas de resultados */
 .paginado {
   /* En fila */
   display: flex;
+  /* En pantallas chicas puede quebrar línea */
+  flex-wrap: wrap;
   /* Centrado */
   justify-content: center;
   /* Alineación vertical */
   align-items: center;
   /* Separación entre elementos */
-  gap: var(--espacio-4);
+  gap: var(--espacio-3);
   /* Separación con la cuadrícula */
   margin-top: var(--espacio-8);
+}
+
+/* Lista numerada del paginado tradicional de la cartelera (E4-06.3) */
+.paginado .paginado-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.paginado-item {
+  display: inline-flex;
+}
+
+.paginado-enlace {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 var(--espacio-2);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-sm);
+  color: var(--color-texto);
+  text-decoration: none;
+  font-size: var(--texto-sm);
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida), color var(--transicion-rapida);
+}
+
+.paginado-enlace:hover {
+  background-color: var(--color-superficie-hover);
+  color: var(--color-texto);
+}
+
+.paginado-enlace.activo {
+  background-color: var(--color-primario);
+  border-color: var(--color-primario);
+  color: var(--color-texto-inverso);
+  font-weight: 700;
+}
+
+.paginado-elipsis {
+  color: var(--color-texto-apagado);
+  padding: 0 var(--espacio-1);
+}
+
+/* Centinela e indicador de carga para el scroll infinito (E4-06.3) */
+.cartelera-centinela {
+  width: 100%;
+  height: 1px;
+}
+
+.cartelera-cargando-mas {
+  text-align: center;
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  margin: var(--espacio-6) 0 0;
 }
 
 /* Página actual */
@@ -4258,16 +5209,6 @@ dd {
   display: block;
 }
 
-/* Cabecera de la sección de obras */
-.ficha-obras-cabecera {
-  /* Margen inferior */
-  margin-bottom: var(--espacio-4);
-  /* Relleno inferior */
-  padding-bottom: var(--espacio-2);
-  /* Línea divisoria sutil */
-  border-bottom: 1px solid var(--color-superficie-borde);
-}
-
 /* Rótulo de estado de las obras (programadas o candidatas en votación) */
 .ficha-obras-etiqueta {
   /* Tipografía de títulos */
@@ -4286,180 +5227,6 @@ dd {
   margin: 0;
 }
 
-/* Lista vertical de tarjetas de obras */
-.ficha-obras-lista {
-  /* Disposición flex en columna */
-  display: flex;
-  /* Dirección vertical */
-  flex-direction: column;
-  /* Separación entre películas */
-  gap: var(--espacio-6);
-}
-
-/* Tarjeta individual de una película o cortometraje */
-.ficha-obra-tarjeta {
-  /* Fondo superficie */
-  background-color: var(--color-superficie);
-  /* Borde tenue */
-  border: 1px solid var(--color-superficie-borde);
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-lg);
-  /* Relleno interno */
-  padding: var(--espacio-6);
-  /* Disposición flex */
-  display: flex;
-  /* Separación entre afiche y datos */
-  gap: var(--espacio-6);
-  /* Alineación superior */
-  align-items: flex-start;
-  /* Sombra sutil */
-  box-shadow: var(--sombra-sm);
-}
-
-/* Columna para el afiche cinematográfico */
-.ficha-obra-afiche-columna {
-  /* Ancho fijo de afiche */
-  width: 180px;
-  /* No se comprime */
-  flex-shrink: 0;
-}
-
-/* Marcador visual sustituto del afiche cuando no hay imagen */
-.ficha-obra-afiche-placeholder {
-  /* Ancho 100% */
-  width: 100%;
-  /* Proporción 2:3 */
-  aspect-ratio: 2 / 3;
-  /* Esquinas redondeadas */
-  border-radius: var(--radio-md);
-  /* Fondo degradado suave */
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%);
-  /* Borde tenue */
-  border: 1px solid var(--color-superficie-borde);
-  /* Disposición flex */
-  display: flex;
-  /* Dirección vertical */
-  flex-direction: column;
-  /* Centrado vertical */
-  align-items: center;
-  /* Centrado horizontal */
-  justify-content: center;
-  /* Separación */
-  gap: var(--espacio-2);
-}
-
-/* Cuerpo de información textual de la obra */
-.ficha-obra-cuerpo {
-  /* Ocupa el espacio restante */
-  flex: 1;
-  /* Evita desborde horizontal */
-  min-width: 0;
-  /* Disposición flex en columna */
-  display: flex;
-  /* Dirección vertical */
-  flex-direction: column;
-  /* Separación interna */
-  gap: var(--espacio-2);
-}
-
-/* Título de la obra individual (h2) */
-.ficha-obra-titulo {
-  /* Tipografía de títulos */
-  font-family: var(--fuente-titulos);
-  /* Tamaño 30px */
-  font-size: var(--texto-2xl);
-  /* Peso negrita */
-  font-weight: 700;
-  /* Color blanco brillante */
-  color: var(--color-texto-brillante);
-  /* Margen cero */
-  margin: 0;
-  /* Altura de línea */
-  line-height: 1.25;
-}
-
-/* Año de realización o estreno */
-.ficha-obra-anio {
-  /* Tamaño normal */
-  font-size: var(--texto-lg);
-  /* Peso normal */
-  font-weight: 400;
-  /* Color atenuado */
-  color: var(--color-texto-apagado);
-  /* Separación del título */
-  margin-left: var(--espacio-1);
-}
-
-/* Fila de metadatos de la obra (dirección, duración, tipo) */
-.ficha-obra-metadatos {
-  /* Disposición flex */
-  display: flex;
-  /* Envoltorio responsivo */
-  flex-wrap: wrap;
-  /* Alineación centrada */
-  align-items: center;
-  /* Separación */
-  gap: var(--espacio-2);
-  /* Tamaño chico */
-  font-size: var(--texto-sm);
-  /* Color secundario */
-  color: var(--color-texto-secundario);
-  /* Margen vertical */
-  margin: var(--espacio-1) 0;
-}
-
-/* Énfasis en valores clave de metadatos */
-.ficha-obra-metadato strong {
-  /* Color blanco de lectura */
-  color: var(--color-texto);
-  /* Peso seminegrita */
-  font-weight: 600;
-}
-
-/* Separador puntual entre metadatos */
-.ficha-obra-separador {
-  /* Color atenuado */
-  color: var(--color-texto-apagado);
-}
-
-/* Contenedor de géneros cinematográficos */
-.ficha-obra-generos {
-  /* Disposición flex */
-  display: flex;
-  /* Envoltorio */
-  flex-wrap: wrap;
-  /* Alineación centrada */
-  align-items: center;
-  /* Separación */
-  gap: var(--espacio-2);
-  /* Margen superior */
-  margin-top: var(--espacio-1);
-}
-
-/* Rótulo de la lista de géneros */
-.ficha-obra-generos-rotulo {
-  /* Tamaño micro */
-  font-size: var(--texto-xs);
-  /* Peso seminegrita */
-  font-weight: 600;
-  /* Mayúsculas */
-  text-transform: uppercase;
-  /* Espaciado */
-  letter-spacing: 0.05em;
-  /* Color atenuado */
-  color: var(--color-texto-apagado);
-}
-
-/* Fila de chips de géneros */
-.ficha-obra-generos-chips {
-  /* Disposición flex */
-  display: flex;
-  /* Envoltorio */
-  flex-wrap: wrap;
-  /* Separación */
-  gap: var(--espacio-1);
-}
-
 /* Chip de género individual */
 .ficha-genero-chip {
   /* Disposición en bloque de línea */
@@ -4476,24 +5243,6 @@ dd {
   font-size: var(--texto-xs);
   /* Peso seminegrita */
   font-weight: 600;
-}
-
-/* Contenedor de la sinopsis argumental */
-.ficha-obra-sinopsis {
-  /* Tamaño de lectura base */
-  font-size: var(--texto-base);
-  /* Color crema de lectura */
-  color: var(--color-texto-secundario);
-  /* Altura de línea confortable */
-  line-height: 1.6;
-  /* Margen superior */
-  margin-top: var(--espacio-2);
-}
-
-/* Párrafo dentro de la sinopsis */
-.ficha-obra-sinopsis p {
-  /* Sin margen propio */
-  margin: 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -5158,7 +5907,7 @@ dd {
 
 /* Tarjetas de números arriba de la tabla, como el wireframe: del ancho de cuatro por fila, aunque
    haya dos */
-.panel-admin-resumen {
+.panel-resumen {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--espacio-4);
@@ -5169,7 +5918,7 @@ dd {
   background: none;
 }
 
-.panel-admin-dato {
+.panel-dato {
   padding: var(--espacio-4) var(--espacio-5);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
@@ -5177,7 +5926,7 @@ dd {
 }
 
 /* «USUARIOS REGISTRADOS», en versalitas como los títulos de las columnas */
-.panel-admin-dato dt {
+.panel-dato dt {
   font-size: var(--texto-xs);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -5185,11 +5934,11 @@ dd {
   color: var(--color-texto-apagado);
 }
 
-.panel-admin-dato dd {
+.panel-dato dd {
   margin: 0;
 }
 
-.panel-admin-dato-valor {
+.panel-dato-valor {
   margin-top: var(--espacio-2);
   font-family: var(--fuente-titulos);
   font-size: var(--texto-3xl);
@@ -5198,20 +5947,20 @@ dd {
   color: var(--color-texto-brillante);
 }
 
-.panel-admin-dato-nota {
+.panel-dato-nota {
   font-size: var(--texto-sm);
   color: var(--color-texto-secundario);
 }
 
 /* En tablet, dos por fila; en el celular, una */
 @media (max-width: 900px) {
-  .panel-admin-resumen {
+  .panel-resumen {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 480px) {
-  .panel-admin-resumen {
+  .panel-resumen {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -5219,21 +5968,21 @@ dd {
 /* El body corta lo que se sale a los costados con overflow-x: hidden, que lo vuelve un contenedor
    con desplazamiento propio: la barra lateral (sticky) se pegaba a él, que nunca se desplaza, y se
    iba con la página. clip corta igual sin eso */
-.cuerpo-app:has(.panel-admin) {
+.cuerpo-app:has(.panel) {
   overflow-x: clip;
 }
 
-/* Sin encabezado ni pie, el panel del administrador ocupa toda la pantalla, como el wireframe */
-.contenido-principal:has(> .panel-admin) {
+/* Sin encabezado ni pie, el panel (panel.html.twig) ocupa toda la pantalla, como el wireframe */
+.contenido-principal:has(> .panel) {
   max-width: none;
   padding: 0;
   display: flex;
 }
 
-/* Panel del administrador: la barra lateral y el contenido, como el wireframe. El fondo de la
+/* Los paneles: la barra lateral y el contenido, como el wireframe. El fondo de la
    columna de la barra lo pinta el panel, así sigue hasta abajo aunque la página sea más alta que
    la pantalla (la barra es del alto de la pantalla) */
-.panel-admin {
+.panel {
   flex: 1;
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
@@ -5241,7 +5990,7 @@ dd {
 }
 
 /* Barra lateral: el logo, las secciones y, al pie, la sesión */
-.panel-admin-menu {
+.panel-menu {
   display: flex;
   flex-direction: column;
   gap: var(--espacio-6);
@@ -5255,17 +6004,17 @@ dd {
   overflow-y: auto;
 }
 
-.panel-admin-marca {
+.panel-marca {
   align-self: flex-start;
   padding-left: var(--espacio-2);
 }
 
-.panel-admin-marca img {
+.panel-marca img {
   display: block;
 }
 
 /* Quién está en sesión y, debajo, el botón para salir, abajo de todo */
-.panel-admin-sesion {
+.panel-sesion {
   margin-top: auto;
   display: flex;
   flex-direction: column;
@@ -5275,14 +6024,14 @@ dd {
 }
 
 /* El avatar y, al lado, el nombre sobre el rol */
-.panel-admin-sesion-usuario {
+.panel-sesion-usuario {
   display: flex;
   align-items: center;
   gap: var(--espacio-3);
   min-width: 0;
 }
 
-.panel-admin-sesion-datos {
+.panel-sesion-datos {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -5291,7 +6040,7 @@ dd {
 }
 
 /* Un nombre largo se corta con puntos suspensivos en vez de ensanchar la barra */
-.panel-admin-sesion-nombre {
+.panel-sesion-nombre {
   max-width: 100%;
   font-weight: 600;
   font-size: var(--texto-sm);
@@ -5300,18 +6049,18 @@ dd {
   white-space: nowrap;
 }
 
-.panel-admin-salir {
+.panel-salir {
   width: 100%;
 }
 
 /* El contenido, en todo el ancho que deja la barra, como el wireframe */
-.panel-admin-contenido {
+.panel-contenido {
   min-width: 0;
   padding: var(--espacio-8) var(--espacio-10) var(--espacio-12);
 }
 
 /* «ADMINISTRACIÓN», sobre las secciones */
-.panel-admin-menu-titulo {
+.panel-menu-titulo {
   margin: 0 0 var(--espacio-3);
   font-size: var(--texto-xs);
   letter-spacing: 0.08em;
@@ -5320,7 +6069,7 @@ dd {
 }
 
 /* Las secciones, una debajo de otra */
-.panel-admin-menu-lista {
+.panel-menu-lista {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -5330,7 +6079,7 @@ dd {
 }
 
 /* Cada sección */
-.panel-admin-menu-enlace {
+.panel-menu-enlace {
   display: block;
   padding: var(--espacio-2) var(--espacio-3);
   border-radius: var(--radio-md);
@@ -5338,37 +6087,51 @@ dd {
   text-decoration: none;
 }
 
-.panel-admin-menu-enlace:hover {
+.panel-menu-enlace:hover {
   background-color: var(--color-superficie-hover);
   color: var(--color-texto);
 }
 
 /* La sección actual, llena como en el wireframe: con los colores invertidos, como la página
    actual del paginado */
-.panel-admin-menu-enlace.activo {
+.panel-menu-enlace.activo {
   background-color: var(--color-texto);
   color: var(--color-texto-inverso);
   font-weight: 600;
 }
 
+/* Un grupo de secciones dentro de la lista, como «Funciones» en el panel del organizador: el
+   nombre del grupo, que no es un enlace, y sus secciones debajo con sangría */
+.panel-menu-subtitulo {
+  display: block;
+  padding: var(--espacio-2) var(--espacio-3) var(--espacio-1);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.panel-menu-grupo .panel-menu-lista {
+  padding-left: var(--espacio-3);
+}
+
 /* Título y bajada del contenido */
-.panel-admin-cabecera {
+.panel-cabecera {
   margin-bottom: var(--espacio-6);
 }
 
 /* Más chico que el título de las páginas públicas: acá manda la tabla, no el título */
-.panel-admin-titulo {
+.panel-titulo {
   margin: 0;
   font-size: var(--texto-2xl);
 }
 
-.panel-admin-bajada {
+.panel-bajada {
   margin: var(--espacio-1) 0 0;
   color: var(--color-texto-secundario);
 }
 
 /* Buscador y filtros en una fila: el buscador más ancho */
-.panel-admin-filtros {
+.panel-filtros {
   display: grid;
   grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(140px, 1fr)) auto;
   gap: var(--espacio-3);
@@ -5377,11 +6140,11 @@ dd {
 }
 
 /* El buscador con la lupa adentro */
-.panel-admin-busqueda {
+.panel-busqueda {
   position: relative;
 }
 
-.panel-admin-busqueda-icono {
+.panel-busqueda-icono {
   position: absolute;
   left: 0.85rem;
   top: 50%;
@@ -5390,7 +6153,7 @@ dd {
   pointer-events: none;
 }
 
-.panel-admin-busqueda .campo-control {
+.panel-busqueda .campo-control {
   /* Lugar para la lupa */
   padding-left: 2.4rem;
 }
@@ -5441,14 +6204,14 @@ dd {
 
 /* En tablet y celular, la barra lateral pasa arriba y en fila, y los filtros uno debajo de otro */
 @media (max-width: 900px) {
-  .panel-admin {
+  .panel {
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
     background: none;
   }
 
   /* Arriba: el logo y la sesión en un renglón y las secciones debajo */
-  .panel-admin-menu {
+  .panel-menu {
     position: static;
     height: auto;
     display: grid;
@@ -5460,17 +6223,17 @@ dd {
   }
 
   /* El logo y la sesión en el primer renglón; cada grupo de secciones, en uno propio debajo */
-  .panel-admin-marca {
+  .panel-marca {
     grid-row: 1;
     grid-column: 1;
   }
 
-  .panel-admin-menu nav {
+  .panel-menu nav {
     grid-column: 1 / -1;
   }
 
   /* En el renglón del logo queda sólo el botón para salir: el nombre no entra */
-  .panel-admin-sesion {
+  .panel-sesion {
     grid-row: 1;
     grid-column: 2;
     margin-top: 0;
@@ -5479,24 +6242,40 @@ dd {
     align-items: flex-end;
   }
 
-  .panel-admin-sesion-usuario {
+  .panel-sesion-usuario {
     display: none;
   }
 
-  .panel-admin-salir {
+  .panel-salir {
     width: auto;
   }
 
-  .panel-admin-contenido {
+  .panel-contenido {
     padding: var(--espacio-6) var(--espacio-4) var(--espacio-12);
   }
 
-  .panel-admin-menu-lista {
+  .panel-menu-lista {
     flex-direction: row;
     flex-wrap: wrap;
   }
 
-  .panel-admin-filtros {
+  /* El grupo sigue en la fila: su nombre y sus secciones al lado, sin la sangría */
+  .panel-menu-grupo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .panel-menu-grupo .panel-menu-lista {
+    padding-left: 0;
+  }
+
+  .panel-menu-subtitulo {
+    padding: var(--espacio-2) var(--espacio-1) var(--espacio-2) var(--espacio-3);
+    color: var(--color-texto-apagado);
+  }
+
+  .panel-filtros {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -5948,11 +6727,6 @@ a.tabla-admin-principal:focus-visible {
   line-height: 1.4;
 }
 
-/* Oculta la sección de fecha y hora cuando se elige votación de títulos con JS */
-.seccion-formulario[hidden] {
-  display: none;
-}
-
 /* Cuadrícula interactiva de selección de obras del catálogo */
 .cuadricula-seleccion-obras {
   display: grid;
@@ -6097,11 +6871,6 @@ a.tabla-admin-principal:focus-visible {
   display: flex;
   flex-direction: column;
   gap: var(--espacio-3);
-}
-
-/* El display de arriba le gana al atributo hidden: sin esto, la sala que no se eligió se ve igual */
-.parametros-sala-grupo[hidden] {
-  display: none;
 }
 
 .parametros-sala-nombre {
@@ -6277,10 +7046,6 @@ a.tabla-admin-principal:focus-visible {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-}
-
-.franja-alerta-rango[hidden] {
-  display: none;
 }
 
 /* Acciones para agregar franjas */
@@ -6594,6 +7359,168 @@ a.tabla-admin-principal:focus-visible {
   border-color: var(--color-borde-medio);
 }
 
+/* --------------------------------------------------------------------------
+   FICHA DE UNA FUNCIÓN PROGRAMADA (E4-10.10)
+   Como el wireframe «funcion-programada»: el detalle (las obras, los recuadros y
+   la sala) y, al costado, la reserva. Finalizada y cancelada, sin el costado.
+   -------------------------------------------------------------------------- */
+
+.ficha-detalle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--espacio-8);
+}
+
+.ficha-detalle-con-lateral {
+  grid-template-columns: minmax(0, 1fr) 340px;
+}
+
+.ficha-detalle-principal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-8);
+  min-width: 0;
+}
+
+/* En el costado la reserva va apilada: el precio, la barra y, abajo, el formulario a lo ancho */
+.ficha-detalle-lateral .ficha-reserva {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ficha-detalle-lateral .ficha-reserva-disponibles {
+  min-width: 0;
+}
+
+.ficha-detalle-lateral .ficha-reserva-formulario {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ficha-detalle-lateral .ficha-reserva-formulario .grupo-campo {
+  width: auto;
+}
+
+/* Las obras en filas: el afiche chico, el título y «2023 · Documental · 94 min» */
+.ficha-obras-filas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin: var(--espacio-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ficha-obra-fila {
+  display: flex;
+  /* Arriba y no al centro: con la sinopsis la fila es alta y el afiche va junto al título */
+  align-items: flex-start;
+  gap: var(--espacio-4);
+  padding: var(--espacio-3) var(--espacio-4);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+.ficha-obra-fila .ficha-titulo-nombre,
+.ficha-sala-fila .ficha-titulo-nombre {
+  font-size: var(--texto-base);
+}
+
+/* Fecha, horario, duración total y entrada: cuatro recuadros con el rótulo chico arriba */
+.ficha-recuadros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espacio-4);
+  width: auto;
+  margin: 0;
+  /* Sin la caja que el dl tiene en todo el sitio: cada recuadro tiene la suya */
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.ficha-recuadro {
+  padding: var(--espacio-4);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+.ficha-recuadro dt {
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+.ficha-recuadro dd {
+  margin: var(--espacio-2) 0 0;
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+/* La sala: la foto, el nombre con la dirección y «Ver sala» a la derecha */
+.ficha-sala-fila {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-5);
+  margin-top: var(--espacio-4);
+  padding: var(--espacio-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-lg);
+}
+
+.ficha-sala-fila-foto {
+  flex-shrink: 0;
+  width: 10rem;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+}
+
+.ficha-sala-fila-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  flex: 1;
+  min-width: 0;
+}
+
+/* La sinopsis de cada obra y la descripción de la sala, debajo de sus datos */
+.ficha-obra-fila-sinopsis,
+.ficha-sala-fila-descripcion {
+  margin: var(--espacio-2) 0 0;
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+  color: var(--color-texto);
+}
+
+/* En tablet y celular, una columna: la reserva baja después del detalle */
+@media (max-width: 900px) {
+  .ficha-detalle-con-lateral {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ficha-recuadros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .ficha-sala-fila {
+    flex-direction: column;
+  }
+
+  .ficha-sala-fila-foto {
+    width: 100%;
+  }
+}
+
 /* El chip de los lugares de la cabecera, en rojo cuando no queda ninguno */
 .ficha-chip-agotada {
   border-color: var(--color-error);
@@ -6727,6 +7654,146 @@ a.tabla-admin-principal:focus-visible {
   gap: var(--espacio-2);
 }
 
+/* «Mi cuenta» (E4-10.13), como los wireframes mi-cuenta-mis-datos y mi-cuenta-mis-reservas: la
+   barra lateral a la izquierda y el contenido al lado, entre el encabezado y el pie del sitio */
+.mi-cuenta-cuerpo {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: var(--espacio-8);
+  align-items: start;
+}
+
+/* La tarjeta del usuario (en «Mis datos») arriba de las secciones */
+.mi-cuenta-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+/* La inicial y, al lado, el nombre sobre «Desde…»; los roles en el renglón de abajo */
+.mi-cuenta-tarjeta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--espacio-3) var(--espacio-4);
+  padding: var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* Más grande que el del encabezado, como la foto del wireframe */
+.mi-cuenta-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: var(--texto-xl);
+}
+
+.mi-cuenta-nombre {
+  margin: 0;
+  font-weight: 600;
+  /* Un nombre largo baja de renglón en vez de ensanchar la barra */
+  overflow-wrap: anywhere;
+}
+
+.mi-cuenta-desde {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.mi-cuenta-roles {
+  grid-column: 1 / -1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+/* Las secciones, una debajo de otra */
+.mi-cuenta-menu-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.mi-cuenta-menu-enlace {
+  display: block;
+  padding: var(--espacio-2) var(--espacio-3);
+  border-radius: var(--radio-md);
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.mi-cuenta-menu-enlace:hover {
+  background-color: var(--color-superficie-hover);
+  color: var(--color-texto);
+}
+
+/* La sección actual, llena como en el wireframe, igual que en el panel del administrador */
+.mi-cuenta-menu-enlace.activo {
+  background-color: var(--color-texto);
+  color: var(--color-texto-inverso);
+  font-weight: 600;
+}
+
+/* «Mis datos», en su recuadro como el wireframe */
+.mi-cuenta-panel {
+  padding: var(--espacio-8);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* «Información personal», con la línea debajo del wireframe */
+.mi-cuenta-subtitulo {
+  margin: var(--espacio-6) 0 var(--espacio-4);
+  padding-bottom: var(--espacio-2);
+  border-bottom: 1px solid var(--color-borde);
+  font-size: var(--texto-md);
+}
+
+/* Cada dato con su nombre arriba, como las etiquetas del formulario del wireframe */
+.mi-cuenta-datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  margin: 0;
+}
+
+.mi-cuenta-datos dt {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.mi-cuenta-datos dd {
+  margin: var(--espacio-1) 0 0;
+  color: var(--color-texto-brillante);
+  overflow-wrap: anywhere;
+}
+
+/* En tablet y celular, una sola columna: la tarjeta y las secciones en fila arriba del contenido */
+@media (max-width: 900px) {
+  .mi-cuenta-cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-6);
+  }
+
+  .mi-cuenta-menu-lista {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .mi-cuenta-panel {
+    padding: var(--espacio-5);
+  }
+}
+
 /* El comprobante en papel (E4-04.2): sólo el código y los datos de la reserva, en negro sobre
    blanco y sin el resto del sitio, para que entre en una hoja y se lea en la puerta */
 @media print {
@@ -6793,6 +7860,210 @@ a.tabla-admin-principal:focus-visible {
   }
 }
 
+/* --------------------------------------------------------------------------
+   CATÁLOGO DE OBRAS: ALTA, EDICIÓN Y MIS OBRAS (E4-08.1)
+   Componentes para plantillas/programacion/alta_obra.html.twig y mis_obras.html.twig
+   -------------------------------------------------------------------------- */
+
+/* Formulario buscador de obras en catálogo (E4-08.2) */
+.buscador-obras {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+/* Insignia para tipo de obra (Película / Cortometraje) */
+.insignia-tipo-obra {
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  color: var(--color-texto);
+}
+
+/* Año en cabecera de tarjeta de obra */
+.tarjeta-obra-anio {
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto-secundario);
+}
+
+/* Chips de géneros en tarjeta de obra */
+.tarjeta-obra-generos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1);
+  margin-bottom: var(--espacio-3);
+}
+
+/* Acciones en tarjeta de Mis Obras */
+.tarjeta-mi-obra-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-top: auto;
+}
+
+.tarjeta-mi-obra-acciones .acciones-fila-enlaces {
+  display: flex;
+  gap: var(--espacio-2);
+}
+
+.tarjeta-mi-obra-acciones .acciones-fila-enlaces .boton {
+  flex: 1;
+  text-align: center;
+}
+
+.baja-ayuda-bloqueo {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-apagado);
+  text-align: center;
+  display: block;
+}
+
+/* Formulario de alta y edición de obra (E4-08.1) */
+.formulario-alta-obra .generos-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.formulario-alta-obra .generos-leyenda {
+  margin-bottom: var(--espacio-1);
+}
+
+.campo-generos-cuadricula {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-2);
+}
+
+.genero-opcion-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: var(--espacio-1) var(--espacio-3);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.genero-opcion-item:hover {
+  background-color: var(--color-superficie-hover);
+  border-color: var(--color-primario);
+}
+
+.afiche-vista-previa-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-4);
+}
+
+.afiche-vista-previa-titulo {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+  font-weight: 600;
+}
+
+.afiche-vista-previa {
+  width: 140px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radio-md);
+  overflow: hidden;
+  border: 1px solid var(--color-borde-medio);
+  background-color: var(--color-superficie);
+}
+
+.afiche-miniatura {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Ficha pública de la obra (E4-08.3 - Wireframe «ficha-pelicula») */
+.ficha-obra-cabecera {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--espacio-8);
+  align-items: start;
+  margin: var(--espacio-6) 0 var(--espacio-10);
+}
+
+.ficha-obra-portada {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radio-lg);
+  overflow: hidden;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+}
+
+.ficha-obra-portada-imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ficha-obra-placeholder {
+  height: 100%;
+  min-height: 320px;
+}
+
+.ficha-obra-encabezado-titulo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-2);
+}
+
+.ficha-obra-metas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-3);
+}
+
+.ficha-obra-sinopsis-bloque {
+  margin-top: var(--espacio-3);
+  margin-bottom: var(--espacio-5);
+}
+
+.ficha-obra-sinopsis-titulo {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-xl);
+  color: var(--color-texto);
+  margin-bottom: var(--espacio-2);
+}
+
+.ficha-obra-sinopsis-texto {
+  color: var(--color-texto-secundario);
+  line-height: 1.6;
+}
+
+.ficha-obra-acciones-organizador {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-4);
+}
+
+@media (max-width: 768px) {
+  .ficha-obra-cabecera {
+    grid-template-columns: 1fr;
+    gap: var(--espacio-5);
+    margin-bottom: var(--espacio-8);
+  }
+
+  .ficha-obra-portada {
+    max-width: 220px;
+    margin: 0 auto;
+  }
+}
 /* --------------------------------------------------------------------------
    12. DISEÑO RESPONSIVE ADAPTATIVO
    Garantiza que no exista scroll horizontal a 360 px, en tablet y a 1440 px.
@@ -6949,26 +8220,6 @@ a.tabla-admin-principal:focus-visible {
     width: 100%;
     /* Altura moderada */
     height: 200px;
-  }
-
-  /* Tarjeta de obra apilada verticalmente */
-  .ficha-obra-tarjeta {
-    /* Dirección de columna */
-    flex-direction: column;
-    /* Alineación estirada */
-    align-items: stretch;
-    /* Separación vertical */
-    gap: var(--espacio-4);
-  }
-
-  /* Afiche centrado y con ancho controlado en móvil */
-  .ficha-obra-afiche-columna {
-    /* Ancho responsivo */
-    width: 100%;
-    /* Límite para no ocupar toda la pantalla vertical */
-    max-width: 220px;
-    /* Centrado horizontal con margen inferior */
-    margin: 0 auto var(--espacio-2) auto;
   }
 
   /* Título de la función ajustado en móvil */
@@ -7133,27 +8384,10 @@ a.tabla-admin-principal:focus-visible {
   }
   /* Ficha de la función en celulares angostos a 360 px (IC-87 / E3-04.3) */
   .ficha-sala-tarjeta,
-  .ficha-obra-tarjeta {
-    /* Relleno compacto */
-    padding: var(--espacio-4);
-  }
-
-  /* Afiche compacto en celulares angostos */
-  .ficha-obra-afiche-columna {
-    /* Máximo 180px */
-    max-width: 180px;
-  }
-
   /* Título de la función a 360 px */
   .ficha-funcion-titulo {
     /* Tamaño adaptado */
     font-size: 1.75rem;
-  }
-
-  /* Título de obra a 360 px */
-  .ficha-obra-titulo {
-    /* Tamaño 24px */
-    font-size: var(--texto-xl);
   }
 
   /* Título de sala a 360 px */
@@ -7162,11 +8396,6 @@ a.tabla-admin-principal:focus-visible {
     font-size: var(--texto-lg);
   }
 
-  /* Metadatos más compactos */
-  .ficha-obra-metadatos {
-    /* Tamaño micro */
-    font-size: var(--texto-xs);
-  }
 }
 
 /* ── 12.4 Pantallas de Escritorio Ancho (1440 px o superior) ───────────── */
@@ -7214,4 +8443,505 @@ a.tabla-admin-principal:focus-visible {
 .panel-reservas-codigo {
   font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   letter-spacing: 0.08em;
+}
+
+/* --------------------------------------------------------------------------
+   25. CARRUSEL DE DESTACADAS DE LA PORTADA (E4-07)
+   La lista de programacion/inicio.html.twig y lo que le agrega el componente
+   Carrusel (js/componentes/carrusel.js), que marca el contenedor con
+   .carrusel-armado. Sin esa clase, la lista es una tira que se desplaza de
+   costado: así se ve sin JavaScript.
+   -------------------------------------------------------------------------- */
+
+/* Sin JavaScript: una diapositiva por vez, las demás al costado, y se pasa desplazando */
+.carrusel-pista {
+  list-style: none;
+  display: flex;
+  gap: var(--espacio-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Que el desplazamiento de costado no arrastre la página en el celular */
+  overscroll-behavior-x: contain;
+}
+
+/* La diapositiva: el afiche entero a la izquierda y los datos de la función ocupando todo el resto,
+   hasta el borde: así no queda un hueco al costado */
+.carrusel-diapositiva {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--espacio-10);
+  /* A los costados, lugar para las flechas sin que tapen el afiche */
+  padding: var(--espacio-8) calc(var(--espacio-12) + var(--espacio-6));
+  min-height: 26rem;
+  overflow: hidden;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+}
+
+/* El mismo afiche, desenfocado y oscurecido, de fondo: los afiches son verticales y el recuadro
+   apaisado, y así los costados no quedan vacíos */
+.carrusel-fondo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(28px) brightness(0.35) saturate(1.2);
+  /* Agrandado, para que el desenfoque no deje un borde claro */
+  transform: scale(1.25);
+  pointer-events: none;
+}
+
+/* El afiche, entero: recortado se pierde el título. El ancho sale de la imagen, sin una proporción
+   fija: los fotogramas apaisados quedarían en una caja vertical con la sombra marcando el hueco */
+.carrusel-imagen {
+  position: relative;
+  display: block;
+  height: 22rem;
+  width: auto;
+  max-width: 100%;
+  border-radius: var(--radio-md);
+  box-shadow: var(--sombra-lg);
+  /* Arrastrar el afiche con el mouse no lo levanta como una imagen suelta */
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.carrusel-texto {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-5);
+}
+
+/* El título, grande y con una línea debajo que cruza la diapositiva */
+.carrusel-titulo {
+  align-self: stretch;
+  font-family: var(--fuente-titulos);
+  font-size: clamp(var(--texto-2xl), 3.5vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0;
+  padding-bottom: var(--espacio-5);
+  border-bottom: 1px solid var(--color-borde-medio);
+}
+
+.carrusel-titulo-enlace {
+  color: var(--color-texto);
+  text-decoration: none;
+}
+
+.carrusel-titulo-enlace:hover {
+  color: var(--color-primario);
+}
+
+/* Sala, cuándo y entrada, en tres columnas iguales */
+.carrusel-datos {
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espacio-6);
+  margin: 0;
+}
+
+.carrusel-dato dt {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-1);
+  color: var(--color-texto-apagado);
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.carrusel-dato dd {
+  margin: 0;
+  color: var(--color-texto);
+  font-size: var(--texto-lg);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* La localidad, debajo de la sala */
+.carrusel-dato-detalle {
+  display: block;
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  font-weight: 400;
+}
+
+.carrusel-accion {
+  margin-top: var(--espacio-2);
+}
+
+/* Con JavaScript: todas en la misma celda, y se ve sólo la actual */
+.carrusel-pantalla {
+  position: relative;
+}
+
+/* Deslizar de costado es del carrusel; de arriba a abajo sigue siendo desplazar la página. Y
+   arrastrar con el mouse no selecciona el texto */
+.carrusel-armado .carrusel-pantalla {
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.carrusel-armado .carrusel-pista {
+  display: grid;
+  overflow: hidden;
+  border-radius: var(--radio-lg);
+}
+
+.carrusel-armado {
+  /* Lo que dura cada transición */
+  --carrusel-duracion: 0.6s;
+}
+
+/* La que no se ve se esconde recién cuando terminó de irse: si no, desaparecería de golpe */
+.carrusel-armado .carrusel-diapositiva {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  transition:
+    opacity var(--carrusel-duracion) ease,
+    transform var(--carrusel-duracion) cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear var(--carrusel-duracion);
+}
+
+.carrusel-armado .carrusel-diapositiva.es-actual {
+  visibility: visible;
+  transition:
+    opacity var(--carrusel-duracion) ease,
+    transform var(--carrusel-duracion) cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s;
+}
+
+/* El JS la pone un instante para ubicar la que entra en su punto de partida sin animar */
+.carrusel-armado .carrusel-diapositiva.sin-transicion {
+  transition: none;
+}
+
+/* Las tres transiciones (E4-07.2): una clase en el contenedor elige cuál. La actual siempre queda
+   quieta y a la vista; cambia de dónde viene la que entra y a dónde va la que sale. */
+
+/* Fundido: la nueva aparece encima de la anterior */
+.carrusel-fundido .carrusel-diapositiva {
+  opacity: 0;
+}
+
+.carrusel-fundido .carrusel-diapositiva.es-actual {
+  opacity: 1;
+}
+
+/* Deslizar: entra por un costado y empuja a la anterior por el otro. Hacia adelante entra por la
+   derecha; hacia atrás, por la izquierda */
+.carrusel-deslizar .carrusel-diapositiva {
+  transform: translateX(100%);
+}
+
+.carrusel-deslizar .carrusel-diapositiva.desde-atras,
+.carrusel-deslizar .carrusel-diapositiva.sale-hacia-atras {
+  transform: translateX(-100%);
+}
+
+.carrusel-deslizar .carrusel-diapositiva.sale-hacia-adelante {
+  transform: translateX(100%);
+}
+
+.carrusel-deslizar .carrusel-diapositiva.es-actual {
+  transform: none;
+}
+
+/* Zoom: la nueva se acerca desde un poco más grande y la anterior se aleja mientras se apaga */
+.carrusel-zoom .carrusel-diapositiva {
+  opacity: 0;
+  transform: scale(1.15);
+}
+
+.carrusel-zoom .carrusel-diapositiva.sale-hacia-atras,
+.carrusel-zoom .carrusel-diapositiva.sale-hacia-adelante {
+  transform: scale(0.85);
+}
+
+.carrusel-zoom .carrusel-diapositiva.es-actual {
+  opacity: 1;
+  transform: none;
+}
+
+/* Las flechas, a los costados de la diapositiva */
+.carrusel-flecha {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  background-color: rgba(23, 20, 28, 0.75);
+  color: var(--color-texto);
+  font-size: var(--texto-2xl);
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.carrusel-flecha:hover {
+  background-color: var(--color-superficie-interactiva);
+  border-color: var(--color-primario);
+}
+
+.carrusel-flecha:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+.carrusel-flecha-anterior {
+  left: var(--espacio-3);
+}
+
+.carrusel-flecha-siguiente {
+  right: var(--espacio-3);
+}
+
+/* La barra de carga (E4-07.3): tapa la diapositiva hasta que bajaron todas las imágenes, que es
+   cuando arranca el pase automático */
+.carrusel-carga {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-3);
+  background-color: rgba(23, 20, 28, 0.88);
+  border-radius: var(--radio-lg);
+}
+
+.carrusel-carga-texto {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.carrusel-carga-barra {
+  appearance: none;
+  width: min(20rem, 70%);
+  height: 0.5rem;
+  border: 0;
+  border-radius: var(--radio-completo);
+  overflow: hidden;
+  background-color: var(--color-superficie-interactiva);
+}
+
+.carrusel-carga-barra::-webkit-progress-bar {
+  background-color: var(--color-superficie-interactiva);
+}
+
+.carrusel-carga-barra::-webkit-progress-value {
+  background-color: var(--color-primario);
+  transition: width var(--transicion-base);
+}
+
+.carrusel-carga-barra::-moz-progress-bar {
+  background-color: var(--color-primario);
+}
+
+/* Debajo de la diapositiva, los controles */
+/* Las miniaturas y la pausa juntas y centradas, debajo de la diapositiva: con pocas, en los
+   extremos dejaban un hueco en el medio */
+.carrusel-controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-3);
+}
+
+.carrusel-pausa {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-completo);
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+}
+
+.carrusel-pausa:hover {
+  border-color: var(--color-primario);
+}
+
+.carrusel-pausa:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+/* Las miniaturas (E4-07.4): una por diapositiva, repartiéndose todo el ancho, con el afiche
+   recortado; la actual, con el borde ámbar */
+.carrusel-miniaturas {
+  list-style: none;
+  flex: 1 1 auto;
+  display: flex;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: var(--espacio-1);
+  min-width: 0;
+}
+
+.carrusel-miniaturas li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.carrusel-miniatura {
+  display: block;
+  width: 100%;
+  height: 4.5rem;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: var(--radio-sm);
+  background-color: var(--color-superficie-elevada);
+  color: var(--color-texto-secundario);
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity var(--transicion-rapida), border-color var(--transicion-rapida);
+}
+
+.carrusel-miniatura img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* El tercio de arriba del afiche, donde suele estar el título */
+  object-position: center 25%;
+  -webkit-user-drag: none;
+}
+
+.carrusel-miniatura:hover {
+  opacity: 0.85;
+}
+
+.carrusel-miniatura[aria-current="true"] {
+  opacity: 1;
+  border-color: var(--color-primario);
+}
+
+.carrusel-miniatura:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+/* Responsive (E4-07.5). En tablet, el afiche un poco más chico y menos aire a los costados */
+@media (max-width: 1024px) {
+  .carrusel-diapositiva {
+    gap: var(--espacio-6);
+    padding: var(--espacio-6) calc(var(--espacio-12) + var(--espacio-2));
+    min-height: 0;
+  }
+
+  .carrusel-imagen {
+    height: 18rem;
+  }
+}
+
+/* En el celular, una columna: el afiche arriba y los datos abajo, centrados. Las flechas quedan a
+   la altura del afiche: a los costados de uno vertical, y encima de los bordes de un fotograma
+   apaisado, que ocupa todo el ancho */
+@media (max-width: 768px) {
+  .carrusel-diapositiva {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: var(--espacio-4);
+    padding: var(--espacio-5) var(--espacio-4) var(--espacio-6);
+  }
+
+  .carrusel-imagen {
+    /* Con tope y no fijo: un fotograma apaisado que no entra a lo ancho se achica entero, en vez de
+       quedar aplastado */
+    height: auto;
+    max-height: 15rem;
+  }
+
+  .carrusel-texto {
+    align-items: center;
+    text-align: center;
+    gap: var(--espacio-2);
+    max-width: 100%;
+  }
+
+  .carrusel-titulo {
+    /* Un título largo («El gabinete del Dr. Caligari + Viaje a la Luna») corta, no desborda */
+    overflow-wrap: anywhere;
+  }
+
+  /* Los tres datos, uno debajo del otro: en tres columnas no entran */
+  .carrusel-datos {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-3);
+  }
+
+  .carrusel-dato dt {
+    justify-content: center;
+  }
+
+  .carrusel-dato dd {
+    font-size: var(--texto-md);
+  }
+
+  .carrusel-flecha {
+    /* La mitad del afiche, que empieza después del relleno de arriba */
+    top: calc(var(--espacio-5) + 7.5rem);
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .carrusel-flecha-anterior {
+    left: var(--espacio-2);
+  }
+
+  .carrusel-flecha-siguiente {
+    right: var(--espacio-2);
+  }
+
+  .carrusel-miniatura {
+    height: 3.5rem;
+  }
+}
+
+/* En el celular, el toque ya se ve en el botón: sin el recuadro azul que agrega el navegador */
+.carrusel-flecha,
+.carrusel-miniatura,
+.carrusel-pausa {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Para quien pidió reducir el movimiento: las diapositivas cambian sin animar. El pase automático
+   lo frena el componente */
+@media (prefers-reduced-motion: reduce) {
+  .carrusel-armado {
+    --carrusel-duracion: 0s;
+  }
+
+  .carrusel-carga-barra::-webkit-progress-value,
+  .carrusel-flecha,
+  .carrusel-miniatura {
+    transition: none;
+  }
 }

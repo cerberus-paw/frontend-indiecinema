@@ -33,13 +33,17 @@ jobs:
         run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --no-banner --redact --verbose
 
   javascript:
-    name: JavaScript (sintaxis)
+    name: JavaScript (ESLint)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # El Node que ya trae la máquina alcanza: sólo revisa que cada archivo se pueda leer.
-      - name: Revisar cada archivo
-        run: find estaticos/js -name '*.js' -print0 | xargs -0 -n1 node --check
+      # Sólo las reglas recomendadas (eslint.config.mjs), que encuentran errores y no cuestiones
+      # de estilo: un método repetido en una clase, un nombre que no existe, una variable que
+      # sobra. Reemplaza al `node --check` de antes, que sólo revisaba la sintaxis.
+      - name: Instalar ESLint
+        run: npm ci --no-audit --no-fund
+      - name: Revisar el JavaScript
+        run: npm run js
 
   css:
     name: CSS (stylelint)
@@ -61,20 +65,22 @@ jobs:
       # La rama del back con el mismo nombre que ésta, si existe; si no, la rama a la que apunta
       # el PR (dev o main), y si tampoco existe, main. Así un cambio que toca los dos
       # repositorios (las ramas IC-… se llaman igual en los dos) se prueba entero antes de mergear
-      # ninguno. Las ramas van por env y no en el script, por si traen algo raro.
+      # ninguno. Si es la del mismo nombre, se mezcla con esa base antes de probar (IC-453). Las
+      # ramas van por env y no en el script, por si traen algo raro.
       - name: Elegir la rama del back
         id: back
         env:
           RAMA: ${{ github.head_ref || github.ref_name }}
           BASE: ${{ github.base_ref || github.ref_name }}
         run: |
-          for ref in "$RAMA" "$BASE" main; do
-            if git ls-remote --exit-code --heads https://github.com/cerberus-paw/backend-indiecinema.git "refs/heads/$ref" >/dev/null; then
-              echo "ref=$ref" >> "$GITHUB_OUTPUT"
-              break
-            fi
-          done
-          grep ref= "$GITHUB_OUTPUT"
+          existe() {
+            git ls-remote --exit-code --heads https://github.com/cerberus-paw/backend-indiecinema.git "refs/heads/$1" >/dev/null
+          }
+          if existe "$BASE"; then base="$BASE"; else base=main; fi
+          if existe "$RAMA"; then ref="$RAMA"; else ref="$base"; fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "Rama del back: $ref (base: $base)"
       - uses: actions/checkout@v7
         with:
           path: frontend-indiecinema
@@ -83,6 +89,23 @@ jobs:
           repository: cerberus-paw/backend-indiecinema
           ref: ${{ steps.back.outputs.ref }}
           path: backend-indiecinema
+          # Con la historia entera: para mezclarla con la base hace falta el ancestro común.
+          fetch-depth: 0
+      # Una rama del back con el mismo nombre puede haber quedado atrás de la base: sin ponerla al
+      # día, el front se prueba contra un back viejo y falla por cosas ajenas al PR (pasó con el
+      # #65). Es lo que GitHub ya hace con el propio front al probar un PR.
+      - name: Poner al día la rama del back con su base
+        if: steps.back.outputs.ref != steps.back.outputs.base
+        working-directory: backend-indiecinema
+        env:
+          BASE: ${{ steps.back.outputs.base }}
+        run: |
+          git fetch --no-tags origin "$BASE"
+          if ! git -c user.name=CI -c user.email=ci@localhost merge --no-edit FETCH_HEAD; then
+            echo "::error::La rama del back tiene conflictos con $BASE: hay que ponerla al día antes de probar este PR."
+            exit 1
+          fi
+          git log --oneline -1
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
@@ -124,20 +147,22 @@ jobs:
       # La rama del back con el mismo nombre que ésta, si existe; si no, la rama a la que apunta
       # el PR (dev o main), y si tampoco existe, main. Así un cambio que toca los dos
       # repositorios (las ramas IC-… se llaman igual en los dos) se prueba entero antes de mergear
-      # ninguno. Las ramas van por env y no en el script, por si traen algo raro.
+      # ninguno. Si es la del mismo nombre, se mezcla con esa base antes de probar (IC-453). Las
+      # ramas van por env y no en el script, por si traen algo raro.
       - name: Elegir la rama del back
         id: back
         env:
           RAMA: ${{ github.head_ref || github.ref_name }}
           BASE: ${{ github.base_ref || github.ref_name }}
         run: |
-          for ref in "$RAMA" "$BASE" main; do
-            if git ls-remote --exit-code --heads https://github.com/cerberus-paw/backend-indiecinema.git "refs/heads/$ref" >/dev/null; then
-              echo "ref=$ref" >> "$GITHUB_OUTPUT"
-              break
-            fi
-          done
-          grep ref= "$GITHUB_OUTPUT"
+          existe() {
+            git ls-remote --exit-code --heads https://github.com/cerberus-paw/backend-indiecinema.git "refs/heads/$1" >/dev/null
+          }
+          if existe "$BASE"; then base="$BASE"; else base=main; fi
+          if existe "$RAMA"; then ref="$RAMA"; else ref="$base"; fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "Rama del back: $ref (base: $base)"
       - uses: actions/checkout@v7
         with:
           path: frontend-indiecinema
@@ -146,6 +171,23 @@ jobs:
           repository: cerberus-paw/backend-indiecinema
           ref: ${{ steps.back.outputs.ref }}
           path: backend-indiecinema
+          # Con la historia entera: para mezclarla con la base hace falta el ancestro común.
+          fetch-depth: 0
+      # Una rama del back con el mismo nombre puede haber quedado atrás de la base: sin ponerla al
+      # día, el front se prueba contra un back viejo y falla por cosas ajenas al PR (pasó con el
+      # #65). Es lo que GitHub ya hace con el propio front al probar un PR.
+      - name: Poner al día la rama del back con su base
+        if: steps.back.outputs.ref != steps.back.outputs.base
+        working-directory: backend-indiecinema
+        env:
+          BASE: ${{ steps.back.outputs.base }}
+        run: |
+          git fetch --no-tags origin "$BASE"
+          if ! git -c user.name=CI -c user.email=ci@localhost merge --no-edit FETCH_HEAD; then
+            echo "::error::La rama del back tiene conflictos con $BASE: hay que ponerla al día antes de probar este PR."
+            exit 1
+          fi
+          git log --oneline -1
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"

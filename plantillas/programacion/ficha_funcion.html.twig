@@ -3,11 +3,14 @@
   dirección, la fecha, el precio y el estado. Se ve en cualquier estado: en votación, en acuerdo
   de fecha, programada, finalizada o cancelada.
 
-  Encabezados, sin saltar niveles: h1 la función; h2 la sala y cada obra. El rótulo de las obras
-  («La obra», «Obras candidatas»…) no es un encabezado: nombra la sección con aria-labelledby.
+  Programada, finalizada y cancelada siguen el wireframe «funcion-programada» (E4-10.10): el
+  detalle (las obras en filas, los recuadros de fecha, horario, duración total y entrada, y la
+  sala) y, al costado, la reserva. Sólo una programada que se puede reservar, o que se agotó,
+  tiene ese costado; hasta 900 px baja después del detalle. Encabezados: h1 la función; h2 «Se
+  proyectan N títulos», «La sala» y la reserva; h3 cada obra y el nombre de la sala.
 
-  En celular (hasta 768 px) la sala y cada obra pasan a una columna, y la fecha y el precio se
-  apilan.
+  En votación de títulos, h2 la sala; el rótulo de las obras candidatas no es un encabezado:
+  nombra la sección con aria-labelledby. En celular (hasta 768 px) la sala pasa a una columna.
 
   Variables:
   - funcion:
@@ -18,6 +21,12 @@
       - precio: (string) ya escrito ('$ 2.500', 'A la gorra').
       - cupo: (int) cuántos espectadores entran.
       - fecha: (string|null) ya escrita ('Sáb 19 sep · 20:30'), o null si todavía no se acordó.
+      - dia: (string|null) la fecha sola ('Sáb 19 sep'), o null si todavía no se acordó.
+      - horario: (string|null) de inicio a fin ('20:30 a 23:30'): termina cuando terminan sus
+        obras. null si todavía no se acordó la fecha.
+      - duracion_total: (int|null) la suma de las duraciones de sus obras elegidas, en minutos;
+        null mientras los títulos están en votación, que ahí las obras son las candidatas y la
+        función todavía no tiene una duración.
       - obras_elegidas: (bool) si las obras son las elegidas; si no, son las candidatas.
       - sala: url (de su ficha), nombre, descripcion, direccion, localidad, capacidad e imagen
         (la URL de la foto, o null).
@@ -47,6 +56,8 @@
     (id, fecha, fecha_corta, hora_inicio, hora_fin y votos), franja_ganadora (la que lidera),
     confirmable, acuerdo_sin_minimo, fecha_limite (ya escrita), votacion_abierta y votos_emitidos
     (los de la votación de títulos). franjas_del_usuario son las franjas que marcó quien mira.
+
+  dia, horario y duracion_total se leen con ??, por si el back todavía no las manda.
 
   editable, cancelable, cerrable, reservable y guardada llevan |default(false): el paquete front se mergea
   antes que el back, así que mientras tanto esta plantilla la sirve un controlador que todavía no
@@ -102,7 +113,7 @@
 
   {# data-lugares-libres: de dónde traer los lugares al día, para el componente LugaresLibres
      (E4-05.2). Sólo si la página se cargó con el dato: sin él no hay número que actualizar. #}
-  <article class="ficha-funcion-contenido"{% if funcion.lugares_libres|default(null) is not null %} data-lugares-libres="/cartelera/{{ funcion.id }}/lugares" data-cupo="{{ funcion.cupo }}"{% endif %}>
+  <article class="ficha-funcion-contenido"{% if funcion.lugares_libres|default(null) is not null %} data-lugares-libres="/cartelera/{{ funcion.id }}/lugares" data-cupo="{{ funcion.cupo }}" data-lugares="{{ funcion.lugares_libres }}"{% endif %}>
     {# La cabecera de los wireframes de la función (las tres pantallas la comparten): el título
        con «Compartir» a la derecha y, abajo, la sala con su localidad y dos o tres datos en
        píldoras, que cambian según el estado (E3-13.F10). #}
@@ -206,9 +217,9 @@
     {% endif %}
 
     {% set bloque_reserva %}
-    {# El panel de reserva del wireframe (funcion-programada). La ficha es de una columna: va
-       debajo de la cabecera y no al costado. Los lugares libres y el total en vivo llegan con
-       la ocupación y el componente de reserva. En votación de títulos no aplica reserva. #}
+    {# El panel de reserva del wireframe (funcion-programada), que va al costado del detalle. Los
+       lugares libres y el total en vivo llegan con la ocupación y el componente de reserva. En
+       votación de títulos no aplica reserva. #}
     {% if funcion.reservable|default(false) and funcion.estado != 'en_votacion_titulos' %}
       <section class="ficha-seccion ficha-reserva" aria-labelledby="ficha-reserva-titulo">
         <div class="ficha-reserva-precio">
@@ -228,21 +239,36 @@
           {% endif %}
         </div>
         {% if usuario %}
-          {# data-formulario-reserva: el enganche del componente que lo manda sin recargar (E4-05.3). #}
-          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva>
+          {# data-formulario-reserva: el enganche del componente que lo manda sin recargar (E4-05.3).
+             El tope por persona y lo que le queda al espectador los manda funciones con la
+             ocupación (IC-463): los componentes los leen de acá y no tienen su propio número. Sin
+             el dato (funciones no respondió), el campo llega hasta los lugares o el cupo y la
+             reserva la controla funciones igual. #}
+          {% set tope_por_persona = funcion.maximo_por_persona|default(null) %}
+          {% set restantes_usuario = funcion.lugares_restantes_usuario|default(null) %}
+          {% set sin_lugares_propios = restantes_usuario is same as(0) %}
+          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva{% if tope_por_persona is not null and restantes_usuario is not null %} data-maximo-por-persona="{{ tope_por_persona }}" data-restantes-usuario="{{ restantes_usuario }}"{% endif %}>
             <input type="hidden" name="_csrf" value="{{ csrf }}">
-            {% include 'parciales/campo.html.twig' with {
+            {# valor_maximo nunca menos de 1: con el tope alcanzado el campo va deshabilitado, y un
+               max por debajo del min no tiene sentido. #}
+            {% set campo_cantidad = {
               nombre: 'cantidad',
               etiqueta: 'Cantidad de lugares',
               tipo: 'number',
               valor: '1',
               requerido: true,
               valor_minimo: 1,
-              valor_maximo: funcion.lugares_libres ?? funcion.cupo
-            } only %}
+              valor_maximo: max(1, funcion.maximo_reserva ?? funcion.lugares_libres ?? funcion.cupo),
+              deshabilitado: sin_lugares_propios
+            } %}
+            {% if tope_por_persona is not null %}
+              {% set campo_cantidad = campo_cantidad|merge({ayuda: 'Máximo ' ~ tope_por_persona ~ ' lugares por persona.'}) %}
+            {% endif %}
+            {% include 'parciales/campo.html.twig' with campo_cantidad only %}
             {% include 'parciales/boton.html.twig' with {
               texto: 'Reservar mis lugares',
-              tipo: 'submit'
+              tipo: 'submit',
+              deshabilitado: sin_lugares_propios
             } only %}
           </form>
         {% else %}
@@ -265,7 +291,6 @@
       </section>
     {% endif %}
     {% endset %}
-    {% if funcion.estado != 'en_acuerdo_fecha' %}{{ bloque_reserva }}{% endif %}
 
     {# ==================================================================== #}
     {# BLOQUE INTERACTIVO: VOTACIÓN DE TÍTULOS (E3-12 / IC-148 / IC-149)   #}
@@ -276,8 +301,8 @@
       <section class="ficha-seccion ficha-votacion" aria-labelledby="ficha-votacion-titulo" data-seccion-votacion>
         <div class="ficha-votacion-cabecera">
           <div class="ficha-votacion-intro">
-            <span class="insignia-estado insignia-votacion" aria-label="Fase de la función: Votación de títulos abierta">
-              VOTACIÓN ABIERTA
+            <span class="insignia-estado insignia-votacion">
+              <span class="sr-only">Fase de la función: </span>VOTACIÓN ABIERTA
             </span>
             <h2 id="ficha-votacion-titulo" class="ficha-votacion-titulo">Votación de títulos</h2>
             <p id="ficha-funcion-obras-titulo" class="ficha-obras-etiqueta">Obras candidatas en votación</p>
@@ -386,7 +411,7 @@
                   {% if obra.sinopsis is defined and obra.sinopsis %}
                     <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
                   {% endif %}
-                  <p class="candidata-conteo-votos" aria-label="Cantidad de votos acumulados">
+                  <p class="candidata-conteo-votos">
                     <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
                   </p>
                   <div class="candidata-accion">
@@ -463,7 +488,7 @@
                   {% if obra.sinopsis is defined and obra.sinopsis %}
                     <p class="candidata-sinopsis">{{ obra.sinopsis }}</p>
                   {% endif %}
-                  <p class="candidata-conteo-votos" aria-label="Cantidad de votos acumulados">
+                  <p class="candidata-conteo-votos">
                     <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
                   </p>
                   <div class="candidata-accion">
@@ -620,7 +645,8 @@
                   </div>
                   <div class="ficha-franja-progreso">
                     <div class="ficha-barra" role="progressbar" aria-valuemin="0" aria-valuemax="{{ minimo }}" aria-valuenow="{{ min(votos_franja, minimo) }}" aria-label="Compromisos para el {{ franja.fecha }}">
-                      <span class="ficha-barra-relleno" style="width: {{ min(100, (votos_franja * 100 / minimo)|round) }}%"></span>
+                      {# El ancho lo pone app.js desde data-porcentaje: un style en el HTML lo bloquearía la Content-Security-Policy, que no admite estilos en línea #}
+                      <span class="ficha-barra-relleno" data-porcentaje="{{ min(100, (votos_franja * 100 / minimo)|round) }}"></span>
                     </div>
                     <p class="ficha-franja-conteo">
                       <span><strong>{{ votos_franja }}</strong> de {{ minimo }} {{ minimo == 1 ? 'comprometido' : 'comprometidos' }}</span>
@@ -713,8 +739,10 @@
       {{ bloque_reserva }}
     {% endif %}
 
-    {# En acuerdo de fecha no va: el wireframe nombra la sala en la cabecera (E3-13.F10). #}
-    {% if funcion.estado != 'en_acuerdo_fecha' %}
+    {# La sala, como estaba, sólo en votación de títulos: en acuerdo de fecha el wireframe la
+       nombra en la cabecera (E3-13.F10), y programada, finalizada y cancelada la llevan en el
+       detalle de abajo. #}
+    {% if funcion.estado == 'en_votacion_titulos' %}
     <section class="ficha-seccion ficha-seccion-sala" aria-labelledby="ficha-funcion-sala-titulo">
       <div class="ficha-sala-tarjeta">
         <div class="ficha-sala-detalles">
@@ -744,53 +772,112 @@
     </section>
     {% endif %}
 
+    {# ==================================================================== #}
+    {# PROGRAMADA, FINALIZADA O CANCELADA, como el wireframe                #}
+    {# «funcion-programada» (E4-10.10): el detalle (las obras, los          #}
+    {# recuadros y la sala) y, al costado, la reserva. Sólo una programada  #}
+    {# que todavía se puede reservar, o que se agotó, tiene ese costado:    #}
+    {# las demás van en una columna.                                        #}
+    {# ==================================================================== #}
     {% if funcion.estado != 'en_votacion_titulos' and funcion.estado != 'en_acuerdo_fecha' %}
-    <section class="ficha-seccion ficha-seccion-obras" aria-labelledby="ficha-funcion-obras-titulo">
-      <div class="ficha-obras-cabecera">
-        <p id="ficha-funcion-obras-titulo" class="ficha-obras-etiqueta">
-          {% if funcion.obras_elegidas %}
-            {{ funcion.obras|length == 1 ? 'La obra' : 'Las obras' }}
-          {% else %}
-            Obras candidatas
+    {% set con_lateral = funcion.estado == 'programada' and bloque_reserva|trim != '' %}
+    <div class="ficha-detalle{% if con_lateral %} ficha-detalle-con-lateral{% endif %}">
+      <div class="ficha-detalle-principal">
+        <section class="ficha-seccion ficha-seccion-obras" aria-labelledby="ficha-funcion-obras-titulo">
+          {% set cantidad_obras = funcion.obras|length %}
+          <h2 id="ficha-funcion-obras-titulo" class="ficha-seccion-titulo">
+            {%- if not funcion.obras_elegidas -%}
+              {{ cantidad_obras == 1 ? 'Obra candidata' : 'Obras candidatas' }}
+            {%- elseif funcion.estado == 'finalizada' -%}
+              {{ cantidad_obras == 1 ? 'Se proyectó 1 título' : 'Se proyectaron ' ~ cantidad_obras ~ ' títulos' }}
+            {%- else -%}
+              {{ cantidad_obras == 1 ? 'Se proyecta 1 título' : 'Se proyectan ' ~ cantidad_obras ~ ' títulos' }}
+            {%- endif -%}
+          </h2>
+          {# Una fila por obra, sin votos: la votación ya terminó. #}
+          <ul class="ficha-obras-filas">
+            {% for obra in funcion.obras %}
+              <li class="ficha-obra-fila">
+                {# El afiche lo sirve /obras/{id}/afiche; sin afiche cargado, el marcador. #}
+                {% if obra.afiche ?? null %}
+                  <img src="{{ obra.afiche }}" alt="" class="ficha-titulo-afiche" loading="lazy">
+                {% else %}
+                  <span class="ficha-titulo-afiche ficha-titulo-afiche-vacio" aria-hidden="true">Afiche</span>
+                {% endif %}
+                <div>
+                  <h3 class="ficha-titulo-nombre">
+                    {%- if obra.url ?? null -%}
+                      <a href="{{ obra.url }}">{{ obra.titulo }}</a>
+                    {%- else -%}
+                      {{ obra.titulo }}
+                    {%- endif -%}
+                  </h3>
+                  <p class="ficha-titulo-datos">{{ ([obra.anio, obra.generos|join(', ')]|filter(dato => dato is not empty)|join(' · ')) }} · {{ obra.duracion }} min</p>
+                  {% if obra.director ?? null %}
+                    <p class="ficha-titulo-datos">Dirección: <strong>{{ obra.director }}</strong></p>
+                  {% endif %}
+                  {% if obra.sinopsis ?? null %}
+                    <p class="ficha-obra-fila-sinopsis">{{ obra.sinopsis }}</p>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+
+        {# Los cuatro recuadros del wireframe. Sin fecha (una cancelada antes de acordarla) no hay
+           fecha ni horario que mostrar. #}
+        <dl class="ficha-recuadros">
+          {% if funcion.dia ?? null %}
+            <div class="ficha-recuadro"><dt>Fecha</dt><dd>{{ funcion.dia }}</dd></div>
           {% endif %}
-        </p>
+          {% if funcion.horario ?? null %}
+            <div class="ficha-recuadro"><dt>Horario</dt><dd>{{ funcion.horario }}</dd></div>
+          {% endif %}
+          {% if funcion.duracion_total ?? null %}
+            <div class="ficha-recuadro"><dt>Duración total</dt><dd>{{ funcion.duracion_total }} min</dd></div>
+          {% endif %}
+          <div class="ficha-recuadro"><dt>Entrada</dt><dd>{{ funcion.precio }}</dd></div>
+        </dl>
+
+        <section class="ficha-seccion ficha-seccion-sala" aria-labelledby="ficha-funcion-sala-titulo">
+          <h2 id="ficha-funcion-sala-titulo" class="ficha-seccion-titulo">La sala</h2>
+          <div class="ficha-sala-fila">
+            {% if funcion.sala.imagen %}
+              <img src="{{ funcion.sala.imagen }}" alt="" class="ficha-sala-fila-foto" loading="lazy">
+            {% else %}
+              <span class="ficha-sala-fila-foto ficha-titulo-afiche-vacio" aria-hidden="true">Foto</span>
+            {% endif %}
+            <div class="ficha-sala-fila-datos">
+              <h3 class="ficha-titulo-nombre">{{ funcion.sala.nombre }}</h3>
+              <p class="ficha-sala-ubicacion">
+                {% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'ficha-sala-icono' } only %}
+                <span>{{ funcion.sala.direccion }}, {{ funcion.sala.localidad }}</span>
+              </p>
+              <p class="ficha-titulo-datos">{{ funcion.sala.capacidad }} butacas</p>
+              {% if funcion.sala.descripcion %}
+                <p class="ficha-sala-fila-descripcion">{{ funcion.sala.descripcion }}</p>
+              {% endif %}
+            </div>
+            {% include 'parciales/boton.html.twig' with {
+              texto: 'Ver sala',
+              url: funcion.sala.url,
+              variante: 'secundario'
+            } only %}
+          </div>
+        </section>
       </div>
 
-      <div class="ficha-obras-lista">
-        {% for obra in funcion.obras %}
-          <article class="ficha-obra-tarjeta">
-            <div class="ficha-obra-afiche-columna">
-              <div class="ficha-obra-afiche-placeholder" aria-hidden="true">
-                <span class="afiche-placeholder-texto">AFICHE</span>
-              </div>
-            </div>
-            <div class="ficha-obra-cuerpo">
-              <h2 class="ficha-obra-titulo">
-                {{ obra.titulo }} <span class="ficha-obra-anio">({{ obra.anio }})</span>
-              </h2>
-              <div class="ficha-obra-metadatos">
-                <span class="ficha-obra-metadato">Dirección: <strong>{{ obra.director }}</strong></span>
-                <span class="ficha-obra-separador" aria-hidden="true">·</span>
-                <span class="ficha-obra-metadato">Duración: <strong>{{ obra.duracion }} min</strong></span>
-              </div>
-              {% if obra.generos is not empty %}
-                <div class="ficha-obra-generos">
-                  <span class="ficha-obra-generos-rotulo">Géneros:</span>
-                  <div class="ficha-obra-generos-chips">
-                    {% for genero in obra.generos %}
-                      <span class="ficha-genero-chip">{{ genero }}</span>
-                    {% endfor %}
-                  </div>
-                </div>
-              {% endif %}
-              <div class="ficha-obra-sinopsis">
-                <p>{{ obra.sinopsis }}</p>
-              </div>
-            </div>
-          </article>
-        {% endfor %}
-      </div>
-    </section>
+      {# La reserva al costado: el precio, los lugares libres y el formulario de siempre, o el
+         enlace para ingresar, o el aviso de agotada. Queda adentro del artículo, que es donde
+         la buscan los componentes LugaresLibres y FormularioDeReserva. En el celular baja
+         después del detalle. #}
+      {% if con_lateral %}
+        <aside class="ficha-detalle-lateral" aria-label="Reserva">
+          {{ bloque_reserva }}
+        </aside>
+      {% endif %}
+    </div>
     {% endif %}
   </article>
 </div>

@@ -1,3 +1,5 @@
+/* exported GestorFranjas */
+
 /**
  * Componente interactivo y accesible para que el organizador proponga y administre
  * franjas horarias y el mínimo de asistentes requeridos (IC-154 / E3-13.2).
@@ -76,7 +78,7 @@ class GestorFranjas {
    */
   vincularFilasExistentes() {
     const filas = this.obtenerFilas();
-    filas.forEach((fila, indice) => this.vincularFila(fila, indice));
+    filas.forEach((fila) => this.vincularFila(fila));
   }
 
   /**
@@ -92,9 +94,8 @@ class GestorFranjas {
    * Vincula los eventos de eliminación y validación de rango horario a una fila.
    *
    * @param {HTMLElement} fila
-   * @param {number} indice
    */
-  vincularFila(fila, indice) {
+  vincularFila(fila) {
     const botonEliminar = fila.querySelector('[data-eliminar-franja]');
     if (botonEliminar) {
       botonEliminar.onclick = () => this.eliminarFranja(fila);
@@ -144,6 +145,7 @@ class GestorFranjas {
         alerta.hidden = true;
       }
       campoFin.removeAttribute('aria-invalid');
+      campoFin.removeAttribute('aria-describedby');
       return true;
     }
 
@@ -154,8 +156,14 @@ class GestorFranjas {
     }
     if (!esValido) {
       campoFin.setAttribute('aria-invalid', 'true');
+      // Apuntado al aviso de esta fila: el lector de pantalla lo lee al pararse en el campo y no
+      // sólo cuando aparece, que es cuando el foco suele estar en otro lado (E4-09.3).
+      if (alerta?.id) {
+        campoFin.setAttribute('aria-describedby', alerta.id);
+      }
     } else {
       campoFin.removeAttribute('aria-invalid');
+      campoFin.removeAttribute('aria-describedby');
     }
 
     return esValido;
@@ -188,7 +196,7 @@ class GestorFranjas {
 
     if (nuevaFila) {
       this.lista.appendChild(nuevaFila);
-      this.vincularFila(nuevaFila, nuevoIndice);
+      this.vincularFila(nuevaFila);
       this.aplicarRestriccionFechas();
       this.actualizarIndicesYEtiquetas();
       this.actualizarEstadosBotones();
@@ -260,6 +268,18 @@ class GestorFranjas {
         const label = fila.querySelector(`label[for="${idOriginal}"]`);
         if (label) {
           label.setAttribute('for', nuevoId);
+        }
+      }
+
+      // El aviso del rango también se renumera: su id es el que apunta el campo de fin con
+      // aria-describedby, y dos filas no pueden compartirlo (E4-09.3).
+      const alerta = fila.querySelector('[data-error-rango]');
+      const campoFin = fila.querySelector('[data-campo-fin]');
+      if (alerta) {
+        const anterior = alerta.id;
+        alerta.id = `error-franja-rango-${idx}`;
+        if (campoFin?.getAttribute('aria-describedby') === anterior) {
+          campoFin.setAttribute('aria-describedby', alerta.id);
         }
       }
     });

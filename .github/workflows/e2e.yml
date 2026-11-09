@@ -41,6 +41,12 @@ jobs:
           E2E_FUNCION: ${{ vars.E2E_FUNCION }}
           E2E_CORREO: ${{ secrets.E2E_CORREO }}
           E2E_CLAVE: ${{ secrets.E2E_CLAVE }}
+          # Las cuentas del panel, para los anchos del organizador y del administrador (A-3 y
+          # A-4). Opcionales: sin ellas, esos casos se saltean.
+          E2E_ORGANIZADOR_CORREO: ${{ secrets.E2E_ORGANIZADOR_CORREO }}
+          E2E_ORGANIZADOR_CLAVE: ${{ secrets.E2E_ORGANIZADOR_CLAVE }}
+          E2E_ADMINISTRADOR_CORREO: ${{ secrets.E2E_ADMINISTRADOR_CORREO }}
+          E2E_ADMINISTRADOR_CLAVE: ${{ secrets.E2E_ADMINISTRADOR_CLAVE }}
         run: npm run e2e
       # Sólo las capturas y el error de lo que falló. La traza y el informe HTML quedan afuera: la
       # traza guarda los pedidos, con la contraseña del ingreso y la cookie de la sesión, y los

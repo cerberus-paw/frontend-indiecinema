@@ -19,13 +19,7 @@
   <title>{% block titulo %}{% endblock %} · IndieCinema</title>
   {# Ícono de favoritos (favicon) oficial de IndieCinema en formato vectorial SVG #}
   <link rel="icon" type="image/svg+xml" href="/estaticos/img/icon.svg">
-  {# Preconecta con el origen de Google Fonts para acelerar la resolución DNS y el handshake SSL #}
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  {# Preconecta de forma anónima con el CDN de fuentes de Google para optimizar la descarga de archivos woff2 #}
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  {# Carga la fuente tipográfica oficial Fira Sans Condensed de la identidad visual #}
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
-  {# Vincula la hoja de estilos principal servida directamente por Nginx en la ruta pública /estaticos/ #}
+  {# Vincula la hoja de estilos principal servida directamente por Nginx en la ruta pública /estaticos/. Trae también la fuente Fira Sans Condensed, que se sirve desde el sitio y no desde Google: la Content-Security-Policy sólo admite recursos propios #}
   <link rel="stylesheet" href="/estaticos/css/estilos.css">
   {# Bloque opcional para que vistas específicas agreguen hojas de estilo particulares si lo requieren #}
   {% block estilos %}{% endblock %}
@@ -33,11 +27,14 @@
 </head>
 {# Aplica la clase 'cuerpo-app' al body para manejar la estructura flexbox que mantiene el footer pegado al fondo #}
 <body class="cuerpo-app">
+  {# «Saltar al contenido» (E4-10.1): lo primero que toma el foco con Tab. Va afuera del bloque del encabezado para que salga también en los paneles, que lo sacan. No se ve hasta que tiene el foco #}
+  <a href="#contenido-principal" class="skip-link">Saltar al contenido</a>
+
   {# Incluye el encabezado reutilizable con logo, buscador, enlaces públicos y menú según rol. Es un bloque para que el panel del administrador, que tiene su propia barra, lo saque #}
   {% block encabezado %}{% include 'parciales/encabezado.html.twig' %}{% endblock %}
 
-  {# Contenedor principal semántico que delimita el contenido propio de cada subsistema y pantalla #}
-  <main id="contenido-principal" class="contenido-principal">
+  {# Contenedor principal semántico que delimita el contenido propio de cada subsistema y pantalla. Con tabindex -1 acepta el foco desde «Saltar al contenido», así baja el foco y no sólo el desplazamiento #}
+  <main id="contenido-principal" class="contenido-principal" tabindex="-1">
     {# Bloque obligatorio 'contenido': aquí se renderiza el cuerpo de cada plantilla hija (esqueleto, catálogo, etc.) #}
     {% block contenido %}{% endblock %}
   {# Cierre del elemento semántico main #}

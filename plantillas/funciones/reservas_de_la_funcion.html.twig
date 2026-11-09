@@ -2,26 +2,28 @@
   Las reservas de una función para su organizador, en /funcion/organizador/funciones/{id}/reservas
   (E4-03), como la sección «Reservas de la función» del wireframe de la E2 (panel-organizador):
   las tarjetas de números, el registro de la asistencia, la tabla con el botón de cada fila y
-  «Exportar listado» (el CSV). Sin la barra lateral del panel, que todavía no existe: el armado es el
-  de «Mis funciones», de donde se llega. Queda afuera lo que todavía no hay: el nombre del
-  espectador (cuentas no tiene una consulta de varios usuarios juntos), el pago y el reparto.
+  «Exportar listado» (el CSV). Va en el panel del organizador, con «Mis funciones» marcada en la
+  barra, que es de donde se llega (E4-10.12). Queda afuera lo que todavía no hay: el pago y el
+  reparto.
 
   Variables:
   - funcion: id, titulo, url (de su ficha), fecha (o null), sala, estado y cupo.
   - resumen: reservados y libres (lugares), asistentes (lugares ya registrados), recaudado (ya
     escrito) y reservas (cuántas siguen en pie).
-  - reservas: lista de {id, codigo, cantidad, total, estado ('confirmada' | 'cancelada' |
-    'asistio'), estado_etiqueta, creada (ya escrita), registrable}.
+  - reservas: lista de {id, codigo, espectador (o null), cantidad, total, estado ('confirmada' |
+    'cancelada' | 'asistio'), estado_etiqueta, creada (ya escrita), registrable}.
   - registra_asistencia: (bool) si se puede registrar: la función no se canceló.
   - codigo: (string) lo que se había escrito, al volver con un error.
   - registrada: (string|null) el código que se acaba de registrar.
   - error_general: (string, opcional) por qué no se registró la asistencia.
 #}
-{% extends 'base.html.twig' %}
+{% extends 'organizador.html.twig' %}
 
 {% block titulo %}Reservas · {{ funcion.titulo }}{% endblock %}
 
-{% block contenido %}
+{% block seccion %}funciones{% endblock %}
+
+{% block panel %}
 {% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
 {# data-panel-de-reservas: el enganche del componente que registra la asistencia sin recargar (E4-05.5). #}
 <div class="contenedor panel-reservas" data-panel-de-reservas>
@@ -46,35 +48,37 @@
     } only %}
   </header>
 
-  <dl class="panel-admin-resumen">
-    <div class="panel-admin-dato">
+  <dl class="panel-resumen">
+    <div class="panel-dato">
       <dt>Lugares reservados</dt>
-      <dd class="panel-admin-dato-valor" data-resumen="reservados">{{ resumen.reservados }}</dd>
-      <dd class="panel-admin-dato-nota">de {{ funcion.cupo }} · {{ resumen.reservas }} {{ resumen.reservas == 1 ? 'reserva' : 'reservas' }}</dd>
+      <dd class="panel-dato-valor" data-resumen="reservados">{{ resumen.reservados }}</dd>
+      <dd class="panel-dato-nota">de {{ funcion.cupo }} · {{ resumen.reservas }} {{ resumen.reservas == 1 ? 'reserva' : 'reservas' }}</dd>
     </div>
-    <div class="panel-admin-dato">
+    <div class="panel-dato">
       <dt>Lugares libres</dt>
-      <dd class="panel-admin-dato-valor" data-resumen="libres">{{ resumen.libres }}</dd>
-      <dd class="panel-admin-dato-nota">{{ resumen.libres == 0 ? 'agotada' : 'para reservar' }}</dd>
+      <dd class="panel-dato-valor" data-resumen="libres">{{ resumen.libres }}</dd>
+      <dd class="panel-dato-nota">{{ resumen.libres == 0 ? 'agotada' : 'para reservar' }}</dd>
     </div>
-    <div class="panel-admin-dato">
+    <div class="panel-dato">
       <dt>Asistentes registrados</dt>
-      <dd class="panel-admin-dato-valor" data-resumen="asistentes">{{ resumen.asistentes }}</dd>
-      <dd class="panel-admin-dato-nota">de {{ resumen.reservados }} lugares reservados</dd>
+      <dd class="panel-dato-valor" data-resumen="asistentes">{{ resumen.asistentes }}</dd>
+      <dd class="panel-dato-nota">de {{ resumen.reservados }} lugares reservados</dd>
     </div>
-    <div class="panel-admin-dato">
+    <div class="panel-dato">
       <dt>Total de las reservas</dt>
-      <dd class="panel-admin-dato-valor" data-resumen="recaudado">{{ resumen.recaudado }}</dd>
-      <dd class="panel-admin-dato-nota">sin las canceladas</dd>
+      <dd class="panel-dato-valor" data-resumen="recaudado">{{ resumen.recaudado }}</dd>
+      <dd class="panel-dato-nota">sin las canceladas</dd>
     </div>
   </dl>
 
   {% if registrada %}
     {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Se registró la asistencia de la reserva ' ~ registrada ~ '.' } only %}
   {% endif %}
-  {% if error_general is defined %}
-    {% include 'parciales/mensaje.html.twig' with { tipo: 'error', titulo: 'No se registró la asistencia', mensaje: error_general } only %}
-  {% endif %}
+  {# Por qué no se registró, con el foco, como el resumen de errores de los formularios (E4-10.5) #}
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    error_general: error_general ?? null,
+    titulo: 'No se registró la asistencia'
+  } only %}
   {# data-avisos: acá pone el componente el resultado de registrar sin recargar. Vacía y en la
      página desde el principio, para que un lector de pantalla lea lo que aparece. #}
   <div data-avisos aria-live="polite"></div>
@@ -102,6 +106,7 @@
         <thead>
           <tr>
             <th scope="col">Código</th>
+            <th scope="col">Espectador</th>
             <th scope="col">Lugares</th>
             <th scope="col">Total</th>
             <th scope="col">Reservada</th>
@@ -113,6 +118,7 @@
           {% for reserva in reservas %}
             <tr data-reserva="{{ reserva.id }}">
               <td><span class="tabla-admin-principal panel-reservas-codigo">{{ reserva.codigo }}</span></td>
+              <td>{{ reserva.espectador ?? '—' }}</td>
               <td>{{ reserva.cantidad }}</td>
               <td>{{ reserva.total }}</td>
               <td>{{ reserva.creada }}</td>

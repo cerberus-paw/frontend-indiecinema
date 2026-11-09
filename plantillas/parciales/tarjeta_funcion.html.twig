@@ -76,14 +76,17 @@
     <a href="{{ url_detalle }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">
       {# Si la función cuenta con una imagen de afiche cargada #}
       {% if funcion.afiche is defined and funcion.afiche %}
+        {# El mismo afiche, desenfocado, de fondo: el afiche es vertical y el recuadro apaisado, así que
+           se muestra entero (recortado se pierde el título) y esto llena los costados #}
+        <img src="{{ funcion.afiche }}" alt="" class="tarjeta-funcion-imagen-fondo" loading="lazy">
         {# Imagen fotográfica del afiche con carga diferida #}
         <img
           {# Ruta absoluta o relativa de la imagen #}
           src="{{ funcion.afiche }}"
           {# Texto alternativo con el título de la obra #}
           alt="Afiche de {{ funcion.titulo }}"
-          {# Clase con recorte armónico y zoom al hacer hover #}
-          class="tarjeta-funcion-imagen"
+          {# Clase con el afiche entero, sin recortar, y zoom al hacer hover #}
+          class="tarjeta-funcion-imagen tarjeta-funcion-imagen-entera"
           {# Carga diferida nativa para optimizar el rendimiento de la cartelera #}
           loading="lazy"
         {# Cierre de la etiqueta img #}
@@ -106,9 +109,10 @@
   <div class="tarjeta-funcion-cuerpo">
     {# Barra superior con la insignia de estado y el precio #}
     <div class="tarjeta-funcion-cabecera">
-      {# Insignia de píldora que indica el estado del ciclo o función #}
-      <span class="insignia-estado {{ clase_insignia }}" aria-label="Estado: {{ etiqueta_estado }}">
-        {{ etiqueta_estado }}
+      {# Insignia de píldora que indica el estado del ciclo o función. «Estado:» lo lee sólo el lector
+         de pantalla: un span sin rol no puede llevar aria-label (validador del W3C, E4-10.7). #}
+      <span class="insignia-estado {{ clase_insignia }}">
+        <span class="sr-only">Estado: </span>{{ etiqueta_estado }}
       </span>
       {# Valor monetario o modalidad de cobro de la entrada #}
       <span class="tarjeta-funcion-precio">{{ texto_precio }}</span>

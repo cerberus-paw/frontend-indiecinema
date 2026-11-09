@@ -9,6 +9,10 @@ cuenta de espectador que ya existe (`E2E_CORREO` y `E2E_CLAVE`) y una función d
 se pueda reservar, con al menos 3 lugares libres. Lo que reservan lo cancelan al terminar, así
 se pueden correr muchas veces contra el mismo sitio sin agotar las funciones.
 
+En todos los casos, además, ninguna página puede violar la Content-Security-Policy: si el
+navegador bloquea un estilo o un script en línea, o un recurso de otro origen, la prueba falla
+aunque lo demás haya salido bien (`testSinSesion` en `ayudas.js`).
+
 ## Ingresar
 
 | Caso | Qué hace | Qué tiene que ver |
@@ -27,6 +31,7 @@ se pueden correr muchas veces contra el mismo sitio sin agotar las funciones.
 | R-3 | Pide 0 lugares, y después -1 | No se reserva: el campo queda inválido y los lugares libres no cambian |
 | R-4 | Pide un lugar más de los que quedan | No se reserva: el campo queda inválido y los lugares libres no cambian |
 | R-5 | Escribe letras en la cantidad | No se reserva |
+| R-6 | Pide más lugares que el máximo por persona (7), o reserva 2 y al volver pide 5 | No se reserva: el máximo del campo baja a lo que le queda (hasta 6 por persona), el error dice cuál es el máximo y los lugares libres no cambian |
 
 ## Mis reservas y cancelar
 
@@ -36,6 +41,112 @@ se pueden correr muchas veces contra el mismo sitio sin agotar las funciones.
 | M-2 | Abre el comprobante desde «Mis reservas» | El mismo código y la cantidad |
 | C-1 | Cancela la reserva desde «Mis reservas» y confirma | La reserva queda «cancelada», ya no se puede cancelar y los lugares vuelven a la función |
 | C-2 | Entra a cancelar y elige «Conservar la reserva» | La reserva sigue «confirmada» |
+
+## Teclado
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| T-1 | Sin sesión, abre la portada y aprieta Tab, y después Enter | Con Tab, el foco está en «Saltar al contenido», que se ve; con Enter, el foco pasa al contenido principal |
+| T-2 | En la portada, con el foco en «Diapositiva siguiente» aprieta Enter, y en «Diapositiva anterior», Espacio | Con Enter pasa a la segunda diapositiva y con Espacio vuelve a la primera; la miniatura marcada acompaña |
+| T-3 | En la portada, con el foco en la miniatura de la tercera diapositiva aprieta Enter | Se ve la tercera diapositiva |
+| T-4 | En la portada, con el foco en «Pausar el pase automático» aprieta Enter, y después Espacio | Con Enter se pausa (el botón pasa a «Reanudar el pase automático») y con Espacio se reanuda |
+| T-5 | En la portada, recorre el carrusel con Tab de punta a punta | El foco nunca cae en una diapositiva que no se ve |
+| T-6 | Con sesión, en la ficha de una función escribe 1 en la cantidad y aprieta Enter | «Reserva confirmada», sin tocar el mouse; la reserva se cancela al terminar |
+## Menú del usuario
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| U-1 | Con sesión, abre el menú del encabezado con Enter, lo recorre con Tab, lo cierra con Esc, lo vuelve a abrir con Espacio y hace clic afuera | Se abre; Tab pasa por «Panel de mi cuenta» y «Mis reservas»; Esc lo cierra con el foco de vuelta en el botón; Espacio lo abre y el clic afuera lo cierra |
+## Formularios con errores
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| F-1 | Sin sesión, manda el registro vacío, aprieta Tab y después Enter | Vuelve con el foco en el resumen «Revisá N campos», con un link por campo; con Tab, el foco pasa al primer link; con Enter, al campo «Nombre» |
+
+## Contraste
+
+Miden el color que calcula el navegador contra el fondo real del texto (WCAG 1.4.3, 4,5:1), sin
+sesión y en el registro, que tiene ayudas, placeholders y errores.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| K-1 | Abre el registro | La ayuda de un campo da al menos 4,5:1 contra su fondo |
+| K-2 | Abre el registro | El placeholder de un campo da al menos 4,5:1 contra el fondo del campo |
+| K-3 | Manda el registro vacío | El error de un campo da al menos 4,5:1 contra su fondo |
+
+## Ordenar la cartelera
+
+Sin sesión. Necesitan al menos dos páginas de cartelera (más de 12 funciones), como en los datos
+de prueba.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| O-1 | En la cartelera, elige «Precio: mayor a menor» en «Ordenar por» | Sin recargar, las funciones van de la más cara a la más barata, la dirección lleva el orden y no aparece «Limpiar» |
+| O-2 | Con ese orden, pasa a la página siguiente | La dirección y el desplegable conservan el orden, y los precios siguen bajando desde el último de la primera página |
+| O-3 | Elige un orden, después otro, y aprieta «Atrás» | Vuelve el primer orden, en el desplegable y en las funciones |
+| O-4 | Con un orden elegido, busca algo que no hay y después borra la búsqueda | Sin funciones no está «Ordenar por»; al volver las funciones, vuelve con el mismo orden |
+| O-5 | Abre una búsqueda sin funciones y la borra | Aparece «Ordenar por», que no estaba |
+| O-6 | Sin JavaScript, elige «Precio: menor a mayor» y aprieta «Ordenar» | Carga la cartelera de la más barata a la más cara |
+
+## Filtrar por precio
+
+Sin sesión, con los datos de prueba: hay funciones a la gorra (precio 0).
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| PR-1 | Escribe 0 en «Precio hasta» y deja de escribir | Sin recargar, sólo funciones «A la gorra», y la dirección lleva `precio_max=0` |
+
+## Paginado de la cartelera
+
+Sin sesión. Necesitan más de una página de cartelera (más de 12 funciones), como en los datos de
+prueba.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| PG-1 | En la compu, aprieta el número 2 del paginado | Sin recargar, la página 2, con el 2 marcado como la actual |
+| PG-2 | En el celular, baja hasta el final de la cartelera | Sin números de página, se agregan las funciones de la página siguiente |
+| PG-3 | En el celular, elige «Tradicional» en «Paginado» y recarga | Sigue en «Tradicional», con los números de página |
+| PG-4 | Sin JavaScript, abre la cartelera | No ve «Paginado», y los números de página llevan a cada página |
+
+## Últimas búsquedas
+
+Sin sesión. Cada prueba arranca con el navegador vacío, sin búsquedas guardadas.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| U-1 | Hace seis búsquedas distintas | Quedan las últimas cinco, la más nueva primero: la primera desapareció |
+| U-2 | Escribe una palabra de a poco, sin salir del campo, y después sale | Mientras escribe no se guarda nada; al salir queda una sola búsqueda, la de la palabra entera |
+| U-3 | Aprieta una de las últimas búsquedas | Sin recargar, la cartelera de esa búsqueda, con los filtros puestos en el formulario |
+| U-4 | Elige sólo un orden, sin filtros | No se guarda: un orden no es una búsqueda |
+| U-5 | Aprieta «Borrar historial» | Desaparecen las búsquedas y la sección |
+
+## Columna de filtros
+
+Sin sesión. La cartelera como el wireframe (E4-10.9): los filtros en una columna que en el
+celular se pliega.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| FC-1 | En un celular de 360 px, abre la cartelera, va a «Filtros» con Tab y aprieta Enter | Arranca cerrada, sin los campos a la vista; con Enter se abre y se ve «Buscar» |
+| FC-2 | En la compu (1280 px), abre la cartelera | La columna está abierta, a la izquierda de las funciones, con los grupos Buscar, Localidad, Fecha, Género y Precio; arriba dice cuántas funciones hay y cómo están ordenadas |
+| FC-3 | En la cartelera, elige «Precio: menor a mayor» en «Ordenar por» | Sin recargar, arriba dice «ordenadas por precio: menor a mayor» |
+| FC-4 | Con «Localidad: Luján» y «Hasta $ 2.000» aplicados, va con Tab a la etiqueta de la localidad y aprieta Enter; después, Enter en la que queda | Sin recargar, queda sólo «Hasta $ 2.000», la localidad vuelve a «Todas» y el foco está en esa etiqueta; con el segundo Enter no quedan etiquetas y el foco va a los resultados |
+| FC-5 | Sin filtros, elige «Luján» en «Localidad» | Sin recargar, aparece la etiqueta «Localidad: Luján» con «Quitar todos», y «Filtros» dice «(1)» |
+| FC-6 | Abre la cartelera con una búsqueda que no encuentra nada, y después busca algo que sí | Sin funciones no se ve «0 funciones · ordenadas por …», sólo el aviso; con funciones, vuelve el resumen |
+| FC-7 | Con dos filtros, quita una etiqueta con Enter y, antes de que llegue la respuesta, empieza a escribir en «Buscar» | El foco se queda en «Buscar»: la etiqueta quitada no se lo lleva cuando llega su respuesta |
+
+## Anchos de pantalla
+
+Cada pantalla, a 360 px (un celular), 768 px (una tableta) y 1280 px (la compu). Se usa si no
+hay que desplazarse de costado, si nada queda cortado fuera de la pantalla y si las tablas más
+anchas se desplazan dentro de su recuadro.
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| A-1 | Sin sesión, abre la portada, la cartelera (también sin resultados), una ficha, las salas, una sala, las obras, una obra, ingresar y registro | Cada una se usa a los tres anchos |
+| A-2 | Con sesión, abre la ficha de una función que se puede reservar, su página de reserva, «Mis reservas» y «Solicitar sala» | Cada una se usa a los tres anchos |
+| A-3 | Como organizador, abre «Mis salas», «Mis obras», cargar una obra, «Mis funciones», programar una función y las reservas de una función | Cada una se usa a los tres anchos; las tablas se desplazan en su recuadro |
+| A-4 | Como administrador, abre los usuarios, las reservas y las solicitudes | Cada una se usa a los tres anchos; las tablas se desplazan en su recuadro |
 
 ## Lo que todavía no cubren
 

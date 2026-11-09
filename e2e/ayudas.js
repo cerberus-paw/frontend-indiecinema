@@ -1,6 +1,32 @@
 // Lo que comparten las pruebas: la cuenta, ingresar, encontrar una función que se pueda reservar,
 // reservar y cancelar. Todo pasa por las páginas, como lo haría un espectador.
-import { test as base, expect } from '@playwright/test';
+import { test as playwright, expect } from '@playwright/test';
+
+/**
+ * `test` de Playwright, que además hace fallar la prueba si alguna página registró una violación
+ * de la Content-Security-Policy: un estilo o un script en línea, o un recurso de otro origen, que
+ * el navegador bloqueó. Se ve como un error de la consola, o como una excepción si lo bloqueado era
+ * un eval. Es automático: lo controla cada prueba que importa `test` o `testSinSesion` de acá, sin
+ * nombrarlo. Contra un sitio sin la cabecera no hay nada que bloquear y siempre pasa.
+ */
+export const testSinSesion = playwright.extend({
+  violacionesDeCsp: [async ({ page }, use) => {
+    const violaciones = [];
+    const esDeCsp = (texto) => /Content[- ]Security[- ]Policy/i.test(texto);
+    page.on('console', (mensaje) => {
+      if (esDeCsp(mensaje.text())) {
+        violaciones.push(`${page.url()}: ${mensaje.text()}`);
+      }
+    });
+    page.on('pageerror', (error) => {
+      if (esDeCsp(error.message)) {
+        violaciones.push(`${page.url()}: ${error.message}`);
+      }
+    });
+    await use(violaciones);
+    expect(violaciones, 'ninguna página tiene que violar la Content-Security-Policy').toEqual([]);
+  }, { auto: true }],
+});
 
 /**
  * La cuenta de espectador con la que se prueba. Sale del entorno y no del código: en Actions son
@@ -26,6 +52,23 @@ export const codigoEscrito = (codigo) => `${codigo.slice(0, 4)}-${codigo.slice(4
  */
 export const ARCHIVO_DE_SESION = new URL(`./.sesion/${process.env.E2E_CORREO ?? 'espectador'}.json`, import.meta.url).pathname;
 
+/**
+ * Las cuentas del organizador y del administrador, para las pruebas de sus paneles. Opcionales: sin
+ * ellas, esas pruebas se saltean. Cada una guarda su sesión en su archivo, como la del espectador.
+ */
+export const CUENTAS_DEL_PANEL = {
+  organizador: {
+    correo: process.env.E2E_ORGANIZADOR_CORREO,
+    clave: process.env.E2E_ORGANIZADOR_CLAVE,
+    archivo: new URL('./.sesion/organizador.json', import.meta.url).pathname,
+  },
+  administrador: {
+    correo: process.env.E2E_ADMINISTRADOR_CORREO,
+    clave: process.env.E2E_ADMINISTRADOR_CLAVE,
+    archivo: new URL('./.sesion/administrador.json', import.meta.url).pathname,
+  },
+};
+
 export async function ingresar(page, { correo, clave } = cuenta()) {
   await page.goto('/cuenta/ingresar');
   await page.getByLabel('Correo electrónico').fill(correo);
@@ -41,10 +84,17 @@ export async function ingresar(page, { correo, clave } = cuenta()) {
   await page.waitForLoadState();
 }
 
+/**
+ * El menú del usuario del encabezado: un desplegable con listas de enlaces, no un menú de
+ * aplicación. Se busca adentro porque el pie repite algunas opciones, como «Mis reservas».
+ */
+export const menuDelUsuario = (page) => page.locator('header details');
+
 /** Abre «Mis reservas» desde el menú del usuario, como lo haría él. */
 export async function abrirMisReservas(page) {
-  await page.locator('header summary').click();
-  await page.getByRole('menuitem', { name: 'Mis reservas' }).click();
+  const menu = menuDelUsuario(page);
+  await menu.locator('summary').click();
+  await menu.getByRole('link', { name: 'Mis reservas' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Mis reservas' })).toBeVisible();
 }
 
@@ -55,11 +105,21 @@ export async function abrirMisReservas(page) {
  *
  * Con E2E_FUNCION, dos corridas a la vez (el back y el front mergeados juntos, cada uno con su
  * cuenta) no cuentan los lugares de la misma función.
+ *
+ * Con `todoElTope`, además, la cuenta no tiene que tener lugares reservados en ella: le queda el
+ * tope por persona entero (IC-463). Lo que reservan las pruebas se cancela al terminar, pero una
+ * reserva hecha a mano con la misma cuenta cambiaría lo que espera R-6.
  */
-export async function buscarFuncionReservable(page, minimo = 3) {
+export async function buscarFuncionReservable(page, minimo = 3, { todoElTope = false } = {}) {
   const elegida = process.env.E2E_FUNCION;
-  const sirve = async () => (await page.locator('form[data-formulario-reserva]').count()) > 0
-    && (await lugaresLibres(page)) >= minimo;
+  const formulario = page.locator('form[data-formulario-reserva]');
+  const tieneTodoElTope = async () => {
+    const tope = await formulario.getAttribute('data-maximo-por-persona');
+    return tope !== null && tope === await formulario.getAttribute('data-restantes-usuario');
+  };
+  const sirve = async () => (await formulario.count()) > 0
+    && (await lugaresLibres(page)) >= minimo
+    && (!todoElTope || await tieneTodoElTope());
   if (elegida) {
     await page.goto(`/cartelera/${elegida}`);
     if (!(await sirve())) {
@@ -149,7 +209,7 @@ export async function cancelar(page, codigo, { siPuede = false } = {}) {
  * `reservas` donde cada prueba anota los códigos de lo que reserva: al terminar, pase o falle, se
  * cancelan. Así se puede correr una y otra vez contra el mismo sitio sin agotar las funciones.
  */
-export const test = base.extend({
+export const test = testSinSesion.extend({
   storageState: ARCHIVO_DE_SESION,
   reservas: async ({ page }, use) => {
     const codigos = [];

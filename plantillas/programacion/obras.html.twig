@@ -1,0 +1,98 @@
+{#
+  Catálogo público de obras / películas, en /obras (E4-08.2 - Wireframe «Peliculas»).
+  Permite a los visitantes explorar las películas y cortometrajes disponibles en la comunidad,
+  filtrando por título/director o por género. Funciona completamente con GET sin JavaScript.
+
+  Variables:
+  - obras: lista de obras como las recibe parciales/tarjeta_obra.html.twig.
+  - generos: lista de géneros del catálogo (id, nombre).
+  - filtros: mapa con los filtros aplicados (q, genero).
+  - filtrada: si hay algún filtro activo.
+  - avisos: lista de advertencias si algún filtro no era válido.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Películas{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Películas</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Películas</h1>
+      <p class="solicitud-bajada">Las obras de cine independiente disponibles para descubrir y proyectar en salas de la comunidad.</p>
+    </div>
+  </header>
+
+  {% set opciones_genero = [{valor: '', etiqueta: 'Todos'}] %}
+  {% if generos is defined %}
+    {% for gen in generos %}
+      {% set nombre_genero = gen.nombre ?? gen %}
+      {% set opciones_genero = opciones_genero|merge([{valor: nombre_genero, etiqueta: nombre_genero}]) %}
+    {% endfor %}
+  {% endif %}
+
+  <form class="filtros-cartelera buscador-obras" action="/obras" method="get" role="search" aria-label="Buscar películas">
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'q',
+      etiqueta: 'Buscar',
+      tipo: 'search',
+      valor: filtros.q ?? '',
+      placeholder: 'Título o director'
+    } only %}
+
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'genero',
+      etiqueta: 'Género',
+      tipo: 'select',
+      valor: filtros.genero ?? '',
+      opciones: opciones_genero
+    } only %}
+
+    <div class="filtros-cartelera-acciones">
+      {% include 'parciales/boton.html.twig' with { texto: 'Buscar', variante: 'primario' } only %}
+      {% if filtrada ?? false %}
+        {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/obras', variante: 'fantasma' } only %}
+      {% endif %}
+    </div>
+  </form>
+
+  {% if avisos is defined and avisos is not empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      titulo: 'Algunos filtros no se aplicaron',
+      detalles: avisos
+    } only %}
+  {% endif %}
+
+  {% if obras is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: filtrada ?? false
+        ? 'No hay películas que coincidan con la búsqueda. Probá con otros filtros.'
+        : 'Todavía no hay películas cargadas en el catálogo.'
+    } only %}
+  {% else %}
+    <div class="cartelera-resumen cartelera-barra">
+      <p class="cartelera-resultados" role="status">
+        {{ obras|length }} {{ obras|length == 1 ? 'película' : 'películas' }}
+      </p>
+    </div>
+
+    {# El h2 de las tarjetas (h3) para el lector de pantalla (E4-10.2) #}
+    <h2 class="sr-only">Películas</h2>
+    <div class="cuadricula-funciones">
+      {% for obra in obras %}
+        {% include 'parciales/tarjeta_obra.html.twig' with { obra: obra } only %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

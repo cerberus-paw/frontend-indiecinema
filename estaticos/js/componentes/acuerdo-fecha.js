@@ -1,3 +1,5 @@
+/* exported AcuerdoFecha */
+
 /**
  * El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
  *

@@ -1,24 +1,14 @@
 {#
   Armado de las pantallas del administrador, como el wireframe de la E2
-  (administracion-usuarios-parametros): sin el encabezado ni el pie del sitio público, sólo la
-  barra lateral con el logo, las secciones y la sesión, y el contenido al lado. El administrador
-  no usa la cartelera ni las salas: el panel es todo su sitio.
+  (administracion-usuarios-parametros): el panel compartido (panel.html.twig) con la barra del
+  administrador. El administrador no usa la cartelera ni las salas: el panel es todo su sitio.
 
   Bloques de la pantalla:
   - seccion: la sección actual, 'usuarios', 'reservas' o 'solicitudes', para resaltarla en la barra.
   - panel: el contenido.
 #}
-{% extends 'base.html.twig' %}
+{% extends 'panel.html.twig' %}
 
-{% block encabezado %}{% endblock %}
-{% block pie %}{% endblock %}
-
-{% block contenido %}
-<div class="panel-admin">
-  {% include 'parciales/menu_administracion.html.twig' with { activa: block('seccion'), usuario: usuario ?? null, csrf: csrf ?? '' } only %}
-
-  <div class="panel-admin-contenido">
-    {% block panel %}{% endblock %}
-  </div>
-</div>
+{% block barra %}
+{% include 'parciales/menu_administracion.html.twig' with { activa: block('seccion'), usuario: usuario ?? null, csrf: csrf ?? '' } only %}
 {% endblock %}

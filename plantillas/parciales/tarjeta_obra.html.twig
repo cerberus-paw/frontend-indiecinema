@@ -1,0 +1,72 @@
+{#
+  Tarjeta de una obra / película, para el catálogo público (/obras) y «Mis obras» (/organizador/obras).
+  Usa las clases del sistema de tarjetas de IndieCinema (.tarjeta-funcion .tarjeta-obra).
+
+  Parámetros:
+  - obra: id, titulo, anio, director, duracion (en minutos), tipo, origen_copia, generos (lista), afiche (URL o null).
+  - editable: (bool, opcional) si es true, muestra opciones de edición o gestión del organizador.
+  - compacta: (bool, opcional) disposición horizontal compacta.
+#}
+{% set es_compacta = compacta ?? false %}
+{% set duracion_obra = obra.duracion_minutos ?? (obra.duracion ?? null) %}
+<article class="tarjeta-funcion tarjeta-obra{% if es_compacta %} tarjeta-obra-compacta{% endif %}" aria-label="{{ obra.titulo }}{% if obra.anio %} ({{ obra.anio }}){% endif %}">
+  <div class="tarjeta-funcion-afiche">
+    <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">
+      {% if obra.afiche ?? false %}
+        <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="tarjeta-funcion-imagen" loading="lazy">
+      {% else %}
+        <div class="tarjeta-funcion-afiche-placeholder">
+          <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+          <span class="afiche-placeholder-texto">AFICHE</span>
+        </div>
+      {% endif %}
+    </a>
+  </div>
+  <div class="tarjeta-funcion-cuerpo">
+    <div class="tarjeta-funcion-cabecera">
+      {% if obra.tipo is defined and obra.tipo %}
+        <span class="insignia-estado insignia-tipo-obra">
+          {{ obra.tipo_etiqueta ?? (obra.tipo == 'cortometraje' ? 'CORTOMETRAJE' : 'PELÍCULA') }}
+        </span>
+      {% endif %}
+      {% if obra.anio is defined and obra.anio %}
+        <span class="tarjeta-obra-anio">{{ obra.anio }}</span>
+      {% endif %}
+    </div>
+
+    <h3 class="tarjeta-funcion-titulo">
+      <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-titulo-enlace">{{ obra.titulo }}</a>
+    </h3>
+
+    <div class="tarjeta-funcion-meta">
+      {% if obra.director is defined and obra.director %}
+        <p class="tarjeta-funcion-dato meta-director">
+          <span class="meta-icono" aria-hidden="true">🎬</span>
+          <span class="meta-texto">{{ obra.director }}</span>
+        </p>
+      {% endif %}
+      {% if duracion_obra %}
+        <p class="tarjeta-funcion-dato meta-duracion">
+          <span class="meta-icono" aria-hidden="true">⏱️</span>
+          <span class="meta-texto">{{ duracion_obra }} min</span>
+        </p>
+      {% endif %}
+    </div>
+
+    {% if obra.generos is defined and obra.generos is not empty %}
+      <div class="tarjeta-obra-generos" role="list" aria-label="Géneros">
+        {% for genero in obra.generos %}
+          <span class="ficha-genero-chip" role="listitem">{{ genero }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="tarjeta-funcion-acciones">
+      {% if editable ?? false %}
+        <a href="/organizador/obras/{{ obra.id }}/editar" class="boton boton-secundario boton-chico boton-bloque">Editar</a>
+      {% else %}
+        <a href="/obras/{{ obra.id }}" class="boton boton-secundario boton-chico boton-bloque">Ver ficha</a>
+      {% endif %}
+    </div>
+  </div>
+</article>
