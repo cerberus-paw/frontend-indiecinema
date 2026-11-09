@@ -78,7 +78,7 @@ test('R-6 · no se pueden reservar más de 6 lugares por persona', async ({ page
   await boton.click();
 
   expect(await campo.evaluate((c) => !c.validity.valid || c.getAttribute('aria-invalid') === 'true')).toBe(true);
-  await expect(page.locator('.campo-error, [role="alert"]')).toContainText('Se pueden reservar hasta 6 lugares por persona en cada función.');
+  await expect(page.locator('#error-cantidad')).toContainText('Se pueden reservar hasta 6 lugares por persona en cada función.');
   await expect(avisoDeReserva(page)).toHaveCount(0);
   expect(await lugaresLibres(page, { recargar: true })).toBe(antes);
 
@@ -95,7 +95,7 @@ test('R-6 · no se pueden reservar más de 6 lugares por persona', async ({ page
   await formNuevo.boton.click();
 
   expect(await formNuevo.campo.evaluate((c) => !c.validity.valid || c.getAttribute('aria-invalid') === 'true')).toBe(true);
-  await expect(page.locator('.campo-error, [role="alert"]')).toContainText('Ya tenés 2 lugares reservados: podés sumar hasta 4 lugares más (máximo 6 por persona).');
+  await expect(page.locator('#error-cantidad')).toContainText('Ya tenés 2 lugares reservados: podés sumar hasta 4 lugares más (máximo 6 por persona).');
   await expect(avisoDeReserva(page)).toHaveCount(0);
   expect(await lugaresLibres(page, { recargar: true })).toBe(antes - 2);
 
