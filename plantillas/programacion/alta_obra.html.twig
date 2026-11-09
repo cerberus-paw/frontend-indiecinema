@@ -140,6 +140,7 @@
           tipo: 'select',
           valor: valores.tipo ?? 'pelicula',
           opciones: opciones_tipo,
+          placeholder: 'Elegí el tipo',
           requerido: true,
           error: errores.tipo ?? null
         }) only %}
@@ -151,6 +152,7 @@
           tipo: 'select',
           valor: valores.origen_copia ?? 'obra_propia',
           opciones: opciones_origen,
+          placeholder: 'Elegí el origen de la copia',
           ayuda: 'Condición legal de la copia para proyectarla en salas comunitarias.',
           requerido: true,
           error: errores.origen_copia ?? null
