@@ -39,6 +39,24 @@
 {% set mensaje_error = error ?? (errores[nombre] ?? null) %}
 {# Asigna el tipo de campo predeterminado en 'text' si no se especificó otro tipo en la invocación #}
 {% set tipo_campo = tipo ?? 'text' %}
+{#
+  Un formulario rechazado vuelve con lo que se mandó, pero en un campo de fecha, de hora o de número
+  un valor que no tiene ese formato (lo que llega de un POST armado a mano: «mañana», «dos», «40,5»)
+  no vale en el HTML (W3C) y el navegador igual lo descarta y muestra el campo vacío. Se deja afuera
+  acá, que es lo mismo que se ve; el error del campo sigue diciendo qué estaba mal. La fecha pasa
+  primero por la expresión, que pone el mes y el día en rango: con un mes 13, date() revienta; con
+  un 30 de febrero, se corre al 2 de marzo y la comparación la deja afuera.
+#}
+{% set texto_valor = valor is defined ? valor ~ '' : '' %}
+{% if texto_valor == '' or tipo_campo not in ['number', 'date', 'time'] %}
+  {% set valor_valido = true %}
+{% elseif tipo_campo == 'number' %}
+  {% set valor_valido = texto_valor matches '/^-?(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?$/' %}
+{% elseif tipo_campo == 'date' %}
+  {% set valor_valido = texto_valor matches '/^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/' and texto_valor|date('Y-m-d') == texto_valor %}
+{% else %}
+  {% set valor_valido = texto_valor matches '/^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$/' %}
+{% endif %}
 {# Genera un ID único para asociar aria-describedby con el mensaje de error en lectores de pantalla #}
 {% set id_error = 'error-' ~ nombre %}
 {# Genera un ID para asociar aria-describedby con el texto de ayuda en lectores de pantalla #}
@@ -185,9 +203,10 @@
         {# Clase visual de control que cambia a borde rojo si contiene error #}
         class="campo-control control-input{% if mensaje_error %} control-invalido{% endif %}"
         {# Persiste el valor ingresado excepto en contraseñas o archivos por seguridad #}
-        {% if valor is defined and tipo_campo != 'password' and tipo_campo != 'file' %}value="{{ valor }}"{% endif %}
-        {# Sugerencia contextual en texto gris cuando el campo está vacío #}
-        {% if placeholder is defined %}placeholder="{{ placeholder }}"{% endif %}
+        {% if valor is defined and tipo_campo != 'password' and tipo_campo != 'file' and valor_valido %}value="{{ valor }}"{% endif %}
+        {# Sugerencia contextual en texto gris cuando el campo está vacío. Sólo en los tipos que la
+           admiten: en uno de fecha, hora o archivo el W3C la rechaza y el navegador no la muestra. #}
+        {% if placeholder is defined and tipo_campo in ['text', 'email', 'password', 'number', 'search', 'tel', 'url'] %}placeholder="{{ placeholder }}"{% endif %}
         {# Exige que el usuario complete el campo antes de enviar el formulario #}
         {% if requerido ?? false %}required{% endif %}
         {% if deshabilitado ?? false %}disabled{% endif %}

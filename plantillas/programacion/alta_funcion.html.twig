@@ -190,7 +190,10 @@
       {# SECCIÓN 2: OBRAS DEL CATÁLOGO                                        #}
       {# ==================================================================== #}
       {# id="obras": el link del resumen de errores trae acá (E4-10.5) #}
-      <fieldset id="obras" class="seccion-formulario">
+      {# data-candidatas-minimas y data-error-candidatas: el mínimo de obras de una votación y su
+         mensaje, los mismos del servidor (FormularioDeFuncion::reglas()), para que ModoFuncion
+         frene el envío antes de mandarlo (F-01.6). #}
+      <fieldset id="obras" class="seccion-formulario" data-candidatas-minimas="{{ reglas.obras.candidatas_minimas|default(2) }}" data-error-candidatas="{{ reglas.obras.mensajes.candidatas|default('Para abrir una votación elegí al menos dos obras candidatas.') }}">
         <legend class="seccion-leyenda">
           <span class="seccion-titulo">Obras del catálogo</span>
           <span class="seccion-subtitulo" data-obras-subtitulo>{{ es_votacion ? 'Elegí las obras candidatas que participarán de la votación.' : 'Elegí la obra o los títulos a proyectar en la función.' }}</span>
@@ -219,7 +222,7 @@
                   {% if error_obras %}aria-invalid="true" aria-describedby="error-obras"{% endif %}
                   {% if marcada %}checked{% endif %}
                 >
-                <div class="info-seleccion-obra">
+                <span class="info-seleccion-obra">
                   <span class="titulo-seleccion-obra">{{ obra.titulo }}</span>
                   <span class="meta-seleccion-obra">
                     {{ obra.anio ?? '' }}
@@ -227,7 +230,7 @@
                     {% if dur %} · {{ dur }} min{% endif %}
                     {% if obra.director is defined and obra.director %} · Dir: {{ obra.director }}{% endif %}
                   </span>
-                </div>
+                </span>
               </label>
             {% endfor %}
           </div>
@@ -240,7 +243,7 @@
             <span class="error-icono" aria-hidden="true">⚠️</span> {{ error_obras }}
           </span>
         {% endif %}
-        <span class="campo-ayuda" data-obras-ayuda{% if error_obras %} hidden{% endif %}>{{ es_votacion ? 'Marcá las obras del catálogo que serán candidatas para la votación.' : 'Marcá al menos una obra del catálogo para esta función.' }}</span>
+        <span class="campo-ayuda" data-obras-ayuda{% if error_obras %} hidden{% endif %}>{{ es_votacion ? 'Marcá al menos dos obras del catálogo: serán las candidatas de la votación.' : 'Marcá al menos una obra del catálogo para esta función.' }}</span>
       </fieldset>
 
       {# ==================================================================== #}

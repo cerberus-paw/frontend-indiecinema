@@ -94,11 +94,11 @@
       </div>
 
       {% if obra.generos is defined and obra.generos is not empty %}
-        <div class="ficha-obra-generos" aria-label="Géneros cinematográficos">
-          <span class="ficha-obra-generos-rotulo">Géneros:</span>
-          <div class="ficha-obra-generos-chips">
+        <div class="ficha-obra-generos">
+          <span class="ficha-obra-generos-rotulo" id="ficha-obra-generos-rotulo">Géneros:</span>
+          <div class="ficha-obra-generos-chips" role="list" aria-labelledby="ficha-obra-generos-rotulo">
             {% for genero in obra.generos %}
-              <span class="ficha-genero-chip">{{ genero }}</span>
+              <span class="ficha-genero-chip" role="listitem">{{ genero }}</span>
             {% endfor %}
           </div>
         </div>

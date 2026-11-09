@@ -9,6 +9,9 @@
  * - Ajusta los textos de subtítulo y ayuda de las obras para indicar que serán candidatas.
  * - Modifica el banner informativo para reflejar la apertura de la votación de títulos.
  * - Cambia la etiqueta del botón de envío a «Abrir a votación».
+ * - No deja mandar una votación con menos candidatas que el mínimo (F-01.6): con una sola no hay
+ *   nada que votar. El mínimo y el mensaje los da el servidor en el fieldset de las obras, y el
+ *   error sale donde lo dibuja él. La validación en línea no mira las casillas, por eso va acá.
  *
  * Sin JavaScript, ambos bloques permanecen accesibles en el documento (mejora progresiva).
  */
@@ -23,7 +26,7 @@ class ModoFuncion {
     },
     en_votacion_titulos: {
       obrasSubtitulo: 'Elegí las obras candidatas que participarán de la votación.',
-      obrasAyuda: 'Marcá las obras del catálogo que serán candidatas para la votación.',
+      obrasAyuda: 'Marcá al menos dos obras del catálogo: serán las candidatas de la votación.',
       avisoTitulo: 'Apertura de votación',
       boton: 'Abrir a votación',
     },
@@ -53,12 +56,88 @@ class ModoFuncion {
     this.botonSubmit = this.formulario.querySelector('#boton-enviar-funcion')
       || this.formulario.querySelector('button[type="submit"]');
 
+    this.obras = this.formulario.querySelector('#obras');
+
     for (const radio of this.radios) {
-      radio.addEventListener('change', () => this.cambiarModo(radio.value));
+      radio.addEventListener('change', () => {
+        this.cambiarModo(radio.value);
+        this.limpiarErrorDeCandidatas();
+      });
     }
+    this.formulario.addEventListener('submit', (evento) => this.alEnviar(evento));
+    // El error se va apenas alcanza el mínimo, sin esperar a mandar de nuevo.
+    this.obras?.addEventListener('change', () => {
+      if (this.faltanCandidatas() === false) {
+        this.limpiarErrorDeCandidatas();
+      }
+    });
 
     const inicial = this.formulario.querySelector('input[name="modo"]:checked')?.value || 'programada';
     this.cambiarModo(inicial);
+  }
+
+  /**
+   * @returns {boolean|null} si es una votación con menos candidatas que el mínimo; null si no es
+   *   una votación o la página no trae las obras
+   */
+  faltanCandidatas() {
+    const votacion = this.formulario.querySelector('input[name="modo"]:checked')?.value === 'en_votacion_titulos';
+    if (!votacion || !this.obras) {
+      return null;
+    }
+    const minimo = Number.parseInt(this.obras.dataset.candidatasMinimas ?? '2', 10);
+
+    return this.obras.querySelectorAll('input[name="obras[]"]:checked').length < minimo;
+  }
+
+  /**
+   * @param {SubmitEvent} evento
+   */
+  alEnviar(evento) {
+    if (!this.faltanCandidatas()) {
+      return;
+    }
+    evento.preventDefault();
+    this.mostrarErrorDeCandidatas(this.obras.dataset.errorCandidatas ?? '');
+  }
+
+  /**
+   * El error debajo de las obras, con el marcado con que lo dibuja el servidor (alta_funcion.html.twig):
+   * el span #error-obras con role="alert", cada casilla con aria-invalid apuntándolo, y sin la
+   * ayuda, que el servidor también saca. El foco va a la primera casilla, desde donde se arregla.
+   *
+   * @param {string} mensaje
+   */
+  mostrarErrorDeCandidatas(mensaje) {
+    this.limpiarErrorDeCandidatas();
+    const casillas = this.obras.querySelectorAll('input[name="obras[]"]');
+    for (const casilla of casillas) {
+      casilla.setAttribute('aria-invalid', 'true');
+      casilla.setAttribute('aria-describedby', 'error-obras');
+    }
+    const error = PAW.nuevoElemento('span', '', { id: 'error-obras', class: 'campo-error', role: 'alert' });
+    error.append(PAW.nuevoElemento('span', '⚠️', { class: 'error-icono', 'aria-hidden': 'true' }), ` ${mensaje}`);
+    if (this.ayudaObras) {
+      this.ayudaObras.hidden = true;
+      this.ayudaObras.before(error);
+    } else {
+      this.obras.append(error);
+    }
+    casillas[0]?.focus();
+  }
+
+  limpiarErrorDeCandidatas() {
+    if (!this.obras) {
+      return;
+    }
+    this.obras.querySelector('#error-obras')?.remove();
+    for (const casilla of this.obras.querySelectorAll('input[name="obras[]"]')) {
+      casilla.removeAttribute('aria-invalid');
+      casilla.removeAttribute('aria-describedby');
+    }
+    if (this.ayudaObras) {
+      this.ayudaObras.hidden = false;
+    }
   }
 
   /**

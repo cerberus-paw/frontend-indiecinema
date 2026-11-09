@@ -54,9 +54,9 @@
     </div>
 
     {% if obra.generos is defined and obra.generos is not empty %}
-      <div class="tarjeta-obra-generos" aria-label="Géneros">
+      <div class="tarjeta-obra-generos" role="list" aria-label="Géneros">
         {% for genero in obra.generos %}
-          <span class="ficha-genero-chip">{{ genero }}</span>
+          <span class="ficha-genero-chip" role="listitem">{{ genero }}</span>
         {% endfor %}
       </div>
     {% endif %}
