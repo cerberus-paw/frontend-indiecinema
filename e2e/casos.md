@@ -31,6 +31,7 @@ aunque lo demás haya salido bien (`testSinSesion` en `ayudas.js`).
 | R-3 | Pide 0 lugares, y después -1 | No se reserva: el campo queda inválido y los lugares libres no cambian |
 | R-4 | Pide un lugar más de los que quedan | No se reserva: el campo queda inválido y los lugares libres no cambian |
 | R-5 | Escribe letras en la cantidad | No se reserva |
+| R-6 | Pide más lugares que el máximo por persona (7), o reserva 2 y al volver pide 5 | No se reserva: el máximo del campo baja a lo que le queda (hasta 6 por persona), el error dice cuál es el máximo y los lugares libres no cambian |
 
 ## Mis reservas y cancelar
 
