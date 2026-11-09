@@ -258,7 +258,7 @@
               valor: '1',
               requerido: true,
               valor_minimo: 1,
-              valor_maximo: max(1, funcion.maximo_reserva|default(null) ?? funcion.lugares_libres|default(null) ?? funcion.cupo),
+              valor_maximo: max(1, funcion.maximo_reserva ?? funcion.lugares_libres ?? funcion.cupo),
               deshabilitado: sin_lugares_propios
             } %}
             {% if tope_por_persona is not null %}
