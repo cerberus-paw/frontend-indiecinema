@@ -249,6 +249,8 @@
           {% set sin_lugares_propios = restantes_usuario is same as(0) %}
           <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva{% if tope_por_persona is not null and restantes_usuario is not null %} data-maximo-por-persona="{{ tope_por_persona }}" data-restantes-usuario="{{ restantes_usuario }}"{% endif %}>
             <input type="hidden" name="_csrf" value="{{ csrf }}">
+            {# valor_maximo nunca menos de 1: con el tope alcanzado el campo va deshabilitado, y un
+               max por debajo del min no tiene sentido. #}
             {% set campo_cantidad = {
               nombre: 'cantidad',
               etiqueta: 'Cantidad de lugares',
@@ -256,8 +258,6 @@
               valor: '1',
               requerido: true,
               valor_minimo: 1,
-              {# Nunca menos de 1: con el tope alcanzado el campo va deshabilitado, y un max por
-                 debajo del min no tiene sentido. #}
               valor_maximo: max(1, funcion.maximo_reserva|default(null) ?? funcion.lugares_libres|default(null) ?? funcion.cupo),
               deshabilitado: sin_lugares_propios
             } %}
