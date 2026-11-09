@@ -69,7 +69,7 @@ test('R-5 · con letras en la cantidad no se reserva', async ({ page }) => {
 });
 
 test('R-6 · no se pueden reservar más de 6 lugares por persona', async ({ page, reservas }) => {
-  await buscarFuncionReservable(page, 7);
+  await buscarFuncionReservable(page, 7, { todoElTope: true });
   const antes = await lugaresLibres(page);
   const { campo, boton } = formularioDeReserva(page);
 

@@ -113,7 +113,7 @@
 
   {# data-lugares-libres: de dónde traer los lugares al día, para el componente LugaresLibres
      (E4-05.2). Sólo si la página se cargó con el dato: sin él no hay número que actualizar. #}
-  <article class="ficha-funcion-contenido"{% if funcion.lugares_libres|default(null) is not null %} data-lugares-libres="/cartelera/{{ funcion.id }}/lugares" data-cupo="{{ funcion.cupo }}" data-lugares="{{ funcion.lugares_libres }}"{% endif %} data-maximo-por-persona="{{ funcion.maximo_por_persona ?? 6 }}">
+  <article class="ficha-funcion-contenido"{% if funcion.lugares_libres|default(null) is not null %} data-lugares-libres="/cartelera/{{ funcion.id }}/lugares" data-cupo="{{ funcion.cupo }}" data-lugares="{{ funcion.lugares_libres }}"{% endif %}>
     {# La cabecera de los wireframes de la función (las tres pantallas la comparten): el título
        con «Compartir» a la derecha y, abajo, la sala con su localidad y dos o tres datos en
        píldoras, que cambian según el estado (E3-13.F10). #}
@@ -239,24 +239,36 @@
           {% endif %}
         </div>
         {% if usuario %}
-          {# data-formulario-reserva: el enganche del componente que lo manda sin recargar (E4-05.3). #}
-          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva data-maximo-por-persona="{{ funcion.maximo_por_persona ?? 6 }}">
+          {# data-formulario-reserva: el enganche del componente que lo manda sin recargar (E4-05.3).
+             El tope por persona y lo que le queda al espectador los manda funciones con la
+             ocupación (IC-463): los componentes los leen de acá y no tienen su propio número. Sin
+             el dato (funciones no respondió), el campo llega hasta los lugares o el cupo y la
+             reserva la controla funciones igual. #}
+          {% set tope_por_persona = funcion.maximo_por_persona|default(null) %}
+          {% set restantes_usuario = funcion.lugares_restantes_usuario|default(null) %}
+          {% set sin_lugares_propios = restantes_usuario is same as(0) %}
+          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva{% if tope_por_persona is not null and restantes_usuario is not null %} data-maximo-por-persona="{{ tope_por_persona }}" data-restantes-usuario="{{ restantes_usuario }}"{% endif %}>
             <input type="hidden" name="_csrf" value="{{ csrf }}">
-            {% include 'parciales/campo.html.twig' with {
+            {% set campo_cantidad = {
               nombre: 'cantidad',
               etiqueta: 'Cantidad de lugares',
               tipo: 'number',
               valor: '1',
               requerido: true,
               valor_minimo: 1,
-              valor_maximo: funcion.maximo_reserva ?? min(funcion.lugares_libres ?? funcion.cupo, funcion.maximo_por_persona ?? 6),
-              ayuda: 'Máximo ' ~ (funcion.maximo_por_persona ?? 6) ~ ' lugares por persona.',
-              deshabilitado: (funcion.maximo_reserva is defined and funcion.maximo_reserva == 0)
-            } only %}
+              {# Nunca menos de 1: con el tope alcanzado el campo va deshabilitado, y un max por
+                 debajo del min no tiene sentido. #}
+              valor_maximo: max(1, funcion.maximo_reserva|default(null) ?? funcion.lugares_libres|default(null) ?? funcion.cupo),
+              deshabilitado: sin_lugares_propios
+            } %}
+            {% if tope_por_persona is not null %}
+              {% set campo_cantidad = campo_cantidad|merge({ayuda: 'Máximo ' ~ tope_por_persona ~ ' lugares por persona.'}) %}
+            {% endif %}
+            {% include 'parciales/campo.html.twig' with campo_cantidad only %}
             {% include 'parciales/boton.html.twig' with {
               texto: 'Reservar mis lugares',
               tipo: 'submit',
-              deshabilitado: (funcion.maximo_reserva is defined and funcion.maximo_reserva == 0)
+              deshabilitado: sin_lugares_propios
             } only %}
           </form>
         {% else %}

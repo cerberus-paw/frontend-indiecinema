@@ -99,35 +99,21 @@ class FormularioDeReserva {
   static mensajeDelCampo(campo) {
     if (campo.validity.rangeOverflow) {
       const max = Number.parseInt(campo.getAttribute('max') ?? '', 10);
-      const contenedor = campo.closest('[data-maximo-por-persona]');
-      const maximoPorPersona = Number.parseInt(contenedor?.dataset.maximoPorPersona ?? '6', 10);
       const libres = Number.parseInt(campo.dataset.lugaresLibres ?? '', 10);
-
-      const esPorTopePersona = !Number.isNaN(libres)
-        ? libres > max
-        : max <= maximoPorPersona;
-
-      if (esPorTopePersona) {
-        if (max === maximoPorPersona) {
-          return `Se pueden reservar hasta ${maximoPorPersona} lugares por persona en cada función.`;
-        }
-        if (max < maximoPorPersona && max > 0) {
-          const yaReservados = maximoPorPersona - max;
-          const textoYa = yaReservados === 1 ? '1 lugar reservado' : `${yaReservados} lugares reservados`;
-          const textoSumar = max === 1 ? '1 lugar más' : `hasta ${max} lugares más`;
-
-          return `Ya tenés ${textoYa}: podés sumar ${textoSumar} (máximo ${maximoPorPersona} por persona).`;
-        }
-        if (max <= 0) {
-          return `Ya tenés reservados los ${maximoPorPersona} lugares máximos por persona para esta función.`;
-        }
+      // El tope por persona y lo que le queda los manda el servidor en el formulario (IC-463).
+      // Frena el tope cuando le queda menos que los libres; si son iguales, el servidor dice
+      // primero lo de la sala, y acá también.
+      const maximoPorPersona = Number.parseInt(campo.form?.dataset.maximoPorPersona ?? '', 10);
+      const restantes = Number.parseInt(campo.form?.dataset.restantesUsuario ?? '', 10);
+      if (Number.isInteger(maximoPorPersona) && Number.isInteger(restantes)
+        && (!Number.isInteger(libres) || restantes < libres)) {
+        return FormularioDeReserva.mensajeDelTope(maximoPorPersona - restantes, restantes, maximoPorPersona);
       }
 
-      const limiteLugares = Number.isNaN(libres) ? max : libres;
-      switch (limiteLugares) {
+      switch (Number.isInteger(libres) ? libres : max) {
         case 0: return 'La función está agotada.';
         case 1: return 'Queda 1 lugar.';
-        default: return `Quedan ${limiteLugares} lugares.`;
+        default: return `Quedan ${Number.isInteger(libres) ? libres : max} lugares.`;
       }
     }
     if (campo.validity.valueMissing) {
@@ -265,6 +251,28 @@ class FormularioDeReserva {
     campo?.classList.remove('control-invalido');
     campo?.removeAttribute('aria-invalid');
     campo?.removeAttribute('aria-describedby');
+  }
+
+  /**
+   * El error del tope por persona, palabra por palabra el de
+   * ServicioDeReservas::mensajeDeMaximoPorPersona().
+   *
+   * @param {number} yaReservados
+   * @param {number} restantes
+   * @param {number} maximo
+   * @returns {string}
+   */
+  static mensajeDelTope(yaReservados, restantes, maximo) {
+    if (yaReservados === 0) {
+      return `Se pueden reservar hasta ${maximo} lugares por persona en cada función.`;
+    }
+    if (restantes === 0) {
+      return `Ya tenés reservados los ${maximo} lugares máximos por persona para esta función.`;
+    }
+    const textoYa = yaReservados === 1 ? '1 lugar reservado' : `${yaReservados} lugares reservados`;
+    const textoSumar = restantes === 1 ? '1 lugar más' : `hasta ${restantes} lugares más`;
+
+    return `Ya tenés ${textoYa}: podés sumar ${textoSumar} (máximo ${maximo} por persona).`;
   }
 
   /**

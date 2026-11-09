@@ -56,20 +56,12 @@ class LugaresLibres {
     // cancela. Null mientras no esté agotada.
     this.recuadroGuardado = null;
     this.libres = this.leerLibres();
+    // Los lugares libres quedan en el campo para que FormularioDeReserva sepa si lo que frena un
+    // pedido es la sala o el tope por persona (IC-463), y decirlo con las mismas palabras que el
+    // servidor.
     const campo = this.contenedor.querySelector('input[name="cantidad"]');
-    if (campo) {
-      if (this.libres !== null) {
-        campo.dataset.lugaresLibres = String(this.libres);
-      }
-      const maximoPorPersona = Number.parseInt(this.contenedor.dataset.maximoPorPersona ?? '6', 10);
-      const max = Number.parseInt(campo.getAttribute('max') ?? '', 10);
-      const tope = Number.isInteger(max) ? max : maximoPorPersona;
-      campo.dataset.restantesUsuario = String(tope);
-      if (tope === 0) {
-        campo.setAttribute('disabled', '');
-        const boton = this.contenedor.querySelector('.ficha-reserva-formulario button[type="submit"]');
-        boton?.setAttribute('disabled', '');
-      }
+    if (campo && this.libres !== null) {
+      campo.dataset.lugaresLibres = String(this.libres);
     }
     // Afuera de lo que se redibuja: la región tiene que existir antes del cambio para que un
     // lector de pantalla la lea.
@@ -172,19 +164,19 @@ class LugaresLibres {
    * Muestra los lugares que vinieron. Si el dato no está (funciones no respondió del lado del
    * servidor) se deja lo que hay: es mejor un número de hace un rato que ninguno.
    *
-   * @param {{lugares_libres: ?number, agotada?: boolean, lugares_restantes_usuario?: number, maximo_reserva?: number}} datos
+   * Con sesión vienen también los lugares que le quedan al espectador por el tope por persona
+   * (IC-463): pueden cambiar sin que cambien los libres, si reservó o canceló en otra pestaña.
+   *
+   * @param {{lugares_libres: ?number, agotada?: boolean, lugares_restantes_usuario?: ?number}} datos
    */
   actualizar(datos) {
     const libres = datos.lugares_libres;
-    const restantesUsuario = datos.maximo_reserva ?? datos.lugares_restantes_usuario;
     if (!Number.isInteger(libres)) {
       return;
     }
     const agotada = datos.agotada ?? libres === 0;
     const cambioLibres = libres !== this.libres;
-    const campo = this.contenedor.querySelector('input[name="cantidad"]');
-    const topeAnterior = Number.parseInt(campo?.dataset.restantesUsuario ?? '', 10);
-    const cambioTope = Number.isInteger(restantesUsuario) && restantesUsuario !== topeAnterior;
+    const cambioTope = this.guardarRestantes(datos.lugares_restantes_usuario);
 
     if (!cambioLibres && !cambioTope) {
       return;
@@ -198,7 +190,7 @@ class LugaresLibres {
     // pintarlos con el número de ahora y no con el que tenían cuando se agotó.
     this.pintarRecuadro(agotada);
     this.pintarBarra(libres);
-    this.pintarCampo(libres, agotada, restantesUsuario);
+    this.pintarCampo(libres, agotada);
     if (anunciar) {
       this.anunciar(libres, agotada);
     }
@@ -284,37 +276,55 @@ class LugaresLibres {
   }
 
   /**
+   * Anota en el formulario lo que le queda al espectador, si vino en la respuesta: es de donde lo
+   * leen pintarCampo() y FormularioDeReserva. Sin el formulario (sin sesión) no hay nada que anotar.
+   *
+   * @param {?number|undefined} restantes
+   * @returns {boolean} si cambió
+   */
+  guardarRestantes(restantes) {
+    const formulario = this.contenedor.querySelector('form[data-restantes-usuario]');
+    if (!formulario || !Number.isInteger(restantes) || formulario.dataset.restantesUsuario === String(restantes)) {
+      return false;
+    }
+    formulario.dataset.restantesUsuario = String(restantes);
+
+    return true;
+  }
+
+  /**
    * El máximo del campo de cantidad, que es contra lo que valida el navegador, y el botón: con la
    * función agotada no hay cantidad que entre, así que mandar el formulario sólo daría el error.
-   * Cuando el recuadro entero pasó a ser el aviso de agotada no hay campo ni botón que tocar.
+   * Lo mismo cuando el espectador ya tiene todos los lugares que puede tener (IC-463). El máximo
+   * es el menor entre los libres y lo que le queda; sin ese dato, sólo los libres. Cuando el
+   * recuadro entero pasó a ser el aviso de agotada no hay campo ni botón que tocar.
    *
    * @param {number} libres
    * @param {boolean} agotada
-   * @param {?number} [restantesUsuario]
    */
-  pintarCampo(libres, agotada, restantesUsuario = null) {
+  pintarCampo(libres, agotada) {
     const campo = this.contenedor.querySelector('input[name="cantidad"]');
-    let tope = null;
+    const restantes = Number.parseInt(campo?.form?.dataset.restantesUsuario ?? '', 10);
+    const conTope = Number.isInteger(restantes);
+    const completo = conTope && restantes === 0;
+    const apagado = agotada || completo;
     if (campo) {
-      const maximoPorPersona = Number.parseInt(this.contenedor.dataset.maximoPorPersona ?? '6', 10);
-      const enDataset = Number.parseInt(campo.dataset.restantesUsuario ?? '', 10);
-      tope = Number.isInteger(restantesUsuario)
-        ? restantesUsuario
-        : (!Number.isNaN(enDataset) ? enDataset : maximoPorPersona);
-      const maximoCampo = Math.max(Math.min(libres, tope), 1);
-
-      campo.setAttribute('max', String(maximoCampo));
+      const maximo = Math.max(conTope ? Math.min(libres, restantes) : libres, 1);
+      campo.setAttribute('max', String(maximo));
       campo.dataset.lugaresLibres = String(libres);
-      campo.dataset.restantesUsuario = String(tope);
-      campo.toggleAttribute('disabled', agotada || tope === 0);
-
+      campo.toggleAttribute('disabled', apagado);
       // Lo que ya tenía escrito puede haber quedado por encima de lo que queda.
-      if (!agotada && Number.parseInt(campo.value, 10) > maximoCampo) {
-        campo.value = String(maximoCampo);
+      if (!apagado && Number.parseInt(campo.value, 10) > maximo) {
+        campo.value = String(maximo);
       }
     }
     const boton = this.contenedor.querySelector('.ficha-reserva-formulario button[type="submit"]');
-    boton?.toggleAttribute('disabled', agotada || tope === 0);
+    boton?.toggleAttribute('disabled', apagado);
+    // El botón deshabilitado desde el servidor trae aria-disabled: si se vuelve a habilitar, que
+    // no siga anunciándose como apagado.
+    if (!apagado) {
+      boton?.removeAttribute('aria-disabled');
+    }
   }
 
   /**
