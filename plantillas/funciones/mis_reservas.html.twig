@@ -8,7 +8,8 @@
 
   Variables:
   - reservas: lista de {id, codigo (8 caracteres; se muestra en dos grupos de 4), cantidad, total
-    (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio'),
+    (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio' |
+    'ausente'),
     estado_etiqueta, cancelable, enlace_de_pago (a Mercado Pago, sólo en una pendiente que todavía
     está a tiempo; si no, null), funcion}. funcion es {id, titulo, url, fecha (o null), precio, sala, localidad}, o null si
     programación no la devolvió.
@@ -24,7 +25,7 @@
 
 {% block panel %}
 {# La pendiente de pago va con la píldora de contorno, sin modificador. #}
-{% set clases_estado = { pendiente_pago: '', confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
+{% set clases_estado = { pendiente_pago: '', confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio', ausente: '' } %}
 <div class="panel-reservas mis-reservas">
   <header class="encabezado-formulario-solicitud">
     <div class="solicitud-texto-cabecera">

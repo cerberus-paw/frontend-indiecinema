@@ -21,7 +21,7 @@
 {% block seccion %}reservas{% endblock %}
 
 {% block panel %}
-{% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
+{% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio', ausente: '' } %}
 {# data-panel-de-reservas: el enganche del componente que anula sin recargar la lista (E4-05.5). #}
 <div data-panel-de-reservas>
 <header class="panel-cabecera">

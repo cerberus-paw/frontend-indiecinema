@@ -36,6 +36,8 @@ class AccionesDeReserva {
     confirmada: 'estado-cuenta-activa',
     cancelada: 'estado-cuenta-cancelada',
     asistio: 'estado-cuenta-asistio',
+    // La de quien no fue (EF-04.1): la píldora sin color, porque ya no hay nada que hacer con ella.
+    ausente: '',
   };
 
   /**

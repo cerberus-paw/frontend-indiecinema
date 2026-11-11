@@ -11,7 +11,7 @@
   - resumen: reservados y libres (lugares), asistentes (lugares ya registrados), recaudado (ya
     escrito) y reservas (cuántas siguen en pie).
   - reservas: lista de {id, codigo, espectador (o null), cantidad, total, estado ('confirmada' |
-    'cancelada' | 'asistio'), estado_etiqueta, creada (ya escrita), registrable}.
+    'cancelada' | 'asistio' | 'ausente'), estado_etiqueta, creada (ya escrita), registrable}.
   - registra_asistencia: (bool) si se puede registrar: la función no se canceló.
   - codigo: (string) lo que se había escrito, al volver con un error.
   - registrada: (string|null) el código que se acaba de registrar.
@@ -24,7 +24,7 @@
 {% block seccion %}funciones{% endblock %}
 
 {% block panel %}
-{% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
+{% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio', ausente: '' } %}
 {# data-panel-de-reservas: el enganche del componente que registra la asistencia sin recargar (E4-05.5). #}
 <div class="contenedor panel-reservas" data-panel-de-reservas>
   <nav class="navegacion-migas" aria-label="Migas de pan">
