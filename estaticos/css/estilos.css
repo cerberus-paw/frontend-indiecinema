@@ -8945,3 +8945,33 @@ a.tabla-admin-principal:focus-visible {
     transition: none;
   }
 }
+
+/* ── Calificar una función (EF-04.2) ──────────────────────────────────────────────────────────
+   Los cinco puntajes, uno por renglón: la estrella sola no dice qué significa, así que va con el
+   número y la palabra. */
+.calificacion-puntajes {
+  border: none;
+  margin: 0 0 var(--espacio-5);
+  padding: 0;
+}
+
+.calificacion-opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-2) 0;
+  cursor: pointer;
+}
+
+.calificacion-opcion input {
+  accent-color: var(--color-primario);
+}
+
+.calificacion-estrellas {
+  color: var(--color-primario);
+  letter-spacing: 0.1em;
+}
+
+.calificacion-puntajes.con-error .calificacion-opcion {
+  color: var(--color-error);
+}

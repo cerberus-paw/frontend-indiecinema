@@ -10,9 +10,11 @@
   - reservas: lista de {id, codigo (8 caracteres; se muestra en dos grupos de 4), cantidad, total
     (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio' |
     'ausente'),
-    estado_etiqueta, cancelable, enlace_de_pago (a Mercado Pago, sólo en una pendiente que todavía
+    estado_etiqueta, cancelable, calificable (si puede calificar la función: asistió, terminó y
+    todavía no la calificó; EF-04.2), enlace_de_pago (a Mercado Pago, sólo en una pendiente que todavía
     está a tiempo; si no, null), funcion}. funcion es {id, titulo, url, fecha (o null), precio, sala, localidad}, o null si
     programación no la devolvió.
+  - calificada: (bool) si se acaba de guardar una calificación, para el aviso.
   - sin_programacion: (bool) programación no respondió: ninguna fila tiene los datos de su función.
   - paginado: numero, total_paginas, total, anterior y siguiente (URL o null) y paginas: lista de
     {numero, url, actual}.
@@ -38,6 +40,13 @@
       variante: 'secundario'
     } only %}
   </header>
+
+  {% if calificada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      mensaje: '¡Gracias por calificar! Tu calificación ya cuenta para la sala y la película.'
+    } only %}
+  {% endif %}
 
   {% if sin_programacion|default(false) %}
     {% include 'parciales/mensaje.html.twig' with {
@@ -98,6 +107,14 @@
                     tamano: 'chico',
                     aria_label: 'Ver el comprobante de la reserva ' ~ reserva.codigo
                   } only %}
+                  {% if reserva.calificable|default(false) %}
+                    {% include 'parciales/boton.html.twig' with {
+                      texto: 'Calificar función',
+                      url: '/funcion/reservas/' ~ reserva.id ~ '/calificar',
+                      tamano: 'chico',
+                      aria_label: 'Calificar la función de la reserva ' ~ reserva.codigo
+                    } only %}
+                  {% endif %}
                   {% if reserva.cancelable %}
                     {% include 'parciales/boton.html.twig' with {
                       texto: 'Cancelar',
