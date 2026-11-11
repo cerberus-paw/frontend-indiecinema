@@ -8975,3 +8975,42 @@ a.tabla-admin-principal:focus-visible {
 .calificacion-puntajes.con-error .calificacion-opcion {
   color: var(--color-error);
 }
+
+/* ── Calificaciones en las fichas de la sala y de la obra (EF-04.3) ───────────────────────── */
+.calificacion-promedio {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin: var(--espacio-2) 0 0;
+}
+
+.calificacion-cantidad,
+.calificacion-item-fecha {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.calificaciones-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.calificacion-item {
+  padding: var(--espacio-3) 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.calificacion-item-cabecera {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin: 0;
+}
+
+.calificacion-item-comentario {
+  margin: var(--espacio-2) 0 0;
+  overflow-wrap: anywhere;
+}
