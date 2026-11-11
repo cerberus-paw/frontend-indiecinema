@@ -692,8 +692,12 @@
             <ul class="ficha-titulos">
               {% for obra in funcion.obras %}
                 <li class="ficha-titulo">
-                  {# Todavía no hay una ruta que sirva el afiche: va el marcador, como en las obras. #}
-                  <span class="ficha-titulo-afiche ficha-titulo-afiche-vacio" aria-hidden="true">Afiche</span>
+                  {# Como en la votación: el afiche lo sirve /obras/{id}/afiche; sin afiche cargado, el marcador (F-02.1). #}
+                  {% if obra.afiche ?? null %}
+                    <img src="{{ obra.afiche }}" alt="" class="ficha-titulo-afiche" loading="lazy">
+                  {% else %}
+                    <span class="ficha-titulo-afiche ficha-titulo-afiche-vacio" aria-hidden="true">Afiche</span>
+                  {% endif %}
                   <div>
                     <p class="ficha-titulo-nombre">{{ obra.titulo }}</p>
                     <p class="ficha-titulo-datos">{{ obra.anio }} · {{ obra.duracion }} min</p>
