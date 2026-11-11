@@ -125,7 +125,7 @@ jobs:
       # Que falle uno no corta los otros: se ve de una vez todo lo que está roto.
       fail-fast: false
       matrix:
-        paquete: [nucleo, cuentas, programacion, funciones]
+        paquete: [nucleo, cuentas, programacion, funciones, moderacion]
     # Las del back corren contra un MySQL de verdad, como en su CI.
     services:
       mysql:
