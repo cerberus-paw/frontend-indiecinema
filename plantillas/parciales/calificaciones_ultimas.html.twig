@@ -1,0 +1,38 @@
+{#
+  «Lo que dicen los espectadores» en la ficha de una sala o de una obra (EF-04.3): las últimas
+  calificaciones, con el nombre de quien la dejó. El comentario lo escribió un espectador: Twig lo
+  escapa, y nl2br agrega los saltos de línea después de escaparlo.
+
+  Parámetros recibidos:
+  - calificaciones: {promedio, cantidad, ultimas: lista de {puntaje, comentario, espectador,
+    fecha}}, o null si funciones no respondió.
+  - id: el id del título de la sección, para su aria-labelledby.
+  - vacio: el mensaje cuando todavía no hay ninguna.
+#}
+<section class="ficha-sala-seccion calificaciones-ultimas" aria-labelledby="{{ id }}">
+  <h2 id="{{ id }}" class="ficha-sala-seccion-titulo">Lo que dicen los espectadores</h2>
+  {% if calificaciones is null %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      mensaje: 'Ahora no podemos mostrar las calificaciones. Probá de nuevo en un rato.'
+    } only %}
+  {% elseif calificaciones.ultimas is empty %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: vacio } only %}
+  {% else %}
+    <ul class="calificaciones-lista">
+      {% for calificacion in calificaciones.ultimas %}
+        <li class="calificacion-item">
+          <p class="calificacion-item-cabecera">
+            <span class="calificacion-estrellas" aria-hidden="true">{% for estrella in 1..5 %}{{ estrella <= calificacion.puntaje ? '★' : '☆' }}{% endfor %}</span>
+            <span class="sr-only">{{ calificacion.puntaje }} de 5,</span>
+            <strong>{{ calificacion.espectador }}</strong>
+            <span class="calificacion-item-fecha">· {{ calificacion.fecha }}</span>
+          </p>
+          {% if calificacion.comentario %}
+            <p class="calificacion-item-comentario">{{ calificacion.comentario|nl2br }}</p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>
