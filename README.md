@@ -57,14 +57,15 @@ frontend-indiecinema/
 │   │   ├── sala.html.twig      # Ficha pública de una sala con sus próximas funciones
 │   │   ├── solicitar_sala.html.twig # Solicitud para abrir una sala, con su estado
 │   │   └── salas.html.twig     # Catálogo público de salas indie habilitadas, con buscador
-│   └── funciones/              # Plantillas específicas del subsistema funciones
-│       ├── reservar.html.twig  # Reserva de lugares de una función, con los errores
-│       ├── reserva_confirmada.html.twig # Confirmación de la reserva con su código (el comprobante)
-│       ├── cancelar_reserva.html.twig # Confirmación para cancelar una reserva propia
-│       ├── pasos_reserva.html.twig # Los pasos de la reserva (Lugares → Comprobante)
-│       ├── mis_reservas.html.twig # «Mis reservas» del espectador
-│       ├── reservas_de_la_funcion.html.twig # Las reservas de una función para su organizador: asistencia y CSV
-│       └── administracion_reservas.html.twig # Todas las reservas para el administrador, con la anulación
+│   ├── funciones/              # Plantillas específicas del subsistema funciones
+│   │   ├── reservar.html.twig  # Reserva de lugares de una función, con los errores
+│   │   ├── reserva_confirmada.html.twig # Confirmación de la reserva con su código (el comprobante)
+│   │   ├── cancelar_reserva.html.twig # Confirmación para cancelar una reserva propia
+│   │   ├── pasos_reserva.html.twig # Los pasos de la reserva (Lugares → Comprobante)
+│   │   ├── mis_reservas.html.twig # «Mis reservas» del espectador
+│   │   ├── reservas_de_la_funcion.html.twig # Las reservas de una función para su organizador: asistencia y CSV
+│   │   └── administracion_reservas.html.twig # Todas las reservas para el administrador, con la anulación
+│   └── moderacion/             # Del subsistema moderacion (EF-01): vacía hasta EF-05
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
     ├── css/
     │   └── estilos.css         # Hoja de estilos con paleta cinematográfica oscura y responsive
@@ -166,6 +167,7 @@ El menú de usuario es un desplegable común (`<details>`/`<summary>`), no un me
    composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/cuentas
    composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/programacion
    composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/funciones
+   composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/moderacion
    ```
    Con Docker (lo habitual), el README del back explica cómo levantar todo, también sin PHP en la máquina.
 3. Levantar el servidor local de desarrollo sin Docker:
