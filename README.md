@@ -65,8 +65,8 @@ frontend-indiecinema/
 │   │   ├── mis_reservas.html.twig # «Mis reservas» del espectador
 │   │   ├── reservas_de_la_funcion.html.twig # Las reservas de una función para su organizador: asistencia y CSV
 │   │   └── administracion_reservas.html.twig # Todas las reservas para el administrador, con la anulación
-│   ├── moderacion/             # Del subsistema moderacion (EF-01): vacía hasta EF-05
-│   └── recaudacion/            # Del subsistema recaudacion (EF-02): vacía hasta EF-06
+│   ├── moderacion/             # Del subsistema moderacion (EF-01): vacía hasta EF-07
+│   └── recaudacion/            # Del subsistema recaudacion (EF-02): vacía hasta EF-08
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
     ├── css/
     │   └── estilos.css         # Hoja de estilos con paleta cinematográfica oscura y responsive
