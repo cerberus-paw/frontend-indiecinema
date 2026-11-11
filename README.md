@@ -65,7 +65,8 @@ frontend-indiecinema/
 │   │   ├── mis_reservas.html.twig # «Mis reservas» del espectador
 │   │   ├── reservas_de_la_funcion.html.twig # Las reservas de una función para su organizador: asistencia y CSV
 │   │   └── administracion_reservas.html.twig # Todas las reservas para el administrador, con la anulación
-│   └── moderacion/             # Del subsistema moderacion (EF-01): vacía hasta EF-05
+│   ├── moderacion/             # Del subsistema moderacion (EF-01): vacía hasta EF-05
+│   └── recaudacion/            # Del subsistema recaudacion (EF-02): vacía hasta EF-06
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
     ├── css/
     │   └── estilos.css         # Hoja de estilos con paleta cinematográfica oscura y responsive
@@ -168,6 +169,7 @@ El menú de usuario es un desplegable común (`<details>`/`<summary>`), no un me
    composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/programacion
    composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/funciones
    composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/moderacion
+   composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/recaudacion
    ```
    Con Docker (lo habitual), el README del back explica cómo levantar todo, también sin PHP en la máquina.
 3. Levantar el servidor local de desarrollo sin Docker:
