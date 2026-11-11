@@ -9014,3 +9014,23 @@ a.tabla-admin-principal:focus-visible {
   margin: var(--espacio-2) 0 0;
   overflow-wrap: anywhere;
 }
+
+/* Lo que calificó el espectador, en «Mis reservas» (EF-04.5): las estrellas y el comentario,
+   que puede ser largo, cortado en dos líneas. */
+.mis-reservas-calificacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  margin: 0;
+  max-width: 18rem;
+}
+
+.mis-reservas-comentario {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

@@ -11,7 +11,8 @@
     (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio' |
     'ausente'),
     estado_etiqueta, cancelable, calificable (si puede calificar la función: asistió, terminó y
-    todavía no la calificó; EF-04.2), enlace_de_pago (a Mercado Pago, sólo en una pendiente que todavía
+    todavía no la calificó; EF-04.2), calificacion ({puntaje, comentario} si la calificó con esta
+    reserva, o null; EF-04.5), enlace_de_pago (a Mercado Pago, sólo en una pendiente que todavía
     está a tiempo; si no, null), funcion}. funcion es {id, titulo, url, fecha (o null), precio, sala, localidad}, o null si
     programación no la devolvió.
   - calificada: (bool) si se acaba de guardar una calificación, para el aviso.
@@ -92,6 +93,19 @@
               <td><span class="estado-cuenta {{ clases_estado[reserva.estado] ?? '' }}">{{ reserva.estado_etiqueta }}</span></td>
               <td>
                 <div class="mis-reservas-acciones">
+                  {# El historial de calificaciones de la propuesta (EF-04.5): lo que puso, al lado de
+                     la reserva con la que fue. #}
+                  {% if reserva.calificacion|default(null) %}
+                    <p class="mis-reservas-calificacion">
+                      <span class="calificacion-estrellas" aria-hidden="true">{% for estrella in 1..5 %}{{ estrella <= reserva.calificacion.puntaje ? '★' : '☆' }}{% endfor %}</span>
+                      <span class="sr-only">Calificaste {{ reserva.calificacion.puntaje }} de 5.</span>
+                      {% if reserva.calificacion.comentario %}
+                        <span class="mis-reservas-comentario">«{{ reserva.calificacion.comentario }}»</span>
+                      {% endif %}
+                    </p>
+                  {% elseif reserva.estado == 'ausente' %}
+                    <span class="tabla-admin-secundario">Reservaste y no asististe</span>
+                  {% endif %}
                   {% if reserva.enlace_de_pago|default(null) %}
                     {% include 'parciales/boton.html.twig' with {
                       texto: 'Pagar',
