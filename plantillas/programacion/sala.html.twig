@@ -6,8 +6,9 @@
   sola columna, con el costado después de las funciones. Una sala sin habilitar sólo la ve su
   organizador, con el aviso de que todavía no está publicada.
 
-  Lo que el wireframe muestra sin datos detrás (equipamiento, calificaciones, mapa, organizador,
-  seguir, historial y denunciar) no va.
+  Debajo del nombre, el promedio de sus calificaciones; después de las próximas funciones, el
+  historial de proyecciones y lo que dicen los espectadores (EF-04.3). Lo que el wireframe
+  muestra sin datos detrás (equipamiento, mapa, organizador, seguir y denunciar) no va.
 
   Encabezados, sin saltar niveles: h1 la sala; h2 cada sección de las dos columnas; h3 cada función.
 
@@ -16,6 +17,10 @@
     null), habilitada, peliculas_por_funcion, duracion_funcion y tiempo_entre_funciones (estos dos,
     en minutos).
   - funciones: lista de funciones como las recibe parciales/fila_funcion.html.twig, por fecha.
+  - calificaciones: {promedio (o null), cantidad, ultimas}, como las recibe
+    parciales/calificaciones_ultimas.html.twig; null si funciones no respondió.
+  - historial: las últimas funciones finalizadas, de la más reciente a la más vieja: {fecha,
+    titulo, url, asistentes (o null sin funciones), cupo, promedio (o null)}.
 #}
 {% extends 'base.html.twig' %}
 
@@ -59,6 +64,9 @@
         {% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'meta-icono' } only %}
         <span>{{ sala.direccion }} · {{ sala.localidad }}</span>
       </p>
+      {% if calificaciones %}
+        {% include 'parciales/calificacion_promedio.html.twig' with { promedio: calificaciones.promedio, cantidad: calificaciones.cantidad } only %}
+      {% endif %}
     </header>
 
     <div class="ficha-sala-columnas">
@@ -84,6 +92,47 @@
             </ul>
           {% endif %}
         </section>
+
+        {% if historial is not empty %}
+          <section class="ficha-sala-seccion" aria-labelledby="ficha-sala-historial-titulo">
+            <h2 id="ficha-sala-historial-titulo" class="ficha-sala-seccion-titulo">Historial de proyecciones</h2>
+            <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="ficha-sala-historial-titulo">
+              <table class="tabla-admin">
+                <thead>
+                  <tr>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Película proyectada</th>
+                    <th scope="col">Asistentes</th>
+                    <th scope="col">Calificación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for proyeccion in historial %}
+                    <tr>
+                      <td>{{ proyeccion.fecha }}</td>
+                      <td><a href="{{ proyeccion.url }}" class="tabla-admin-principal">{{ proyeccion.titulo }}</a></td>
+                      <td>{{ proyeccion.asistentes is null ? '—' : proyeccion.asistentes ~ ' de ' ~ proyeccion.cupo }}</td>
+                      <td>
+                        {% if proyeccion.promedio is null %}
+                          <span class="tabla-admin-secundario">Sin calificar</span>
+                        {% else %}
+                          <span class="calificacion-estrellas" aria-hidden="true">{% for estrella in 1..5 %}{{ estrella <= proyeccion.promedio|round ? '★' : '☆' }}{% endfor %}</span>
+                          {{ proyeccion.promedio|number_format(1, ',') }}<span class="sr-only"> de 5</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        {% endif %}
+
+        {% include 'parciales/calificaciones_ultimas.html.twig' with {
+          calificaciones: calificaciones,
+          id: 'ficha-sala-calificaciones-titulo',
+          vacio: 'Todavía nadie calificó una función de esta sala.'
+        } only %}
       </div>
 
       <aside class="ficha-sala-costado" aria-label="Datos de la sala">

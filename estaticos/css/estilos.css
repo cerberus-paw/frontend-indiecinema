@@ -8945,3 +8945,92 @@ a.tabla-admin-principal:focus-visible {
     transition: none;
   }
 }
+
+/* ── Calificar una función (EF-04.2) ──────────────────────────────────────────────────────────
+   Los cinco puntajes, uno por renglón: la estrella sola no dice qué significa, así que va con el
+   número y la palabra. */
+.calificacion-puntajes {
+  border: none;
+  margin: 0 0 var(--espacio-5);
+  padding: 0;
+}
+
+.calificacion-opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-2) 0;
+  cursor: pointer;
+}
+
+.calificacion-opcion input {
+  accent-color: var(--color-primario);
+}
+
+.calificacion-estrellas {
+  color: var(--color-primario);
+  letter-spacing: 0.1em;
+}
+
+.calificacion-puntajes.con-error .calificacion-opcion {
+  color: var(--color-error);
+}
+
+/* ── Calificaciones en las fichas de la sala y de la obra (EF-04.3) ───────────────────────── */
+.calificacion-promedio {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin: var(--espacio-2) 0 0;
+}
+
+.calificacion-cantidad,
+.calificacion-item-fecha {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.calificaciones-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.calificacion-item {
+  padding: var(--espacio-3) 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.calificacion-item-cabecera {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin: 0;
+}
+
+.calificacion-item-comentario {
+  margin: var(--espacio-2) 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* Lo que calificó el espectador, en «Mis reservas» (EF-04.5): las estrellas y el comentario,
+   que puede ser largo, cortado en dos líneas. */
+.mis-reservas-calificacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  margin: 0;
+  max-width: 18rem;
+}
+
+.mis-reservas-comentario {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

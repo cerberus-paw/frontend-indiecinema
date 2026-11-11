@@ -1,0 +1,88 @@
+{#
+  Calificar una función a la que se asistió (EF-04.2), en /funcion/reservas/{id}/calificar. No
+  tiene wireframe: sigue la confirmación de cancelar una reserva (el resumen de la función arriba y
+  el formulario abajo). Se llega desde el botón «Calificar función» de «Mis reservas».
+
+  El puntaje son cinco radios dentro de un fieldset, para que el lector de pantalla los lea como
+  un grupo con su pregunta; cada uno dice el número y qué quiere decir, no sólo las estrellas.
+
+  Variables:
+  - reserva: id y codigo.
+  - funcion: titulo, url, fecha (o null), sala y localidad.
+  - valores: puntaje y comentario, al volver con errores.
+  - errores: (map) puntaje y comentario, como los devuelve el servidor.
+  - maximo_comentario: (int) cuántos caracteres admite el comentario.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Calificar {{ funcion.titulo }}{% endblock %}
+
+{% block contenido %}
+{% set puntajes = { 5: 'Excelente', 4: 'Muy buena', 3: 'Buena', 2: 'Regular', 1: 'Mala' } %}
+<div class="contenedor contenedor-confirmacion-cancelacion">
+  <nav class="navegacion-migas" aria-label="Ruta de navegación">
+    <ol class="lista-migas">
+      <li><a href="/funcion/reservas" class="enlace-miga">Mis reservas</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="miga-activa" aria-current="page">Calificar</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Calificar la función</h1>
+      <p class="solicitud-bajada">Tu calificación ayuda a otros espectadores a elegir sala y película. Se puede calificar una sola vez.</p>
+    </div>
+  </header>
+
+  {% include 'parciales/resumen_de_errores.html.twig' with { errores: errores } only %}
+
+  <article class="tarjeta-resumen-cancelacion">
+    <h2 class="resumen-cancelacion-titulo"><a href="{{ funcion.url }}">{{ funcion.titulo }}</a></h2>
+    <dl class="resumen-cancelacion-lista">
+      <div class="parametro-item">
+        <dt>Sala</dt>
+        <dd>{{ funcion.sala }} · {{ funcion.localidad }}</dd>
+      </div>
+      <div class="parametro-item">
+        <dt>Fecha y horario</dt>
+        <dd>{{ funcion.fecha ?? 'Sin fecha' }}</dd>
+      </div>
+    </dl>
+  </article>
+
+  <form action="/funcion/reservas/{{ reserva.id }}/calificar" method="POST" class="formulario-calificacion">
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+    <fieldset id="puntaje" class="calificacion-puntajes{% if errores.puntaje is defined %} con-error{% endif %}">
+      <legend class="campo-etiqueta">¿Qué te pareció? <span class="campo-requerido" aria-hidden="true">*</span></legend>
+      {% for valor, texto in puntajes %}
+        <label class="calificacion-opcion">
+          <input type="radio" name="puntaje" value="{{ valor }}" required{% if (valores.puntaje ?? '') == valor ~ '' %} checked{% endif %}{% if errores.puntaje is defined %} aria-invalid="true" aria-describedby="error-puntaje"{% endif %}>
+          <span class="calificacion-estrellas" aria-hidden="true">{% for estrella in 1..5 %}{{ estrella <= valor ? '★' : '☆' }}{% endfor %}</span>
+          <span>{{ valor }} · {{ texto }}</span>
+        </label>
+      {% endfor %}
+      {% if errores.puntaje is defined %}
+        <span id="error-puntaje" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.puntaje }}</span>
+      {% endif %}
+    </fieldset>
+
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'comentario',
+      etiqueta: 'Comentario (opcional)',
+      tipo: 'textarea',
+      valor: valores.comentario ?? '',
+      errores: errores,
+      maximo: maximo_comentario,
+      filas: 4,
+      ayuda: 'Se muestra con tu nombre en la ficha de la sala y de la película. Hasta ' ~ maximo_comentario ~ ' caracteres.'
+    } only %}
+
+    <div class="pie-formulario-acciones">
+      {% include 'parciales/boton.html.twig' with { texto: 'Calificar', tipo: 'submit' } only %}
+      <a href="/funcion/reservas" class="boton boton-secundario">Volver a mis reservas</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
