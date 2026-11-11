@@ -7,6 +7,8 @@
   - obra: datos de la obra (id, titulo, anio, director, duracion, tipo, tipo_etiqueta,
     origen_copia, origen_copia_etiqueta, generos, sinopsis, afiche, editable, tiene_funciones_futuras).
   - funciones: lista de funciones de esta obra (formato para parciales/tarjeta_funcion.html.twig).
+  - calificaciones: {promedio (o null), cantidad, ultimas} de las funciones donde se dio, como las
+    recibe parciales/calificaciones_ultimas.html.twig; null si funciones no respondió (EF-04.3).
   - mensaje_exito: (?string) confirmación si se guardaron cambios.
   - error_baja: (?string) error si falló la baja.
   - csrf: token CSRF.
@@ -70,6 +72,9 @@
         {% endif %}
       </div>
 
+      {% if calificaciones %}
+        {% include 'parciales/calificacion_promedio.html.twig' with { promedio: calificaciones.promedio, cantidad: calificaciones.cantidad } only %}
+      {% endif %}
       <div class="ficha-obra-metas">
         {% if obra.director is defined and obra.director %}
           <p class="tarjeta-funcion-dato meta-director">
@@ -150,5 +155,11 @@
       </div>
     {% endif %}
   </section>
+
+  {% include 'parciales/calificaciones_ultimas.html.twig' with {
+    calificaciones: calificaciones,
+    id: 'ficha-obra-calificaciones-titulo',
+    vacio: 'Todavía nadie calificó una función de esta película.'
+  } only %}
 </div>
 {% endblock %}
