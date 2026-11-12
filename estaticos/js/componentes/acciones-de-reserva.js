@@ -41,6 +41,21 @@ class AccionesDeReserva {
   };
 
   /**
+   * La nota del reembolso en la fila (EF-06.4), la misma que escribe la plantilla del panel del
+   * administrador. Si cambia allá, cambia acá.
+   */
+  static TEXTOS_DE_REEMBOLSO = {
+    hecho: 'Reembolsada',
+    pendiente: 'Reembolso pendiente',
+  };
+
+  /** Lo que el aviso de la anulación le suma según cómo quedó el reembolso. */
+  static AVISOS_DE_REEMBOLSO = {
+    hecho: ' Se le devolvió el pago.',
+    pendiente: ' El reembolso quedó pendiente: Mercado Pago no lo tomó.',
+  };
+
+  /**
    * @param {Element|string} pContenedor el panel, con data-panel-de-reservas, o su selector
    */
   constructor(pContenedor) {
@@ -116,7 +131,7 @@ class AccionesDeReserva {
    * La fila se busca por su id y no por dónde está el formulario: el del código de arriba no está
    * en ninguna fila, y igual tiene que cambiar la que se registró.
    *
-   * @param {{id: string, estado: string, estado_etiqueta: string, anulable?: boolean, registrable?: boolean}} reserva
+   * @param {{id: string, estado: string, estado_etiqueta: string, reembolso?: ?string, anulable?: boolean, registrable?: boolean}} reserva
    * @param {?Element} [enfocado=null] lo que tenía el foco cuando se mandó la acción
    */
   pintarFila(reserva, enfocado = null) {
@@ -128,6 +143,11 @@ class AccionesDeReserva {
     if (pildora) {
       pildora.textContent = reserva.estado_etiqueta;
       pildora.className = `estado-cuenta ${AccionesDeReserva.CLASES_DE_ESTADO[reserva.estado] ?? ''}`.trim();
+      // Sólo el panel del administrador manda el reembolso: en el del organizador no viene, y
+      // entonces la nota de la fila queda como está.
+      if (reserva.reembolso !== undefined && pildora.parentElement) {
+        AccionesDeReserva.pintarReembolso(pildora.parentElement, reserva.reembolso);
+      }
     }
     // anulable en el panel del administrador, registrable en el del organizador: el que no es de
     // este panel no viene, y sin él no se saca ningún botón.
@@ -146,6 +166,30 @@ class AccionesDeReserva {
         PAW.enfocar(hecho);
       }
     }
+  }
+
+  /**
+   * La nota de qué pasó con la plata, al lado de la píldora del estado (EF-06.4). La plantilla la
+   * escribe sólo si había algo que decir, así que acá se crea o se saca según lo que conteste el
+   * servidor: una anulación puede dejar un reembolso donde antes no había ninguno.
+   *
+   * @param {Element} celda la celda del estado
+   * @param {?string} reembolso «hecho», «pendiente», o null si no había nada que devolver
+   */
+  static pintarReembolso(celda, reembolso) {
+    const nota = celda.querySelector('[data-reembolso]');
+    const texto = AccionesDeReserva.TEXTOS_DE_REEMBOLSO[reembolso] ?? '';
+    if (!texto) {
+      nota?.remove();
+
+      return;
+    }
+    if (nota) {
+      nota.textContent = texto;
+
+      return;
+    }
+    celda.append(PAW.nuevoElemento('span', texto, { class: 'tabla-admin-secundario', 'data-reembolso': '' }));
   }
 
   /**
@@ -189,14 +233,18 @@ class AccionesDeReserva {
   }
 
   /**
-   * @param {{codigo?: string, estado?: string}} reserva
+   * @param {{codigo?: string, estado?: string, reembolso?: ?string}} reserva
    * @returns {string}
    */
   static hecho(reserva) {
     const codigo = reserva?.codigo ?? '';
+    if (reserva?.estado === 'asistio') {
+      return `Se registró la asistencia de la reserva ${codigo}.`;
+    }
+    // Lo del reembolso sólo si había plata que devolver: el aviso es la única forma que tiene el
+    // administrador de enterarse ahí mismo de que quedó pendiente (EF-06.4).
+    const reembolso = AccionesDeReserva.AVISOS_DE_REEMBOLSO[reserva?.reembolso] ?? '';
 
-    return reserva?.estado === 'asistio'
-      ? `Se registró la asistencia de la reserva ${codigo}.`
-      : `Se anuló la reserva ${codigo} y sus lugares quedaron libres.`;
+    return `Se anuló la reserva ${codigo} y sus lugares quedaron libres.${reembolso}`;
   }
 }
