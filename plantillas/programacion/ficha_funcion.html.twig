@@ -563,7 +563,7 @@
           {% if not sin_franjas and not es_sin_quorum and not votacion_abierta %}
             {% include 'parciales/mensaje.html.twig' with {
               tipo: 'info',
-              mensaje: 'Ya pasó la fecha límite para marcar «Me sirve». Falta que el organizador confirme la franja que llegó al mínimo.'
+              mensaje: 'Ya pasó la fecha límite para marcar «Me sirve». En unos minutos la función queda programada en la franja que llegó al mínimo.'
             } only %}
           {% endif %}
           {% if es_sin_quorum %}
@@ -612,7 +612,9 @@
                     <p class="ficha-panel-texto">La del {{ franja_lider.fecha }}, de {{ franja_lider.hora_inicio }} a {{ franja_lider.hora_fin }}, tiene {{ max_votos }} {{ max_votos == 1 ? 'compromiso' : 'compromisos' }} y el mínimo es {{ minimo }}. Al confirmarla, la función queda programada con esa fecha.</p>
                   {% else %}
                     <h3 id="ficha-panel-organizador-titulo" class="ficha-panel-titulo">Gestión del acuerdo de fecha</h3>
-                    <p class="ficha-panel-texto">Cuando una franja llegue al mínimo la vas a poder confirmar desde acá. Si el acuerdo no reúne el interés esperado, podés cerrarlo y decidir si proponés otras franjas o cancelás la función.</p>
+                    {# Al vencer el acuerdo lo cierra la tarea programada (EF-03.2): con el mínimo la
+                       programa, y sin él la cancela. Antes del límite, el organizador decide. #}
+                    <p class="ficha-panel-texto">Cuando una franja llegue al mínimo la vas a poder confirmar desde acá; si no la confirmás, se confirma sola al llegar la fecha límite. Si al llegar la fecha límite ninguna llegó al mínimo, la función se cancela sola y les avisamos a quienes marcaron «Me sirve». Antes de eso podés cerrar el acuerdo y proponer otras franjas.</p>
                   {% endif %}
                   <div class="ficha-panel-acciones">
                     {% if confirmable %}
@@ -741,9 +743,9 @@
             {% include 'parciales/icono.html.twig' with { nombre: 'advertencia' } only %}
             <p>
               {% if es_sin_quorum %}
-                Este acuerdo cerró sin llegar al mínimo de {{ minimo }} {{ minimo == 1 ? 'asistente' : 'asistentes' }}: la función no se programa, y el organizador decide si propone otras fechas o la cancela.
+                Este acuerdo cerró sin llegar al mínimo de {{ minimo }} {{ minimo == 1 ? 'asistente' : 'asistentes' }}: la función no se programa con estas franjas. El organizador puede proponer otras o cancelarla.
               {% else %}
-                Marcar <strong>Me sirve</strong> es comprometerte a ir, pero no reserva ni cobra nada. Si ninguna franja llega al mínimo antes de la fecha límite, la función no se programa y el organizador decide si propone otras fechas o la cancela.
+                Marcar <strong>Me sirve</strong> es comprometerte a ir, pero no reserva ni cobra nada. Si ninguna franja llega al mínimo antes de la fecha límite, la función se cancela y te avisamos por correo.
               {% endif %}
             </p>
           </div>
