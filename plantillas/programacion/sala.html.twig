@@ -149,17 +149,21 @@
               <dt>Capacidad</dt>
               <dd>{{ sala.capacidad }} lugares</dd>
             </div>
+            {# Debajo de cada parámetro, qué regla aplica (EF-05.3). #}
             <div class="ficha-sala-parametro">
               <dt>Películas por función</dt>
               <dd>{{ sala.peliculas_por_funcion }}</dd>
+              <dd class="ficha-sala-parametro-regla">Cuántas películas se proyectan en cada función. Al cerrar una votación quedan las más votadas, hasta este número.</dd>
             </div>
             <div class="ficha-sala-parametro">
               <dt>Duración máxima</dt>
               <dd>{{ sala.duracion_funcion }} min</dd>
+              <dd class="ficha-sala-parametro-regla">Cuánto puede durar una función. La asistencia se registra desde una hora antes hasta que termina.</dd>
             </div>
             <div class="ficha-sala-parametro">
               <dt>Tiempo entre funciones</dt>
               <dd>{{ sala.tiempo_entre_funciones }} min</dd>
+              <dd class="ficha-sala-parametro-regla">Cuánto tiempo libre queda como mínimo entre una función y la siguiente.</dd>
             </div>
           </dl>
         </section>

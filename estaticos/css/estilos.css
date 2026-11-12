@@ -3760,8 +3760,10 @@ dd {
 
 /* Un parámetro */
 .ficha-sala-parametro {
-  /* Nombre y valor en fila */
+  /* Nombre y valor en fila, y la regla debajo */
   display: flex;
+  /* La regla baja a su propia línea */
+  flex-wrap: wrap;
   /* A los extremos */
   justify-content: space-between;
   /* Separación mínima */
@@ -3784,6 +3786,18 @@ dd {
   font-weight: 600;
   /* Alineado a la derecha */
   text-align: right;
+}
+
+/* Qué regla aplica el parámetro (EF-05.3), debajo del nombre y el valor */
+.ficha-sala-parametro .ficha-sala-parametro-regla {
+  /* Ocupa toda la línea */
+  flex-basis: 100%;
+  /* Peso normal: la explicación no compite con el valor */
+  font-weight: 400;
+  /* Alineada a la izquierda, como el nombre */
+  text-align: left;
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
 }
 
 /* En tablet y celular, una sola columna: el costado después de las funciones */

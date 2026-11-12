@@ -13,6 +13,8 @@
   - reservas: lista de {id, codigo, espectador (o null), cantidad, total, estado ('confirmada' |
     'cancelada' | 'asistio' | 'ausente'), estado_etiqueta, creada (ya escrita), registrable}.
   - registra_asistencia: (bool) si se puede registrar: la función no se canceló.
+  - asistencia: {desde, hasta} (ya escritos) de la ventana en la que se registra, de una hora
+    antes de la función hasta que termina (EF-05.2), o null si todavía no tiene fecha.
   - codigo: (string) lo que se había escrito, al volver con un error.
   - registrada: (string|null) el código que se acaba de registrar.
   - error_general: (string, opcional) por qué no se registró la asistencia.
@@ -85,6 +87,11 @@
 
   {# En la puerta: el espectador dicta el código de su comprobante #}
   {% if registra_asistencia %}
+    {# Fuera de la ventana el formulario sigue: mandarlo da el error con el motivo. Con un back
+       que todavía no la manda, la línea no sale. #}
+    {% if asistencia is defined and asistencia %}
+      {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'La asistencia se registra de ' ~ asistencia.desde ~ ' a ' ~ asistencia.hasta ~ '.' } only %}
+    {% endif %}
     <form action="/funcion/organizador/funciones/{{ funcion.id }}/asistencia" method="POST" class="panel-reservas-asistencia" data-accion-de-reserva>
       <input type="hidden" name="_csrf" value="{{ csrf }}">
       {% include 'parciales/campo.html.twig' with {
