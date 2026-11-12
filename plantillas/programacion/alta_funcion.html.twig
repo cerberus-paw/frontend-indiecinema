@@ -13,6 +13,7 @@
   - salas: (list, obligatorio) Lista de salas propias del organizador habilitadas para proyectar.
   - obras: (list, obligatorio) Obras disponibles en el catálogo de IndieCinema.
   - valores: (map, opcional) Valores enviados por el usuario tras un error de validación o existentes en edición.
+    En votación, cierre_fecha y cierre_hora son hasta cuándo se vota (EF-03.1).
   - errores: (map, opcional) Diccionario de mensajes de error de validación por campo.
   - error_general: (string, opcional) Mensaje de error general si falló la validación.
   - mensaje_exito: (string, opcional) Mensaje tras guardar exitosamente la función.
@@ -135,7 +136,7 @@
             >
             <span class="opcion-modo-contenido">
               <strong class="opcion-modo-titulo">Abrir a votación de títulos</strong>
-              <span class="opcion-modo-descripcion">Las obras seleccionadas serán candidatas a votación. La fecha y horario se definirán al finalizar la votación.</span>
+              <span class="opcion-modo-descripcion">Las obras seleccionadas serán candidatas a votación hasta el cierre que elijas. La fecha y horario se definirán al finalizar la votación.</span>
             </span>
           </label>
         </div>
@@ -282,6 +283,46 @@
           }) only %}
         </div>
       </fieldset>
+
+      {# ==================================================================== #}
+      {# SECCIÓN 3 BIS: CIERRE DE LA VOTACIÓN (EF-03.1)                       #}
+      {# ==================================================================== #}
+      {# Sólo al abrir una votación: hasta cuándo se vota. Al llegar la votación se cierra sola con
+         la más votada; el organizador la puede cerrar antes desde la ficha. ModoFuncion la muestra
+         en ese modo y oculta la de fecha y horario; sin JavaScript se ven las dos, y el servidor
+         usa la que corresponde al modo elegido. #}
+      {% if not (es_edicion ?? false) %}
+      <fieldset class="seccion-formulario" data-seccion-cierre-votacion>
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Cierre de la votación</span>
+          <span class="seccion-subtitulo">Hasta cuándo votan los espectadores. Al llegar, la votación se cierra sola con el título más votado.</span>
+        </legend>
+
+        <div class="fila-campos-doble">
+          {% include 'parciales/campo.html.twig' with (reglas.cierre_fecha ?? {})|merge({
+            nombre: 'cierre_fecha',
+            etiqueta: 'Día de cierre',
+            tipo: 'date',
+            valor: valores.cierre_fecha ?? '',
+            requerido: es_votacion,
+            errores: errores ?? {},
+            autocompletar: 'off',
+            ayuda: 'Tiene que ser futuro.'
+          }) only %}
+
+          {% include 'parciales/campo.html.twig' with (reglas.cierre_hora ?? {})|merge({
+            nombre: 'cierre_hora',
+            etiqueta: 'Hora de cierre',
+            tipo: 'time',
+            valor: valores.cierre_hora ?? '',
+            placeholder: 'Ej: 23:00',
+            requerido: es_votacion,
+            errores: errores ?? {},
+            ayuda: 'Podés cerrarla antes desde la ficha de la función.'
+          }) only %}
+        </div>
+      </fieldset>
+      {% endif %}
 
       {# ==================================================================== #}
       {# SECCIÓN 4: PRECIO Y CUPO                                             #}

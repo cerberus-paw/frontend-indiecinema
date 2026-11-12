@@ -5288,6 +5288,12 @@ dd {
   margin: 0;
 }
 
+/* Hasta cuándo se vota (EF-03.1), debajo de la bajada */
+.ficha-votacion-cierre {
+  font-size: var(--texto-base);
+  margin: var(--espacio-2) 0 0;
+}
+
 .ficha-votacion-confirmacion,
 .ficha-votacion-error {
   margin-bottom: var(--espacio-4);

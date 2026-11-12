@@ -46,6 +46,8 @@
         para ingresar.
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
+  - funcion.votacion_cierra: (string|null) hasta cuándo se vota, «15 nov 20:00» (EF-03.1); funcion.votacion_vencida:
+    (bool) si ya pasó, aunque la tarea todavía no la haya cerrado.
   - votacion_cerrada: (bool) aviso de éxito al volver de cerrar la votación de títulos (IC-150 / E3-12.4).
   - voto_usuario: (string|null) UUID de la obra que votó el usuario autenticado (E3-12.2 / E3-12.3).
   - conteo_votos: (array<string, int>) mapa asociativo [obra_id => total_votos] con el conteo por candidata.
@@ -309,6 +311,13 @@
             <p class="ficha-votacion-bajada">
               Esta función está abierta a votación de títulos por los espectadores. Elegí cuál de las siguientes películas candidatas querés ver en la sala: el título más votado por la comunidad será proyectado y la fecha definitiva se acordará al finalizar el plazo.
             </p>
+            {# Hasta cuándo se vota (EF-03.1). Vencida, la tarea la cierra en unos minutos con la más
+               votada, y mientras tanto ya no se vota: el servidor también lo rechaza. #}
+            {% if funcion.votacion_vencida|default(false) %}
+              <p class="ficha-votacion-cierre" role="status"><strong>La votación ya cerró.</strong> En unos minutos se ve el título elegido.</p>
+            {% elseif funcion.votacion_cierra|default(null) %}
+              <p class="ficha-votacion-cierre">La votación cierra el <strong>{{ funcion.votacion_cierra }}</strong>.</p>
+            {% endif %}
           </div>
         </div>
 
@@ -415,7 +424,9 @@
                     <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
                   </p>
                   <div class="candidata-accion">
-                    {% if es_votada %}
+                    {% if funcion.votacion_vencida|default(false) %}
+                      {# Ya no se vota: sin botón, para no ofrecer algo que el servidor rechaza. #}
+                    {% elseif es_votada %}
                       <div class="candidata-voto-registrado" role="status">
                         <span class="voto-registrado-texto">Esta es tu elección actual. Podés cambiarla votando por otra candidata.</span>
                       </div>
@@ -552,7 +563,7 @@
           {% if not sin_franjas and not es_sin_quorum and not votacion_abierta %}
             {% include 'parciales/mensaje.html.twig' with {
               tipo: 'info',
-              mensaje: 'Ya pasó la fecha límite para marcar «Me sirve». Falta que el organizador confirme la franja que llegó al mínimo.'
+              mensaje: 'Ya pasó la fecha límite para marcar «Me sirve». En unos minutos la función queda programada en la franja que llegó al mínimo.'
             } only %}
           {% endif %}
           {% if es_sin_quorum %}
@@ -601,7 +612,9 @@
                     <p class="ficha-panel-texto">La del {{ franja_lider.fecha }}, de {{ franja_lider.hora_inicio }} a {{ franja_lider.hora_fin }}, tiene {{ max_votos }} {{ max_votos == 1 ? 'compromiso' : 'compromisos' }} y el mínimo es {{ minimo }}. Al confirmarla, la función queda programada con esa fecha.</p>
                   {% else %}
                     <h3 id="ficha-panel-organizador-titulo" class="ficha-panel-titulo">Gestión del acuerdo de fecha</h3>
-                    <p class="ficha-panel-texto">Cuando una franja llegue al mínimo la vas a poder confirmar desde acá. Si el acuerdo no reúne el interés esperado, podés cerrarlo y decidir si proponés otras franjas o cancelás la función.</p>
+                    {# Al vencer el acuerdo lo cierra la tarea programada (EF-03.2): con el mínimo la
+                       programa, y sin él la cancela. Antes del límite, el organizador decide. #}
+                    <p class="ficha-panel-texto">Cuando una franja llegue al mínimo la vas a poder confirmar desde acá; si no la confirmás, se confirma sola al llegar la fecha límite. Si al llegar la fecha límite ninguna llegó al mínimo, la función se cancela sola y les avisamos a quienes marcaron «Me sirve». Antes de eso podés cerrar el acuerdo y proponer otras franjas.</p>
                   {% endif %}
                   <div class="ficha-panel-acciones">
                     {% if confirmable %}
@@ -730,9 +743,9 @@
             {% include 'parciales/icono.html.twig' with { nombre: 'advertencia' } only %}
             <p>
               {% if es_sin_quorum %}
-                Este acuerdo cerró sin llegar al mínimo de {{ minimo }} {{ minimo == 1 ? 'asistente' : 'asistentes' }}: la función no se programa, y el organizador decide si propone otras fechas o la cancela.
+                Este acuerdo cerró sin llegar al mínimo de {{ minimo }} {{ minimo == 1 ? 'asistente' : 'asistentes' }}: la función no se programa con estas franjas. El organizador puede proponer otras o cancelarla.
               {% else %}
-                Marcar <strong>Me sirve</strong> es comprometerte a ir, pero no reserva ni cobra nada. Si ninguna franja llega al mínimo antes de la fecha límite, la función no se programa y el organizador decide si propone otras fechas o la cancela.
+                Marcar <strong>Me sirve</strong> es comprometerte a ir, pero no reserva ni cobra nada. Si ninguna franja llega al mínimo antes de la fecha límite, la función se cancela y te avisamos por correo.
               {% endif %}
             </p>
           </div>
