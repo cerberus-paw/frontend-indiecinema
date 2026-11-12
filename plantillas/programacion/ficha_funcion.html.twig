@@ -46,6 +46,8 @@
         para ingresar.
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
+  - funcion.votacion_cierra: (string|null) hasta cuándo se vota, «15 nov 20:00» (EF-03.1); funcion.votacion_vencida:
+    (bool) si ya pasó, aunque la tarea todavía no la haya cerrado.
   - votacion_cerrada: (bool) aviso de éxito al volver de cerrar la votación de títulos (IC-150 / E3-12.4).
   - voto_usuario: (string|null) UUID de la obra que votó el usuario autenticado (E3-12.2 / E3-12.3).
   - conteo_votos: (array<string, int>) mapa asociativo [obra_id => total_votos] con el conteo por candidata.
@@ -309,6 +311,13 @@
             <p class="ficha-votacion-bajada">
               Esta función está abierta a votación de títulos por los espectadores. Elegí cuál de las siguientes películas candidatas querés ver en la sala: el título más votado por la comunidad será proyectado y la fecha definitiva se acordará al finalizar el plazo.
             </p>
+            {# Hasta cuándo se vota (EF-03.1). Vencida, la tarea la cierra en unos minutos con la más
+               votada, y mientras tanto ya no se vota: el servidor también lo rechaza. #}
+            {% if funcion.votacion_vencida|default(false) %}
+              <p class="ficha-votacion-cierre" role="status"><strong>La votación ya cerró.</strong> En unos minutos se ve el título elegido.</p>
+            {% elseif funcion.votacion_cierra|default(null) %}
+              <p class="ficha-votacion-cierre">La votación cierra el <strong>{{ funcion.votacion_cierra }}</strong>.</p>
+            {% endif %}
           </div>
         </div>
 
@@ -415,7 +424,9 @@
                     <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
                   </p>
                   <div class="candidata-accion">
-                    {% if es_votada %}
+                    {% if funcion.votacion_vencida|default(false) %}
+                      {# Ya no se vota: sin botón, para no ofrecer algo que el servidor rechaza. #}
+                    {% elseif es_votada %}
                       <div class="candidata-voto-registrado" role="status">
                         <span class="voto-registrado-texto">Esta es tu elección actual. Podés cambiarla votando por otra candidata.</span>
                       </div>

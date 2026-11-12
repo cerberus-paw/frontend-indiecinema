@@ -5,7 +5,8 @@
  * de títulos» (E3-12.1 / IC-147).
  *
  * Al elegir «Abrir a votación»:
- * - Oculta y deshabilita la sección de fecha y horario (la fecha y hora no son obligatorias).
+ * - Oculta y deshabilita la sección de fecha y horario (la fecha y hora no son obligatorias), y
+ *   muestra la del cierre de la votación, que sí lo es (EF-03.1). En «Función programada», al revés.
  * - Ajusta los textos de subtítulo y ayuda de las obras para indicar que serán candidatas.
  * - Modifica el banner informativo para reflejar la apertura de la votación de títulos.
  * - Cambia la etiqueta del botón de envío a «Abrir a votación».
@@ -49,6 +50,8 @@ class ModoFuncion {
     this.seccionFechaHora = this.formulario.querySelector('[data-seccion-fecha-hora]');
     this.campoFecha = this.formulario.querySelector('input[name="fecha"]');
     this.campoHora = this.formulario.querySelector('input[name="hora"]');
+    this.seccionCierre = this.formulario.querySelector('[data-seccion-cierre-votacion]');
+    this.camposCierre = this.formulario.querySelectorAll('input[name="cierre_fecha"], input[name="cierre_hora"]');
     this.subtituloObras = this.formulario.querySelector('[data-obras-subtitulo]');
     this.ayudaObras = this.formulario.querySelector('[data-obras-ayuda]');
     this.avisoTitulo = this.formulario.querySelector('[data-aviso-titulo]');
@@ -166,6 +169,14 @@ class ModoFuncion {
     if (this.campoHora) {
       this.campoHora.disabled = esVotacion;
       this.campoHora.required = !esVotacion;
+    }
+    // El cierre, al revés: sólo una votación lo tiene. Deshabilitado no viaja ni lo valida el navegador.
+    if (this.seccionCierre) {
+      this.seccionCierre.hidden = !esVotacion;
+    }
+    for (const campo of this.camposCierre) {
+      campo.disabled = !esVotacion;
+      campo.required = esVotacion;
     }
 
     // Subtítulo y ayuda de la selección de obras
