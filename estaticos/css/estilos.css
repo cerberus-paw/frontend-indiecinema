@@ -6164,6 +6164,144 @@ dd {
   padding-left: 2.4rem;
 }
 
+/* Más de un botón en la cabecera de una página, como «Ver el reporte» y «Cargar obra» */
+.encabezado-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+}
+
+/* Reportes (EF-09): el período en una fila, con las etiquetas a la vista porque son fechas */
+.reporte-filtros {
+  grid-template-columns: repeat(2, minmax(150px, 220px)) auto;
+  justify-content: start;
+  align-items: end;
+}
+
+.reporte-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.reporte-filtro-etiqueta {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.reporte-titulo {
+  margin: var(--espacio-8) 0 var(--espacio-4);
+  font-size: var(--texto-xl);
+}
+
+.reporte-seccion {
+  margin-bottom: var(--espacio-8);
+}
+
+.reporte-subtitulo {
+  margin: 0;
+  font-size: var(--texto-lg);
+}
+
+/* De dónde sale la sugerencia: los umbrales, para que se entienda por qué aparece */
+.reporte-explicacion {
+  margin: var(--espacio-1) 0 var(--espacio-4);
+  max-width: 70ch;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.reporte-sugerencias {
+  display: grid;
+  gap: var(--espacio-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cada sugerencia, con el borde del color principal: es lo que hay que leer primero */
+.reporte-sugerencia {
+  padding: var(--espacio-4) var(--espacio-5);
+  border: 1px solid var(--color-borde);
+  border-left: 3px solid var(--color-primario);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie);
+}
+
+.reporte-sugerencia-texto {
+  margin: 0;
+}
+
+.reporte-sugerencia-nota {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* Con la sala, un campo más en la fila */
+.reporte-filtros-con-sala {
+  grid-template-columns: repeat(2, minmax(150px, 200px)) minmax(160px, 240px) auto;
+}
+
+/* Las dos partes del reporte, como pestañas: la actual subrayada con el color principal */
+.reporte-pestanas {
+  display: flex;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-5);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.reporte-pestana {
+  padding: var(--espacio-2) var(--espacio-3);
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.reporte-pestana:hover {
+  color: var(--color-texto);
+}
+
+.reporte-pestana.activa {
+  border-bottom-color: var(--color-primario);
+  color: var(--color-texto-brillante);
+  font-weight: 600;
+}
+
+/* El mes que se muestra abajo, marcado en la tabla de los meses */
+.reporte-fila-actual td {
+  background-color: var(--color-primario-suave);
+}
+
+/* El total del período, al pie, separado y en negrita */
+.reporte-fila-total th,
+.reporte-fila-total td {
+  border-top: 1px solid var(--color-borde-fuerte);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+}
+
+.reporte-fila-total th {
+  /* Sin las versalitas de los títulos de las columnas: es un total, no un encabezado */
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  text-align: left;
+}
+
+/* Un título sin explicación debajo, pegado a su tabla: un poco de aire */
+.reporte-subtitulo + .tabla-admin-contenedor {
+  margin-top: var(--espacio-3);
+}
+
+@media (max-width: 600px) {
+  .reporte-filtros,
+  .reporte-filtros-con-sala {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* Paginado numerado, como el wireframe: un cuadrado por página */
 .paginado-numerado ul {
   list-style: none;
