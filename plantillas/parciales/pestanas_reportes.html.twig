@@ -1,0 +1,23 @@
+{#
+  Las partes de los reportes (EF-09), como pestañas que son enlaces: lo que conviene hacer, los
+  totales y, para el dueño de obras, cómo le fue a cada una. Llevan el período elegido, así
+  cambiar de una a otra no lo pierde.
+
+  Parámetros recibidos:
+  - activa: (string) 'sugerencias', 'funciones' u 'obras'.
+  - periodo: desde y hasta (AAAA-MM-DD).
+  - administrador: (bool) no carga obras: no ve «Mis obras».
+#}
+{% set consulta = '?desde=' ~ periodo.desde|url_encode ~ '&hasta=' ~ periodo.hasta|url_encode %}
+{% set pestanas = [
+  { clave: 'sugerencias', texto: 'Qué conviene hacer', url: '/recaudacion/reportes' },
+  { clave: 'funciones', texto: 'Funciones y meses', url: '/recaudacion/reportes/funciones' }
+] %}
+{% if not administrador %}
+  {% set pestanas = pestanas|merge([{ clave: 'obras', texto: 'Mis obras', url: '/recaudacion/reportes/obras' }]) %}
+{% endif %}
+<nav class="reporte-pestanas" aria-label="Partes del reporte">
+  {% for pestana in pestanas %}
+    <a href="{{ pestana.url }}{{ consulta }}" class="reporte-pestana{% if activa == pestana.clave %} activa{% endif %}"{% if activa == pestana.clave %} aria-current="page"{% endif %}>{{ pestana.texto }}</a>
+  {% endfor %}
+</nav>

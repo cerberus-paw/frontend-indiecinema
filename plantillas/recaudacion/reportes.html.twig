@@ -3,11 +3,11 @@
   en las salas en un período y qué conviene hacer. No hay frame en los wireframes de la E2: sigue
   el armado de las reservas de una función (panel-organizador), con las tarjetas de números, el
   filtro en fila y las tablas. Primero las sugerencias, que es lo que se usa para decidir; los
-  totales por función y el CSV vienen con EF-09.2.
+  totales por función y el CSV están en la otra pestaña (reportes_funciones.html.twig).
 
   Variables:
   - periodo: desde y hasta (AAAA-MM-DD, para el filtro) y texto («del 1 de agosto al 29 de octubre
-    de 2026»).
+    de 2026», o null si el elegido no sirve).
   - administrador: (bool) ve todas las salas y va con la barra del administrador.
   - error: (string, opcional) por qué no se pudo usar el período; entonces no hay datos.
   - avisos: lista de textos: lo que faltó porque un subsistema no respondió.
@@ -32,9 +32,11 @@
 <header class="panel-cabecera">
   <h1 class="panel-titulo">Reportes</h1>
   <p class="panel-bajada">
-    Lo que pasó {{ administrador ? 'en todas las salas' : 'en tus salas' }} {{ periodo.texto }}, y qué conviene hacer con eso.
+    Lo que pasó {{ administrador ? 'en todas las salas' : 'en tus salas' }}{% if periodo.texto %} {{ periodo.texto }}{% endif %}, y qué conviene hacer con eso.
   </p>
 </header>
+
+{% include 'parciales/pestanas_reportes.html.twig' with { activa: 'sugerencias', periodo: periodo, administrador: administrador } only %}
 
 <form class="panel-filtros reporte-filtros" action="/recaudacion/reportes" method="get" aria-label="Elegir el período">
   <label class="reporte-filtro">
