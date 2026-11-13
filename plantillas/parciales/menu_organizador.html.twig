@@ -2,11 +2,11 @@
   Barra lateral de las pantallas del organizador, como el wireframe de la E2 (panel-organizador):
   el logo, las secciones que ya tienen pantalla y, al pie, quién está en sesión y el botón para
   salir. Reemplaza al encabezado del sitio, así que el cierre de sesión tiene que estar acá. Las
-  secciones del wireframe que todavía no tienen pantalla (Resumen, Recaudación, Usuarios
-  bloqueados…) no van, para no llevar a una página que no existe.
+  secciones del wireframe que todavía no tienen pantalla (Resumen, Usuarios bloqueados…) no van,
+  para no llevar a una página que no existe. «Recaudación» del wireframe es «Reportes» (EF-09).
 
   Parámetros recibidos:
-  - activa: (string) la sección actual: 'salas', 'funciones' o 'programar'.
+  - activa: (string) la sección actual: 'salas', 'funciones', 'programar' o 'reportes'.
   - usuario: el usuario en sesión.
   - csrf: el token del formulario para salir.
 #}
@@ -33,6 +33,10 @@
             <a href="/organizador/funciones/nueva" class="panel-menu-enlace{% if activa == 'programar' %} activo{% endif %}"{% if activa == 'programar' %} aria-current="page"{% endif %}>Programar función</a>
           </li>
         </ul>
+      </li>
+      {# Lo que pasó en las salas y qué conviene hacer: es de recaudación (EF-09) #}
+      <li>
+        <a href="/recaudacion/reportes" class="panel-menu-enlace{% if activa == 'reportes' %} activo{% endif %}"{% if activa == 'reportes' %} aria-current="page"{% endif %}>Reportes</a>
       </li>
       {# Otra sala pasa por la solicitud, como la primera: es una página del sitio, fuera del panel #}
       <li>

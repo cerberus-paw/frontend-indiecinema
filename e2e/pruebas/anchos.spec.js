@@ -128,13 +128,14 @@ test.describe('el organizador', () => {
   test.skip(!correo, 'Sin E2E_ORGANIZADOR_CORREO.');
   test.use({ storageState: archivo });
 
-  recorrer('A-3 · Mis salas, Mis obras, Mis funciones, sus formularios y las reservas de una función', async (page) => [
+  recorrer('A-3 · Mis salas, Mis obras, Mis funciones, sus formularios, las reservas de una función y los reportes', async (page) => [
     '/organizador/salas',
     '/organizador/obras',
     '/organizador/obras/nueva',
     '/organizador/funciones',
     '/organizador/funciones/nueva',
     await primerLink(page, '/organizador/funciones', '/funcion/organizador/funciones/'),
+    '/recaudacion/reportes',
   ]);
 });
 
@@ -143,9 +144,10 @@ test.describe('el administrador', () => {
   test.skip(!correo, 'Sin E2E_ADMINISTRADOR_CORREO.');
   test.use({ storageState: archivo });
 
-  recorrer('A-4 · usuarios, reservas y solicitudes', async () => [
+  recorrer('A-4 · usuarios, reservas, reportes y solicitudes', async () => [
     '/cuenta/administracion/usuarios',
     '/funcion/administracion/reservas',
+    '/recaudacion/reportes',
     '/administracion/solicitudes',
   ]);
 });

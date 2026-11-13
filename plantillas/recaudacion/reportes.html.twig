@@ -1,0 +1,215 @@
+{#
+  Los reportes del organizador y del administrador, en /recaudacion/reportes (EF-09): lo que pasó
+  en las salas en un período y qué conviene hacer. No hay frame en los wireframes de la E2: sigue
+  el armado de las reservas de una función (panel-organizador), con las tarjetas de números, el
+  filtro en fila y las tablas. Primero las sugerencias, que es lo que se usa para decidir; los
+  totales por función y el CSV vienen con EF-09.2.
+
+  Variables:
+  - periodo: desde y hasta (AAAA-MM-DD, para el filtro) y texto («del 1 de agosto al 29 de octubre
+    de 2026»).
+  - administrador: (bool) ve todas las salas y va con la barra del administrador.
+  - error: (string, opcional) por qué no se pudo usar el período; entonces no hay datos.
+  - avisos: lista de textos: lo que faltó porque un subsistema no respondió.
+  - funciones: cuántas funciones finalizadas hubo.
+  - sin_ventas: (bool) funciones no respondió: no hay ocupación, asistencia ni calificaciones.
+  - resumen: {funciones, ocupacion, asistencia, promedio, conversion} de todo el período (ya
+    escritos; los que no se pudieron calcular, null), o null.
+  - dias_flojos: lista de {sala, dia, funciones, ocupacion, resto (o null)}.
+  - titulos: lista de {titulo, funciones, ocupacion, asistencia, promedio}.
+  - pedidos: lista de {titulo, votaciones, votos, porcentaje}.
+  - salas: lista de {nombre, funciones, ocupacion, asistencia, promedio, conversion}, de la que
+    más rinde a la que menos.
+  - umbrales: los de config.ini, ya escritos, para explicar de dónde sale cada sugerencia.
+#}
+{% extends administrador ? 'administracion.html.twig' : 'organizador.html.twig' %}
+
+{% block titulo %}Reportes{% endblock %}
+
+{% block seccion %}reportes{% endblock %}
+
+{% block panel %}
+<header class="panel-cabecera">
+  <h1 class="panel-titulo">Reportes</h1>
+  <p class="panel-bajada">
+    Lo que pasó {{ administrador ? 'en todas las salas' : 'en tus salas' }} {{ periodo.texto }}, y qué conviene hacer con eso.
+  </p>
+</header>
+
+<form class="panel-filtros reporte-filtros" action="/recaudacion/reportes" method="get" aria-label="Elegir el período">
+  <label class="reporte-filtro">
+    <span class="reporte-filtro-etiqueta">Desde</span>
+    <input type="date" name="desde" value="{{ periodo.desde }}" class="campo-control" required>
+  </label>
+  <label class="reporte-filtro">
+    <span class="reporte-filtro-etiqueta">Hasta</span>
+    <input type="date" name="hasta" value="{{ periodo.hasta }}" class="campo-control" required>
+  </label>
+  {% include 'parciales/boton.html.twig' with { texto: 'Ver el período', tipo: 'submit', variante: 'primario' } only %}
+</form>
+
+{% include 'parciales/resumen_de_errores.html.twig' with {
+  error_general: error ?? null,
+  titulo: 'No se pudo mostrar el período'
+} only %}
+
+{% if error is not defined or error is null %}
+  {% for aviso in avisos %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: aviso } only %}
+  {% endfor %}
+
+  {# Sin funciones no hay nada que sugerir. Si es porque programación no respondió, ya lo dice el aviso #}
+  {% if funciones == 0 %}
+    {% if avisos is empty %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'info',
+        mensaje: 'No hubo funciones finalizadas en el período. Probá con uno más largo.'
+      } only %}
+    {% endif %}
+  {% else %}
+    {% if resumen %}
+      <dl class="panel-resumen">
+        <div class="panel-dato">
+          <dt>Funciones</dt>
+          <dd class="panel-dato-valor">{{ resumen.funciones }}</dd>
+          <dd class="panel-dato-nota">finalizadas en el período</dd>
+        </div>
+        <div class="panel-dato">
+          <dt>Ocupación</dt>
+          <dd class="panel-dato-valor">{{ resumen.ocupacion }}</dd>
+          <dd class="panel-dato-nota">de los lugares, vendidos</dd>
+        </div>
+        <div class="panel-dato">
+          <dt>Asistencia</dt>
+          <dd class="panel-dato-valor">{{ resumen.asistencia ?? '—' }}</dd>
+          <dd class="panel-dato-nota">de los que reservaron, fueron</dd>
+        </div>
+        <div class="panel-dato">
+          <dt>Calificación</dt>
+          <dd class="panel-dato-valor">{{ resumen.promedio ?? '—' }}</dd>
+          <dd class="panel-dato-nota">{{ resumen.promedio ? 'promedio, de 1 a 5' : 'nadie calificó todavía' }}</dd>
+        </div>
+      </dl>
+    {% endif %}
+
+    <h2 class="reporte-titulo">Qué conviene hacer</h2>
+
+    <section class="reporte-seccion" aria-labelledby="reporte-dias-flojos">
+      <h3 id="reporte-dias-flojos" class="reporte-subtitulo">Días para una promoción</h3>
+      <p class="reporte-explicacion">
+        Los días de la semana en que una sala vendió el {{ umbrales.dia_flojo }} de los lugares o menos, en {{ umbrales.dia_flojo_funciones }} funciones o más, y menos que el resto de la semana. Un descuento ese día puede llenar los lugares que quedan vacíos.
+      </p>
+      {% if sin_ventas %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
+      {% elseif dias_flojos is empty %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Ningún día quedó flojo: no hace falta una promoción.' } only %}
+      {% else %}
+        <ul class="reporte-sugerencias">
+          {% for dia in dias_flojos %}
+            <li class="reporte-sugerencia">
+              <p class="reporte-sugerencia-texto">
+                <strong>{{ dia.sala }}, los {{ dia.dia }}:</strong> vendió el {{ dia.ocupacion }} de los lugares{% if dia.resto %}, contra el {{ dia.resto }} del resto de la semana{% endif %}.
+              </p>
+              <p class="reporte-sugerencia-nota">Probá una promoción los {{ dia.dia }}. Sale de {{ dia.funciones }} funciones.</p>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+
+    <section class="reporte-seccion" aria-labelledby="reporte-titulos">
+      <h3 id="reporte-titulos" class="reporte-subtitulo">Títulos para repetir</h3>
+      <p class="reporte-explicacion">
+        Los que llenaron el {{ umbrales.repetir_ocupacion }} de los lugares o más, a los que fue el {{ umbrales.repetir_asistencia }} o más de los que reservaron y que tienen {{ umbrales.repetir_promedio }} de promedio o más.
+      </p>
+      {% if sin_ventas %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
+      {% elseif titulos is empty %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Ningún título llegó a las tres cosas en el período.' } only %}
+      {% else %}
+        <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-titulos">
+          <table class="tabla-admin">
+            <thead>
+              <tr>
+                <th scope="col">Título</th>
+                <th scope="col">Funciones</th>
+                <th scope="col">Ocupación</th>
+                <th scope="col">Asistencia</th>
+                <th scope="col">Promedio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for titulo in titulos %}
+                <tr>
+                  <td><span class="tabla-admin-principal">{{ titulo.titulo }}</span></td>
+                  <td>{{ titulo.funciones }}</td>
+                  <td>{{ titulo.ocupacion }}</td>
+                  <td>{{ titulo.asistencia }}</td>
+                  <td>{{ titulo.promedio }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="reporte-seccion" aria-labelledby="reporte-pedidos">
+      <h3 id="reporte-pedidos" class="reporte-subtitulo">Lo que el público pidió y no vio</h3>
+      <p class="reporte-explicacion">
+        Las obras que perdieron una votación con el {{ umbrales.pedido }} de los votos o más y no se proyectaron en el período. Se pueden programar con fecha fija, sin votación.
+      </p>
+      {% if pedidos is empty %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Ninguna obra quedó afuera con tantos votos.' } only %}
+      {% else %}
+        <ul class="reporte-sugerencias">
+          {% for pedido in pedidos %}
+            <li class="reporte-sugerencia">
+              <p class="reporte-sugerencia-texto">
+                <strong>{{ pedido.titulo }}:</strong> {{ pedido.votos }} {{ pedido.votos == 1 ? 'voto' : 'votos' }} en {{ pedido.votaciones }} {{ pedido.votaciones == 1 ? 'votación' : 'votaciones' }} que perdió, el {{ pedido.porcentaje }} de los votos.
+              </p>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+
+    <section class="reporte-seccion" aria-labelledby="reporte-salas">
+      <h3 id="reporte-salas" class="reporte-subtitulo">Salas que más rinden</h3>
+      <p class="reporte-explicacion">
+        Ordenadas por ocupación, después por asistencia y por promedio. «Votaron y reservaron» es cuántos de los que votaron títulos sacaron entrada: mide si la votación trae gente.
+      </p>
+      {% if sin_ventas %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
+      {% elseif salas is not empty %}
+        <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-salas">
+          <table class="tabla-admin">
+            <thead>
+              <tr>
+                <th scope="col">Sala</th>
+                <th scope="col">Funciones</th>
+                <th scope="col">Ocupación</th>
+                <th scope="col">Asistencia</th>
+                <th scope="col">Promedio</th>
+                <th scope="col">Votaron y reservaron</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sala in salas %}
+                <tr>
+                  <td><span class="tabla-admin-principal">{{ sala.nombre }}</span></td>
+                  <td>{{ sala.funciones }}</td>
+                  <td>{{ sala.ocupacion }}</td>
+                  <td>{{ sala.asistencia ?? '—' }}</td>
+                  <td>{{ sala.promedio ?? '—' }}</td>
+                  <td>{{ sala.conversion ?? '—' }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endif %}
+{% endblock %}
