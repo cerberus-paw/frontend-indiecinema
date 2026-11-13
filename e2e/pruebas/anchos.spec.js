@@ -146,6 +146,6 @@ test.describe('el administrador', () => {
   recorrer('A-4 · usuarios, reservas y solicitudes', async () => [
     '/cuenta/administracion/usuarios',
     '/funcion/administracion/reservas',
-    '/administracion/solicitudes',
+    '/moderacion/solicitudes',
   ]);
 });

@@ -1,9 +1,9 @@
 {#
-  Bandeja de solicitudes de sala, en /administracion/solicitudes, como el wireframe de la E2
+  Bandeja de solicitudes de sala, en /moderacion/solicitudes (EF-07.2), como el wireframe de la E2
   (moderacion-solicitudes): el buscador y la lista a la izquierda; a la derecha la elegida, con la
   sala, los datos del espacio y el historial de quien la mandó, y la resolución con su motivo
   obligatorio. «Ver historial de decisiones» lista las resueltas; desde una aprobada la sala se
-  retira del sitio o se vuelve a publicar. Queda afuera lo que todavía no existe: las otras
+  retira del sitio o se vuelve a publicar, con un motivo que queda en el registro. Queda afuera lo que todavía no existe: las otras
   bandejas de moderación, la documentación, el checklist, la categoría, la revisión manual y
   guardar sin enviar.
 
@@ -17,11 +17,13 @@
   - total_en_la_lista: cuántas hay en la lista, aunque muestre menos.
   - solicitudes: lista de {id, estado, sala, localidad, solicitante (o null), enviada, elegida}.
   - elegida: {id, estado, enviada, resuelta, motivo, sala: {id, nombre, localidad, capacidad,
-    imagen, habilitada, descripcion, direccion, peliculas_por_funcion, duracion_funcion,
-    tiempo_entre_funciones}, solicitante: {nombre, correo, cuenta_creada, es_organizador} (null
-    si ya no existe, false si cuentas no respondió), solicitante_nombre, solicitudes_previas},
-    o null.
-  - valores: lo que mandó si hubo errores, {resolucion, motivo}.
+    imagen, descripcion, direccion, peliculas_por_funcion, duracion_funcion,
+    tiempo_entre_funciones}, en_el_sitio, solicitante: {nombre, correo, cuenta_creada,
+    es_organizador} (null si ya no existe, false si cuentas no respondió), solicitante_nombre,
+    solicitudes_previas}, o null. en_el_sitio es cómo está la sala de una aprobada según
+    programación: 'publicada', 'retirada', 'dada_de_baja', o 'desconocido' si programación no
+    respondió; null en las que no están aprobadas.
+  - valores: lo que mandó si hubo errores, {resolucion, motivo, motivo_sala}.
   - errores: campo => qué está mal.
   - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
   - mensaje_exito: el aviso de lo que se acaba de hacer (opcional).
@@ -42,9 +44,9 @@
     <p class="panel-bajada">Revisá los datos del espacio y resolvé con un motivo registrado.</p>
   </div>
   {% if historial %}
-    <a href="/administracion/solicitudes" class="boton boton-secundario">Volver a las pendientes</a>
+    <a href="{{ prefijo }}/solicitudes" class="boton boton-secundario">Volver a las pendientes</a>
   {% else %}
-    <a href="/administracion/solicitudes?ver=historial" class="boton boton-secundario">Ver historial de decisiones</a>
+    <a href="{{ prefijo }}/solicitudes?ver=historial" class="boton boton-secundario">Ver historial de decisiones</a>
   {% endif %}
 </header>
 
@@ -54,9 +56,9 @@
 
 <nav class="pestanas" aria-label="Bandejas">
   {% if historial %}
-    <a href="/administracion/solicitudes?ver=historial" class="pestana activa" aria-current="page">Historial de decisiones</a>
+    <a href="{{ prefijo }}/solicitudes?ver=historial" class="pestana activa" aria-current="page">Historial de decisiones</a>
   {% else %}
-    <a href="/administracion/solicitudes" class="pestana activa" aria-current="page">
+    <a href="{{ prefijo }}/solicitudes" class="pestana activa" aria-current="page">
       Solicitudes de sala <span class="bandeja-cuenta">{{ total_pendientes }}</span>
     </a>
   {% endif %}
@@ -64,7 +66,7 @@
 
 <div class="bandeja">
   <section class="bandeja-lista" aria-label="{{ historial ? 'Solicitudes resueltas' : 'Solicitudes pendientes' }}">
-    <form class="bandeja-buscador" action="/administracion/solicitudes" method="get" role="search">
+    <form class="bandeja-buscador" action="{{ prefijo }}/solicitudes" method="get" role="search">
       {% if historial %}<input type="hidden" name="ver" value="historial">{% endif %}
       <label class="panel-busqueda">
         <span class="sr-only">Buscar solicitud o solicitante</span>
@@ -84,7 +86,7 @@
     {% else %}
       <ul class="bandeja-items">
         {% for solicitud in solicitudes %}
-          {% set url = '/administracion/solicitudes?id=' ~ solicitud.id ~ (q != '' ? '&q=' ~ q|url_encode : '') %}
+          {% set url = prefijo ~ '/solicitudes?id=' ~ solicitud.id ~ (q != '' ? '&q=' ~ q|url_encode : '') %}
           <li>
             <a href="{{ url }}" class="bandeja-item{% if solicitud.elegida %} activo{% endif %}"{% if solicitud.elegida %} aria-current="true"{% endif %}>
               <span class="bandeja-item-fila">
@@ -121,7 +123,7 @@
       {% if elegida.estado == 'pendiente' %}
         {# Si la resolución volvió con errores: «Revisá N campos» con un link a cada uno (E4-10.5) #}
         {% include 'parciales/resumen_de_errores.html.twig' with { errores: errores } only %}
-        <form action="/administracion/solicitudes/{{ elegida.id }}/resolver" method="post">
+        <form action="{{ prefijo }}/solicitudes/{{ elegida.id }}/resolver" method="post">
         <input type="hidden" name="_csrf" value="{{ csrf }}">
       {% endif %}
       <div class="bandeja-columnas">
@@ -187,18 +189,37 @@
               <p class="bandeja-texto">{{ elegida.motivo|nl2br }}</p>
             </div>
             {% if elegida.estado == 'aprobada' %}
+              {% set publicada = elegida.en_el_sitio == 'publicada' %}
               <div class="bandeja-caja">
                 <p class="bandeja-caja-titulo">La sala en el sitio</p>
                 <p class="bandeja-detalle-datos">
-                  {{ sala.habilitada ? 'Publicada: se ve en el listado de salas y sus funciones en la cartelera.' : 'Retirada: no se ve en el sitio.' }}
+                  {{ {
+                    publicada: 'Publicada: se ve en el listado de salas y sus funciones en la cartelera.',
+                    retirada: 'Retirada: no se ve en el sitio.',
+                    dada_de_baja: 'Su organizador la dio de baja.',
+                    desconocido: 'No pudimos consultar si está publicada. Probá de nuevo en un rato.'
+                  }[elegida.en_el_sitio] }}
                 </p>
-                <form action="/administracion/solicitudes/{{ elegida.id }}/{{ sala.habilitada ? 'deshabilitar-sala' : 'habilitar-sala' }}" method="post" class="solicitud-acciones-inferior">
-                  <input type="hidden" name="_csrf" value="{{ csrf }}">
-                  <button type="submit" class="boton {{ sala.habilitada ? 'boton-secundario' : 'boton-primario' }} boton-chico">{{ sala.habilitada ? 'Retirar del sitio' : 'Volver a publicar' }}</button>
-                  {% if sala.habilitada %}
-                    <a href="/salas/{{ sala.id }}" class="boton boton-fantasma boton-chico">Ver la ficha pública</a>
-                  {% endif %}
-                </form>
+                {% if elegida.en_el_sitio in ['publicada', 'retirada'] %}
+                  <form action="{{ prefijo }}/solicitudes/{{ elegida.id }}/{{ publicada ? 'deshabilitar-sala' : 'habilitar-sala' }}" method="post" class="solicitud-acciones-inferior">
+                    <input type="hidden" name="_csrf" value="{{ csrf }}">
+                    {% include 'parciales/campo.html.twig' with {
+                      nombre: 'motivo_sala',
+                      etiqueta: publicada ? 'Por qué la retirás' : 'Por qué la volvés a publicar',
+                      tipo: 'textarea',
+                      filas: 2,
+                      valor: valores.motivo_sala ?? '',
+                      requerido: true,
+                      maximo: maximo_motivo,
+                      ayuda: 'Queda en el registro, con tu nombre.',
+                      errores: errores
+                    } only %}
+                    <button type="submit" class="boton {{ publicada ? 'boton-secundario' : 'boton-primario' }} boton-chico">{{ publicada ? 'Retirar del sitio' : 'Volver a publicar' }}</button>
+                    {% if publicada %}
+                      <a href="/salas/{{ sala.id }}" class="boton boton-fantasma boton-chico">Ver la ficha pública</a>
+                    {% endif %}
+                  </form>
+                {% endif %}
               </div>
             {% endif %}
           {% endif %}
