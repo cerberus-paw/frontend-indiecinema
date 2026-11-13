@@ -44,7 +44,6 @@ frontend-indiecinema/
 │   │   └── registro.html.twig  # Formulario de alta de usuario
 │   ├── programacion/           # Plantillas del subsistema programación
 │   │   ├── acerca_de.html.twig # «Acerca de IndieCinema»: quiénes somos y cómo funciona
-│   │   ├── administracion_solicitudes.html.twig # Bandeja de solicitudes de sala del administrador
 │   │   ├── alta_funcion.html.twig # Formulario de alta para programar o abrir a votación una función (IC-121 / IC-147)
 │   │   ├── alta_sala.html.twig # Formulario de edición de sala
 │   │   ├── cancelar_funcion.html.twig # Confirmación para cancelar una función propia
@@ -55,7 +54,6 @@ frontend-indiecinema/
 │   │   ├── mis_salas.html.twig # Gestión de salas del organizador
 │   │   ├── proponer_franjas.html.twig # Las franjas horarias y el mínimo de asistentes del acuerdo de fecha
 │   │   ├── sala.html.twig      # Ficha pública de una sala con sus próximas funciones
-│   │   ├── solicitar_sala.html.twig # Solicitud para abrir una sala, con su estado
 │   │   └── salas.html.twig     # Catálogo público de salas indie habilitadas, con buscador
 │   ├── funciones/              # Plantillas específicas del subsistema funciones
 │   │   ├── reservar.html.twig  # Reserva de lugares de una función, con los errores
@@ -65,7 +63,9 @@ frontend-indiecinema/
 │   │   ├── mis_reservas.html.twig # «Mis reservas» del espectador
 │   │   ├── reservas_de_la_funcion.html.twig # Las reservas de una función para su organizador: asistencia y CSV
 │   │   └── administracion_reservas.html.twig # Todas las reservas para el administrador, con la anulación
-│   ├── moderacion/             # Del subsistema moderacion (EF-01): vacía hasta EF-07
+│   ├── moderacion/             # Del subsistema moderacion (EF-01)
+│   │   ├── administracion_solicitudes.html.twig # Bandeja de solicitudes de sala, en /moderacion/solicitudes (EF-07.2)
+│   │   └── solicitar_sala.html.twig # Solicitud para abrir una sala, con su estado
 │   └── recaudacion/            # Del subsistema recaudacion (EF-02): vacía hasta EF-08
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
     ├── css/
@@ -306,8 +306,8 @@ Las próximas funciones de la ficha de la sala, una por fila, como el wireframe 
 - **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y casilla de términos sin tildar por defecto (`marcado: valores.terminos ?? false`), mensajes de error y botón principal.
 - **`plantillas/programacion/acerca_de.html.twig`**: «Acerca de IndieCinema» en `/acerca-de`, estática: quiénes somos, los cuatro pasos de cómo funciona una función (como la sección del wireframe de la portada) y quién participa. Las secciones `#quienes-somos` y `#como-funciona` son las que enlazan el encabezado y el pie (IC-95).
 - **`plantillas/administracion.html.twig`**: Armado de las pantallas del administrador, como el wireframe `administracion-usuarios-parametros`: sin el encabezado ni el pie del sitio, con la barra lateral (`parciales/menu_administracion.html.twig`: el logo, los grupos «Administración» y «Moderación», y la sesión) y el contenido. Cada pantalla define `seccion` y `panel` (IC-245).
-- **`plantillas/programacion/administracion_solicitudes.html.twig`**: Bandeja de solicitudes de sala en `/administracion/solicitudes`, como el wireframe `moderacion-solicitudes`: buscador y lista a la izquierda, y la elegida a la derecha con la foto, los datos del espacio, el historial de quien la mandó y la resolución (aprobar o rechazar) con su motivo obligatorio; «Ver historial de decisiones» lista las resueltas (IC-246).
-- **`plantillas/programacion/solicitar_sala.html.twig`**: Solicitud para abrir una sala en `/solicitar-sala`, como el wireframe `solicitud-de-sala`, para el espectador y el organizador: los datos del espacio, la foto, los parámetros y las declaraciones, con las validaciones que manda el backend, que también avisa mientras se carga, y la foto que se puede arrastrar (E4-09). Arriba, el estado de la última que mandó; si la rechazaron, el motivo y el formulario con la sala para corregirla (IC-246).
+- **`plantillas/moderacion/administracion_solicitudes.html.twig`**: Bandeja de solicitudes de sala en `/moderacion/solicitudes` (de moderación desde EF-07.2), como el wireframe `moderacion-solicitudes`: buscador y lista a la izquierda, y la elegida a la derecha con la foto, los datos del espacio, el historial de quien la mandó y la resolución (aprobar o rechazar) con su motivo obligatorio; «Ver historial de decisiones» lista las resueltas (IC-246); desde una aprobada, la sala se retira del sitio o se vuelve a publicar con un motivo.
+- **`plantillas/moderacion/solicitar_sala.html.twig`**: Solicitud para abrir una sala en `/solicitar-sala`, que atiende moderación desde EF-07.2, como el wireframe `solicitud-de-sala`, para el espectador y el organizador: los datos del espacio, la foto, los parámetros y las declaraciones, con las validaciones que manda el backend, que también avisa mientras se carga, y la foto que se puede arrastrar (E4-09). Arriba, el estado de la última que mandó; si la rechazaron, el motivo y el formulario con la sala para corregirla (IC-246).
 - **`plantillas/programacion/alta_funcion.html.twig`**: Formulario de alta y edición para programar o editar una función en `/organizador/funciones/nueva` y `/organizador/funciones/{id}/editar` (IC-121 / IC-122 / IC-147 / E3-11.2 / E3-11.3 / E3-12.1) con selector de modo («Función programada» vs «Abrir a votación de títulos»), selector de sala propia habilitada, selección de obras del catálogo (o candidatas para votación), fecha y horario de proyección condicionales al modo, precio y cupo de localidades, con los errores mientras se carga (E4-09.1).
 - **`plantillas/programacion/alta_sala.html.twig`**: Formulario de edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía (con arrastrar y soltar) y parámetros de proyección, y los errores mientras se carga (E4-09). Las salas nuevas entran por la solicitud de sala.
 - **`plantillas/programacion/cancelar_funcion.html.twig`**: Pantalla de confirmación para cancelar una función propia en `/organizador/funciones/{id}/cancelar` (IC-123 / E3-11.4): migas de pan, advertencia de acción irreversible, ficha resumen de la función (sala, fecha/hora, precio, cupo y estado) y formulario POST con token CSRF para confirmar la baja lógica o volver al listado.
