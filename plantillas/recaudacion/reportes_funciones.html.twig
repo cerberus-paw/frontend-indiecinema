@@ -36,7 +36,7 @@
   {% endif %}
 </header>
 
-{% include 'parciales/pestanas_reportes.html.twig' with { activa: 'funciones', periodo: periodo } only %}
+{% include 'parciales/pestanas_reportes.html.twig' with { activa: 'funciones', periodo: periodo, administrador: administrador } only %}
 
 <form class="panel-filtros reporte-filtros reporte-filtros-con-sala" action="/recaudacion/reportes/funciones" method="get" aria-label="Elegir el período y la sala">
   <label class="reporte-filtro">
