@@ -36,7 +36,7 @@
   </p>
 </header>
 
-{% include 'parciales/pestanas_reportes.html.twig' with { activa: 'sugerencias', periodo: periodo } only %}
+{% include 'parciales/pestanas_reportes.html.twig' with { activa: 'sugerencias', periodo: periodo, administrador: administrador } only %}
 
 <form class="panel-filtros reporte-filtros" action="/recaudacion/reportes" method="get" aria-label="Elegir el período">
   <label class="reporte-filtro">

@@ -6164,6 +6164,13 @@ dd {
   padding-left: 2.4rem;
 }
 
+/* Más de un botón en la cabecera de una página, como «Ver el reporte» y «Cargar obra» */
+.encabezado-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+}
+
 /* Reportes (EF-09): el período en una fila, con las etiquetas a la vista porque son fechas */
 .reporte-filtros {
   grid-template-columns: repeat(2, minmax(150px, 220px)) auto;
