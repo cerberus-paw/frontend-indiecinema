@@ -3,13 +3,14 @@
   (E4-03), como la sección «Reservas de la función» del wireframe de la E2 (panel-organizador):
   las tarjetas de números, el registro de la asistencia, la tabla con el botón de cada fila y
   «Exportar listado» (el CSV). Va en el panel del organizador, con «Mis funciones» marcada en la
-  barra, que es de donde se llega (E4-10.12). Queda afuera lo que todavía no hay: el pago y el
-  reparto.
+  barra, que es de donde se llega (E4-10.12). Queda afuera lo que todavía no hay: el reparto.
 
   Variables:
   - funcion: id, titulo, url (de su ficha), fecha (o null), sala, estado y cupo.
   - resumen: reservados y libres (lugares), asistentes (lugares ya registrados), recaudado (ya
-    escrito) y reservas (cuántas siguen en pie).
+    escrito: la plata que entró por Mercado Pago y no se devolvió, «$ 0» si la función cobra y
+    todavía no cobró nada y «A la gorra» si no cobra entrada; EF-06.5) y reservas (cuántas siguen
+    en pie).
   - reservas: lista de {id, codigo, espectador (o null), cantidad, total, estado ('confirmada' |
     'cancelada' | 'asistio' | 'ausente'), estado_etiqueta, creada (ya escrita), registrable}.
   - registra_asistencia: (bool) si se puede registrar: la función no se canceló.
@@ -65,9 +66,9 @@
       <dd class="panel-dato-nota">de {{ resumen.reservados }} lugares reservados</dd>
     </div>
     <div class="panel-dato">
-      <dt>Total de las reservas</dt>
+      <dt>Total cobrado</dt>
       <dd class="panel-dato-valor" data-resumen="recaudado">{{ resumen.recaudado }}</dd>
-      <dd class="panel-dato-nota">sin las canceladas</dd>
+      <dd class="panel-dato-nota">lo que se pagó, menos lo devuelto</dd>
     </div>
   </dl>
 
