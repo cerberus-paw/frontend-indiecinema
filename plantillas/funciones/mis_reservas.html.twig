@@ -13,7 +13,10 @@
     estado_etiqueta, cancelable, calificable (si puede calificar la función: asistió, terminó y
     todavía no la calificó; EF-04.2), calificacion ({puntaje, comentario} si la calificó con esta
     reserva, o null; EF-04.5), enlace_de_pago (a Mercado Pago, sólo en una pendiente que todavía
-    está a tiempo; si no, null), funcion}. funcion es {id, titulo, url, fecha (o null), precio, sala, localidad}, o null si
+    está a tiempo; si no, null), motivo (por qué se canceló, ya redactado para el espectador:
+    «Venció el plazo para pagar.», «Se canceló la función.»; null si no está cancelada o si la
+    canceló él; EF-06.3), reembolsada_en (cuándo le volvió la plata, ya escrito; null si no se
+    reembolsó), funcion}. funcion es {id, titulo, url, fecha (o null), precio, sala, localidad}, o null si
     programación no la devolvió.
   - calificada: (bool) si se acaba de guardar una calificación, para el aviso.
   - sin_programacion: (bool) programación no respondió: ninguna fila tiene los datos de su función.
@@ -90,7 +93,18 @@
               {% endif %}
               <td>{{ reserva.cantidad }}</td>
               <td><span class="panel-reservas-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</span></td>
-              <td><span class="estado-cuenta {{ clases_estado[reserva.estado] ?? '' }}">{{ reserva.estado_etiqueta }}</span></td>
+              <td>
+                <span class="estado-cuenta {{ clases_estado[reserva.estado] ?? '' }}">{{ reserva.estado_etiqueta }}</span>
+                {# Por qué se canceló y si volvió la plata (EF-06.3): un «Cancelada» solo no dice si
+                   el espectador tiene algo que esperar. Las dos van en su renglón, abajo de la
+                   píldora, con el gris de los datos secundarios de la tabla. #}
+                {% if reserva.motivo|default(null) %}
+                  <span class="tabla-admin-secundario">{{ reserva.motivo }}</span>
+                {% endif %}
+                {% if reserva.reembolsada_en|default(null) %}
+                  <span class="tabla-admin-secundario">Reembolsada el {{ reserva.reembolsada_en }}</span>
+                {% endif %}
+              </td>
               <td>
                 <div class="mis-reservas-acciones">
                   {# El historial de calificaciones de la propuesta (EF-04.5): lo que puso, al lado de
