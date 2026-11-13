@@ -12,7 +12,9 @@
     total (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio'),
     cancelable (si todavía se puede cancelar: confirmada o pendiente, y antes de que empiece la
     función), y en una pendiente que todavía está a tiempo, enlace_de_pago (a Mercado Pago) y vence
-    (la hora, ya escrita); si no, null.
+    (la hora, ya escrita); si no, null. En una cancelada (EF-06.3), motivo (por qué, ya redactado
+    para el espectador) y reembolsada_en (cuándo le volvió la plata, ya escrito); las dos en null
+    si no hay nada que decir.
   - funcion: id, titulo, url, fecha (o null), sala y localidad; null si programación ya no la
     muestra (su sala se dio de baja).
   - cancelada: (bool) aviso al volver de cancelarla.
@@ -103,6 +105,14 @@
         <dt>Total</dt>
         <dd>{{ reserva.total }}</dd>
       </div>
+      {# En los datos y no en un aviso: los avisos no se imprimen (E4-04.2) y el reembolso es parte
+         del comprobante de lo que pasó con la plata. #}
+      {% if reserva.reembolsada_en|default(null) %}
+        <div>
+          <dt>Reembolso</dt>
+          <dd>Reembolsada el {{ reserva.reembolsada_en }}</dd>
+        </div>
+      {% endif %}
     </dl>
 
     <div class="comprobante-acciones">
@@ -134,6 +144,13 @@
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'info',
       mensaje: 'Presentá este código en la puerta: el organizador registra la asistencia con él.'
+    } only %}
+  {# Por qué se canceló (EF-06.3): el motivo del historial, que no lo escribió el espectador. El
+     que la canceló él no tiene ninguno, y entonces no hay nada que explicarle. #}
+  {% elseif reserva.estado == 'cancelada' and reserva.motivo|default(null) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      mensaje: reserva.motivo
     } only %}
   {% elseif reserva.estado == 'pendiente_pago' %}
     {% if reserva.vence|default(null) %}
