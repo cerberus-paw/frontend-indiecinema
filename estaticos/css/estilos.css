@@ -6231,8 +6231,66 @@ dd {
   color: var(--color-texto-secundario);
 }
 
+/* Con la sala, un campo más en la fila */
+.reporte-filtros-con-sala {
+  grid-template-columns: repeat(2, minmax(150px, 200px)) minmax(160px, 240px) auto;
+}
+
+/* Las dos partes del reporte, como pestañas: la actual subrayada con el color principal */
+.reporte-pestanas {
+  display: flex;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-5);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.reporte-pestana {
+  padding: var(--espacio-2) var(--espacio-3);
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.reporte-pestana:hover {
+  color: var(--color-texto);
+}
+
+.reporte-pestana.activa {
+  border-bottom-color: var(--color-primario);
+  color: var(--color-texto-brillante);
+  font-weight: 600;
+}
+
+/* El mes que se muestra abajo, marcado en la tabla de los meses */
+.reporte-fila-actual td {
+  background-color: var(--color-primario-suave);
+}
+
+/* El total del período, al pie, separado y en negrita */
+.reporte-fila-total th,
+.reporte-fila-total td {
+  border-top: 1px solid var(--color-borde-fuerte);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+}
+
+.reporte-fila-total th {
+  /* Sin las versalitas de los títulos de las columnas: es un total, no un encabezado */
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  text-align: left;
+}
+
+/* Un título sin explicación debajo, pegado a su tabla: un poco de aire */
+.reporte-subtitulo + .tabla-admin-contenedor {
+  margin-top: var(--espacio-3);
+}
+
 @media (max-width: 600px) {
-  .reporte-filtros {
+  .reporte-filtros,
+  .reporte-filtros-con-sala {
     grid-template-columns: minmax(0, 1fr);
   }
 }

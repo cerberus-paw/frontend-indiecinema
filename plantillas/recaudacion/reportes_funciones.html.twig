@@ -1,0 +1,157 @@
+{#
+  Los totales del reporte, en /recaudacion/reportes/funciones (EF-09.2): lo de cada mes del
+  período y, debajo, las funciones de uno, con el mismo armado que las sugerencias
+  (reportes.html.twig). Un mes por página es el paginado: se elige desde la tabla de los meses. El
+  CSV trae todas las funciones del período juntas. La parte de cada uno sale con el reparto.
+
+  Variables:
+  - periodo: desde, hasta (AAAA-MM-DD) y texto (null si el elegido no sirve).
+  - administrador: (bool) ve todas las salas.
+  - error: (string, opcional) por qué no se pudo usar el período; entonces no hay datos.
+  - avisos: lista de textos: lo que faltó porque un subsistema no respondió.
+  - sala: (string|null) la sala elegida en el filtro.
+  - salas: lista de {valor, etiqueta}: las que tuvieron funciones en el período.
+  - meses: lista de {nombre, url, actual, funciones, cupo, vendidas, ocupacion, asistentes,
+    asistencia, cobrado, promedio, calificaciones}, del primero al último. Lo que no se pudo
+    calcular viene en null.
+  - total: lo mismo, del período entero.
+  - mes: (string|null) el nombre del mes que se muestra abajo.
+  - funciones: las de ese mes, con lo mismo más fecha, sala y obras.
+  - csv: la dirección del CSV con el mismo filtro.
+#}
+{% extends administrador ? 'administracion.html.twig' : 'organizador.html.twig' %}
+
+{% block titulo %}Reportes · Funciones y meses{% endblock %}
+
+{% block seccion %}reportes{% endblock %}
+
+{% block panel %}
+<header class="encabezado-formulario-solicitud">
+  <div class="solicitud-texto-cabecera">
+    <h1 class="panel-titulo">Reportes</h1>
+    <p class="panel-bajada">Lo que se vendió {{ administrador ? 'en todas las salas' : 'en tus salas' }}{% if periodo.texto %} {{ periodo.texto }}{% endif %}, mes por mes y función por función.</p>
+  </div>
+  {% if csv is defined %}
+    {% include 'parciales/boton.html.twig' with { texto: 'Exportar CSV', url: csv, variante: 'secundario', icono: '⬇' } only %}
+  {% endif %}
+</header>
+
+{% include 'parciales/pestanas_reportes.html.twig' with { activa: 'funciones', periodo: periodo } only %}
+
+<form class="panel-filtros reporte-filtros reporte-filtros-con-sala" action="/recaudacion/reportes/funciones" method="get" aria-label="Elegir el período y la sala">
+  <label class="reporte-filtro">
+    <span class="reporte-filtro-etiqueta">Desde</span>
+    <input type="date" name="desde" value="{{ periodo.desde }}" class="campo-control" required>
+  </label>
+  <label class="reporte-filtro">
+    <span class="reporte-filtro-etiqueta">Hasta</span>
+    <input type="date" name="hasta" value="{{ periodo.hasta }}" class="campo-control" required>
+  </label>
+  <label class="reporte-filtro">
+    <span class="reporte-filtro-etiqueta">Sala</span>
+    <select name="sala" class="campo-control control-select">
+      <option value="">Todas</option>
+      {% for opcion in salas ?? [] %}
+        <option value="{{ opcion.valor }}"{% if sala == opcion.valor %} selected{% endif %}>{{ opcion.etiqueta }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  {% include 'parciales/boton.html.twig' with { texto: 'Ver', tipo: 'submit', variante: 'primario' } only %}
+</form>
+
+{% include 'parciales/resumen_de_errores.html.twig' with {
+  error_general: error ?? null,
+  titulo: 'No se pudo mostrar el período'
+} only %}
+
+{% if error is not defined or error is null %}
+  {% for aviso in avisos %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: aviso } only %}
+  {% endfor %}
+
+  {% if meses is empty %}
+    {% if avisos is empty %}
+      {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'No hubo funciones finalizadas en el período. Probá con uno más largo.' } only %}
+    {% endif %}
+  {% else %}
+    <section class="reporte-seccion" aria-labelledby="reporte-meses">
+      <h2 id="reporte-meses" class="reporte-subtitulo">Mes por mes</h2>
+      <p class="reporte-explicacion">Lo cobrado es lo que se pagó por Mercado Pago; las reservas a la gorra o sin cobro no suman. Elegí un mes para ver sus funciones.</p>
+      <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-meses">
+        <table class="tabla-admin reporte-tabla">
+          <thead>
+            <tr>
+              <th scope="col">Mes</th>
+              <th scope="col">Funciones</th>
+              <th scope="col">Vendidas</th>
+              <th scope="col">Ocupación</th>
+              <th scope="col">Asistentes</th>
+              <th scope="col">Cobrado</th>
+              <th scope="col">Promedio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mes in meses %}
+              <tr{% if mes.actual %} class="reporte-fila-actual"{% endif %}>
+                <td><a href="{{ mes.url }}" class="tabla-admin-principal"{% if mes.actual %} aria-current="true"{% endif %}>{{ mes.nombre }}</a></td>
+                <td>{{ mes.funciones }}</td>
+                <td>{{ mes.vendidas ?? '—' }}{% if mes.vendidas is not null %} <span class="tabla-admin-secundario">de {{ mes.cupo }}</span>{% endif %}</td>
+                <td>{{ mes.ocupacion ?? '—' }}</td>
+                <td>{{ mes.asistentes ?? '—' }}{% if mes.asistencia %} <span class="tabla-admin-secundario">{{ mes.asistencia }}</span>{% endif %}</td>
+                <td>{{ mes.cobrado ?? '—' }}</td>
+                <td>{{ mes.promedio ?? '—' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr class="reporte-fila-total">
+              <th scope="row">Total del período</th>
+              <td>{{ total.funciones }}</td>
+              <td>{{ total.vendidas ?? '—' }}{% if total.vendidas is not null %} <span class="tabla-admin-secundario">de {{ total.cupo }}</span>{% endif %}</td>
+              <td>{{ total.ocupacion ?? '—' }}</td>
+              <td>{{ total.asistentes ?? '—' }}{% if total.asistencia %} <span class="tabla-admin-secundario">{{ total.asistencia }}</span>{% endif %}</td>
+              <td>{{ total.cobrado ?? '—' }}</td>
+              <td>{{ total.promedio ?? '—' }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <section class="reporte-seccion" aria-labelledby="reporte-funciones">
+      <h2 id="reporte-funciones" class="reporte-subtitulo">Funciones de {{ mes|lower }}</h2>
+      <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-funciones">
+        <table class="tabla-admin reporte-tabla">
+          <thead>
+            <tr>
+              <th scope="col">Función</th>
+              <th scope="col">Sala</th>
+              <th scope="col">Vendidas</th>
+              <th scope="col">Ocupación</th>
+              <th scope="col">Asistentes</th>
+              <th scope="col">Cobrado</th>
+              <th scope="col">Promedio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for funcion in funciones %}
+              <tr>
+                <td>
+                  <span class="tabla-admin-principal">{{ funcion.obras }}</span>
+                  <span class="tabla-admin-secundario">{{ funcion.fecha }}</span>
+                </td>
+                <td>{{ funcion.sala }}</td>
+                <td>{{ funcion.vendidas ?? '—' }}{% if funcion.vendidas is not null %} <span class="tabla-admin-secundario">de {{ funcion.cupo }}</span>{% endif %}</td>
+                <td>{{ funcion.ocupacion ?? '—' }}</td>
+                <td>{{ funcion.asistentes ?? '—' }}{% if funcion.asistencia %} <span class="tabla-admin-secundario">{{ funcion.asistencia }}</span>{% endif %}</td>
+                <td>{{ funcion.cobrado ?? '—' }}</td>
+                <td>{{ funcion.promedio ?? '—' }}{% if funcion.calificaciones > 0 %} <span class="tabla-admin-secundario">{{ funcion.calificaciones }} {{ funcion.calificaciones == 1 ? 'calificación' : 'calificaciones' }}</span>{% endif %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+{% endif %}
+{% endblock %}
