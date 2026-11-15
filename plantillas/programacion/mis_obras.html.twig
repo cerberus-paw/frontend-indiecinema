@@ -5,7 +5,8 @@
 
   Variables:
   - obras: lista de obras del organizador. Cada una con estado (EF-07.7): pendiente, aprobada o
-    rechazada; sólo la aprobada está en el catálogo y tiene ficha pública.
+    rechazada; sólo la aprobada está en el catálogo y tiene ficha pública. motivo: por qué la
+    rechazaron (null si no); editarla la vuelve a pendiente.
   - creada: (bool) aviso de que se acaba de cargar una obra nueva.
   - guardada: (bool) aviso de que se guardaron los cambios de una obra.
   - dada_de_baja: (bool) aviso de que la obra fue dada de baja lógicamente.
@@ -130,6 +131,13 @@
                 {{ obra.titulo }}
               {% endif %}
             </h3>
+
+            {% if estado_obra == 'rechazada' and obra.motivo is defined and obra.motivo %}
+              <p class="tarjeta-funcion-dato">
+                <strong>Por qué la rechazaron:</strong> {{ obra.motivo|nl2br }}
+                Corregila con «Editar» y vuelve a revisión.
+              </p>
+            {% endif %}
 
             <div class="tarjeta-funcion-meta">
               {% if obra.director is defined and obra.director %}
