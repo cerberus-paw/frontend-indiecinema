@@ -1,0 +1,127 @@
+{#
+  La documentación de una sala para su organizador, en /moderacion/salas/{id}/documentacion
+  (EF-07.5), enlazada desde «Mis salas»: por qué está suspendida, el seguro y la habilitación
+  vigentes, los que esperan revisión y el formulario para subir uno nuevo. La moderación lo revisa y
+  le avisa por correo; si la sala estaba suspendida por ese papel, vuelve a publicarse.
+
+  Variables:
+  - sala: {id, nombre}.
+  - suspensiones: lista de {causa (como se lee), motivo, desde}. En una por denuncia, sólo el motivo
+    del moderador.
+  - vigentes: uno por tipo, {nombre, falta (el texto si no tiene), documento: {nombre, vence,
+    vencido, url} o null}.
+  - pendientes: lista de {nombre, vence, vencido, url}: las renovaciones que esperan revisión.
+  - reglas: campo => {requerido, aceptar, valor_minimo, valor_maximo, mensajes}.
+  - valores, errores: lo que mandó y qué está mal, si volvió con errores.
+  - mensaje_exito: si acaba de subir uno (opcional).
+#}
+{% extends 'organizador.html.twig' %}
+
+{% block titulo %}Documentación de {{ sala.nombre }}{% endblock %}
+
+{% block seccion %}salas{% endblock %}
+
+{% block panel %}
+<div class="contenedor">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/organizador/salas" class="enlace-miga">Mis salas</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Documentación de {{ sala.nombre }}</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Documentación de {{ sala.nombre }}</h1>
+      <p class="solicitud-bajada">El seguro y la habilitación del espacio. Si se vencen sin que la moderación acepte uno nuevo, la sala queda suspendida.</p>
+    </div>
+  </header>
+
+  {% if mensaje_exito is defined %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', titulo: 'Documento enviado', mensaje: mensaje_exito } only %}
+  {% endif %}
+
+  <section class="seccion-formulario" aria-labelledby="titulo-estado">
+    <h2 id="titulo-estado" class="seccion-titulo">Estado de la sala</h2>
+    {% if suspensiones is empty %}
+      <p class="solicitud-bajada">No está suspendida.</p>
+    {% else %}
+      <p class="solicitud-bajada">Está suspendida: no se ve en el sitio ni programa funciones nuevas. Las que ya tenía siguen en pie.</p>
+      <ul class="documentacion-lista">
+        {% for suspension in suspensiones %}
+          <li><strong>{{ suspension.causa }}</strong> (desde el {{ suspension.desde }}): {{ suspension.motivo }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  <section class="seccion-formulario" aria-labelledby="titulo-documentos">
+    <h2 id="titulo-documentos" class="seccion-titulo">Documentos aceptados</h2>
+    <ul class="documentacion-lista">
+      {% for vigente in vigentes %}
+        <li>
+          {% if vigente.documento %}
+            <a href="{{ vigente.documento.url }}" download>{{ vigente.nombre }} (PDF)</a>,
+            {% if vigente.documento.vencido %}<strong class="bandeja-vencido">venció el {{ vigente.documento.vence }}</strong>{% else %}vence el {{ vigente.documento.vence }}{% endif %}
+          {% else %}
+            {{ vigente.falta }}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if pendientes is not empty %}
+      <h3 class="seccion-subtitulo">Pendiente de revisión</h3>
+      <ul class="documentacion-lista">
+        {% for documento in pendientes %}
+          <li><a href="{{ documento.url }}" download>{{ documento.nombre }} (PDF)</a>, vence el {{ documento.vence }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    errores: errores ?? {},
+    titulo: 'No se pudo subir el documento'
+  } only %}
+
+  <form action="/moderacion/salas/{{ sala.id }}/documentacion" method="post" enctype="multipart/form-data" data-validar-en-linea>
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+    <fieldset class="seccion-formulario">
+      <legend class="seccion-leyenda">
+        <span class="seccion-titulo">Subir uno nuevo</span>
+        <span class="seccion-subtitulo">Lo revisa la moderación. Si ya mandaste uno del mismo tipo y espera revisión, éste lo reemplaza.</span>
+      </legend>
+      <div class="seccion-campos">
+        {% include 'parciales/campo.html.twig' with reglas.tipo|merge({
+          nombre: 'tipo',
+          etiqueta: 'Qué documento es',
+          tipo: 'select',
+          opciones: { seguro: 'Seguro del espacio', habilitacion: 'Habilitación del espacio' },
+          valor: valores.tipo ?? 'seguro',
+          errores: errores
+        }) only %}
+        {% include 'parciales/campo.html.twig' with reglas.documento|merge({
+          nombre: 'documento',
+          etiqueta: 'El PDF',
+          tipo: 'file',
+          zona_de_archivo: 'Arrastrá el PDF acá, o elegilo:',
+          ayuda: 'En PDF, hasta 5 MB.',
+          errores: errores
+        }) only %}
+        {% include 'parciales/campo.html.twig' with reglas.vence|merge({
+          nombre: 'vence',
+          etiqueta: 'Vencimiento',
+          tipo: 'date',
+          valor: valores.vence ?? '',
+          ayuda: 'La que dice el papel.',
+          errores: errores
+        }) only %}
+      </div>
+    </fieldset>
+    <div class="solicitud-acciones-inferior">
+      <button type="submit" class="boton boton-primario">Enviar a revisión</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
