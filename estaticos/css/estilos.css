@@ -6577,6 +6577,37 @@ a.tabla-admin-principal:focus-visible {
   min-width: 0;
 }
 
+/* Las salas suspendidas por denuncia, abajo de la pestaña «Denuncias» (EF-07.8): cada una con su
+   formulario para levantar la suspensión. */
+.bandeja-seccion {
+  margin-top: var(--espacio-8);
+}
+
+.panel-subtitulo {
+  margin: 0 0 var(--espacio-3);
+  font-size: var(--texto-xl);
+}
+
+.bandeja-levantar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-3);
+}
+
+.bandeja-levantar textarea {
+  width: 100%;
+}
+
+.bandeja-levantar .boton {
+  align-self: flex-start;
+}
+
+/* El formulario de la denuncia: la caja de las categorías separada del detalle. */
+.formulario-denuncia .bandeja-caja {
+  margin-bottom: var(--espacio-4);
+}
+
 .bandeja-caja + .bandeja-caja {
   margin-top: var(--espacio-4);
 }

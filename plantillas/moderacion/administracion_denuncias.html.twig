@@ -19,6 +19,10 @@
   - valores: lo que mandó si hubo errores, {accion, motivo}.
   - errores: campo => qué está mal.
   - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
+  - suspendidas: las salas suspendidas por denuncia, lista de {sala_id, nombre (o null si
+    programación no la tiene), motivo, desde, propia}; false si programación no respondió. propia:
+    la sala es del moderador en sesión, que no levanta la suspensión.
+  - levantar: el levantamiento que volvió con error, {sala, motivo, error}, o null.
   - mensaje_exito: el aviso de lo que se acaba de hacer (opcional).
 #}
 {% extends 'administracion.html.twig' %}
@@ -184,5 +188,42 @@
       </article>
     {% endif %}
   </div>
+{% endif %}
+
+{% if not historial %}
+  <section class="bandeja-seccion" aria-labelledby="titulo-suspendidas">
+    <h2 id="titulo-suspendidas" class="panel-subtitulo">Salas suspendidas por denuncia</h2>
+    {% if suspendidas is same as(false) %}
+      <p class="bandeja-nota bandeja-nota-suelta">No pudimos consultar las salas. Probá de nuevo en un rato.</p>
+    {% elseif suspendidas is empty %}
+      <p class="bandeja-nota bandeja-nota-suelta">Ninguna sala está suspendida por una denuncia.</p>
+    {% else %}
+      <ul class="bandeja-items">
+        {% for suspendida in suspendidas %}
+          {% set con_error = levantar and levantar.sala == suspendida.sala_id %}
+          <li class="bandeja-item">
+            <span class="bandeja-item-fila">
+              <span class="bandeja-item-sala">{{ suspendida.nombre ?? 'Una sala que programación ya no tiene' }}</span>
+              <span class="estado-cuenta estado-cuenta-suspendida">Suspendida</span>
+            </span>
+            <span class="bandeja-item-datos">Desde el {{ suspendida.desde }} · {{ suspendida.motivo }}</span>
+            {% if suspendida.propia %}
+              <span class="bandeja-item-datos">Es tuya: la levanta otro moderador.</span>
+            {% else %}
+              <form action="{{ prefijo }}/denuncias/salas/{{ suspendida.sala_id }}/levantar" method="post" class="bandeja-levantar">
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                <label for="motivo-levantar-{{ suspendida.sala_id }}" class="campo-etiqueta">Motivo para levantarla</label>
+                <textarea id="motivo-levantar-{{ suspendida.sala_id }}" name="motivo" rows="2" maxlength="{{ maximo_motivo }}" required{% if con_error %} aria-invalid="true" aria-describedby="error-levantar-{{ suspendida.sala_id }}"{% endif %}>{{ con_error ? levantar.motivo : '' }}</textarea>
+                {% if con_error %}
+                  <span id="error-levantar-{{ suspendida.sala_id }}" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ levantar.error }}</span>
+                {% endif %}
+                <button type="submit" class="boton boton-secundario">Levantar la suspensión</button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
 {% endif %}
 {% endblock %}
