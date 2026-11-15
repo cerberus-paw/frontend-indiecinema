@@ -77,6 +77,9 @@
             <li><a href="/organizador/funciones/nueva">Programar una función</a></li>
             <li><a href="/solicitar-sala">Publicar una sala</a></li>
           {% endif %}
+          {% if usr.alcanza('moderador') %}
+            <li><a href="/moderacion/solicitudes">Solicitudes de sala</a></li>
+          {% endif %}
         {% else %}
           <li><a href="/cuenta/ingresar">Ingresar</a></li>
           <li><a href="/cuenta/registro">Crear cuenta</a></li>

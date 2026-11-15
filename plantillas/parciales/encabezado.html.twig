@@ -194,6 +194,19 @@
               </ul>
             {% endif %}
 
+            {# Sección de moderación: el moderador, además de su panel de organizador; el administrador la tiene en la suya #}
+            {% if usr.alcanza('moderador') and not es_admin %}
+              <div class="menu-separador"></div>
+              <div class="menu-seccion-titulo" id="menu-seccion-moderacion">Moderación</div>
+              <ul class="menu-seccion" aria-labelledby="menu-seccion-moderacion">
+                <li>
+                  <a href="/moderacion/solicitudes" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">📨</span> Solicitudes de sala
+                  </a>
+                </li>
+              </ul>
+            {% endif %}
+
             {# Sección de administración: sólo el administrador, el único rol que alcanza esas rutas #}
             {% if usr.alcanza('administrador') %}
               <div class="menu-separador"></div>
