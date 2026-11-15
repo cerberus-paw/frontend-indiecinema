@@ -3,7 +3,8 @@
   cargan los organizadores quedan pendientes hasta que un moderador las aprueba o las rechaza con
   un motivo, que le llega a su dueño. La lista a la izquierda, primero la que lleva más tiempo, y
   la elegida a la derecha, con sus datos, el afiche y quién la cargó. «Ver historial» lista las
-  resueltas.
+  resueltas. Por ?id= se abre también una que no está pendiente: una aprobada se rechaza (la
+  denuncia de EF-07.8).
 
   Variables:
   - historial: si la vista es la del historial.
@@ -12,7 +13,9 @@
   - resueltas: en el historial, lista de {titulo, resolucion (aprobada o rechazada), motivo, resuelta}.
   - elegida: {id, titulo, tipo, anio, director, duracion, sinopsis, generos, origen_copia, afiche
     (o null), cargada, dueno ({nombre, correo}, null si ya no existe o false si cuentas no
-    respondió), propia}, o null. propia: la cargó el moderador en sesión, que no la resuelve.
+    respondió), propia, estado (pendiente, aprobada o rechazada), resoluciones (las que admite:
+    aprobar y rechazar; una aprobada, sólo rechazar; una rechazada, ninguna)}, o null. propia: la
+    cargó el moderador en sesión, que no la resuelve.
   - valores: lo que mandó si hubo errores, {resolucion, motivo}.
   - errores: campo => qué está mal.
   - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
@@ -60,11 +63,14 @@
   {% endif %}
 {% elseif sin_programacion %}
   <p class="bandeja-nota bandeja-nota-suelta">No pudimos consultar las obras pendientes. Probá de nuevo en un rato.</p>
-{% elseif obras is empty %}
+{% elseif obras is empty and not elegida %}
   <p class="bandeja-nota bandeja-nota-suelta">No hay obras esperando revisión.</p>
 {% else %}
   <div class="bandeja">
     <section class="bandeja-lista" aria-label="Obras pendientes">
+      {% if obras is empty %}
+        <p class="bandeja-nota">No hay obras esperando revisión.</p>
+      {% endif %}
       <ul class="bandeja-items">
         {% for obra in obras %}
           <li>
@@ -82,11 +88,12 @@
     </section>
 
     {% if elegida %}
-      {% set resolvible = not elegida.propia %}
+      {% set resolvible = not elegida.propia and elegida.resoluciones is not empty %}
+      {% set estados = { pendiente: ['', 'Pendiente'], aprobada: [' estado-cuenta-activa', 'Aprobada'], rechazada: [' estado-cuenta-suspendida', 'Rechazada'] } %}
       <article class="bandeja-detalle" aria-labelledby="titulo-obra">
         <header class="bandeja-detalle-cabecera">
           <h2 id="titulo-obra" class="bandeja-detalle-titulo">{{ elegida.titulo }}</h2>
-          <span class="estado-cuenta">Pendiente</span>
+          <span class="estado-cuenta{{ estados[elegida.estado][0] }}">{{ estados[elegida.estado][1] }}</span>
         </header>
         <p class="bandeja-detalle-datos bandeja-detalle-meta">
           <span>{{ elegida.tipo }} · {{ elegida.anio }}</span>
@@ -125,15 +132,20 @@
           </div>
 
           <div>
-            {% if not resolvible %}
+            {% if elegida.propia %}
               <div class="bandeja-caja">
                 <p class="bandeja-caja-titulo">Resolución</p>
                 <p class="bandeja-texto">La cargaste vos: la resuelve otro moderador.</p>
               </div>
+            {% elseif not resolvible %}
+              <div class="bandeja-caja">
+                <p class="bandeja-caja-titulo">Resolución</p>
+                <p class="bandeja-texto">Está rechazada: vuelve a revisión cuando su dueño la corrige.</p>
+              </div>
             {% else %}
               <fieldset id="resolucion" class="bandeja-caja{% if errores.resolucion is defined %} con-error{% endif %}">
                 <legend class="bandeja-caja-titulo">Resolución</legend>
-                {% for valor, texto in { aprobar: 'Aprobarla: entra en el catálogo', rechazar: 'Rechazarla' } %}
+                {% for valor, texto in { aprobar: 'Aprobarla: entra en el catálogo', rechazar: elegida.estado == 'aprobada' ? 'Rechazarla: sale del catálogo y de las votaciones abiertas' : 'Rechazarla' }|filter((texto, valor) => valor in elegida.resoluciones) %}
                   <label class="bandeja-opcion">
                     <input type="radio" name="resolucion" value="{{ valor }}" required{% if (valores.resolucion ?? '') == valor %} checked{% endif %}{% if errores.resolucion is defined %} aria-invalid="true" aria-describedby="error-resolucion"{% endif %}>
                     {{ texto }}
