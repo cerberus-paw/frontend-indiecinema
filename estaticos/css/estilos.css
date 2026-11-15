@@ -6656,6 +6656,22 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto-apagado);
 }
 
+/* Lo que tildó cada moderador (EF-07.9), de solo lectura: un renglón por punto, con ✓ o ✗ */
+.bandeja-checklist {
+  clear: both;
+  list-style: none;
+  margin: 0 0 var(--espacio-3);
+  padding: 0;
+}
+
+.bandeja-checklist-punto.cumple span[aria-hidden] {
+  color: var(--color-exito);
+}
+
+.bandeja-checklist-punto.no-cumple span[aria-hidden] {
+  color: var(--color-error);
+}
+
 /* El error de la resolución, debajo de las opciones */
 .bandeja-caja .campo-error {
   clear: both;

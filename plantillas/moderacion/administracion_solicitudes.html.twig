@@ -24,7 +24,10 @@
     tiempo_entre_funciones}, en_el_sitio, documentos (EF-07.4: lista de {nombre, vence, vencido,
     estado, url}, vacía en las que se mandaron antes de que se pidiera), solicitante: {nombre, correo, cuenta_creada,
     es_organizador} (null si ya no existe, false si cuentas no respondió), solicitante_nombre,
-    solicitudes_previas, propia}, o null. revision (EF-07.6): {motivo, fecha} si pasó por la
+    solicitudes_previas, propia, revisiones}, o null. revisiones (EF-07.9): qué tildó cada
+    moderador al resolverla, del más viejo al más nuevo, lista de {resolucion (en_revision_manual,
+    aprobada o rechazada), fecha, moderador (el nombre, o null si cuentas no respondió), puntos:
+    lista de {nombre, cumple}}; vacía en las resueltas antes del checklist. revision (EF-07.6): {motivo, fecha} si pasó por la
     revisión manual, o null. estado: pendiente, en_revision_manual, aprobada o rechazada. cambio
     (EF-07.6): si es un pedido de cambio de dirección; direccion_actual: la que tiene la sala
     ahora, en un cambio abierto ('Av. San Martín 450, Luján'), false si programación no respondió,
@@ -226,6 +229,20 @@
               <p class="bandeja-caja-titulo">Revisión manual</p>
               <p class="bandeja-detalle-datos">Desde el {{ revision.fecha }}</p>
               <p class="bandeja-texto">{{ revision.motivo|nl2br }}</p>
+            </div>
+          {% endif %}
+          {# EF-07.9: qué tildó cada moderador, de solo lectura #}
+          {% if elegida.revisiones is defined and elegida.revisiones is not empty %}
+            <div class="bandeja-caja">
+              <p class="bandeja-caja-titulo">Requisitos revisados</p>
+              {% for registro in elegida.revisiones %}
+                <p class="bandeja-detalle-datos">{{ estados[registro.resolucion] }} el {{ registro.fecha }}{% if registro.moderador %} por {{ registro.moderador }}{% endif %}</p>
+                <ul class="bandeja-checklist">
+                  {% for punto in registro.puntos %}
+                    <li class="bandeja-checklist-punto {{ punto.cumple ? 'cumple' : 'no-cumple' }}"><span aria-hidden="true">{{ punto.cumple ? '✓' : '✗' }}</span> <span class="sr-only">{{ punto.cumple ? 'Tildado:' : 'Sin tildar:' }}</span> {{ punto.nombre }}</li>
+                  {% endfor %}
+                </ul>
+              {% endfor %}
             </div>
           {% endif %}
           {% if propia and elegida.estado in abiertas %}
