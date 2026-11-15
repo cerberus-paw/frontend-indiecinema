@@ -6625,6 +6625,11 @@ a.tabla-admin-principal:focus-visible {
   padding: 0 0 var(--espacio-2);
 }
 
+/* Un documento con el vencimiento pasado (EF-07.4): en el color de los errores */
+.bandeja-vencido {
+  color: var(--color-error);
+}
+
 /* El motivo a todo el ancho, debajo de las columnas */
 .bandeja-motivo {
   margin-top: var(--espacio-6);
