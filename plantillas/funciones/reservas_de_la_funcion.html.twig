@@ -7,11 +7,12 @@
   reparto.
 
   Variables:
-  - funcion: id, titulo, url (de su ficha), fecha (o null), sala, estado y cupo.
+  - funcion: id, titulo, url (de su ficha), sala_id, fecha (o null), sala, estado y cupo.
   - resumen: reservados y libres (lugares), asistentes (lugares ya registrados), recaudado (ya
     escrito) y reservas (cuántas siguen en pie).
-  - reservas: lista de {id, codigo, espectador (o null), cantidad, total, estado ('confirmada' |
-    'cancelada' | 'asistio' | 'ausente'), estado_etiqueta, creada (ya escrita), registrable}.
+  - reservas: lista de {id, codigo, usuario_id, espectador (o null), cantidad, total, estado
+    ('confirmada' | 'cancelada' | 'asistio' | 'ausente'), estado_etiqueta, creada (ya escrita),
+    registrable}.
   - registra_asistencia: (bool) si se puede registrar: la función no se canceló.
   - codigo: (string) lo que se había escrito, al volver con un error.
   - registrada: (string|null) el código que se acaba de registrar.
@@ -118,7 +119,17 @@
           {% for reserva in reservas %}
             <tr data-reserva="{{ reserva.id }}">
               <td><span class="tabla-admin-principal panel-reservas-codigo">{{ reserva.codigo }}</span></td>
-              <td>{{ reserva.espectador ?? '—' }}</td>
+              <td>
+                {%- if reserva.espectador -%}
+                  <span class="tabla-admin-principal">{{ reserva.espectador }}</span>
+                  {%- if (funcion.sala_id ?? null) and (reserva.usuario_id ?? null) -%}
+                    {% set url_bloquear = '/organizador/bloqueados?sala=' ~ funcion.sala_id|url_encode ~ '&usuario=' ~ reserva.usuario_id|url_encode %}
+                    <span class="tabla-admin-secundario"><a href="{{ url_bloquear }}">Bloquear en la sala</a></span>
+                  {%- endif -%}
+                {%- else -%}
+                  —
+                {%- endif -%}
+              </td>
               <td>{{ reserva.cantidad }}</td>
               <td>{{ reserva.total }}</td>
               <td>{{ reserva.creada }}</td>
