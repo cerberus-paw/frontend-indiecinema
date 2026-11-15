@@ -38,6 +38,8 @@
         programada, mientras todavía no se dio).
       - cerrable: (bool) si quien la mira es su organizador y la votación de títulos está abierta,
         para cerrarla con la candidata ganadora (E3-12.4 / IC-150).
+      - denunciable: (bool) si muestra «Denunciar»: está en la cartelera y quien la mira no es su
+        organizador (EF-07.8).
       - lugares_libres: (int|null) cuántos lugares quedan (E4-02), sólo de una programada. null si
         el subsistema funciones no respondió: la ficha se muestra igual, sin ese dato.
       - agotada: (bool) si no queda ningún lugar.
@@ -196,6 +198,9 @@
           } only %}
         {% endif %}
       </div>
+      {% if funcion.denunciable is defined and funcion.denunciable %}
+        <p class="ficha-denunciar">{% include 'parciales/denunciar.html.twig' with { tipo: 'funcion', id: funcion.id } only %}</p>
+      {% endif %}
     </header>
 
     {# La línea de estados del wireframe: los cuatro, con los ya pasados tildados, el actual lleno

@@ -114,6 +114,8 @@
               <dl class="bandeja-ficha">
                 {% if d.tipo is defined %}<dt>Tipo</dt><dd>{{ d.tipo }}{% if d.anio is defined %} · {{ d.anio }}{% endif %}</dd>{% endif %}
                 {% if d.director is defined %}<dt>Dirección</dt><dd>{{ d.director }}</dd>{% endif %}
+                {% if d.sala is defined %}<dt>Sala</dt><dd>{{ d.sala }}</dd>{% endif %}
+                {% if d.obras is defined %}<dt>Obras</dt><dd>{{ d.obras|map(o => o.titulo)|join(' + ') }}</dd>{% endif %}
               </dl>
               {% if d.sinopsis is defined %}
                 <h3 class="bandeja-subtitulo">Sinopsis</h3>
