@@ -10,8 +10,9 @@
     motivo, resuelta}.
   - grupos: lista de {tipo, tipo_etiqueta, id, titulo, cantidad, desde, elegida}.
   - elegida: {tipo, tipo_etiqueta, id, titulo, denunciado, denuncias, propia, acciones}, o null.
-    denunciado: los datos de lo denunciado según el tipo, con url (la ficha); null si ya no está
-    publicado; false si su subsistema no respondió. denuncias: lista de {categoria, detalle (o
+    denunciado: los datos de lo denunciado según el tipo, con url (la ficha) y sancionado (si ya
+    se hizo lo que resuelve sus denuncias: se cierran sin repetirlo); null si ya no está publicado;
+    false si su subsistema no respondió. denuncias: lista de {categoria, detalle (o
     null), cuando, quien ({nombre, correo}, null si ya no existe o false si cuentas no
     respondió)}. propia: es del moderador en sesión o denunció él, que no las resuelve. acciones:
     lista de {valor, etiqueta}.
@@ -97,6 +98,11 @@
               <p class="bandeja-nota bandeja-nota-suelta">Ya no está publicada: sólo se pueden desestimar sus denuncias.</p>
             {% else %}
               {% set d = elegida.denunciado %}
+              {% if d.sancionado %}
+                <p class="bandeja-nota bandeja-nota-suelta">
+                  {% if elegida.tipo == 'obra' %}Ya está rechazada: resolverlas así no la vuelve a rechazar.{% endif %}
+                </p>
+              {% endif %}
               {% if d.afiche is defined and d.afiche %}
                 <img src="{{ d.afiche }}" alt="Afiche de {{ elegida.titulo }}" class="bandeja-foto">
               {% endif %}
