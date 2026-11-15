@@ -18,7 +18,8 @@
   - errores: campo => qué está mal.
   - corrigiendo: si la última la rechazaron y el formulario es para corregirla.
   - solicitud: la última que mandó, {estado (pendiente, aprobada o rechazada), sala, imagen,
-    enviada, resuelta, motivo}, o null.
+    enviada, resuelta, motivo, documentos}, o null. documentos (EF-07.4): lista de {nombre,
+    vence (dd/mm/aaaa), url}; vacía en las que se mandaron antes de que se pidieran.
   - error_general: si hubo errores (opcional).
   - mensaje_exito: si la acaba de mandar (opcional).
 #}
@@ -70,6 +71,16 @@
             {# nl2br escapa antes de agregar los <br> #}
             <p class="progreso-solicitud-aviso-texto">«{{ solicitud.motivo|nl2br }}»</p>
           </div>
+        </div>
+      {% endif %}
+      {% if solicitud.documentos is defined and solicitud.documentos is not empty %}
+        <div class="progreso-solicitud-documentos">
+          <p class="progreso-solicitud-aviso-titulo">Documentación que mandaste</p>
+          <ul>
+            {% for documento in solicitud.documentos %}
+              <li><a href="{{ documento.url }}" download>{{ documento.nombre }} (PDF)</a>, vence el {{ documento.vence }}</li>
+            {% endfor %}
+          </ul>
         </div>
       {% endif %}
     </section>
