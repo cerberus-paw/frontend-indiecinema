@@ -2,13 +2,15 @@
   Bandeja de solicitudes de sala, en /moderacion/solicitudes (EF-07.2), como el wireframe de la E2
   (moderacion-solicitudes): el buscador y la lista a la izquierda; a la derecha la elegida, con la
   sala, los datos del espacio y el historial de quien la mandó, y la resolución con su motivo
-  obligatorio. «Ver historial de decisiones» lista las resueltas; desde una aprobada la sala se
-  retira del sitio o se vuelve a publicar, con un motivo que queda en el registro. Queda afuera lo que todavía no existe: las otras
-  bandejas de moderación, la documentación, el checklist, la categoría, la revisión manual y
-  guardar sin enviar.
+  obligatorio. Una pendiente también pasa a revisión manual (EF-07.6) y sigue en la lista, con su
+  marca, hasta que se aprueba o se rechaza. «Ver historial de decisiones» lista las resueltas;
+  desde una aprobada la sala se retira del sitio o se vuelve a publicar, con un motivo que queda
+  en el registro. Queda afuera lo que todavía no existe: el checklist, la categoría y guardar sin
+  enviar.
 
-  Resolver es un POST con el token CSRF, la resolución (aprobar o rechazar) y el motivo, que se le
-  muestra a quien la mandó. Aprobarla publica la sala y le da el rol de organizador.
+  Resolver es un POST con el token CSRF, la resolución (aprobar, rechazar o, en una pendiente,
+  revision) y el motivo, que se le muestra a quien la mandó. Aprobarla publica la sala y le da el
+  rol de organizador.
 
   Variables:
   - historial: si la lista es la de las resueltas.
@@ -16,12 +18,13 @@
   - total_pendientes: cuántas esperan, para la pestaña.
   - total_en_la_lista: cuántas hay en la lista, aunque muestre menos.
   - solicitudes: lista de {id, estado, sala, localidad, solicitante (o null), enviada, elegida}.
-  - elegida: {id, estado, enviada, resuelta, motivo, sala: {id, nombre, localidad, capacidad,
+  - elegida: {id, estado, enviada, resuelta, motivo, revision, sala: {id, nombre, localidad, capacidad,
     imagen, descripcion, direccion, peliculas_por_funcion, duracion_funcion,
     tiempo_entre_funciones}, en_el_sitio, documentos (EF-07.4: lista de {nombre, vence, vencido,
     estado, url}, vacía en las que se mandaron antes de que se pidiera), solicitante: {nombre, correo, cuenta_creada,
     es_organizador} (null si ya no existe, false si cuentas no respondió), solicitante_nombre,
-    solicitudes_previas, propia}, o null. propia: la mandó el moderador en sesión, que no la
+    solicitudes_previas, propia}, o null. revision (EF-07.6): {motivo, fecha} si pasó por la
+    revisión manual, o null. estado: pendiente, en_revision_manual, aprobada o rechazada. propia: la mandó el moderador en sesión, que no la
     resuelve ni retira su sala (EF-07.3); se ve sin los formularios. en_el_sitio es cómo está la sala de una aprobada según
     programación: 'publicada', 'retirada', 'dada_de_baja', o 'desconocido' si programación no
     respondió; null en las que no están aprobadas.
@@ -37,8 +40,9 @@
 {% block seccion %}solicitudes{% endblock %}
 
 {% block panel %}
-{% set estados = { pendiente: 'Pendiente', aprobada: 'Aprobada', rechazada: 'Rechazada' } %}
-{% set clases = { pendiente: 'estado-cuenta', aprobada: 'estado-cuenta estado-cuenta-activa', rechazada: 'estado-cuenta estado-cuenta-suspendida' } %}
+{% set estados = { pendiente: 'Pendiente', en_revision_manual: 'En revisión manual', aprobada: 'Aprobada', rechazada: 'Rechazada' } %}
+{% set clases = { pendiente: 'estado-cuenta', en_revision_manual: 'estado-cuenta estado-cuenta-revision', aprobada: 'estado-cuenta estado-cuenta-activa', rechazada: 'estado-cuenta estado-cuenta-suspendida' } %}
+{% set abiertas = ['pendiente', 'en_revision_manual'] %}
 
 <header class="panel-cabecera bandeja-cabecera">
   <div>
@@ -67,7 +71,7 @@
 </nav>
 
 <div class="bandeja">
-  <section class="bandeja-lista" aria-label="{{ historial ? 'Solicitudes resueltas' : 'Solicitudes pendientes' }}">
+  <section class="bandeja-lista" aria-label="{{ historial ? 'Solicitudes resueltas' : 'Solicitudes por resolver' }}">
     <form class="bandeja-buscador" action="{{ prefijo }}/solicitudes" method="get" role="search">
       {% if historial %}<input type="hidden" name="ver" value="historial">{% endif %}
       <label class="panel-busqueda">
@@ -111,7 +115,9 @@
     {% set sala = elegida.sala %}
     {# La del moderador en sesión la resuelve otro (EF-07.3); con is defined, por si el back todavía no la manda #}
     {% set propia = elegida.propia is defined and elegida.propia %}
-    {% set resolvible = elegida.estado == 'pendiente' and not propia %}
+    {% set resolvible = elegida.estado in abiertas and not propia %}
+    {# EF-07.6: con is defined, por si el back todavía no la manda #}
+    {% set revision = elegida.revision is defined ? elegida.revision : null %}
     <article class="bandeja-detalle" aria-labelledby="titulo-solicitud">
       <header class="bandeja-detalle-cabecera">
         <h2 id="titulo-solicitud" class="bandeja-detalle-titulo">{{ sala.nombre }}</h2>
@@ -193,7 +199,14 @@
         </div>
 
         <div>
-          {% if propia and elegida.estado == 'pendiente' %}
+          {% if revision %}
+            <div class="bandeja-caja">
+              <p class="bandeja-caja-titulo">Revisión manual</p>
+              <p class="bandeja-detalle-datos">Desde el {{ revision.fecha }}</p>
+              <p class="bandeja-texto">{{ revision.motivo|nl2br }}</p>
+            </div>
+          {% endif %}
+          {% if propia and elegida.estado in abiertas %}
             <div class="bandeja-caja">
               <p class="bandeja-caja-titulo">Resolución</p>
               <p class="bandeja-texto">La mandaste vos: la resuelve otro moderador.</p>
@@ -201,7 +214,11 @@
           {% elseif resolvible %}
               <fieldset id="resolucion" class="bandeja-caja{% if errores.resolucion is defined %} con-error{% endif %}">
                 <legend class="bandeja-caja-titulo">Resolución</legend>
-                {% for valor, texto in { aprobar: 'Aprobar y publicar la sala', rechazar: 'Rechazar la solicitud' } %}
+                {% set opciones = { aprobar: 'Aprobar y publicar la sala', rechazar: 'Rechazar la solicitud' } %}
+                {% if elegida.estado == 'pendiente' %}
+                  {% set opciones = opciones|merge({ revision: 'Pasar a revisión manual (por ejemplo, para coordinar una visita)' }) %}
+                {% endif %}
+                {% for valor, texto in opciones %}
                   <label class="bandeja-opcion">
                     <input type="radio" name="resolucion" value="{{ valor }}" required{% if (valores.resolucion ?? '') == valor %} checked{% endif %}{% if errores.resolucion is defined %} aria-invalid="true" aria-describedby="error-resolucion"{% endif %}>
                     {{ texto }}
