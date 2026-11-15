@@ -1,6 +1,6 @@
 /* global AccionesDeReserva, AcuerdoFecha, BotonImprimir, BuscadorDeCartelera, Carrusel, Compartir,
    ConfirmarEnvio, EnviarAlElegir, FormularioDeReserva, GestorFranjas, LugaresLibres, MenuUsuario,
-   ModoFuncion, ParametrosDeSala, ResumenDeErrores, ValidacionEnLinea, VotacionTitulos, ZonaDeImagen */
+   ModoFuncion, ParametrosDeSala, ResumenDeErrores, ValidacionEnLinea, VotacionTitulos, ZonaDeArchivo */
 
 /**
  * La aplicación: cuando el DOM está listo, carga e inicia los componentes que la página necesita.
@@ -80,8 +80,8 @@ class App {
       PAW.cargarScript('ValidacionEnLinea', `${App.COMPONENTES}/validacion-en-linea.js`, () => new ValidacionEnLinea(formulario));
     }
     // Arrastrar y soltar la imagen, con vista previa (E4-09.2 / IC-296).
-    for (const campo of document.querySelectorAll('[data-zona-de-imagen]')) {
-      PAW.cargarScript('ZonaDeImagen', `${App.COMPONENTES}/zona-de-imagen.js`, () => new ZonaDeImagen(campo));
+    for (const campo of document.querySelectorAll('[data-zona-de-archivo]')) {
+      PAW.cargarScript('ZonaDeArchivo', `${App.COMPONENTES}/zona-de-archivo.js`, () => new ZonaDeArchivo(campo));
     }
     // Los lugares libres de la ficha, al día sin recargar (E4-05.2 / IC-273).
     if (document.querySelector('[data-lugares-libres]')) {

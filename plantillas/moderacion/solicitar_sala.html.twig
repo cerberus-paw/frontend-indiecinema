@@ -171,7 +171,7 @@
           {% endif %}
           {% include 'parciales/campo.html.twig' with reglas.imagen|merge({
             nombre: 'imagen',
-            zona_de_imagen: true,
+            zona_de_archivo: 'Arrastrá la imagen acá, o elegila:',
             etiqueta: corrigiendo ? 'Otra foto de la sala' : 'Foto de la sala',
             tipo: 'file',
             ayuda: 'JPG, PNG o WebP, hasta 5 MB.' ~ (corrigiendo ? ' Si no elegís otra, queda la que mandaste.' : ''),
@@ -236,6 +236,7 @@
             {% endif %}
             {% include 'parciales/campo.html.twig' with reglas[documento.archivo]|merge({
               nombre: documento.archivo,
+              zona_de_archivo: 'Arrastrá el PDF acá, o elegilo:',
               etiqueta: anterior ? 'Otro PDF: ' ~ documento.etiqueta|lower : documento.etiqueta,
               tipo: 'file',
               ayuda: 'En PDF, hasta 5 MB.' ~ (anterior ? ' Si no subís otro, queda el que mandaste.' : ''),
