@@ -11,8 +11,8 @@
   - grupos: lista de {tipo, tipo_etiqueta, id, titulo, cantidad, desde, elegida}.
   - elegida: {tipo, tipo_etiqueta, id, titulo, denunciado, denuncias, propia, acciones}, o null.
     denunciado: los datos de lo denunciado según el tipo, con url (la ficha) y sancionado (si ya
-    se hizo lo que resuelve sus denuncias: se cierran sin repetirlo); null si ya no está publicado;
-    false si su subsistema no respondió. denuncias: lista de {categoria, detalle (o
+    se hizo lo que resuelve sus denuncias: se cierran sin repetirlo); null si ya no existe (se dio
+    de baja); false si su subsistema no respondió. denuncias: lista de {categoria, detalle (o
     null), cuando, quien ({nombre, correo}, null si ya no existe o false si cuentas no
     respondió)}. propia: es del moderador en sesión o denunció él, que no las resuelve. acciones:
     lista de {valor, etiqueta}.
@@ -101,6 +101,7 @@
               {% if d.sancionado %}
                 <p class="bandeja-nota bandeja-nota-suelta">
                   {% if elegida.tipo == 'obra' %}Ya está rechazada: resolverlas así no la vuelve a rechazar.{% endif %}
+                  {% if elegida.tipo == 'sala' %}Ya está suspendida por una denuncia: resolverlas así no abre otra suspensión.{% endif %}
                 </p>
               {% endif %}
               {% if d.afiche is defined and d.afiche %}
