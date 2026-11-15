@@ -206,6 +206,38 @@
         </div>
       </fieldset>
 
+      {# EF-07.4: el seguro y la habilitación en PDF, cada uno con su vencimiento. Las reglas pueden faltar si el back todavía no las manda #}
+      {% if reglas.seguro is defined %}
+      <fieldset class="seccion-formulario seccion-lateral">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Documentación</span>
+          <span class="seccion-subtitulo">La revisa la moderación antes de publicar la sala. Sólo la ven ella y vos.</span>
+        </legend>
+        <div class="seccion-campos">
+          {% for documento in [
+            { archivo: 'seguro', fecha: 'vence_seguro', etiqueta: 'Seguro del espacio', vence: 'Vencimiento del seguro' },
+            { archivo: 'habilitacion_pdf', fecha: 'vence_habilitacion', etiqueta: 'Habilitación del espacio', vence: 'Vencimiento de la habilitación' }
+          ] %}
+            {% include 'parciales/campo.html.twig' with reglas[documento.archivo]|merge({
+              nombre: documento.archivo,
+              etiqueta: documento.etiqueta,
+              tipo: 'file',
+              ayuda: 'En PDF, hasta 5 MB.',
+              errores: errores
+            }) only %}
+            {% include 'parciales/campo.html.twig' with reglas[documento.fecha]|merge({
+              nombre: documento.fecha,
+              etiqueta: documento.vence,
+              tipo: 'date',
+              valor: valores[documento.fecha] ?? '',
+              ayuda: 'La que dice el papel. Antes de esa fecha te vamos a pedir uno nuevo.',
+              errores: errores
+            }) only %}
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% endif %}
+
       <fieldset class="seccion-formulario seccion-lateral">
         <legend class="seccion-leyenda">
           <span class="seccion-titulo">Términos y condiciones</span>
