@@ -106,6 +106,7 @@
                 <p class="bandeja-nota bandeja-nota-suelta">
                   {% if elegida.tipo == 'obra' %}Ya está rechazada: resolverlas así no la vuelve a rechazar.{% endif %}
                   {% if elegida.tipo == 'sala' %}Ya está suspendida por una denuncia: resolverlas así no abre otra suspensión.{% endif %}
+                  {% if elegida.tipo == 'calificacion' %}Ya está oculto: resolverlas así no cambia nada en el sitio.{% endif %}
                 </p>
               {% endif %}
               {% if d.afiche is defined and d.afiche %}
@@ -117,6 +118,10 @@
                 {% if d.sala is defined %}<dt>Sala</dt><dd>{{ d.sala }}</dd>{% endif %}
                 {% if d.obras is defined %}<dt>Obras</dt><dd>{{ d.obras|map(o => o.titulo)|join(' + ') }}</dd>{% endif %}
               </dl>
+              {% if d.comentario is defined and d.comentario %}
+                <h3 class="bandeja-subtitulo">El comentario{% if d.puntaje is defined %} · {{ d.puntaje }} de 5{% endif %}</h3>
+                <p class="bandeja-texto">{{ d.comentario|nl2br }}</p>
+              {% endif %}
               {% if d.sinopsis is defined %}
                 <h3 class="bandeja-subtitulo">Sinopsis</h3>
                 <p class="bandeja-texto">{{ d.sinopsis|nl2br }}</p>
