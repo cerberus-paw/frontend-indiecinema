@@ -34,7 +34,8 @@
     respondió; null en las que no están aprobadas.
   - valores: lo que mandó si hubo errores, {resolucion, motivo, requisitos (las claves tildadas),
     motivo_sala}.
-  - requisitos (EF-07.9): los puntos del checklist, lista de {clave, nombre, aclaracion}.
+  - requisitos (EF-07.9): los puntos del checklist, lista de {clave, nombre, aclaracion, vencido}.
+    vencido: el papel que lo respalda está vencido, así que no se puede tildar.
   - errores: campo => qué está mal.
   - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
   - mensaje_exito: el aviso de lo que se acaba de hacer (opcional).
@@ -257,9 +258,10 @@
                   <legend class="bandeja-caja-titulo">Requisitos</legend>
                   {% for requisito in requisitos %}
                     <label class="bandeja-opcion bandeja-requisito">
-                      <input type="checkbox" name="requisitos[]" value="{{ requisito.clave }}"{% if requisito.clave in tildados %} checked{% endif %} aria-describedby="aclaracion-{{ requisito.clave }}{% if errores.requisitos is defined %} error-requisitos{% endif %}">
+                      <input type="checkbox" name="requisitos[]" value="{{ requisito.clave }}"{% if requisito.vencido %} disabled{% elseif requisito.clave in tildados %} checked{% endif %} aria-describedby="aclaracion-{{ requisito.clave }}{% if errores.requisitos is defined %} error-requisitos{% endif %}">
                       <span>
                         {{ requisito.nombre }}
+                        {% if requisito.vencido %}<strong class="bandeja-vencido">vencido</strong>{% endif %}
                         <span id="aclaracion-{{ requisito.clave }}" class="bandeja-requisito-aclaracion">{{ requisito.aclaracion }}</span>
                       </span>
                     </label>
