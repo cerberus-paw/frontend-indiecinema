@@ -12,8 +12,9 @@
   al elegir otro rol aparece abajo la barra con «Guardar cambios» y «Descartar cambios» (con CSS,
   sin JavaScript), y guardar manda en un POST los de toda la página, con el token CSRF y los
   filtros en campos ocultos, para volver a la misma búsqueda. Junto a cada rol va el que tenía al
-  mostrarse (antes[id]): el servidor cambia sólo el que se tocó. Al moderador y al administrador no
-  se los cambia desde la web: su desplegable está deshabilitado y no se manda.
+  mostrarse (antes[id]): el servidor cambia sólo el que se tocó. Se elige espectador, organizador o
+  moderador (EF-07.3); al administrador no se lo cambia desde la web: su desplegable está
+  deshabilitado y no se manda.
 
   Variables:
   - resumen: {usuarios, nuevos (este mes), organizadores (con la cuenta activa)}, sobre todas las
@@ -141,11 +142,12 @@
               </div>
             </td>
             <td>
-              {% if usuario.rol in ['espectador', 'organizador'] %}
+              {% if usuario.rol in ['espectador', 'organizador', 'moderador'] %}
                 <input type="hidden" name="antes[{{ usuario.id }}]" value="{{ usuario.rol }}">
                 <select name="roles[{{ usuario.id }}]" class="campo-control control-select" aria-label="Rol de {{ usuario.nombre }}">
                   <option value="espectador"{% if usuario.rol == 'espectador' %} selected{% endif %}>Espectador</option>
                   <option value="organizador"{% if usuario.rol == 'organizador' %} selected{% endif %}>Organizador</option>
+                  <option value="moderador"{% if usuario.rol == 'moderador' %} selected{% endif %}>Moderador</option>
                 </select>
               {% else %}
                 <select class="campo-control control-select tabla-admin-rol-fijo" disabled aria-label="Rol de {{ usuario.nombre }}: no se cambia desde la web" title="Este rol no se cambia desde la web">
