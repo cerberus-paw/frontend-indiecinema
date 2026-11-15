@@ -229,11 +229,16 @@
             { archivo: 'seguro', fecha: 'vence_seguro', etiqueta: 'Seguro del espacio', vence: 'Vencimiento del seguro' },
             { archivo: 'habilitacion_pdf', fecha: 'vence_habilitacion', etiqueta: 'Habilitación del espacio', vence: 'Vencimiento de la habilitación' }
           ] %}
+            {# Al corregir, el que ya mandó: si no sube otro, queda ése #}
+            {% set anterior = corrigiendo and solicitud.documentos is defined ? solicitud.documentos|filter(d => d.campo == documento.archivo)|first : null %}
+            {% if anterior %}
+              <p class="solicitud-documento-actual">Mandaste <a href="{{ anterior.url }}" download>este PDF</a>, que vence el {{ anterior.vence }}.</p>
+            {% endif %}
             {% include 'parciales/campo.html.twig' with reglas[documento.archivo]|merge({
               nombre: documento.archivo,
-              etiqueta: documento.etiqueta,
+              etiqueta: anterior ? 'Otro PDF: ' ~ documento.etiqueta|lower : documento.etiqueta,
               tipo: 'file',
-              ayuda: 'En PDF, hasta 5 MB.',
+              ayuda: 'En PDF, hasta 5 MB.' ~ (anterior ? ' Si no subís otro, queda el que mandaste.' : ''),
               errores: errores
             }) only %}
             {% include 'parciales/campo.html.twig' with reglas[documento.fecha]|merge({
