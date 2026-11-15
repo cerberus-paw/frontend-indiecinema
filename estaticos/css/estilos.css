@@ -8102,6 +8102,23 @@ a.tabla-admin-principal:focus-visible {
   margin-top: var(--espacio-4);
 }
 
+/* «Denunciar» en las fichas y en los comentarios (EF-07.8): discreto, pero subrayado para que se
+   lea como un link. */
+.ficha-denunciar {
+  margin-top: var(--espacio-4);
+}
+
+.enlace-denunciar {
+  color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+  text-decoration: underline;
+}
+
+.enlace-denunciar:hover,
+.enlace-denunciar:focus-visible {
+  color: inherit;
+}
+
 @media (max-width: 768px) {
   .ficha-obra-cabecera {
     grid-template-columns: 1fr;

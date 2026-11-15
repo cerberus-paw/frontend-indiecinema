@@ -7,8 +7,8 @@
   administrador. Cada uno ve sólo las secciones que puede abrir.
 
   Parámetros recibidos:
-  - activa: (string) la sección actual: 'usuarios', 'reservas', 'solicitudes', 'documentos' u
-    'obras'.
+  - activa: (string) la sección actual: 'usuarios', 'reservas', 'solicitudes', 'documentos',
+    'obras' o 'denuncias'.
   - usuario: el usuario en sesión.
   - csrf: el token del formulario para salir.
 #}
@@ -44,6 +44,9 @@
       </li>
       <li>
         <a href="/moderacion/obras" class="panel-menu-enlace{% if activa == 'obras' %} activo{% endif %}"{% if activa == 'obras' %} aria-current="page"{% endif %}>Obras</a>
+      </li>
+      <li>
+        <a href="/moderacion/denuncias" class="panel-menu-enlace{% if activa == 'denuncias' %} activo{% endif %}"{% if activa == 'denuncias' %} aria-current="page"{% endif %}>Denuncias</a>
       </li>
     </ul>
   </nav>

@@ -1,0 +1,71 @@
+{#
+  La denuncia de una sala, una función, una obra o un comentario, en
+  /moderacion/denuncias/nueva?tipo=…&id=… (EF-07.8). La hace cualquiera con sesión sobre lo
+  publicado que no es suyo, y llega a la pestaña «Denuncias» de la bandeja de moderación. Quien la
+  hizo no ve cómo termina.
+
+  Variables:
+  - denunciado: {tipo (sala, funcion, obra o calificacion), tipo_etiqueta, id, titulo, url (la
+    ficha del sitio donde se ve)}.
+  - categorias: lista de {valor, etiqueta}: las del tipo.
+  - valores: lo que mandó si hubo errores, {categoria, detalle}.
+  - errores: campo => qué está mal.
+  - maximo_detalle: el largo máximo del detalle, el mismo que controla el backend.
+  - enviada: si la acaba de mandar; en ese caso, la confirmación sin formulario.
+  - repetida: si ya tiene una abierta sobre esto; en ese caso no hay formulario.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Denunciar «{{ denunciado.titulo }}»{% endblock %}
+
+{% block contenido %}
+<div class="contenedor-formulario">
+  <header class="encabezado-formulario-solicitud">
+    <h1 class="solicitud-titulo">Denunciar «{{ denunciado.titulo }}»</h1>
+    <p class="solicitud-bajada">
+      {{ denunciado.tipo_etiqueta }}. Contanos qué pasa: la moderación de IndieCinema lo revisa y,
+      si corresponde, lo saca del sitio. Quien publicó esto no sabe quién lo denunció.
+    </p>
+  </header>
+
+  {% if enviada %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Recibimos tu denuncia. La revisa la moderación.' } only %}
+    <p><a href="{{ denunciado.url }}" class="boton boton-secundario">Volver a «{{ denunciado.titulo }}»</a></p>
+  {% elseif repetida %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Ya denunciaste esto: la está revisando la moderación.' } only %}
+    <p><a href="{{ denunciado.url }}" class="boton boton-secundario">Volver a «{{ denunciado.titulo }}»</a></p>
+  {% else %}
+    {% include 'parciales/resumen_de_errores.html.twig' with { errores: errores } only %}
+    <form action="{{ prefijo }}/denuncias/nueva?tipo={{ denunciado.tipo|url_encode }}&amp;id={{ denunciado.id|url_encode }}" method="post" class="formulario-denuncia">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      <fieldset id="categoria" class="bandeja-caja{% if errores.categoria is defined %} con-error{% endif %}">
+        <legend class="bandeja-caja-titulo">¿De qué se trata? <span aria-hidden="true">*</span></legend>
+        {% for categoria in categorias %}
+          <label class="bandeja-opcion">
+            <input type="radio" name="categoria" value="{{ categoria.valor }}" required{% if (valores.categoria ?? '') == categoria.valor %} checked{% endif %}{% if errores.categoria is defined %} aria-invalid="true" aria-describedby="error-categoria"{% endif %}>
+            {{ categoria.etiqueta }}
+          </label>
+        {% endfor %}
+        {% if errores.categoria is defined %}
+          <span id="error-categoria" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.categoria }}</span>
+        {% endif %}
+      </fieldset>
+
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'detalle',
+        etiqueta: 'Detalle',
+        tipo: 'textarea',
+        filas: 5,
+        valor: valores.detalle ?? '',
+        maximo: maximo_detalle,
+        ayuda: 'Opcional, salvo en «Otro». Lo lee sólo la moderación.',
+        errores: errores
+      } only %}
+
+      <div class="formulario-acciones">
+        <button type="submit" class="boton boton-primario">Enviar la denuncia</button>
+      </div>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
