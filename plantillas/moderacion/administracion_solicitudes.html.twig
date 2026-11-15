@@ -5,12 +5,12 @@
   obligatorio. Una pendiente también pasa a revisión manual (EF-07.6) y sigue en la lista, con su
   marca, hasta que se aprueba o se rechaza. «Ver historial de decisiones» lista las resueltas;
   desde una aprobada la sala se retira del sitio o se vuelve a publicar, con un motivo que queda
-  en el registro. Queda afuera lo que todavía no existe: el checklist, la categoría y guardar sin
-  enviar.
+  en el registro. Cada resolución lleva el checklist de requisitos (EF-07.9): aprobar exige los
+  cuatro puntos. Queda afuera lo que todavía no existe: la categoría y guardar sin enviar.
 
   Resolver es un POST con el token CSRF, la resolución (aprobar, rechazar o, en una pendiente,
-  revision) y el motivo, que se le muestra a quien la mandó. Aprobarla publica la sala y le da el
-  rol de organizador.
+  revision), el motivo, que se le muestra a quien la mandó, y los puntos tildados del checklist
+  (requisitos[]). Aprobarla publica la sala y le da el rol de organizador.
 
   Variables:
   - historial: si la lista es la de las resueltas.
@@ -32,7 +32,9 @@
     resuelve ni retira su sala (EF-07.3); se ve sin los formularios. en_el_sitio es cómo está la sala de una aprobada según
     programación: 'publicada', 'retirada', 'dada_de_baja', o 'desconocido' si programación no
     respondió; null en las que no están aprobadas.
-  - valores: lo que mandó si hubo errores, {resolucion, motivo, motivo_sala}.
+  - valores: lo que mandó si hubo errores, {resolucion, motivo, requisitos (las claves tildadas),
+    motivo_sala}.
+  - requisitos (EF-07.9): los puntos del checklist, lista de {clave, nombre, aclaracion}.
   - errores: campo => qué está mal.
   - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
   - mensaje_exito: el aviso de lo que se acaba de hacer (opcional).
@@ -247,6 +249,26 @@
                   <span id="error-resolucion" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.resolucion }}</span>
                 {% endif %}
               </fieldset>
+              {# EF-07.9: lo que controló, un checkbox por punto con lo que hay que mirar. Arranca
+                 vacío; si volvió con errores, con lo que había tildado #}
+              {% if requisitos is defined %}
+                {% set tildados = valores.requisitos ?? [] %}
+                <fieldset id="requisitos" class="bandeja-caja{% if errores.requisitos is defined %} con-error{% endif %}">
+                  <legend class="bandeja-caja-titulo">Requisitos</legend>
+                  {% for requisito in requisitos %}
+                    <label class="bandeja-opcion bandeja-requisito">
+                      <input type="checkbox" name="requisitos[]" value="{{ requisito.clave }}"{% if requisito.clave in tildados %} checked{% endif %} aria-describedby="aclaracion-{{ requisito.clave }}{% if errores.requisitos is defined %} error-requisitos{% endif %}">
+                      <span>
+                        {{ requisito.nombre }}
+                        <span id="aclaracion-{{ requisito.clave }}" class="bandeja-requisito-aclaracion">{{ requisito.aclaracion }}</span>
+                      </span>
+                    </label>
+                  {% endfor %}
+                  {% if errores.requisitos is defined %}
+                    <span id="error-requisitos" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.requisitos }}</span>
+                  {% endif %}
+                </fieldset>
+              {% endif %}
           {% else %}
             <div class="bandeja-caja">
               <p class="bandeja-caja-titulo">Resolución</p>

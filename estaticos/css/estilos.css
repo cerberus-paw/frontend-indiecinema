@@ -6640,6 +6640,22 @@ a.tabla-admin-principal:focus-visible {
   accent-color: var(--color-primario);
 }
 
+/* Un punto del checklist de requisitos (EF-07.9): el checkbox arriba, junto al nombre, y la
+   aclaración debajo, más apagada */
+.bandeja-requisito {
+  align-items: flex-start;
+}
+
+.bandeja-requisito input {
+  margin-top: 0.2em;
+}
+
+.bandeja-requisito-aclaracion {
+  display: block;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-apagado);
+}
+
 /* El error de la resolución, debajo de las opciones */
 .bandeja-caja .campo-error {
   clear: both;
