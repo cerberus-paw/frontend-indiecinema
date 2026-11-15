@@ -93,11 +93,13 @@
         <span class="seccion-subtitulo">Lo revisa la moderación. Si ya mandaste uno del mismo tipo y espera revisión, éste lo reemplaza.</span>
       </legend>
       <div class="seccion-campos">
+        {# Un select obligatorio empieza con una opción vacía: lo pide el validador del W3C #}
         {% include 'parciales/campo.html.twig' with reglas.tipo|merge({
           nombre: 'tipo',
           etiqueta: 'Qué documento es',
           tipo: 'select',
           opciones: { seguro: 'Seguro del espacio', habilitacion: 'Habilitación del espacio' },
+          placeholder: 'Elegí cuál',
           valor: valores.tipo ?? 'seguro',
           errores: errores
         }) only %}
