@@ -17,14 +17,18 @@
   - q: lo que se buscó.
   - total_pendientes: cuántas esperan, para la pestaña.
   - total_en_la_lista: cuántas hay en la lista, aunque muestre menos.
-  - solicitudes: lista de {id, estado, sala, localidad, solicitante (o null), enviada, elegida}.
+  - solicitudes: lista de {id, estado, sala, localidad, solicitante (o null), enviada, cambio,
+    elegida}. cambio (EF-07.6): si es un pedido de cambio de dirección de una sala publicada.
   - elegida: {id, estado, enviada, resuelta, motivo, revision, sala: {id, nombre, localidad, capacidad,
     imagen, descripcion, direccion, peliculas_por_funcion, duracion_funcion,
     tiempo_entre_funciones}, en_el_sitio, documentos (EF-07.4: lista de {nombre, vence, vencido,
     estado, url}, vacía en las que se mandaron antes de que se pidiera), solicitante: {nombre, correo, cuenta_creada,
     es_organizador} (null si ya no existe, false si cuentas no respondió), solicitante_nombre,
     solicitudes_previas, propia}, o null. revision (EF-07.6): {motivo, fecha} si pasó por la
-    revisión manual, o null. estado: pendiente, en_revision_manual, aprobada o rechazada. propia: la mandó el moderador en sesión, que no la
+    revisión manual, o null. estado: pendiente, en_revision_manual, aprobada o rechazada. cambio
+    (EF-07.6): si es un pedido de cambio de dirección; direccion_actual: la que tiene la sala
+    ahora, en un cambio abierto ('Av. San Martín 450, Luján'), false si programación no respondió,
+    o null. propia: la mandó el moderador en sesión, que no la
     resuelve ni retira su sala (EF-07.3); se ve sin los formularios. en_el_sitio es cómo está la sala de una aprobada según
     programación: 'publicada', 'retirada', 'dada_de_baja', o 'desconocido' si programación no
     respondió; null en las que no están aprobadas.
@@ -99,6 +103,9 @@
                 <span class="bandeja-item-sala">{{ solicitud.sala }}</span>
                 <span class="{{ clases[solicitud.estado] }}">{{ estados[solicitud.estado] }}</span>
               </span>
+              {% if solicitud.cambio is defined and solicitud.cambio %}
+                <span class="bandeja-item-datos"><span aria-hidden="true">🔁</span> Cambio de dirección</span>
+              {% endif %}
               <span class="bandeja-item-datos">{{ solicitud.solicitante ? solicitud.solicitante ~ ' · ' : '' }}{{ solicitud.localidad }}</span>
               <span class="bandeja-item-datos"><span aria-hidden="true">📅</span> Enviada {{ solicitud.enviada }}</span>
             </a>
@@ -123,8 +130,20 @@
         <h2 id="titulo-solicitud" class="bandeja-detalle-titulo">{{ sala.nombre }}</h2>
         <span class="{{ clases[elegida.estado] }}">{{ estados[elegida.estado] }}</span>
       </header>
+      {# EF-07.6: con is defined, por si el back todavía no los manda #}
+      {% set cambio = elegida.cambio is defined and elegida.cambio %}
+      {% if cambio %}
+        <p class="bandeja-detalle-datos">
+          <strong>Cambio de dirección</strong> de una sala publicada: sigue con la dirección de antes hasta que lo apruebes.
+          {% if elegida.direccion_actual is defined and elegida.direccion_actual is same as(false) %}
+            No pudimos consultar la dirección que tiene ahora.
+          {% elseif elegida.direccion_actual is defined and elegida.direccion_actual %}
+            Ahora: {{ elegida.direccion_actual }}.
+          {% endif %}
+        </p>
+      {% endif %}
       <p class="bandeja-detalle-datos bandeja-detalle-meta">
-        <span><span aria-hidden="true">📍</span> {{ sala.direccion }}, {{ sala.localidad }}</span>
+        <span><span aria-hidden="true">📍</span> {{ cambio ? 'Nueva: ' : '' }}{{ sala.direccion }}, {{ sala.localidad }}</span>
         <span><span aria-hidden="true">👥</span> {{ sala.capacidad }} lugares declarados</span>
         <span>Enviada el {{ elegida.enviada }}</span>
       </p>
