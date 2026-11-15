@@ -21,7 +21,8 @@
     <div class="error-acciones">
       {% if estado == 401 %}
         {# Para no autenticado, botón directo hacia el inicio de sesión del subsistema de cuentas #}
-        <a href="/cuenta/ingresar" class="boton boton-primario">Ingresar</a>
+        {# Después de ingresar, vuelve a la página pedida (EF-07.8) #}
+        <a href="/cuenta/ingresar{% if ruta_pedida is defined %}?volver={{ (prefijo ~ ruta_pedida)|url_encode }}{% endif %}" class="boton boton-primario">Ingresar</a>
         <a href="/" class="boton boton-secundario">Volver al inicio</a>
       {% else %}
         {# Para otros estados (404, 403, 500…), de vuelta a la portada, y la cartelera como alternativa #}

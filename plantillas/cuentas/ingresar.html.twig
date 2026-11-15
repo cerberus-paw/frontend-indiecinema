@@ -7,6 +7,7 @@
   - valores: (array/map, opcional) Lo que cargó el usuario (sólo el correo: la contraseña no vuelve).
   - errores: (array/map, opcional) Diccionario de errores de validación por campo.
   - error_general: (string, opcional) Error que no es de un campo, como un correo o una contraseña incorrectos.
+  - volver: (string o null) la ruta del sitio adonde volver después de ingresar (EF-07.8).
 #}
 {% extends 'base.html.twig' %}
 
@@ -34,6 +35,10 @@
     <form action="/cuenta/ingresar" method="POST" class="formulario-ingreso" novalidate>
       {# Campo oculto para el token de protección contra ataques CSRF #}
       <input type="hidden" name="_csrf" value="{{ csrf }}">
+      {# La página adonde volver después de ingresar (EF-07.8), si el back la aceptó #}
+      {% if volver is defined and volver %}
+        <input type="hidden" name="volver" value="{{ volver }}">
+      {% endif %}
 
       {% include 'parciales/campo.html.twig' with {
         nombre: 'email',
