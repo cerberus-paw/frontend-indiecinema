@@ -5,9 +5,15 @@
   contraseña todavía no tienen ruta en el back, así que quedan afuera el formulario, «Editar
   perfil» y «Seguridad». También las secciones de la barra sin pantalla y «Eliminar mi cuenta».
 
+  «Mi solicitud de sala» (EF-07.6) muestra en qué quedó la última solicitud de sala, con el enlace
+  a /solicitar-sala para verla o, si la rechazaron, corregirla y reenviarla.
+
   Variables:
   - cuenta: {nombre, correo, roles (lista de 'espectador', 'organizador', 'moderador' o
     'administrador', de menor a mayor), desde ('marzo de 2025')}.
+  - solicitud_de_sala (opcional): {estado (pendiente, en_revision_manual, aprobada o rechazada),
+    sala, motivo (o null), fecha (dd/mm/aaaa)}. No viene si nunca mandó una o si moderación no
+    respondió.
 #}
 {% extends 'cuenta.html.twig' %}
 
@@ -46,5 +52,33 @@
       <dd>{{ cuenta.correo }}</dd>
     </div>
   </dl>
+
+  {% if solicitud_de_sala is defined %}
+    {% set solicitud = solicitud_de_sala %}
+    <h2 class="mi-cuenta-subtitulo">Mi solicitud de sala</h2>
+    <dl class="mi-cuenta-datos">
+      <div>
+        <dt>Sala</dt>
+        <dd>{{ solicitud.sala }}</dd>
+      </div>
+      <div>
+        <dt>Estado</dt>
+        <dd>{{ {
+          pendiente: 'Enviada el ',
+          en_revision_manual: 'En revisión manual desde el ',
+          aprobada: 'Aprobada el ',
+          rechazada: 'Rechazada el '
+        }[solicitud.estado] ?? '' }}{{ solicitud.fecha }}</dd>
+      </div>
+      {% if solicitud.motivo %}
+        <div>
+          <dt>Motivo</dt>
+          {# nl2br escapa antes de agregar los <br> #}
+          <dd>{{ solicitud.motivo|nl2br }}</dd>
+        </div>
+      {% endif %}
+    </dl>
+    <p><a href="/solicitar-sala" class="enlace-destacado">{{ solicitud.estado == 'rechazada' ? 'Corregirla y reenviarla' : 'Ver la solicitud' }}</a></p>
+  {% endif %}
 </section>
 {% endblock %}
