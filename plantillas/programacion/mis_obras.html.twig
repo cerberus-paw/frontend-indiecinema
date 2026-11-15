@@ -4,7 +4,8 @@
   editar y dar de baja (solo si no tienen funciones futuras programadas).
 
   Variables:
-  - obras: lista de obras del organizador.
+  - obras: lista de obras del organizador. Cada una con estado (EF-07.7): pendiente, aprobada o
+    rechazada; sólo la aprobada está en el catálogo y tiene ficha pública.
   - creada: (bool) aviso de que se acaba de cargar una obra nueva.
   - guardada: (bool) aviso de que se guardaron los cambios de una obra.
   - dada_de_baja: (bool) aviso de que la obra fue dada de baja lógicamente.
@@ -42,7 +43,7 @@
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       titulo: '¡Obra cargada!',
-      mensaje: 'La obra se cargó exitosamente en el catálogo y ya podés seleccionarla al proponer funciones.'
+      mensaje: 'La moderación la revisa antes de que entre en el catálogo: cuando la apruebe, vas a poder elegirla al proponer funciones.'
     } only %}
   {% endif %}
 
@@ -88,9 +89,12 @@
       {% for obra in obras %}
         {% set tiene_futuras = obra.tiene_funciones_futuras|default(false) %}
         {% set duracion_obra = obra.duracion_minutos ?? (obra.duracion ?? null) %}
+        {# EF-07.7: con is defined, por si el back todavía no lo manda #}
+        {% set estado_obra = obra.estado is defined ? obra.estado : 'aprobada' %}
+        {% set publicada = estado_obra == 'aprobada' %}
         <article class="tarjeta-funcion tarjeta-obra tarjeta-mi-obra" aria-label="{{ obra.titulo }}{% if obra.anio %} ({{ obra.anio }}){% endif %}">
           <div class="tarjeta-funcion-afiche">
-            <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">
+            {% if publicada %}<a href="/obras/{{ obra.id }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">{% endif %}
               {% if obra.afiche ?? false %}
                 <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="tarjeta-funcion-imagen" loading="lazy">
               {% else %}
@@ -99,7 +103,7 @@
                   <span class="afiche-placeholder-texto">AFICHE</span>
                 </div>
               {% endif %}
-            </a>
+            {% if publicada %}</a>{% endif %}
           </div>
 
           <div class="tarjeta-funcion-cuerpo">
@@ -112,10 +116,19 @@
               {% if obra.anio is defined and obra.anio %}
                 <span class="tarjeta-obra-anio">{{ obra.anio }}</span>
               {% endif %}
+              {% if estado_obra == 'pendiente' %}
+                <span class="estado-cuenta estado-cuenta-revision">Pendiente de revisión</span>
+              {% elseif estado_obra == 'rechazada' %}
+                <span class="estado-cuenta estado-cuenta-suspendida">Rechazada</span>
+              {% endif %}
             </div>
 
             <h3 class="tarjeta-funcion-titulo">
-              <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-titulo-enlace">{{ obra.titulo }}</a>
+              {% if publicada %}
+                <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-titulo-enlace">{{ obra.titulo }}</a>
+              {% else %}
+                {{ obra.titulo }}
+              {% endif %}
             </h3>
 
             <div class="tarjeta-funcion-meta">
@@ -150,7 +163,9 @@
             {# Acciones: Ver ficha, Editar y Dar de baja #}
             <div class="tarjeta-mi-obra-acciones">
               <div class="acciones-fila-enlaces">
-                <a href="/obras/{{ obra.id }}" class="boton boton-secundario boton-chico">Ver ficha</a>
+                {% if publicada %}
+                  <a href="/obras/{{ obra.id }}" class="boton boton-secundario boton-chico">Ver ficha</a>
+                {% endif %}
                 <a href="/organizador/obras/{{ obra.id }}/editar" class="boton boton-secundario boton-chico">Editar</a>
               </div>
 
