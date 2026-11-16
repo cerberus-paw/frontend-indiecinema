@@ -1,0 +1,186 @@
+{#
+  Pedir un título ausente en el catálogo de IndieCinema, en /pedidos/nuevo (EF-11.1 / IC-576).
+  Si ya existe un pedido parecido (mismo título sin distinguir tildes ni mayúsculas y mismo año),
+  muestra «Ya lo pidieron» para que el espectador se sume en vez de duplicar el pedido.
+
+  Variables:
+  - reglas: campo => reglas de validación para HTML5 y validación en línea.
+  - valores: {titulo, anio, director}.
+  - errores: campo => mensaje de error.
+  - parecidos: lista de pedidos parecidos encontrados al enviar.
+  - pedido_actual: último pedido creado o actualizado, o null.
+  - error_general: mensaje general de error, o null.
+  - mensaje_exito: mensaje de confirmación tras crear, sumarse o quitar adhesión, o null.
+  - aviso: advertencia cuando no corresponde repetir adhesión o el pedido ya fue tomado, o null.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Pedir un título{% endblock %}
+
+{% block contenido %}
+<div class="contenedor-formulario-amplio">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga"><a href="/obras" class="enlace-miga">Películas</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Pedir un título</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Pedir un título</h1>
+      <p class="solicitud-bajada">
+        Contanos qué película o cortometraje te gustaría ver en las salas de IndieCinema. Si ya la
+        pidió otra persona, podés sumarte para que alcance el umbral y pase a las salas disponibles.
+      </p>
+    </div>
+  </header>
+
+  {% if mensaje_exito %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: 'Pedido actualizado',
+      mensaje: mensaje_exito
+    } only %}
+  {% endif %}
+
+  {% if aviso %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      titulo: 'Aviso',
+      mensaje: aviso
+    } only %}
+  {% endif %}
+
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    errores: errores ?? {},
+    error_general: error_general ?? null,
+    titulo: 'No se pudo enviar el pedido'
+  } only %}
+
+  {% if parecidos is not empty %}
+    <section class="seccion-formulario" aria-labelledby="ya-lo-pidieron-titulo">
+      <h2 id="ya-lo-pidieron-titulo" class="seccion-titulo">Ya lo pidieron</h2>
+      <p class="seccion-subtitulo">
+        Encontramos un pedido parecido. Podés sumarte para que alcance antes el umbral de activación.
+      </p>
+      <ul class="lista-pedidos-parecidos">
+        {% for parecido in parecidos %}
+          <li class="item-pedido-parecido">
+            <p>
+              <strong>{{ parecido.titulo }}</strong> ({{ parecido.anio }}) · Dirección: {{ parecido.director }}
+              · {{ parecido.adhesiones }} {{ parecido.adhesiones == 1 ? 'adhesión' : 'adhesiones' }}
+              · Estado: {{ parecido.estado_etiqueta }}
+            </p>
+            {% if parecido.estado == 'tomado' and parecido.obra_id %}
+              <p><a href="/obras/{{ parecido.obra_id }}" class="enlace-destacado">Ver en el catálogo</a></p>
+            {% elseif parecido.adherido %}
+              <p>Ya te sumaste a este pedido.</p>
+              <form action="/pedidos/{{ parecido.id }}/sumarme" method="post">
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                <input type="hidden" name="quitar" value="1">
+                {% include 'parciales/boton.html.twig' with {
+                  texto: 'Dejar de pedirlo',
+                  tipo: 'submit',
+                  variante: 'secundario',
+                  tamano: 'chico'
+                } only %}
+              </form>
+            {% else %}
+              <form action="/pedidos/{{ parecido.id }}/sumarme" method="post">
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                {% include 'parciales/boton.html.twig' with {
+                  texto: 'Sumarme',
+                  tipo: 'submit',
+                  variante: 'primario',
+                  tamano: 'chico'
+                } only %}
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if pedido_actual %}
+    <section class="seccion-formulario" aria-labelledby="pedido-actual-titulo">
+      <h2 id="pedido-actual-titulo" class="seccion-titulo">{{ pedido_actual.titulo }} ({{ pedido_actual.anio }})</h2>
+      <p>
+        Dirección: {{ pedido_actual.director }}
+        · {{ pedido_actual.adhesiones }} {{ pedido_actual.adhesiones == 1 ? 'adhesión' : 'adhesiones' }}
+        · Estado: {{ pedido_actual.estado_etiqueta }}
+      </p>
+      {% if pedido_actual.estado == 'tomado' and pedido_actual.obra_id %}
+        <p><a href="/obras/{{ pedido_actual.obra_id }}" class="enlace-destacado">Ver en el catálogo</a></p>
+      {% else %}
+        <form action="/pedidos/{{ pedido_actual.id }}/sumarme" method="post">
+          <input type="hidden" name="_csrf" value="{{ csrf }}">
+          {% if pedido_actual.adherido %}
+            <input type="hidden" name="quitar" value="1">
+            {% include 'parciales/boton.html.twig' with {
+              texto: 'Dejar de pedirlo',
+              tipo: 'submit',
+              variante: 'secundario',
+              tamano: 'chico'
+            } only %}
+          {% else %}
+            {% include 'parciales/boton.html.twig' with {
+              texto: 'Sumarme',
+              tipo: 'submit',
+              variante: 'primario',
+              tamano: 'chico'
+            } only %}
+          {% endif %}
+        </form>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  <form action="/pedidos/nuevo" method="post" data-validar-en-linea>
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+    <fieldset class="seccion-formulario seccion-lateral">
+      <legend class="seccion-leyenda">
+        <span class="seccion-titulo">Datos de la película</span>
+        <span class="seccion-subtitulo">Indicá el título, el año de estreno y quién la dirigió.</span>
+      </legend>
+      <div class="seccion-campos">
+        {% include 'parciales/campo.html.twig' with reglas.titulo|merge({
+          nombre: 'titulo',
+          etiqueta: 'Título',
+          valor: valores.titulo ?? '',
+          placeholder: 'La ciénaga',
+          errores: errores
+        }) only %}
+
+        <div class="fila-campos-doble">
+          {% include 'parciales/campo.html.twig' with reglas.anio|merge({
+            nombre: 'anio',
+            etiqueta: 'Año de estreno',
+            tipo: 'number',
+            valor: valores.anio ?? '',
+            placeholder: '2001',
+            errores: errores
+          }) only %}
+          {% include 'parciales/campo.html.twig' with reglas.director|merge({
+            nombre: 'director',
+            etiqueta: 'Director o directora',
+            valor: valores.director ?? '',
+            placeholder: 'Lucrecia Martel',
+            errores: errores
+          }) only %}
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="solicitud-acciones-inferior">
+      {% include 'parciales/boton.html.twig' with { texto: 'Pedir título', tipo: 'submit', variante: 'primario' } only %}
+      <a href="/obras" class="boton boton-secundario">Volver a películas</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
