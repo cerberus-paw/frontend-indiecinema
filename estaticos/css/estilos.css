@@ -4167,12 +4167,12 @@ dd {
   padding: var(--espacio-10) var(--espacio-12);
 }
 
-/* Los cuatro pasos en una fila */
+/* Los seis pasos en filas de a tres */
 .acerca-de-lista-pasos {
   /* Cuadrícula */
   display: grid;
-  /* Cuatro columnas iguales */
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Tres columnas iguales */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   /* 32 px entre pasos */
   gap: var(--espacio-8);
   /* Sin la numeración ni el sangrado de la lista */
