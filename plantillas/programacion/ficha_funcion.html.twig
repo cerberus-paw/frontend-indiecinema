@@ -44,6 +44,10 @@
       - reservable: (bool) si todavía se puede reservar: no se canceló, no empezó ni está agotada. Con sesión se
         ve el formulario, que manda la reserva al subsistema funciones; sin sesión, el enlace
         para ingresar.
+      - aviso_conducta: (string|null, opcional) advertencia cuando el espectador está bajo el umbral
+        de conducta (EF-13.2).
+      - limite_conducta_alcanzado: (bool, opcional) true si además alcanzó su tope de reservas
+        simultáneas por conducta y no puede iniciar otra hasta liberar una.
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
   - funcion.votacion_cierra: (string|null) hasta cuándo se vota, «15 nov 20:00» (EF-03.1); funcion.votacion_vencida:
@@ -246,10 +250,18 @@
              ocupación (IC-463): los componentes los leen de acá y no tienen su propio número. Sin
              el dato (funciones no respondió), el campo llega hasta los lugares o el cupo y la
              reserva la controla funciones igual. #}
+          {% set aviso_conducta = funcion.aviso_conducta|default(null) %}
+          {% set bloqueado_conducta = funcion.limite_conducta_alcanzado|default(false) %}
+          {% if aviso_conducta %}
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'advertencia',
+              mensaje: aviso_conducta
+            } only %}
+          {% endif %}
           {% set tope_por_persona = funcion.maximo_por_persona|default(null) %}
           {% set restantes_usuario = funcion.lugares_restantes_usuario|default(null) %}
-          {% set sin_lugares_propios = restantes_usuario is same as(0) %}
-          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva{% if tope_por_persona is not null and restantes_usuario is not null %} data-maximo-por-persona="{{ tope_por_persona }}" data-restantes-usuario="{{ restantes_usuario }}"{% endif %}>
+          {% set sin_lugares_propios = (restantes_usuario is same as(0)) or bloqueado_conducta %}
+          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva{% if tope_por_persona is not null and restantes_usuario is not null %} data-maximo-por-persona="{{ tope_por_persona }}" data-restantes-usuario="{{ restantes_usuario }}"{% endif %}{% if bloqueado_conducta %} data-bloqueado-conducta="1"{% endif %}>
             <input type="hidden" name="_csrf" value="{{ csrf }}">
             {# valor_maximo nunca menos de 1: con el tope alcanzado el campo va deshabilitado, y un
                max por debajo del min no tiene sentido. #}
