@@ -7972,6 +7972,18 @@ a.tabla-admin-principal:focus-visible {
   flex-wrap: wrap;
 }
 
+.mi-cuenta-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-6);
+}
+
+.mi-cuenta-formulario {
+  max-width: 32rem;
+  margin-top: var(--espacio-4);
+}
+
 /* El comprobante en papel (E4-04.2): sólo el código y los datos de la reserva, en negro sobre
    blanco y sin el resto del sitio, para que entre en una hoja y se lea en la puerta */
 @media print {

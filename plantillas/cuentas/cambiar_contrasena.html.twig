@@ -1,0 +1,71 @@
+{#
+  Cambio de contraseña desde «Mi cuenta» en /cuenta/contrasena (EF-15.1 / IC-563).
+
+  Variables:
+  - errores: (map) errores por campo (contrasena_actual, password, password_confirmacion)
+  - actualizada: (bool, opcional) true tras actualizar la contraseña
+#}
+{% extends 'cuenta.html.twig' %}
+
+{% block titulo %}Cambiar contraseña{% endblock %}
+{% block seccion %}contrasena{% endblock %}
+{% block miga %}Contraseña{% endblock %}
+
+{% block panel %}
+<section class="mi-cuenta-panel" aria-labelledby="cambiar-contrasena-titulo">
+  <h1 id="cambiar-contrasena-titulo" class="solicitud-titulo">Cambiar contraseña</h1>
+  <p class="solicitud-bajada">Elegí una contraseña nueva. Al guardarla se cerrarán tus sesiones abiertas en otros navegadores.</p>
+
+  {% if actualizada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      mensaje: 'Tu contraseña quedó actualizada.'
+    } only %}
+  {% endif %}
+
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    errores: errores ?? {},
+    titulo: 'No pudimos actualizar la contraseña'
+  } only %}
+
+  <form action="/cuenta/contrasena" method="POST" class="mi-cuenta-formulario" novalidate>
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'contrasena_actual',
+      etiqueta: 'Contraseña actual',
+      tipo: 'password',
+      errores: errores ?? {},
+      requerido: true,
+      autocompletar: 'current-password'
+    } only %}
+
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'password',
+      etiqueta: 'Nueva contraseña',
+      tipo: 'password',
+      errores: errores ?? {},
+      requerido: true,
+      ayuda: 'Entre 8 y 128 caracteres, con letras y números.',
+      autocompletar: 'new-password'
+    } only %}
+
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'password_confirmacion',
+      etiqueta: 'Confirmar nueva contraseña',
+      tipo: 'password',
+      errores: errores ?? {},
+      requerido: true,
+      autocompletar: 'new-password'
+    } only %}
+
+    <div class="formulario-acciones">
+      {% include 'parciales/boton.html.twig' with {
+        texto: 'Actualizar contraseña',
+        tipo: 'submit',
+        variante: 'primario'
+      } only %}
+    </div>
+  </form>
+</section>
+{% endblock %}
