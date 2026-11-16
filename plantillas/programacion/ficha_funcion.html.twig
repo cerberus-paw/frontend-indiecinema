@@ -244,7 +244,19 @@
             </div>
           {% endif %}
         </div>
-        {% if usuario %}
+        {% if usuario and not usuario.correoVerificado %}
+          <div class="ficha-reserva-formulario">
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'advertencia',
+              mensaje: 'Verificá tu correo para reservar.'
+            } only %}
+            {% include 'parciales/boton.html.twig' with {
+              texto: 'Ir a Mi cuenta',
+              url: '/cuenta',
+              variante: 'secundario'
+            } only %}
+          </div>
+        {% elseif usuario %}
           {# data-formulario-reserva: el enganche del componente que lo manda sin recargar (E4-05.3).
              El tope por persona y lo que le queda al espectador los manda funciones con la
              ocupación (IC-463): los componentes los leen de acá y no tienen su propio número. Sin
@@ -379,6 +391,12 @@
         {% endif %}
 
         {% if usuario %}
+          {% if not usuario.correoVerificado and not funcion.votacion_vencida|default(false) %}
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'advertencia',
+              mensaje: 'Verificá tu correo para votar.'
+            } only %}
+          {% endif %}
           {# Mensaje de estado si ya emitió un voto #}
           {% if tiene_voto %}
             <div class="ficha-votacion-aviso-voto" role="status">
@@ -442,6 +460,8 @@
                       <div class="candidata-voto-registrado" role="status">
                         <span class="voto-registrado-texto">Esta es tu elección actual. Podés cambiarla votando por otra candidata.</span>
                       </div>
+                    {% elseif not usuario.correoVerificado %}
+                      {# Sin correo verificado: se muestra el aviso arriba y se oculta el botón. #}
                     {% else %}
                       <form action="{{ accion_voto|default('/cartelera/' ~ funcion.id ~ '/votar') }}" method="POST" class="formulario-voto-obra" data-formulario-voto>
                         <input type="hidden" name="_csrf" value="{{ csrf }}">
@@ -543,7 +563,7 @@
       {# El organizador no marca sus propias franjas: el mínimo lo junta el público (E3-13.F7). Pasada
          la fecha límite no se marca más, aunque falte que el organizador confirme (E3-13.F8). #}
       {% set se_vota = not sin_franjas and not es_sin_quorum and votacion_abierta %}
-      {% set marca_franjas = usuario and not es_organizador and se_vota %}
+      {% set marca_franjas = usuario and usuario.correoVerificado and not es_organizador and se_vota %}
       {% set franja_lider = funcion.franja_ganadora|default(null) %}
       {% set max_votos = franja_lider.votos|default(0) %}
 
@@ -652,6 +672,11 @@
 
             {% if not usuario and se_vota %}
               <p class="ficha-acuerdo-ingresar"><a href="/cuenta/ingresar">Ingresá</a> para marcar «Me sirve» en las franjas a las que podés ir.</p>
+            {% elseif usuario and not usuario.correoVerificado and not es_organizador and se_vota %}
+              {% include 'parciales/mensaje.html.twig' with {
+                tipo: 'advertencia',
+                mensaje: 'Verificá tu correo para votar y marcar «Me sirve» en las franjas.'
+              } only %}
             {% endif %}
 
             <ul class="ficha-franjas">
