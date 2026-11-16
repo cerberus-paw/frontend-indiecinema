@@ -245,17 +245,13 @@
           {% endif %}
         </div>
         {% if usuario and not usuario.correoVerificado %}
-          <div class="ficha-reserva-formulario">
-            {% include 'parciales/mensaje.html.twig' with {
-              tipo: 'advertencia',
-              mensaje: 'Verificá tu correo para reservar.'
-            } only %}
-            {% include 'parciales/boton.html.twig' with {
-              texto: 'Ir a Mi cuenta',
-              url: '/cuenta',
-              variante: 'secundario'
-            } only %}
-          </div>
+          {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+            clase: 'ficha-reserva-formulario',
+            mensaje: 'Verificá tu correo para reservar.',
+            csrf: csrf,
+            volver: '/cartelera/' ~ funcion.id,
+            reenviada: verificacion_reenviada|default(false)
+          } only %}
         {% elseif usuario %}
           {# data-formulario-reserva: el enganche del componente que lo manda sin recargar (E4-05.3).
              El tope por persona y lo que le queda al espectador los manda funciones con la
@@ -392,9 +388,11 @@
 
         {% if usuario %}
           {% if not usuario.correoVerificado and not funcion.votacion_vencida|default(false) %}
-            {% include 'parciales/mensaje.html.twig' with {
-              tipo: 'advertencia',
-              mensaje: 'Verificá tu correo para votar.'
+            {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+              mensaje: 'Verificá tu correo para votar.',
+              csrf: csrf,
+              volver: '/cartelera/' ~ funcion.id,
+              reenviada: verificacion_reenviada|default(false)
             } only %}
           {% endif %}
           {# Mensaje de estado si ya emitió un voto #}
@@ -673,9 +671,11 @@
             {% if not usuario and se_vota %}
               <p class="ficha-acuerdo-ingresar"><a href="/cuenta/ingresar">Ingresá</a> para marcar «Me sirve» en las franjas a las que podés ir.</p>
             {% elseif usuario and not usuario.correoVerificado and not es_organizador and se_vota %}
-              {% include 'parciales/mensaje.html.twig' with {
-                tipo: 'advertencia',
-                mensaje: 'Verificá tu correo para votar y marcar «Me sirve» en las franjas.'
+              {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+                mensaje: 'Verificá tu correo para votar y marcar «Me sirve» en las franjas.',
+                csrf: csrf,
+                volver: '/cartelera/' ~ funcion.id,
+                reenviada: verificacion_reenviada|default(false)
               } only %}
             {% endif %}
 
