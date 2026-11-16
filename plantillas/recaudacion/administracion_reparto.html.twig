@@ -1,0 +1,188 @@
+{#
+  «Reparto» del administrador, en /recaudacion/administracion/reparto (EF-08.1 / IC-559): con
+  cuánto se reparte lo cobrado de cada función paga entre la sala, el dueño de la obra y la
+  plataforma, desde cuándo rige y el historial de cambios. No hay frame en los wireframes de la E2:
+  sigue el armado de las pantallas del administrador (administracion-usuarios-parametros), con las
+  tarjetas de números arriba, el formulario y la tabla.
+
+  Un reparto no se corrige: cada cambio es una fila nueva con su vigencia, y las funciones
+  anteriores a esa fecha se siguen repartiendo con el de antes. Por eso la tabla es el historial
+  completo y no hay botón para editar ni para borrar.
+
+  Variables:
+  - vigente: el que rige ahora {sala, dueno, plataforma (ya escritos, «70 %»), vigente_desde,
+    rige, cargado_por (el id del administrador, o null si lo cargó la migración), cargado_en}, o
+    null si todavía no hay ninguno.
+  - historial: lista de lo mismo, del que rige último al primero. Los que todavía no empezaron a
+    valer van arriba, con rige en false.
+  - valores: {sala, dueno, plataforma, vigente_desde} para completar el formulario: el reparto que
+    rige, o lo que se mandó si volvió con errores.
+  - errores: mapa de errores por campo ('sala', 'dueno', 'plataforma', 'vigente_desde').
+  - error_general: (string, opcional) por qué no se pudo guardar (que no sumen 100 %, una vigencia
+    que ya pasó o repetida).
+  - guardado: (bool) aviso de que el reparto nuevo quedó cargado.
+#}
+{% extends 'administracion.html.twig' %}
+
+{% block titulo %}Reparto{% endblock %}
+
+{% block seccion %}reparto{% endblock %}
+
+{% block panel %}
+<header class="panel-cabecera">
+  <h1 class="panel-titulo">Reparto</h1>
+  <p class="panel-bajada">Con cuánto se reparte lo cobrado de cada función paga entre la sala, el dueño de la obra y la plataforma. Un cambio rige desde la fecha que elijas: las funciones anteriores se reparten con el de antes.</p>
+</header>
+
+{% if guardado %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'exito',
+    mensaje: 'El reparto quedó cargado. Las funciones anteriores a su vigencia siguen con el anterior.'
+  } only %}
+{% endif %}
+
+{% if vigente %}
+  <dl class="panel-resumen">
+    <div class="panel-dato">
+      <dt>Sala</dt>
+      <dd class="panel-dato-valor">{{ vigente.sala }}</dd>
+      <dd class="panel-dato-nota">de lo cobrado</dd>
+    </div>
+    <div class="panel-dato">
+      <dt>Dueño de la obra</dt>
+      <dd class="panel-dato-valor">{{ vigente.dueno }}</dd>
+      <dd class="panel-dato-nota">entre las obras elegidas</dd>
+    </div>
+    <div class="panel-dato">
+      <dt>Plataforma</dt>
+      <dd class="panel-dato-valor">{{ vigente.plataforma }}</dd>
+      <dd class="panel-dato-nota">rige desde el {{ vigente.vigente_desde }}</dd>
+    </div>
+  </dl>
+{% else %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'advertencia',
+    mensaje: 'Todavía no hay ningún reparto vigente: ninguna función paga se puede repartir hasta que cargues uno.'
+  } only %}
+{% endif %}
+
+{% include 'parciales/resumen_de_errores.html.twig' with {
+  errores: errores ?? {},
+  error_general: error_general ?? null,
+  titulo: 'No se pudo cargar el reparto'
+} only %}
+
+<section class="reporte-seccion" aria-labelledby="titulo-cambiar">
+  <h2 id="titulo-cambiar" class="reporte-subtitulo">Cambiar el reparto</h2>
+
+  <form action="/recaudacion/administracion/reparto" method="POST" class="formulario-sala">
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+    <fieldset class="seccion-formulario">
+      <legend class="seccion-leyenda">
+        <span class="seccion-titulo">Porcentajes y vigencia</span>
+        <span class="seccion-subtitulo">Los tres tienen que sumar 100 %. Se pueden usar hasta dos decimales, para repartos como 33,33 / 33,33 / 33,34.</span>
+      </legend>
+
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'sala',
+        etiqueta: 'Sala (%)',
+        tipo: 'number',
+        valor: valores.sala ?? '',
+        errores: errores ?? {},
+        requerido: true,
+        valor_minimo: 0,
+        valor_maximo: 100,
+        paso: '0.01',
+        ayuda: 'La parte del organizador de la sala donde se dio la función.'
+      } only %}
+
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'dueno',
+        etiqueta: 'Dueño de la obra (%)',
+        tipo: 'number',
+        valor: valores.dueno ?? '',
+        errores: errores ?? {},
+        requerido: true,
+        valor_minimo: 0,
+        valor_maximo: 100,
+        paso: '0.01',
+        ayuda: 'Si la función proyectó varias obras, esta parte se divide en partes iguales entre ellas.'
+      } only %}
+
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'plataforma',
+        etiqueta: 'Plataforma (%)',
+        tipo: 'number',
+        valor: valores.plataforma ?? '',
+        errores: errores ?? {},
+        requerido: true,
+        valor_minimo: 0,
+        valor_maximo: 100,
+        paso: '0.01',
+        ayuda: 'La comisión de IndieCinema. El redondeo de las partes también va acá.'
+      } only %}
+
+      {% include 'parciales/campo.html.twig' with {
+        nombre: 'vigente_desde',
+        etiqueta: 'Rige desde',
+        tipo: 'datetime-local',
+        valor: valores.vigente_desde ?? '',
+        errores: errores ?? {},
+        requerido: true,
+        ayuda: 'Puede ser más adelante, para anunciar el cambio antes de que valga. No puede empezar antes de ahora: lo que ya pasó no se vuelve a repartir.'
+      } only %}
+
+      <div class="pie-formulario-acciones">
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Cargar el reparto',
+          tipo: 'submit',
+          variante: 'primario'
+        } only %}
+      </div>
+    </fieldset>
+  </form>
+</section>
+
+<section class="reporte-seccion" aria-labelledby="titulo-historial">
+  <h2 id="titulo-historial" class="reporte-subtitulo">Historial de cambios</h2>
+
+  {% if historial is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'Todavía no hay cambios en el reparto.'
+    } only %}
+  {% else %}
+    <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Historial del reparto">
+      <table class="tabla-admin">
+        <thead>
+          <tr>
+            <th scope="col">Rige desde</th>
+            <th scope="col">Sala</th>
+            <th scope="col">Dueño</th>
+            <th scope="col">Plataforma</th>
+            <th scope="col">Cargado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for parametro in historial %}
+            <tr>
+              <td>
+                <span class="tabla-admin-principal">{{ parametro.vigente_desde }}</span>
+                <span class="tabla-admin-secundario">{{ parametro.rige ? 'rige ahora' : 'todavía no rige' }}</span>
+              </td>
+              <td>{{ parametro.sala }}</td>
+              <td>{{ parametro.dueno }}</td>
+              <td>{{ parametro.plataforma }}</td>
+              <td>
+                <span class="tabla-admin-principal">{{ parametro.cargado_en }}</span>
+                {# Quién lo cargó va por su id: recaudación no pide los nombres a cuentas todavía #}
+                <span class="tabla-admin-secundario">{{ parametro.cargado_por ?? 'carga inicial del sitio' }}</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
