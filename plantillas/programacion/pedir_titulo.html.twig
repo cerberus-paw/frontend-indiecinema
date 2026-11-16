@@ -25,6 +25,8 @@
       <li class="separador-miga" aria-hidden="true">/</li>
       <li class="item-miga"><a href="/obras" class="enlace-miga">Películas</a></li>
       <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga"><a href="/pedidos" class="enlace-miga">Pedidos de títulos</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
       <li class="item-miga miga-activa" aria-current="page">Pedir un título</li>
     </ol>
   </nav>
@@ -179,7 +181,8 @@
 
     <div class="solicitud-acciones-inferior">
       {% include 'parciales/boton.html.twig' with { texto: 'Pedir título', tipo: 'submit', variante: 'primario' } only %}
-      <a href="/obras" class="boton boton-secundario">Volver a películas</a>
+      <a href="/pedidos" class="boton boton-secundario">Ver ranking de pedidos</a>
+      <a href="/obras" class="boton boton-fantasma">Volver a películas</a>
     </div>
   </form>
 </div>
