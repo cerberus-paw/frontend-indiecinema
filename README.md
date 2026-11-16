@@ -66,7 +66,12 @@ frontend-indiecinema/
 │   │   ├── reservas_de_la_funcion.html.twig # Las reservas de una función para su organizador: asistencia y CSV
 │   │   └── administracion_reservas.html.twig # Todas las reservas para el administrador, con la anulación
 │   ├── moderacion/             # Del subsistema moderacion (EF-01): vacía hasta EF-07
-│   └── recaudacion/            # Del subsistema recaudacion (EF-02): vacía hasta EF-08
+│   └── recaudacion/            # Del subsistema recaudacion
+│       ├── reportes.html.twig  # Qué pasó en las salas en un período y qué conviene hacer (EF-09.1)
+│       ├── reportes_funciones.html.twig # Los totales de cada mes y las funciones de uno, con el CSV (EF-09.2)
+│       ├── reportes_obras.html.twig # Cómo le fue a cada obra del dueño, en cualquier sala (EF-09.3)
+│       ├── reportes_obra.html.twig # El detalle de una obra del dueño, con sus votaciones
+│       └── administracion_reparto.html.twig # Con cuánto se reparte lo cobrado y desde cuándo, para el administrador (EF-08.1)
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
     ├── css/
     │   └── estilos.css         # Hoja de estilos con paleta cinematográfica oscura y responsive
