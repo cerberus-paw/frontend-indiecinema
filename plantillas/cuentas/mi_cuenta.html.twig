@@ -7,7 +7,9 @@
 
   Variables:
   - cuenta: {nombre, correo, roles (lista de 'espectador', 'organizador', 'moderador' o
-    'administrador', de menor a mayor), desde ('marzo de 2025')}.
+    'administrador', de menor a mayor), desde ('marzo de 2025'), correo_verificado (bool)}.
+  - verificacion_reenviada: (bool, opcional) true si volvió del POST tras reenviar el enlace.
+  - error_verificacion: (string|null, opcional) error al reenviar el enlace.
 #}
 {% extends 'cuenta.html.twig' %}
 
@@ -34,6 +36,15 @@
 <section class="mi-cuenta-panel" aria-labelledby="mis-datos-titulo">
   <h1 id="mis-datos-titulo" class="solicitud-titulo">Mis datos</h1>
   <p class="solicitud-bajada">Con estos datos entrás a IndieCinema.</p>
+
+  {% if not (cuenta.correo_verificado ?? true) %}
+    {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+      mensaje: 'Hasta que lo confirmes no vas a poder votar ni reservar.',
+      csrf: csrf,
+      reenviada: verificacion_reenviada|default(false),
+      error_verificacion: error_verificacion|default(null)
+    } only %}
+  {% endif %}
 
   <h2 class="mi-cuenta-subtitulo">Información personal</h2>
   <dl class="mi-cuenta-datos">
