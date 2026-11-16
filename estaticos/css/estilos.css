@@ -5791,13 +5791,27 @@ dd {
   table-layout: fixed;
 }
 
-/* En partes del ancho: el rol arranca cerca del medio de la tabla, no contra el borde derecho */
+/* En partes del ancho: la conducta, el rol y el estado mantienen la tabla alineada entre páginas */
+.tabla-admin-columna-conducta {
+  width: 18%;
+}
+
 .tabla-admin-columna-rol {
-  width: 35%;
+  width: 26%;
 }
 
 .tabla-admin-columna-estado {
-  width: 20%;
+  width: 16%;
+}
+
+.tabla-admin-conducta {
+  display: block;
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.conducta-bajo-umbral {
+  color: var(--color-advertencia);
 }
 
 /* El desplegable del rol, del ancho del rol más largo y no de toda la columna, como el wireframe */
@@ -5929,6 +5943,10 @@ dd {
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
   background-color: var(--color-superficie);
+}
+
+.panel-dato-alerta {
+  border-color: var(--color-advertencia);
 }
 
 /* «USUARIOS REGISTRADOS», en versalitas como los títulos de las columnas */
