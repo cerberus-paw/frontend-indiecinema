@@ -13,7 +13,8 @@
   - estados: lista de {valor, etiqueta}, para el filtro.
   - filtro: (string|null) el estado elegido.
   - paginado: numero, total_paginas, total, anterior y siguiente (URL o null) y paginas: lista de
-    {numero, url, actual}.
+    {numero, url, actual}, con null donde se saltean páginas («…»): la primera, la última y dos a
+    cada lado de la actual, como «Usuarios y roles» (IC-656).
   - anulada: (string|null) el código de la reserva que se acaba de anular.
   - error_general: (string, opcional) por qué no se anuló.
 #}
@@ -130,7 +131,9 @@
     <nav class="paginado-numerado" aria-label="Páginas de reservas">
       <ul>
         {% for pagina in paginado.paginas %}
-          {% if pagina.actual %}
+          {% if pagina is null %}
+            <li class="paginado-salto" aria-hidden="true">…</li>
+          {% elseif pagina.actual %}
             <li><a href="{{ pagina.url }}" class="paginado-numero actual" aria-current="page">{{ pagina.numero }}</a></li>
           {% else %}
             <li><a href="{{ pagina.url }}" class="paginado-numero"{% if pagina.url == paginado.anterior %} rel="prev"{% elseif pagina.url == paginado.siguiente %} rel="next"{% endif %} aria-label="Página {{ pagina.numero }}">{{ pagina.numero }}</a></li>
