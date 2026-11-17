@@ -59,6 +59,14 @@
     } only %}
   {% endif %}
 
+  {% if pedido is defined and pedido %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      titulo: 'Pedido de la comunidad',
+      mensaje: 'Al guardar esta obra vas a tomar el pedido «' ~ pedido.titulo ~ ' (' ~ pedido.anio ~ ')» y avisar a quienes se sumaron.'
+    } only %}
+  {% endif %}
+
   {% set opciones_tipo = tipos_obra ?? [
     { valor: 'pelicula', etiqueta: 'Película' },
     { valor: 'cortometraje', etiqueta: 'Cortometraje' }
@@ -72,6 +80,11 @@
 
   <form action="{{ accion|default('/organizador/obras/nueva') }}" method="POST" enctype="multipart/form-data" class="formulario-sala formulario-alta-obra" data-validar-en-linea>
     <input type="hidden" name="_csrf" value="{{ csrf }}">
+    {% if pedido is defined and pedido %}
+      <input type="hidden" name="pedido_id" value="{{ pedido.id }}">
+    {% elseif valores.pedido_id is defined and valores.pedido_id %}
+      <input type="hidden" name="pedido_id" value="{{ valores.pedido_id }}">
+    {% endif %}
 
     {# ==================================================================== #}
     {# SECCIÓN 1: DATOS PRINCIPALES DE LA OBRA                              #}
