@@ -11,10 +11,11 @@
 
   Variables:
   - vigente: el que rige ahora {sala, dueno, plataforma (ya escritos, «70 %»), vigente_desde,
-    rige, cargado_por (el id del administrador, o null si lo cargó la migración), cargado_en}, o
-    null si todavía no hay ninguno.
+    estado ('rige', 'futuro' o 'anterior'), cargado_por (el nombre del administrador, o null si
+    lo cargó la migración), cargado_en (null en el de la migración)}, o null si todavía no hay
+    ninguno.
   - historial: lista de lo mismo, del que rige último al primero. Los que todavía no empezaron a
-    valer van arriba, con rige en false.
+    valer van arriba ('futuro'); abajo del que rige, los que reemplazó ('anterior').
   - valores: {sala, dueno, plataforma, vigente_desde} para completar el formulario: el reparto que
     rige, o lo que se mandó si volvió con errores.
   - errores: mapa de errores por campo ('sala', 'dueno', 'plataforma', 'vigente_desde').
@@ -168,15 +169,18 @@
             <tr>
               <td>
                 <span class="tabla-admin-principal">{{ parametro.vigente_desde }}</span>
-                <span class="tabla-admin-secundario">{{ parametro.rige ? 'rige ahora' : 'todavía no rige' }}</span>
+                <span class="tabla-admin-secundario">{{ {rige: 'rige ahora', futuro: 'todavía no rige', anterior: 'ya no rige'}[parametro.estado] }}</span>
               </td>
               <td>{{ parametro.sala }}</td>
               <td>{{ parametro.dueno }}</td>
               <td>{{ parametro.plataforma }}</td>
               <td>
-                <span class="tabla-admin-principal">{{ parametro.cargado_en }}</span>
-                {# Quién lo cargó va por su id: recaudación no pide los nombres a cuentas todavía #}
-                <span class="tabla-admin-secundario">{{ parametro.cargado_por ?? 'carga inicial del sitio' }}</span>
+                {% if parametro.cargado_por is null %}
+                  <span class="tabla-admin-principal">Carga inicial del sitio</span>
+                {% else %}
+                  <span class="tabla-admin-principal">{{ parametro.cargado_en }}</span>
+                  <span class="tabla-admin-secundario">por {{ parametro.cargado_por }}</span>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}
