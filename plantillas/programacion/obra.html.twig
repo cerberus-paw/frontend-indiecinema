@@ -5,7 +5,8 @@
 
   Variables:
   - obra: datos de la obra (id, titulo, anio, director, duracion, tipo, tipo_etiqueta,
-    origen_copia, origen_copia_etiqueta, generos, sinopsis, afiche, editable, tiene_funciones_futuras).
+    origen_copia, origen_copia_etiqueta, generos, sinopsis, afiche, editable, tiene_funciones_futuras,
+    denunciable: si muestra «Denunciar», a todos menos a su dueño, EF-07.8).
   - funciones: lista de funciones de esta obra (formato para parciales/tarjeta_funcion.html.twig).
   - calificaciones: {promedio (o null), cantidad, ultimas} de las funciones donde se dio, como las
     recibe parciales/calificaciones_ultimas.html.twig; null si funciones no respondió (EF-04.3).
@@ -136,6 +137,11 @@
             {% endif %}
           </form>
         </div>
+      {% endif %}
+
+      {# EF-07.8: cualquiera menos su dueño la denuncia #}
+      {% if obra.denunciable is defined and obra.denunciable %}
+        <p class="ficha-denunciar">{% include 'parciales/denunciar.html.twig' with { tipo: 'obra', id: obra.id } only %}</p>
       {% endif %}
     </div>
   </header>

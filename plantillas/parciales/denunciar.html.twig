@@ -1,0 +1,12 @@
+{#
+  El link «Denunciar» de una ficha o de un comentario (EF-07.8), al formulario de moderación. Sin
+  sesión, el formulario manda a ingresar y vuelve.
+
+  Variables:
+  - tipo: sala, obra, funcion o calificacion.
+  - id: el id de lo que se denuncia.
+  - texto: (opcional) el del link; «Denunciar» si no viene.
+#}
+<a href="/moderacion/denuncias/nueva?tipo={{ tipo|url_encode }}&amp;id={{ id|url_encode }}" class="enlace-denunciar" rel="nofollow">
+  <span aria-hidden="true">⚑</span> {{ texto ?? 'Denunciar' }}
+</a>

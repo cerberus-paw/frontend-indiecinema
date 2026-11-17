@@ -15,7 +15,8 @@
   Variables:
   - sala: id, nombre, descripcion, direccion, localidad, capacidad, imagen (la URL de la foto, o
     null), habilitada, peliculas_por_funcion, duracion_funcion y tiempo_entre_funciones (estos dos,
-    en minutos).
+    en minutos), denunciable (si muestra «Denunciar»: publicada y a todos menos a su organizador,
+    EF-07.8).
   - funciones: lista de funciones como las recibe parciales/fila_funcion.html.twig, por fecha.
   - calificaciones: {promedio (o null), cantidad, ultimas}, como las recibe
     parciales/calificaciones_ultimas.html.twig; null si funciones no respondió.
@@ -66,6 +67,9 @@
       </p>
       {% if calificaciones %}
         {% include 'parciales/calificacion_promedio.html.twig' with { promedio: calificaciones.promedio, cantidad: calificaciones.cantidad } only %}
+      {% endif %}
+      {% if sala.denunciable is defined and sala.denunciable %}
+        <p class="ficha-denunciar">{% include 'parciales/denunciar.html.twig' with { tipo: 'sala', id: sala.id } only %}</p>
       {% endif %}
     </header>
 

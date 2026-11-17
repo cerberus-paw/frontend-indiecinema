@@ -6749,6 +6749,37 @@ a.tabla-admin-principal:focus-visible {
   min-width: 0;
 }
 
+/* Las salas suspendidas por denuncia, abajo de la pestaña «Denuncias» (EF-07.8): cada una con su
+   formulario para levantar la suspensión. */
+.bandeja-seccion {
+  margin-top: var(--espacio-8);
+}
+
+.panel-subtitulo {
+  margin: 0 0 var(--espacio-3);
+  font-size: var(--texto-xl);
+}
+
+.bandeja-levantar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-3);
+}
+
+.bandeja-levantar textarea {
+  width: 100%;
+}
+
+.bandeja-levantar .boton {
+  align-self: flex-start;
+}
+
+/* El formulario de la denuncia: la caja de las categorías separada del detalle. */
+.formulario-denuncia .bandeja-caja {
+  margin-bottom: var(--espacio-4);
+}
+
 .bandeja-caja + .bandeja-caja {
   margin-top: var(--espacio-4);
 }
@@ -8327,6 +8358,23 @@ a.tabla-admin-principal:focus-visible {
   flex-wrap: wrap;
   gap: var(--espacio-3);
   margin-top: var(--espacio-4);
+}
+
+/* «Denunciar» en las fichas y en los comentarios (EF-07.8): discreto, pero subrayado para que se
+   lea como un link. */
+.ficha-denunciar {
+  margin-top: var(--espacio-4);
+}
+
+.enlace-denunciar {
+  color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+  text-decoration: underline;
+}
+
+.enlace-denunciar:hover,
+.enlace-denunciar:focus-visible {
+  color: inherit;
 }
 
 @media (max-width: 768px) {

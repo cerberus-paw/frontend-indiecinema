@@ -4,8 +4,9 @@
   escapa, y nl2br agrega los saltos de línea después de escaparlo.
 
   Parámetros recibidos:
-  - calificaciones: {promedio, cantidad, ultimas: lista de {puntaje, comentario, espectador,
-    fecha}}, o null si funciones no respondió.
+  - calificaciones: {promedio, cantidad, ultimas: lista de {id, puntaje, comentario, espectador,
+    fecha}}, o null si funciones no respondió. Cada comentario se denuncia por el id (EF-07.8);
+    el que ocultó la moderación llega sin comentario.
   - id: el id del título de la sección, para su aria-labelledby.
   - vacio: el mensaje cuando todavía no hay ninguna.
 #}
@@ -30,6 +31,9 @@
           </p>
           {% if calificacion.comentario %}
             <p class="calificacion-item-comentario">{{ calificacion.comentario|nl2br }}</p>
+            {% if calificacion.id is defined and calificacion.id %}
+              <p class="calificacion-item-denunciar">{% include 'parciales/denunciar.html.twig' with { tipo: 'calificacion', id: calificacion.id, texto: 'Denunciar el comentario' } only %}</p>
+            {% endif %}
           {% endif %}
         </li>
       {% endfor %}
