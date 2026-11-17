@@ -7406,6 +7406,12 @@ a.tabla-admin-principal:focus-visible {
   font-weight: 600;
 }
 
+.estado-cuenta-revision {
+  background-color: rgba(240, 166, 59, 0.15);
+  border-color: rgba(240, 166, 59, 0.4);
+  color: var(--color-advertencia);
+}
+
 .estado-cuenta-acuerdo {
   background-color: rgba(240, 166, 59, 0.18);
   border-color: rgba(240, 166, 59, 0.5);
