@@ -5,11 +5,13 @@
   el sitio público, como en el encabezado: no ve el enlace al panel del organizador.
 
   Parámetros recibidos:
-  - activa: (string) la sección actual: 'datos' o 'reservas'.
+  - activa: (string) la sección actual: 'datos', 'editar_datos', 'contrasena' o 'reservas'.
   - usuario: el usuario en sesión.
 #}
 {% set secciones = [
   { clave: 'datos', texto: 'Mis datos', url: '/cuenta/' },
+  { clave: 'editar_datos', texto: 'Editar datos', url: '/cuenta/datos' },
+  { clave: 'contrasena', texto: 'Contraseña', url: '/cuenta/contrasena' },
   { clave: 'reservas', texto: 'Mis reservas', url: '/funcion/reservas' },
 ] %}
 {% if usuario and usuario.alcanza('organizador') and not usuario.alcanza('administrador') %}

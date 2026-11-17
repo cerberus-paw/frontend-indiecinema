@@ -1,0 +1,55 @@
+{#
+  Confirmación o rechazo al abrir el enlace de verificación de correo en /cuenta/verificar (X-02.1 · IC-331).
+
+  Variables recibidas:
+  - verificado: (bool) si el enlace verificó el correo.
+  - titulo: (string) encabezado principal de la pantalla.
+  - mensaje: (string) explicación para el usuario.
+  - mensaje_titulo: (string, opcional) título corto de la alerta.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}{{ titulo|default('Verificación de correo') }}{% endblock %}
+
+{% block contenido %}
+<div class="contenedor-autenticacion">
+  <div class="tarjeta-autenticacion">
+    <header class="autenticacion-cabecera">
+      <h1 class="autenticacion-titulo">{{ titulo|default('Verificación de correo') }}</h1>
+      <p class="autenticacion-subtitulo">Confirmación de tu dirección de correo en IndieCinema.</p>
+    </header>
+
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: (verificado|default(false)) ? 'exito' : 'error',
+      titulo: mensaje_titulo|default((verificado|default(false)) ? 'Correo verificado' : 'No pudimos verificar tu correo'),
+      mensaje: mensaje|default('')
+    } only %}
+
+    <div class="formulario-acciones">
+      {% if usuario is defined and usuario %}
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Ir a Mi cuenta',
+          url: '/cuenta/',
+          variante: 'primario',
+          tamano: 'grande',
+          bloque: true
+        } only %}
+      {% else %}
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Iniciar sesión',
+          url: '/cuenta/ingresar',
+          variante: 'primario',
+          tamano: 'grande',
+          bloque: true
+        } only %}
+      {% endif %}
+    </div>
+
+    <footer class="autenticacion-pie">
+      <p class="autenticacion-enlace-texto">
+        <a href="/cartelera" class="enlace-destacado">Explorar la cartelera</a>
+      </p>
+    </footer>
+  </div>
+</div>
+{% endblock %}
