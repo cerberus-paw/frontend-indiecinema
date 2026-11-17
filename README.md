@@ -19,7 +19,8 @@ Siguiendo las decisiones arquitectónicas de la Entrega 2:
 frontend-indiecinema/
 ├── composer.json               # Definición del paquete cerberus-paw/frontend-indiecinema
 ├── README.md                   # Documentación técnica del paquete
-├── package.json                # stylelint para el CI y Playwright para las pruebas de punta a punta
+├── package.json                # ESLint y stylelint para el CI, y Playwright para las pruebas de punta a punta
+├── eslint.config.mjs           # Reglas recomendadas de ESLint sobre estaticos/js (lo corre el CI)
 ├── e2e/                        # Pruebas de punta a punta: los casos (casos.md) y su código (README)
 ├── herramientas/
 │   └── compilar-plantillas.php # Compila todas las plantillas con el Twig del núcleo (lo corre el CI)
@@ -66,7 +67,12 @@ frontend-indiecinema/
 │   ├── moderacion/             # Del subsistema moderacion (EF-01)
 │   │   ├── administracion_solicitudes.html.twig # Bandeja de solicitudes de sala, en /moderacion/solicitudes (EF-07.2)
 │   │   └── solicitar_sala.html.twig # Solicitud para abrir una sala, con su estado
-│   └── recaudacion/            # Del subsistema recaudacion (EF-02): vacía hasta EF-08
+│   └── recaudacion/            # Del subsistema recaudacion
+│       ├── reportes.html.twig  # Qué pasó en las salas en un período y qué conviene hacer (EF-09.1)
+│       ├── reportes_funciones.html.twig # Los totales de cada mes y las funciones de uno, con el CSV (EF-09.2)
+│       ├── reportes_obras.html.twig # Cómo le fue a cada obra del dueño, en cualquier sala (EF-09.3)
+│       ├── reportes_obra.html.twig # El detalle de una obra del dueño, con sus votaciones
+│       └── administracion_reparto.html.twig # Con cuánto se reparte lo cobrado y desde cuándo, para el administrador (EF-08.1)
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
     ├── css/
     │   └── estilos.css         # Hoja de estilos con paleta cinematográfica oscura y responsive
@@ -310,6 +316,7 @@ Las próximas funciones de la ficha de la sala, una por fila, como el wireframe 
 - **`plantillas/moderacion/solicitar_sala.html.twig`**: Solicitud para abrir una sala en `/solicitar-sala`, que atiende moderación desde EF-07.2, como el wireframe `solicitud-de-sala`, para el espectador y el organizador: los datos del espacio, la foto, los parámetros y las declaraciones, con las validaciones que manda el backend, que también avisa mientras se carga, y la foto que se puede arrastrar (E4-09). Arriba, el estado de la última que mandó; si la rechazaron, el motivo y el formulario con la sala para corregirla (IC-246).
 - **`plantillas/programacion/alta_funcion.html.twig`**: Formulario de alta y edición para programar o editar una función en `/organizador/funciones/nueva` y `/organizador/funciones/{id}/editar` (IC-121 / IC-122 / IC-147 / E3-11.2 / E3-11.3 / E3-12.1) con selector de modo («Función programada» vs «Abrir a votación de títulos»), selector de sala propia habilitada, selección de obras del catálogo (o candidatas para votación), fecha y horario de proyección condicionales al modo, precio y cupo de localidades, con los errores mientras se carga (E4-09.1).
 - **`plantillas/programacion/alta_sala.html.twig`**: Formulario de edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía (con arrastrar y soltar) y parámetros de proyección, y los errores mientras se carga (E4-09). Las salas nuevas entran por la solicitud de sala.
+- **`plantillas/programacion/bloqueados.html.twig`**: «Usuarios bloqueados» para organizadores en `/organizador/bloqueados` (EF-12.1 / IC-580): formulario para bloquear a un espectador en una sala propia indicando un motivo obligatorio (con preselección desde `?sala=` y `?usuario=`), listado de bloqueos activos en sus salas y botón POST para desbloquear.
 - **`plantillas/programacion/cancelar_funcion.html.twig`**: Pantalla de confirmación para cancelar una función propia en `/organizador/funciones/{id}/cancelar` (IC-123 / E3-11.4): migas de pan, advertencia de acción irreversible, ficha resumen de la función (sala, fecha/hora, precio, cupo y estado) y formulario POST con token CSRF para confirmar la baja lógica o volver al listado.
 - **`plantillas/programacion/ficha_funcion.html.twig`**: Ficha de una función en `/cartelera/{id}`, en cualquier estado: las obras (elegidas, o candidatas si está en votación) con su sinopsis, duración y géneros, la sala con su dirección y el enlace a su ficha, la fecha (o «Fecha a confirmar»), el precio, el cupo y el estado, con un aviso si se canceló (IC-86), y el panel para reservar sólo si está programada y todavía no empezó (en votación o en acuerdo de fecha no se reserva: F-01.2): con sesión, el formulario que manda la reserva a funciones; sin sesión, el enlace para ingresar (IC-252). Soporta aviso de confirmación tras editar y accesos de edición y cancelación para organizador dueño (IC-122 / IC-123 / E3-11.4). Cuando la función está en estado `en_votacion_titulos`, incorpora el bloque interactivo de «Votación de títulos» (IC-148 / E3-12) con las obras candidatas como opciones seleccionables, destaca el voto emitido por el espectador con opción a cambiarlo, confirmación accesible de voto y panel informativo de ingreso/registro para visitantes; el organizador ve los votos de cada obra y «Cerrar votación». En `en_acuerdo_fecha`, las franjas con sus «Me sirve», la fecha límite y, para el organizador, confirmar la ganadora o cerrar sin mínimo (E3-13). Los lugares libres van en la cabecera y en el recuadro de reserva, con la barra de lo reservado, y se actualizan solos (E4-02 / E4-05.2). Migas de pan, la sala y cada obra en tarjetas que en celular pasan a una columna, y encabezados sin saltos de nivel: `h1` la función, `h2` la sala y cada obra (IC-87).
 - **`plantillas/programacion/proponer_franjas.html.twig`**: «Proponer franjas horarias» en `/organizador/funciones/{id}/franjas`, a la que lleva cerrar la votación de títulos (E3-13.2): el mínimo de asistentes y de 2 a 5 franjas de fecha y horario, con los errores de cada una junto a su opción (IC-297). Al publicarlas, la función pasa a «En acuerdo de fecha».
@@ -360,6 +367,8 @@ Sin librerías y con una clase por archivo. La plantilla base carga, con `defer`
 
 Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.iniciar()`, la carga condicionada a que su contenedor esté en la página.
 
+Dos líneas más, o el CI falla (IC-447): el archivo del componente arranca con `/* exported <Clase> */`, porque quien la usa es `app.js` y no él mismo, y el nombre de la clase se suma a la lista de `/* global … */` que encabeza `app.js`. Los archivos se cargan con `<script>` y no son módulos, así que ésa es la única forma que tiene ESLint de saber qué publica cada archivo y qué toma de otro; a cambio, un nombre de componente mal escrito en `app.js` falla en el CI en lugar de fallar en el navegador. `PAW` no hace falta declararla: está en `eslint.config.mjs`.
+
 ## 9. Integración continua
 
 En cada PR y en cada push a `main` o a `dev` (`.github/workflows/ci.yml`):
@@ -367,7 +376,7 @@ En cada PR y en cada push a `main` o a `dev` (`.github/workflows/ci.yml`):
 - **Pruebas del back:** el back con el front del PR al lado, y las pruebas de cada subsistema. El back es el de la rama del mismo nombre si existe allá; si no, el de la base del PR (`dev` o `main`): un cambio que toca los dos repositorios va en ramas que se llaman igual, y sus dos PR pasan sin esperar al otro. Es el espejo del CI del back.
 - **Plantillas:** `herramientas/compilar-plantillas.php` compila todas con el Twig del núcleo (del back de la misma rama, como las pruebas); falla con un error de sintaxis o un filtro que no existe.
 - **CSS:** stylelint, sólo con reglas que encuentran errores (una variable que no existe, una propiedad mal escrita, un selector repetido). En local: `npm ci && npm run css`.
-- **JavaScript:** `node --check` sobre cada archivo de `estaticos/js`.
+- **JavaScript:** ESLint con las reglas recomendadas sobre `estaticos/js` (IC-447), que encuentran errores y no cuestiones de estilo: un método repetido en una clase, un nombre que no existe, una variable que sobra. Reemplaza al `node --check` de antes, que sólo veía la sintaxis. En local: `npm ci && npm run js`.
 - **Secretos:** gitleaks sobre todo el historial, como en el back.
 
 Cuando la CI pasa en un push a `main` o a `dev`, `.github/workflows/cd.yml` publica el cambio en el servidor de esa rama, con el mismo script que el back. Cada subtarea sale de `dev` y su PR apunta ahí; a producción llega por un PR de `dev` a `main` (README del back, «Ramas y entornos» y «Despliegue continuo»).

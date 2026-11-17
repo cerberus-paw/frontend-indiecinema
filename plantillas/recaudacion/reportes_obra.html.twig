@@ -1,0 +1,127 @@
+{#
+  El detalle de una obra para su dueño, en /recaudacion/reportes/obras?obra=… (EF-09.3): dónde y
+  cuándo se proyectó, con cuánto público y qué calificación, y cómo le fue en cada votación de
+  títulos, también en las que perdió. Se llega desde la lista (reportes_obras.html.twig), con el
+  mismo período.
+
+  Variables:
+  - periodo: desde, hasta y texto.
+  - administrador: (bool) va con la barra del administrador.
+  - avisos: lista de textos: lo que faltó porque un subsistema no respondió.
+  - volver: la dirección de la lista, con el período.
+  - obra: {titulo, funciones, vendidas, cupo, asistentes, asistencia, promedio, calificaciones,
+    votaciones, ganadas, votos}.
+  - funciones: las que la proyectaron: {fecha, sala, vendidas, cupo, asistentes, asistencia,
+    promedio, calificaciones}.
+  - votaciones_de_la_obra: {fecha, sala, votos, total, porcentaje, gano}.
+#}
+{% extends administrador ? 'administracion.html.twig' : 'organizador.html.twig' %}
+
+{% block titulo %}Reportes · {{ obra.titulo }}{% endblock %}
+
+{% block seccion %}reportes{% endblock %}
+
+{% block panel %}
+<nav class="navegacion-migas" aria-label="Migas de pan">
+  <ol class="lista-migas">
+    <li class="item-miga"><a href="{{ volver }}" class="enlace-miga">Mis obras</a></li>
+    <li class="separador-miga" aria-hidden="true">/</li>
+    <li class="item-miga miga-activa" aria-current="page">{{ obra.titulo }}</li>
+  </ol>
+</nav>
+
+<header class="panel-cabecera">
+  <h1 class="panel-titulo">{{ obra.titulo }}</h1>
+  <p class="panel-bajada">Cómo le fue {{ periodo.texto }}. Lo que te corresponde sale con el reparto.</p>
+</header>
+
+{% for aviso in avisos %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: aviso } only %}
+{% endfor %}
+
+<dl class="panel-resumen">
+  <div class="panel-dato">
+    <dt>Funciones</dt>
+    <dd class="panel-dato-valor">{{ obra.funciones }}</dd>
+    <dd class="panel-dato-nota">en las que se proyectó</dd>
+  </div>
+  <div class="panel-dato">
+    <dt>Público</dt>
+    <dd class="panel-dato-valor">{{ obra.asistentes ?? '—' }}</dd>
+    <dd class="panel-dato-nota">{{ obra.asistencia ? obra.asistencia ~ ' de los que reservaron' : 'personas fueron' }}</dd>
+  </div>
+  <div class="panel-dato">
+    <dt>Calificación</dt>
+    <dd class="panel-dato-valor">{{ obra.promedio ?? '—' }}</dd>
+    <dd class="panel-dato-nota">{{ obra.calificaciones > 0 ? 'con ' ~ obra.calificaciones ~ (obra.calificaciones == 1 ? ' calificación' : ' calificaciones') : 'nadie calificó todavía' }}</dd>
+  </div>
+  <div class="panel-dato">
+    <dt>Votaciones</dt>
+    <dd class="panel-dato-valor">{{ obra.ganadas }} de {{ obra.votaciones }}</dd>
+    <dd class="panel-dato-nota">{{ obra.votaciones > 0 ? 'ganadas, con ' ~ obra.votos ~ (obra.votos == 1 ? ' voto' : ' votos') : 'no estuvo en ninguna' }}</dd>
+  </div>
+</dl>
+
+<section class="reporte-seccion" aria-labelledby="reporte-proyecciones">
+  <h2 id="reporte-proyecciones" class="reporte-subtitulo">Dónde y cuándo se proyectó</h2>
+  {% if funciones is empty %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'En el período estuvo en votaciones, pero no se proyectó.' } only %}
+  {% else %}
+    <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-proyecciones">
+      <table class="tabla-admin reporte-tabla">
+        <thead>
+          <tr>
+            <th scope="col">Función</th>
+            <th scope="col">Sala</th>
+            <th scope="col">Público</th>
+            <th scope="col">Ocupación</th>
+            <th scope="col">Promedio</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for funcion in funciones %}
+            <tr>
+              <td><span class="tabla-admin-principal">{{ funcion.fecha }}</span></td>
+              <td>{{ funcion.sala }}</td>
+              <td>{{ funcion.asistentes ?? '—' }}{% if funcion.vendidas is not null %} <span class="tabla-admin-secundario">de {{ funcion.vendidas }} que reservaron</span>{% endif %}</td>
+              <td>{{ funcion.ocupacion ?? '—' }}</td>
+              <td>{{ funcion.promedio ?? '—' }}{% if funcion.calificaciones > 0 %} <span class="tabla-admin-secundario">{{ funcion.calificaciones }} {{ funcion.calificaciones == 1 ? 'calificación' : 'calificaciones' }}</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</section>
+
+<section class="reporte-seccion" aria-labelledby="reporte-votaciones">
+  <h2 id="reporte-votaciones" class="reporte-subtitulo">Votaciones</h2>
+  <p class="reporte-explicacion">Las funciones en las que el público eligió entre varias obras. Las que perdió también cuentan: muestran que hay gente que la quiere ver.</p>
+  {% if votaciones_de_la_obra is empty %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Se proyectó con fecha fija, sin votación.' } only %}
+  {% else %}
+    <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-votaciones">
+      <table class="tabla-admin reporte-tabla">
+        <thead>
+          <tr>
+            <th scope="col">Función</th>
+            <th scope="col">Sala</th>
+            <th scope="col">Votos</th>
+            <th scope="col">Resultado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for votacion in votaciones_de_la_obra %}
+            <tr>
+              <td><span class="tabla-admin-principal">{{ votacion.fecha }}</span></td>
+              <td>{{ votacion.sala }}</td>
+              <td>{{ votacion.votos }} de {{ votacion.total }} <span class="tabla-admin-secundario">{{ votacion.porcentaje }}</span></td>
+              <td><span class="estado-cuenta {{ votacion.gano ? 'estado-cuenta-activa' : '' }}">{{ votacion.gano ? 'Ganó' : 'Perdió' }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -30,11 +30,19 @@
       <h1 class="solicitud-titulo">Mis obras</h1>
       <p class="solicitud-bajada">Las películas y cortometrajes que cargaste para programar en tus funciones comunitarias.</p>
     </div>
-    {% include 'parciales/boton.html.twig' with {
-      texto: 'Cargar obra',
-      url: '/organizador/obras/nueva',
-      variante: 'primario'
-    } only %}
+    <div class="encabezado-acciones">
+      {# Cómo le fue a cada obra en las funciones que ya terminaron (EF-09.3) #}
+      {% include 'parciales/boton.html.twig' with {
+        texto: 'Ver el reporte',
+        url: '/recaudacion/reportes/obras',
+        variante: 'secundario'
+      } only %}
+      {% include 'parciales/boton.html.twig' with {
+        texto: 'Cargar obra',
+        url: '/organizador/obras/nueva',
+        variante: 'primario'
+      } only %}
+    </div>
   </header>
 
   {# Alertas de estado #}

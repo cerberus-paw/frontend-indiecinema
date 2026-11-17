@@ -110,13 +110,13 @@ class AccionesDeReserva {
   }
 
   /**
-   * Deja la fila como quedó: la píldora del estado y, si la acción ya no se puede repetir, el
-   * texto que la plantilla dejó en data-hecho en lugar del botón.
+   * Deja la fila como quedó: la píldora del estado, el resultado de la conducta o, si la acción
+   * ya no se puede repetir, el texto que la plantilla dejó en data-hecho en lugar del botón.
    *
    * La fila se busca por su id y no por dónde está el formulario: el del código de arriba no está
    * en ninguna fila, y igual tiene que cambiar la que se registró.
    *
-   * @param {{id: string, estado: string, estado_etiqueta: string, anulable?: boolean, registrable?: boolean}} reserva
+   * @param {{id: string, estado: string, estado_etiqueta: string, anulable?: boolean, registrable?: boolean, conducta?: ?{positiva: boolean, etiqueta: string, motivo: ?string}}} reserva
    * @param {?Element} [enfocado=null] lo que tenía el foco cuando se mandó la acción
    */
   pintarFila(reserva, enfocado = null) {
@@ -128,6 +128,11 @@ class AccionesDeReserva {
     if (pildora) {
       pildora.textContent = reserva.estado_etiqueta;
       pildora.className = `estado-cuenta ${AccionesDeReserva.CLASES_DE_ESTADO[reserva.estado] ?? ''}`.trim();
+    }
+    if (reserva.conducta) {
+      this.pintarConducta(fila, reserva.conducta, enfocado);
+
+      return;
     }
     // anulable en el panel del administrador, registrable en el del organizador: el que no es de
     // este panel no viene, y sin él no se saca ningún botón.
@@ -145,6 +150,30 @@ class AccionesDeReserva {
       if (teniaElFoco) {
         PAW.enfocar(hecho);
       }
+    }
+  }
+
+  /**
+   * Reemplaza los formularios de conducta por el resultado guardado, cuidando el foco.
+   *
+   * @param {Element} fila
+   * @param {{positiva: boolean, etiqueta: string, motivo: ?string}} conducta
+   * @param {?Element} [enfocado=null]
+   */
+  pintarConducta(fila, conducta, enfocado = null) {
+    const celda = fila.querySelector('[data-conducta]');
+    if (!celda) {
+      return;
+    }
+    const teniaElFoco = enfocado !== null && celda.contains(enfocado);
+    const etiqueta = PAW.nuevoElemento('span', conducta.etiqueta, { class: 'tabla-admin-principal' });
+    const nodos = [etiqueta];
+    if (conducta.motivo) {
+      nodos.push(PAW.nuevoElemento('span', conducta.motivo, { class: 'tabla-admin-secundario' }));
+    }
+    celda.replaceChildren(...nodos);
+    if (teniaElFoco) {
+      PAW.enfocar(etiqueta);
     }
   }
 
@@ -189,11 +218,14 @@ class AccionesDeReserva {
   }
 
   /**
-   * @param {{codigo?: string, estado?: string}} reserva
+   * @param {{codigo?: string, estado?: string, conducta?: ?Object}} reserva
    * @returns {string}
    */
   static hecho(reserva) {
     const codigo = reserva?.codigo ?? '';
+    if (reserva?.conducta) {
+      return `Se calificó la conducta de la reserva ${codigo}.`;
+    }
 
     return reserva?.estado === 'asistio'
       ? `Se registró la asistencia de la reserva ${codigo}.`
