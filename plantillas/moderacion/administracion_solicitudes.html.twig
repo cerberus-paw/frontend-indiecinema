@@ -20,7 +20,8 @@
     imagen, descripcion, direccion, peliculas_por_funcion, duracion_funcion,
     tiempo_entre_funciones}, en_el_sitio, solicitante: {nombre, correo, cuenta_creada,
     es_organizador} (null si ya no existe, false si cuentas no respondió), solicitante_nombre,
-    solicitudes_previas}, o null. en_el_sitio es cómo está la sala de una aprobada según
+    solicitudes_previas, propia}, o null. propia: la mandó el moderador en sesión, que no la
+    resuelve ni retira su sala (EF-07.3); se ve sin los formularios. en_el_sitio es cómo está la sala de una aprobada según
     programación: 'publicada', 'retirada', 'dada_de_baja', o 'desconocido' si programación no
     respondió; null en las que no están aprobadas.
   - valores: lo que mandó si hubo errores, {resolucion, motivo, motivo_sala}.
@@ -107,6 +108,9 @@
 
   {% if elegida %}
     {% set sala = elegida.sala %}
+    {# La del moderador en sesión la resuelve otro (EF-07.3); con is defined, por si el back todavía no la manda #}
+    {% set propia = elegida.propia is defined and elegida.propia %}
+    {% set resolvible = elegida.estado == 'pendiente' and not propia %}
     <article class="bandeja-detalle" aria-labelledby="titulo-solicitud">
       <header class="bandeja-detalle-cabecera">
         <h2 id="titulo-solicitud" class="bandeja-detalle-titulo">{{ sala.nombre }}</h2>
@@ -120,7 +124,7 @@
 
       {# En una pendiente, el formulario abarca la resolución y el motivo, que en el wireframe
          están en lugares distintos de la pantalla #}
-      {% if elegida.estado == 'pendiente' %}
+      {% if resolvible %}
         {# Si la resolución volvió con errores: «Revisá N campos» con un link a cada uno (E4-10.5) #}
         {% include 'parciales/resumen_de_errores.html.twig' with { errores: errores } only %}
         <form action="{{ prefijo }}/solicitudes/{{ elegida.id }}/resolver" method="post">
@@ -169,7 +173,12 @@
         </div>
 
         <div>
-          {% if elegida.estado == 'pendiente' %}
+          {% if propia and elegida.estado == 'pendiente' %}
+            <div class="bandeja-caja">
+              <p class="bandeja-caja-titulo">Resolución</p>
+              <p class="bandeja-texto">La mandaste vos: la resuelve otro moderador.</p>
+            </div>
+          {% elseif resolvible %}
               <fieldset id="resolucion" class="bandeja-caja{% if errores.resolucion is defined %} con-error{% endif %}">
                 <legend class="bandeja-caja-titulo">Resolución</legend>
                 {% for valor, texto in { aprobar: 'Aprobar y publicar la sala', rechazar: 'Rechazar la solicitud' } %}
@@ -200,7 +209,9 @@
                     desconocido: 'No pudimos consultar si está publicada. Probá de nuevo en un rato.'
                   }[elegida.en_el_sitio] }}
                 </p>
-                {% if elegida.en_el_sitio in ['publicada', 'retirada'] %}
+                {% if propia %}
+                  <p class="bandeja-texto">Es tu sala: la retira o la vuelve a publicar otro moderador.</p>
+                {% elseif elegida.en_el_sitio in ['publicada', 'retirada'] %}
                   <form action="{{ prefijo }}/solicitudes/{{ elegida.id }}/{{ publicada ? 'deshabilitar-sala' : 'habilitar-sala' }}" method="post" class="solicitud-acciones-inferior">
                     <input type="hidden" name="_csrf" value="{{ csrf }}">
                     {% include 'parciales/campo.html.twig' with {
@@ -226,7 +237,7 @@
         </div>
       </div>
 
-      {% if elegida.estado == 'pendiente' %}
+      {% if resolvible %}
         <div class="bandeja-motivo">
           {% include 'parciales/campo.html.twig' with {
             nombre: 'motivo',

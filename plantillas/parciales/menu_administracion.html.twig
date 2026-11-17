@@ -2,8 +2,9 @@
   Barra lateral de las pantallas del administrador, como los wireframes de la E2: el logo, las
   secciones que ya tienen pantalla y, al pie, quién está en sesión y el botón para salir. Reemplaza
   al encabezado del sitio, así que el cierre de sesión tiene que estar acá. Las secciones van en
-  los dos grupos de los wireframes: «Administración» (administracion-usuarios-parametros) y
-  «Moderación» (moderacion-solicitudes), que mientras no haya moderador resuelve el administrador.
+  los dos grupos de los wireframes: «Administración» (administracion-usuarios-parametros), sólo
+  para el administrador, y «Moderación» (moderacion-solicitudes), para el moderador y el
+  administrador. Cada uno ve sólo las secciones que puede abrir.
 
   Parámetros recibidos:
   - activa: (string) la sección actual: 'usuarios', 'reservas', 'reportes', 'reparto' o
@@ -11,12 +12,14 @@
   - usuario: el usuario en sesión.
   - csrf: el token del formulario para salir.
 #}
+{% set es_admin = usuario and usuario.alcanza('administrador') %}
 <aside class="panel-menu">
-  {# El logo lleva al inicio del panel: la portada pública redirige ahí al administrador #}
-  <a href="/cuenta/administracion/usuarios" class="panel-marca" aria-label="IndieCinema: inicio del panel">
+  {# El logo lleva al inicio del panel: la portada pública redirige ahí al administrador; el moderador empieza en la bandeja #}
+  <a href="{{ es_admin ? '/cuenta/administracion/usuarios' : '/moderacion/solicitudes' }}" class="panel-marca" aria-label="IndieCinema: inicio del panel">
     <img src="/estaticos/img/logo-horizontal-dark.svg" alt="IndieCinema" width="140" height="60">
   </a>
 
+  {% if es_admin %}
   <nav aria-label="Administración">
     <p class="panel-menu-titulo">Administración</p>
     <ul class="panel-menu-lista">
@@ -36,6 +39,7 @@
       </li>
     </ul>
   </nav>
+  {% endif %}
 
   <nav aria-label="Moderación">
     <p class="panel-menu-titulo">Moderación</p>
