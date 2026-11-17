@@ -2,11 +2,15 @@
   «Mis reservas» del espectador, en /funcion/reservas (E4-04.1), como el wireframe
   mi-cuenta-mis-reservas: con la barra lateral de «Mi cuenta» (E4-10.13), el título con «Ir a la
   cartelera», la tabla con la función, la sala, la fecha, los lugares, el estado y las acciones de
-  cada una, y el paginado numerado. Queda afuera lo que todavía no tiene datos: la tarjeta del
-  usuario arriba de la barra (funciones no tiene la fecha de alta), las tarjetas de conducta,
-  actividad y beneficios, las pestañas, los filtros y el pago.
+  cada una, y el paginado numerado. Incluye las tarjetas de puntaje de conducta y actividad del
+  espectador (EF-13.3). Queda afuera lo que todavía no tiene datos: la tarjeta del usuario arriba de
+  la barra (funciones no tiene la fecha de alta), los beneficios, las pestañas, los filtros y el
+  pago.
 
   Variables:
+  - resumen_conducta: (opcional) {puntaje, puntaje_inicial, umbral, bajo_umbral,
+    tope_bajo_umbral, asistencias, ausencias, conducta_positivas, conducta_negativas,
+    negativas_vigentes, calificaciones_funciones}.
   - reservas: lista de {id, codigo (8 caracteres; se muestra en dos grupos de 4), cantidad, total
     (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio' |
     'ausente'),
@@ -44,6 +48,32 @@
       variante: 'secundario'
     } only %}
   </header>
+
+  {% set conducta = resumen_conducta|default(null) %}
+  {% if conducta is not null %}
+    <dl class="panel-resumen" aria-label="Tu conducta y actividad">
+      <div class="panel-dato{% if conducta.bajo_umbral %} panel-dato-alerta{% endif %}">
+        <dt>Puntaje de conducta</dt>
+        <dd class="panel-dato-valor">{{ conducta.puntaje }}</dd>
+        <dd class="panel-dato-nota">de {{ conducta.puntaje_inicial }} · {% if conducta.bajo_umbral %}bajo umbral (hasta {{ conducta.tope_bajo_umbral }} reservas a la vez){% else %}sin restricciones{% endif %}</dd>
+      </div>
+      <div class="panel-dato">
+        <dt>Asistencias</dt>
+        <dd class="panel-dato-valor">{{ conducta.asistencias }}</dd>
+        <dd class="panel-dato-nota">{{ conducta.asistencias == 1 ? 'función a la que fuiste' : 'funciones a las que fuiste' }}</dd>
+      </div>
+      <div class="panel-dato">
+        <dt>Ausencias</dt>
+        <dd class="panel-dato-valor">{{ conducta.ausencias }}</dd>
+        <dd class="panel-dato-nota">{{ conducta.ausencias == 1 ? 'vez que no asististe' : 'veces que no asististe' }}</dd>
+      </div>
+      <div class="panel-dato">
+        <dt>Calificaciones</dt>
+        <dd class="panel-dato-valor">{{ conducta.conducta_positivas + conducta.conducta_negativas }}</dd>
+        <dd class="panel-dato-nota">{{ conducta.conducta_positivas }} pos · {{ conducta.conducta_negativas }} neg ({{ conducta.negativas_vigentes }} vig.) · {{ conducta.calificaciones_funciones }} {{ conducta.calificaciones_funciones == 1 ? 'función calificada' : 'funciones calificadas' }}</dd>
+      </div>
+    </dl>
+  {% endif %}
 
   {% if calificada|default(false) %}
     {% include 'parciales/mensaje.html.twig' with {

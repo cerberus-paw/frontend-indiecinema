@@ -1,0 +1,42 @@
+{#
+  Aviso cuando la cuenta autenticada todavía no verificó su correo, con el formulario para pedir
+  un enlace nuevo (X-02.4 / IC-568).
+
+  Variables:
+  - mensaje: (string) texto específico según la pantalla.
+  - csrf: (string) token CSRF para el POST a /cuenta/verificar/reenviar.
+  - volver: (string|null, opcional) ruta /cartelera/{id} para volver a la ficha tras el reenvío.
+  - reenviada: (bool, opcional) true si acaba de enviarse un enlace (?reenviado=1).
+  - error_verificacion: (string|null, opcional) error al pedir el reenvío (ej. esperar 5 minutos).
+  - clase: (string, opcional) clases extra en el contenedor.
+#}
+<div class="aviso-verificacion{% if clase is defined and clase %} {{ clase }}{% endif %}">
+  {% if reenviada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      mensaje: 'Te mandamos un enlace nuevo a tu correo. Revisá tu casilla (vence en 24 horas).'
+    } only %}
+  {% endif %}
+  {% if error_verificacion|default(null) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'error',
+      mensaje: error_verificacion
+    } only %}
+  {% endif %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'advertencia',
+    titulo: 'Todavía no verificaste tu correo',
+    mensaje: mensaje
+  } only %}
+  <form action="/cuenta/verificar/reenviar" method="POST" class="formulario-reenviar-verificacion">
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+    {% if volver|default(null) %}
+      <input type="hidden" name="volver" value="{{ volver }}">
+    {% endif %}
+    {% include 'parciales/boton.html.twig' with {
+      texto: 'Mandarme el enlace otra vez',
+      tipo: 'submit',
+      variante: 'secundario'
+    } only %}
+  </form>
+</div>

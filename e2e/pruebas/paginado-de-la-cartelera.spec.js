@@ -43,7 +43,13 @@ test.describe('en el celular', () => {
     await page.reload();
 
     await expect(page.getByLabel('Paginado')).toHaveValue('tradicional');
-    await expect(numeros(page)).toBeVisible();
+    // Los números sólo están si hay más de una página: en dev, a medida que pasan las funciones de
+    // los datos de prueba, la cartelera puede entrar entera en la primera. Lo que se prueba, que
+    // la elección queda, ya se comprobó arriba.
+    const total = Number.parseInt(await page.locator('[data-cartelera-resumen] .cartelera-resultados').textContent(), 10);
+    if (total > await tarjetas(page).count()) {
+      await expect(numeros(page)).toBeVisible();
+    }
   });
 });
 

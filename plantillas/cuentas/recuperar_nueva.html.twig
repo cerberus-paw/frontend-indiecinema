@@ -1,0 +1,91 @@
+{#
+  Restablecimiento de contraseña con token de un solo uso en /cuenta/recuperar/nueva (X-02.2 · IC-332).
+
+  Variables recibidas:
+  - token_valido: (bool) si el token puede usarse para cambiar la contraseña.
+  - token: (string, opcional) valor crudo del token para enviar con el POST.
+  - errores: (array/map, opcional) errores por campo (password, password_confirmacion).
+  - error_general: (string, opcional) motivo cuando el enlace es inválido, venció o ya se usó.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Elegir nueva contraseña{% endblock %}
+
+{% block contenido %}
+<div class="contenedor-autenticacion">
+  <div class="tarjeta-autenticacion">
+    <header class="autenticacion-cabecera">
+      <h1 class="autenticacion-titulo">Elegir nueva contraseña</h1>
+      <p class="autenticacion-subtitulo">
+        Al guardarla se cerrarán todas las sesiones abiertas en otros navegadores.
+      </p>
+    </header>
+
+    {% if not (token_valido|default(false)) %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'error',
+        titulo: 'Enlace no válido',
+        mensaje: error_general|default('El enlace no es válido o venció.')
+      } only %}
+
+      <div class="formulario-acciones">
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Pedir otro enlace',
+          url: '/cuenta/recuperar',
+          variante: 'primario',
+          tamano: 'grande',
+          bloque: true
+        } only %}
+      </div>
+    {% else %}
+      {% include 'parciales/resumen_de_errores.html.twig' with {
+        errores: errores ?? {},
+        error_general: error_general ?? null,
+        titulo: 'No pudimos guardar la contraseña'
+      } only %}
+
+      <form action="/cuenta/recuperar/nueva" method="POST" class="formulario-ingreso" novalidate>
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+        <input type="hidden" name="token" value="{{ token|default('') }}">
+
+        {% include 'parciales/campo.html.twig' with {
+          nombre: 'password',
+          etiqueta: 'Nueva contraseña',
+          tipo: 'password',
+          placeholder: 'Mínimo 8 caracteres',
+          ayuda: 'Al menos 8 caracteres con letras y números.',
+          requerido: true,
+          autocompletar: 'new-password',
+          error: errores.password ?? null
+        } %}
+
+        {% include 'parciales/campo.html.twig' with {
+          nombre: 'password_confirmacion',
+          etiqueta: 'Confirmar nueva contraseña',
+          tipo: 'password',
+          placeholder: 'Repetí la contraseña',
+          requerido: true,
+          autocompletar: 'new-password',
+          error: errores.password_confirmacion ?? null
+        } %}
+
+        <div class="formulario-acciones">
+          {% include 'parciales/boton.html.twig' with {
+            texto: 'Guardar nueva contraseña',
+            tipo: 'submit',
+            variante: 'primario',
+            tamano: 'grande',
+            bloque: true
+          } only %}
+        </div>
+      </form>
+    {% endif %}
+
+    <footer class="autenticacion-pie">
+      <p class="autenticacion-enlace-texto">
+        <a href="/cuenta/ingresar" class="enlace-destacado">Volver a iniciar sesión</a>
+      </p>
+    </footer>
+  </div>
+</div>
+{% endblock %}
