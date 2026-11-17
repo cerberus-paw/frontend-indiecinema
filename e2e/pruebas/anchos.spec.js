@@ -148,6 +148,6 @@ test.describe('el administrador', () => {
     '/cuenta/administracion/usuarios',
     '/funcion/administracion/reservas',
     '/recaudacion/reportes',
-    '/administracion/solicitudes',
+    '/moderacion/solicitudes',
   ]);
 });
