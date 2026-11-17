@@ -1,0 +1,121 @@
+{#
+  «Mis liquidaciones», en /recaudacion/liquidaciones (EF-08.3 / IC-561): lo que le toca al
+  organizador por sus salas y al dueño por sus obras, mes por mes, y si ya se le transfirió.
+  Arriba, el total y lo que falta cobrar; después, la tabla de los meses, y abajo el detalle del
+  mes elegido, función por función. No hay frame en los wireframes de la E2: sigue el armado de
+  los reportes (reportes_funciones.html.twig), con la tabla de meses que elige el detalle.
+
+  La transferencia se hace fuera del sitio, así que acá no hay nada que confirmar: el
+  administrador marca cuándo la pagó y eso es lo que se ve.
+
+  Variables:
+  - meses: lista de {mes ('2026-11'), nombre, monto, transferida, estado, transferida_en, nota,
+    url, actual}, del mes más nuevo al más viejo.
+  - total: todo lo liquidado, ya escrito («$ 24.500»).
+  - pendiente: lo que todavía no se transfirió.
+  - mes: (string|null) el nombre del mes que se detalla abajo; null si no hay ninguna liquidación.
+  - detalle: lista de {fecha, sala, titulos, cobrado, rol, monto} de ese mes, de la función más
+    vieja a la más nueva. La fecha, la sala y los títulos pueden venir en null en los repartos
+    anteriores a la migración que los guarda.
+#}
+{% extends 'organizador.html.twig' %}
+
+{% block titulo %}Mis liquidaciones{% endblock %}
+
+{% block seccion %}liquidaciones{% endblock %}
+
+{% block panel %}
+<header class="panel-cabecera">
+  <h1 class="panel-titulo">Mis liquidaciones</h1>
+  <p class="panel-bajada">Lo que te toca de lo que se cobró en tus funciones, mes por mes: como organizador de la sala y como dueño de las obras que se proyectaron. Las transferencias las hace la administración fuera del sitio y las marca acá.</p>
+</header>
+
+{% if meses is empty %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'info',
+    mensaje: 'Todavía no hay nada liquidado. Cuando termine una función paga tuya y se reparta lo cobrado, va a aparecer acá el mes que le toca.'
+  } only %}
+{% else %}
+  <dl class="panel-resumen">
+    <div class="panel-dato">
+      <dt>Liquidado</dt>
+      <dd class="panel-dato-valor">{{ total }}</dd>
+      <dd class="panel-dato-nota">en {{ meses|length }} {{ meses|length == 1 ? 'mes' : 'meses' }}</dd>
+    </div>
+    <div class="panel-dato">
+      <dt>Por transferir</dt>
+      <dd class="panel-dato-valor">{{ pendiente }}</dd>
+      <dd class="panel-dato-nota">lo que todavía no te pagaron</dd>
+    </div>
+  </dl>
+
+  <section class="reporte-seccion" aria-labelledby="titulo-meses">
+    <h2 id="titulo-meses" class="reporte-subtitulo">Mes por mes</h2>
+
+    <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="titulo-meses">
+      <table class="tabla-admin reporte-tabla">
+        <thead>
+          <tr>
+            <th scope="col">Mes</th>
+            <th scope="col">Te toca</th>
+            <th scope="col">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fila in meses %}
+            <tr>
+              <td><a href="{{ fila.url }}" class="tabla-admin-principal"{% if fila.actual %} aria-current="true"{% endif %}>{{ fila.nombre }}</a></td>
+              <td>{{ fila.monto }}</td>
+              <td>
+                <span class="tabla-admin-principal">{{ fila.transferida ? 'Transferida' : 'Pendiente' }}</span>
+                {% if fila.transferida_en %}
+                  <span class="tabla-admin-secundario">el {{ fila.transferida_en }}{% if fila.nota %} · {{ fila.nota }}{% endif %}</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {% if mes %}
+    <section class="reporte-seccion" aria-labelledby="titulo-detalle">
+      <h2 id="titulo-detalle" class="reporte-subtitulo">De dónde sale lo de {{ mes }}</h2>
+
+      {% if detalle is empty %}
+        {% include 'parciales/mensaje.html.twig' with {
+          tipo: 'info',
+          mensaje: 'No hay funciones con partes tuyas en ese mes.'
+        } only %}
+      {% else %}
+        <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="titulo-detalle">
+          <table class="tabla-admin reporte-tabla">
+            <thead>
+              <tr>
+                <th scope="col">Función</th>
+                <th scope="col">Se cobró</th>
+                <th scope="col">Por</th>
+                <th scope="col">Te toca</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for linea in detalle %}
+                <tr>
+                  <td>
+                    <span class="tabla-admin-principal">{{ linea.titulos ?? 'Función sin datos guardados' }}</span>
+                    <span class="tabla-admin-secundario">{% if linea.fecha %}{{ linea.fecha }}{% endif %}{% if linea.sala %} · {{ linea.sala }}{% endif %}</span>
+                  </td>
+                  <td>{{ linea.cobrado }}</td>
+                  <td>{{ linea.rol }}</td>
+                  <td>{{ linea.monto }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endif %}
+{% endblock %}

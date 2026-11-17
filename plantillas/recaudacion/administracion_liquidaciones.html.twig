@@ -1,0 +1,136 @@
+{#
+  «Liquidaciones» del administrador, en /recaudacion/administracion/liquidaciones (EF-08.3 /
+  IC-561): lo que hay que transferirle a cada organizador y a cada dueño en el mes, y la marca de
+  que ya se hizo. No hay frame en los wireframes de la E2: sigue el armado de las otras pantallas
+  del administrador (administracion-usuarios-parametros), con el filtro arriba y la tabla abajo.
+
+  La transferencia se hace fuera del sitio: marcarla deja escrito que se pagó, con la fecha y una
+  nota. Una marcada no vuelve atrás ni cambia de monto, así que su fila ya no tiene formulario.
+
+  Variables:
+  - meses: lista de {mes ('2026-11'), nombre, url, actual}, del más nuevo al más viejo.
+  - mes: (string|null) el nombre del mes que se muestra; null si todavía no hay liquidaciones.
+  - liquidaciones: lista de {id, beneficiario (el nombre, o null si cuentas no respondió),
+    beneficiario_id, monto, transferida, estado, transferida_en, nota}, primero las pendientes.
+  - total_pendiente: lo que falta transferir en el mes, ya escrito.
+  - transferida: (bool) aviso de que la marca quedó.
+  - ya_estaba: (bool) aviso de que esa liquidación ya estaba transferida.
+  - error: (string|null) por qué no se pudo marcar.
+  - csrf: el token de los formularios.
+#}
+{% extends 'administracion.html.twig' %}
+
+{% block titulo %}Liquidaciones{% endblock %}
+
+{% block seccion %}liquidaciones{% endblock %}
+
+{% block panel %}
+<header class="panel-cabecera">
+  <h1 class="panel-titulo">Liquidaciones</h1>
+  <p class="panel-bajada">Lo que le toca a cada organizador por sus salas y a cada dueño por sus obras en el mes, con lo que ya se repartió de cada función. La transferencia se hace fuera del sitio: acá queda anotado cuándo se hizo.</p>
+</header>
+
+{% if transferida %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'exito',
+    mensaje: 'La liquidación quedó marcada como transferida.'
+  } only %}
+{% endif %}
+
+{% if ya_estaba %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'info',
+    mensaje: 'Esa liquidación ya estaba transferida: se deja la fecha y la nota de la primera vez.'
+  } only %}
+{% endif %}
+
+{% if error %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'error', mensaje: error } only %}
+{% endif %}
+
+{% if meses is empty %}
+  {% include 'parciales/mensaje.html.twig' with {
+    tipo: 'info',
+    mensaje: 'Todavía no hay liquidaciones. Se arman solas cuando la tarea del reparto reparte lo cobrado de una función finalizada.'
+  } only %}
+{% else %}
+  <form class="panel-filtros reporte-filtros" action="/recaudacion/administracion/liquidaciones" method="get" aria-label="Elegir el mes">
+    <label class="reporte-filtro">
+      <span class="reporte-filtro-etiqueta">Mes</span>
+      <select name="mes" class="campo-control control-select">
+        {% for otro in meses %}
+          <option value="{{ otro.mes }}"{% if otro.actual %} selected{% endif %}>{{ otro.nombre }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    {% include 'parciales/boton.html.twig' with { texto: 'Ver', tipo: 'submit', variante: 'primario' } only %}
+  </form>
+
+  <dl class="panel-resumen">
+    <div class="panel-dato">
+      <dt>Por transferir</dt>
+      <dd class="panel-dato-valor">{{ total_pendiente }}</dd>
+      <dd class="panel-dato-nota">de {{ mes }}</dd>
+    </div>
+  </dl>
+
+  <section class="reporte-seccion" aria-labelledby="titulo-liquidaciones">
+    <h2 id="titulo-liquidaciones" class="reporte-subtitulo">Liquidaciones de {{ mes }}</h2>
+
+    {% if liquidaciones is empty %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'info',
+        mensaje: 'No hay liquidaciones en ese mes.'
+      } only %}
+    {% else %}
+      <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="titulo-liquidaciones">
+        <table class="tabla-admin">
+          <thead>
+            <tr>
+              <th scope="col">Beneficiario</th>
+              <th scope="col">Le toca</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Transferencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for liquidacion in liquidaciones %}
+              <tr>
+                <td>
+                  <span class="tabla-admin-principal">{{ liquidacion.beneficiario ?? 'Sin nombre' }}</span>
+                  {% if liquidacion.beneficiario is null %}
+                    <span class="tabla-admin-secundario">cuentas no respondió el nombre</span>
+                  {% endif %}
+                </td>
+                <td>{{ liquidacion.monto }}</td>
+                <td>
+                  <span class="tabla-admin-principal">{{ liquidacion.transferida ? 'Transferida' : 'Pendiente' }}</span>
+                  {% if liquidacion.transferida_en %}
+                    <span class="tabla-admin-secundario">el {{ liquidacion.transferida_en }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if liquidacion.transferida %}
+                    <span class="tabla-admin-secundario">{{ liquidacion.nota ?? 'Sin nota' }}</span>
+                  {% else %}
+                    <form action="/recaudacion/administracion/liquidaciones/{{ liquidacion.id }}/transferida" method="POST" class="tabla-admin-acciones">
+                      <input type="hidden" name="_csrf" value="{{ csrf }}">
+                      <input type="text" name="nota" maxlength="500" class="campo-control" aria-label="Nota de la transferencia de {{ liquidacion.beneficiario ?? liquidacion.beneficiario_id }}" placeholder="Comprobante, banco…">
+                      {% include 'parciales/boton.html.twig' with {
+                        texto: 'Marcar transferida',
+                        tipo: 'submit',
+                        variante: 'secundario',
+                        tamano: 'chico'
+                      } only %}
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </section>
+{% endif %}
+{% endblock %}
