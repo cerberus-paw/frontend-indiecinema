@@ -177,8 +177,9 @@ class LugaresLibres {
     const agotada = datos.agotada ?? libres === 0;
     const cambioLibres = libres !== this.libres;
     const cambioTope = this.guardarRestantes(datos.lugares_restantes_usuario);
+    const cambioConducta = this.guardarConducta(datos.limite_conducta_alcanzado);
 
-    if (!cambioLibres && !cambioTope) {
+    if (!cambioLibres && !cambioTope && !cambioConducta) {
       return;
     }
     // Sin sesión no hay campo de cantidad, así que no se sabe con qué número se cargó la página:
@@ -293,11 +294,36 @@ class LugaresLibres {
   }
 
   /**
+   * Anota si el espectador alcanzó su tope de reservas simultáneas por conducta (EF-13.2).
+   *
+   * @param {boolean|undefined} bloqueado
+   * @returns {boolean} si cambió
+   */
+  guardarConducta(bloqueado) {
+    const formulario = this.contenedor.querySelector('form[data-formulario-reserva]');
+    if (!formulario || typeof bloqueado !== 'boolean') {
+      return false;
+    }
+    const estaba = formulario.dataset.bloqueadoConducta === '1';
+    if (estaba === bloqueado) {
+      return false;
+    }
+    if (bloqueado) {
+      formulario.dataset.bloqueadoConducta = '1';
+    } else {
+      delete formulario.dataset.bloqueadoConducta;
+    }
+
+    return true;
+  }
+
+  /**
    * El máximo del campo de cantidad, que es contra lo que valida el navegador, y el botón: con la
    * función agotada no hay cantidad que entre, así que mandar el formulario sólo daría el error.
-   * Lo mismo cuando el espectador ya tiene todos los lugares que puede tener (IC-463). El máximo
-   * es el menor entre los libres y lo que le queda; sin ese dato, sólo los libres. Cuando el
-   * recuadro entero pasó a ser el aviso de agotada no hay campo ni botón que tocar.
+   * Lo mismo cuando el espectador ya tiene todos los lugares que puede tener (IC-463) o alcanzó el
+   * tope de reservas simultáneas por conducta (EF-13.2). El máximo es el menor entre los libres y
+   * lo que le queda; sin ese dato, sólo los libres. Cuando el recuadro entero pasó a ser el aviso
+   * de agotada no hay campo ni botón que tocar.
    *
    * @param {number} libres
    * @param {boolean} agotada
@@ -307,7 +333,8 @@ class LugaresLibres {
     const restantes = Number.parseInt(campo?.form?.dataset.restantesUsuario ?? '', 10);
     const conTope = Number.isInteger(restantes);
     const completo = conTope && restantes === 0;
-    const apagado = agotada || completo;
+    const bloqueadoConducta = campo?.form?.dataset.bloqueadoConducta === '1';
+    const apagado = agotada || completo || bloqueadoConducta;
     if (campo) {
       const maximo = Math.max(conTope ? Math.min(libres, restantes) : libres, 1);
       campo.setAttribute('max', String(maximo));
