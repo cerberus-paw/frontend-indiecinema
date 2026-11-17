@@ -6812,6 +6812,38 @@ a.tabla-admin-principal:focus-visible {
   accent-color: var(--color-primario);
 }
 
+/* Un punto del checklist de requisitos (EF-07.9): el checkbox arriba, junto al nombre, y la
+   aclaración debajo, más apagada */
+.bandeja-requisito {
+  align-items: flex-start;
+}
+
+.bandeja-requisito input {
+  margin-top: 0.2em;
+}
+
+.bandeja-requisito-aclaracion {
+  display: block;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-apagado);
+}
+
+/* Lo que tildó cada moderador (EF-07.9), de solo lectura: un renglón por punto, con ✓ o ✗ */
+.bandeja-checklist {
+  clear: both;
+  list-style: none;
+  margin: 0 0 var(--espacio-3);
+  padding: 0;
+}
+
+.bandeja-checklist-punto.cumple span[aria-hidden] {
+  color: var(--color-exito);
+}
+
+.bandeja-checklist-punto.no-cumple span[aria-hidden] {
+  color: var(--color-error);
+}
+
 /* El error de la resolución, debajo de las opciones */
 .bandeja-caja .campo-error {
   clear: both;
