@@ -1,0 +1,78 @@
+{#
+  Edición de nombre y correo en /cuenta/datos (EF-15.1 / IC-563).
+
+  Variables:
+  - valores: {nombre, email}
+  - errores: (map) errores por campo
+  - guardados: (bool, opcional) true tras guardar correctamente
+  - correo_verificado: (bool, opcional) false si quedó pendiente de verificar
+#}
+{% extends 'cuenta.html.twig' %}
+
+{% block titulo %}Editar datos{% endblock %}
+{% block seccion %}editar_datos{% endblock %}
+{% block miga %}Editar datos{% endblock %}
+
+{% block panel %}
+<section class="mi-cuenta-panel" aria-labelledby="editar-datos-titulo">
+  <h1 id="editar-datos-titulo" class="solicitud-titulo">Editar datos</h1>
+  <p class="solicitud-bajada">Actualizá tu nombre o tu correo electrónico. Si cambiás el correo, vas a tener que volver a verificarlo y se cerrarán las demás sesiones.</p>
+
+  {% if guardados|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      mensaje: (correo_verificado ?? true)
+        ? 'Tus datos quedaron guardados.'
+        : 'Tus datos quedaron guardados. Revisá tu casilla nueva para verificar el correo.'
+    } only %}
+  {% endif %}
+
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    errores: errores ?? {},
+    titulo: 'No pudimos guardar tus datos'
+  } only %}
+
+  <form action="/cuenta/datos" method="POST" class="mi-cuenta-formulario" novalidate>
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'nombre',
+      etiqueta: 'Nombre completo',
+      tipo: 'text',
+      valor: valores.nombre ?? '',
+      errores: errores ?? {},
+      requerido: true,
+      maximo: 100,
+      autocompletar: 'name'
+    } only %}
+
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'email',
+      etiqueta: 'Correo electrónico',
+      tipo: 'email',
+      valor: valores.email ?? '',
+      errores: errores ?? {},
+      requerido: true,
+      maximo: 254,
+      autocompletar: 'email'
+    } only %}
+
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'contrasena_actual',
+      etiqueta: 'Contraseña actual',
+      tipo: 'password',
+      errores: errores ?? {},
+      ayuda: 'Necesaria sólo si cambiás tu correo electrónico.',
+      autocompletar: 'current-password'
+    } only %}
+
+    <div class="formulario-acciones">
+      {% include 'parciales/boton.html.twig' with {
+        texto: 'Guardar cambios',
+        tipo: 'submit',
+        variante: 'primario'
+      } only %}
+    </div>
+  </form>
+</section>
+{% endblock %}

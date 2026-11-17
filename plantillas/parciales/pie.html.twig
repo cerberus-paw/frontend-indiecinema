@@ -37,6 +37,7 @@
       <h2 class="pie-subtitulo">Administración</h2>
       <ul class="pie-enlaces">
         <li><a href="/cuenta/administracion/usuarios">Usuarios y roles</a></li>
+        <li><a href="/recaudacion/reportes">Reportes</a></li>
         <li><a href="/moderacion/solicitudes">Solicitudes de sala</a></li>
       </ul>
     </div>
@@ -75,6 +76,7 @@
             <li><a href="/organizador/obras/nueva">Cargar obra</a></li>
             <li><a href="/organizador/funciones">Mis funciones</a></li>
             <li><a href="/organizador/funciones/nueva">Programar una función</a></li>
+            <li><a href="/recaudacion/reportes">Reportes</a></li>
             <li><a href="/solicitar-sala">Publicar una sala</a></li>
           {% endif %}
           {% if usr.alcanza('moderador') %}
@@ -95,7 +97,7 @@
       <ul class="pie-enlaces">
         {# Las secciones de «Acerca de IndieCinema» #}
         <li><a href="/acerca-de#quienes-somos">Quiénes somos</a></li>
-        <li><a href="/acerca-de#como-funciona">Cómo funciona</a></li>
+        <li><a href="/como-funciona">Cómo funciona</a></li>
       </ul>
     </div>
     {% endif %}
