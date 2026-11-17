@@ -1,0 +1,83 @@
+{#
+  «Cómo funciona IndieCinema», en /como-funciona (EF-10.1 · IC-570): el circuito de seis pasos
+  de una función participativa y lo que hace cada rol. Es estática: no recibe variables más allá
+  de las que tiene toda plantilla.
+
+  Encabezados, sin saltar niveles: h1 la página; h2 cada sección; h3 cada paso y cada rol.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Cómo funciona{% endblock %}
+
+{% block contenido %}
+<div class="contenedor acerca-de">
+  <header class="acerca-de-cabecera">
+    <p class="portada-antetitulo">Programación participativa · Paso a paso</p>
+    <h1 class="acerca-de-titulo">Cómo funciona IndieCinema</h1>
+    <p class="acerca-de-bajada">Desde que una sala propone una función hasta que el público la califica: seis pasos para decidir qué se proyecta, cuándo se proyecta y sostener a quienes hacen la película y a la sala.</p>
+  </header>
+
+  <section id="circuito" class="acerca-de-seccion acerca-de-pasos" aria-labelledby="circuito-titulo">
+    <h2 id="circuito-titulo" class="portada-seccion-titulo">El circuito de una función</h2>
+    <ol class="acerca-de-lista-pasos">
+      <li class="acerca-de-paso">
+        <span class="acerca-de-paso-numero" aria-hidden="true">01</span>
+        <h3 class="acerca-de-paso-titulo">Se vota qué se proyecta</h3>
+        <p class="acerca-de-paso-texto">El organizador abre una función con obras candidatas del catálogo y el público vota cuáles quiere ver: quedan tantas como películas da la sala por función.</p>
+      </li>
+      <li class="acerca-de-paso">
+        <span class="acerca-de-paso-numero" aria-hidden="true">02</span>
+        <h3 class="acerca-de-paso-titulo">Se acuerda la fecha</h3>
+        <p class="acerca-de-paso-texto">Elegidas las obras, el público marca qué franjas horarias le sirven; al llegar al mínimo de asistentes, se confirma la fecha ganadora.</p>
+      </li>
+      <li class="acerca-de-paso">
+        <span class="acerca-de-paso-numero" aria-hidden="true">03</span>
+        <h3 class="acerca-de-paso-titulo">Reservás tu lugar</h3>
+        <p class="acerca-de-paso-texto">Con la función programada y cupo disponible, elegís cuántos lugares querés guardar antes de que empiece.</p>
+      </li>
+      <li class="acerca-de-paso">
+        <span class="acerca-de-paso-numero" aria-hidden="true">04</span>
+        <h3 class="acerca-de-paso-titulo">Pagás la entrada</h3>
+        <p class="acerca-de-paso-texto">Si la función tiene precio fijo, abonás por Mercado Pago dentro del plazo de reserva; si es a la gorra, queda confirmada en el acto.</p>
+      </li>
+      <li class="acerca-de-paso">
+        <span class="acerca-de-paso-numero" aria-hidden="true">05</span>
+        <h3 class="acerca-de-paso-titulo">Asistís a la sala</h3>
+        <p class="acerca-de-paso-texto">Presentás el código de tu reserva en la puerta para que la sala registre tu asistencia.</p>
+      </li>
+      <li class="acerca-de-paso">
+        <span class="acerca-de-paso-numero" aria-hidden="true">06</span>
+        <h3 class="acerca-de-paso-titulo">Calificás la función</h3>
+        <p class="acerca-de-paso-texto">Terminada la proyección, quienes asistieron pueden calificar la experiencia y dejar su comentario para el ranking de salas.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="roles" class="acerca-de-seccion" aria-labelledby="roles-titulo">
+    <h2 id="roles-titulo" class="portada-seccion-titulo">Qué hace cada rol</h2>
+    <ul class="acerca-de-roles">
+      <li class="acerca-de-rol">
+        <h3 class="acerca-de-paso-titulo">Espectador</h3>
+        <p class="acerca-de-paso-texto">Explora la cartelera y las salas, vota títulos y franjas horarias, reserva y paga sus entradas, asiste con su código y califica las funciones a las que fue.</p>
+      </li>
+      <li class="acerca-de-rol">
+        <h3 class="acerca-de-paso-titulo">Organizador</h3>
+        <p class="acerca-de-paso-texto">Solicita la apertura de su sala independiente, programa funciones directas o participativas, propone franjas horarias y registra la asistencia en puerta.</p>
+      </li>
+      <li class="acerca-de-rol">
+        <h3 class="acerca-de-paso-titulo">Dueño de la obra</h3>
+        <p class="acerca-de-paso-texto">Carga y mantiene sus películas independientes en el catálogo para que las salas puedan programarlas y participa del reparto de las funciones pagas.</p>
+      </li>
+      <li class="acerca-de-rol">
+        <h3 class="acerca-de-paso-titulo">Moderador</h3>
+        <p class="acerca-de-paso-texto">Evalúa las solicitudes de apertura de salas, verifica que los espacios y el catálogo cumplan las pautas y atiende los reportes de la comunidad.</p>
+      </li>
+    </ul>
+  </section>
+
+  <p class="acerca-de-acciones">
+    {% include 'parciales/boton.html.twig' with { texto: 'Ver la cartelera', url: '/cartelera', variante: 'primario' } only %}
+    {% include 'parciales/boton.html.twig' with { texto: 'Conocer las salas', url: '/salas', variante: 'secundario' } only %}
+  </p>
+</div>
+{% endblock %}

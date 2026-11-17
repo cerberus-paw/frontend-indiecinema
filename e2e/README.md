@@ -20,7 +20,7 @@ E2E_URL=http://localhost:8080 E2E_CORREO=eva@indiecinema.test E2E_CLAVE=espectad
 | `E2E_CORREO` y `E2E_CLAVE` | La cuenta de espectador (en local, la de Eva de los datos de prueba) |
 | `E2E_ORGANIZADOR_CORREO` y `E2E_ORGANIZADOR_CLAVE` | Opcional: una cuenta de organizador con salas y funciones, para A-3 (en local, la de los datos de prueba). Sin ella, A-3 se saltea |
 | `E2E_ADMINISTRADOR_CORREO` y `E2E_ADMINISTRADOR_CLAVE` | Opcional: la cuenta del administrador, para A-4. Sin ella, A-4 se saltea |
-| `E2E_FUNCION` | Opcional: el id de la función donde reservan. Sin ella, la primera de la cartelera que se pueda reservar |
+| `E2E_FUNCION` | Opcional: el id de la función donde reservan, gratuita y lejos en el tiempo (abajo). Sin ella, la primera de la cartelera que se pueda reservar |
 
 - **Qué dejan:** en `resultados/`, la traza y la captura de cada prueba que falló
   (`npx playwright show-trace e2e/resultados/<prueba>/trace.zip` la reproduce paso a paso); en
@@ -37,3 +37,11 @@ E2E_URL=http://localhost:8080 E2E_CORREO=eva@indiecinema.test E2E_CLAVE=espectad
 - **De a una:** comparten la cuenta y cuentan los lugares libres, así que no corren en paralelo.
   Dos corridas a la vez (en Actions, la del back y la del front) necesitan cada una su cuenta y
   su `E2E_FUNCION`.
+- **En una función gratuita:** las pruebas de reserva esperan la reserva confirmada, con su código.
+  En una paga, con Mercado Pago activo, queda pendiente de pago: la prueba falla, la reserva no se
+  cancela y retiene lugares de la cuenta hasta que vence, así que fallan también las siguientes.
+  Las funciones de los datos de prueba, además, se cuentan desde el día en que se cargaron y van
+  pasando. Por eso `E2E_FUNCION` apunta a una de las dos que crea
+  `programacion/herramientas/funciones-e2e.php` del back, gratuitas y a un año:
+  `0000000e-0000-4000-8000-000000000001` para la corrida del back y `…000000000002` para la del
+  front.

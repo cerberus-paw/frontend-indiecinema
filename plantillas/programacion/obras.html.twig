@@ -29,6 +29,10 @@
       <h1 class="solicitud-titulo">Películas</h1>
       <p class="solicitud-bajada">Las obras de cine independiente disponibles para descubrir y proyectar en salas de la comunidad.</p>
     </div>
+    <div class="filtros-cartelera-acciones">
+      {% include 'parciales/boton.html.twig' with { texto: 'Ver pedidos de títulos', url: '/pedidos', variante: 'secundario' } only %}
+      {% include 'parciales/boton.html.twig' with { texto: 'Pedir un título que no está', url: '/pedidos/nuevo', variante: 'primario' } only %}
+    </div>
   </header>
 
   {% set opciones_genero = [{valor: '', etiqueta: 'Todos'}] %}

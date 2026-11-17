@@ -69,9 +69,9 @@
         <li>
           <a href="/salas" class="nav-enlace{% if ruta starts with '/salas' %} activo{% endif %}">Salas</a>
         </li>
-        {# Enlace a la explicación de la dinámica colaborativa, una sección de «Acerca de IndieCinema» #}
+        {# Enlace a «Cómo funciona IndieCinema»: el circuito paso a paso y los roles #}
         <li>
-          <a href="/acerca-de#como-funciona" class="nav-enlace">Cómo funciona</a>
+          <a href="/como-funciona" class="nav-enlace{% if ruta starts with '/como-funciona' %} activo{% endif %}">Cómo funciona</a>
         </li>
         {# Enlace a «Acerca de IndieCinema»: quiénes somos y cómo funciona el sitio #}
         <li>
@@ -187,6 +187,11 @@
                   </a>
                 </li>
                 <li>
+                  <a href="/recaudacion/reportes" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">📊</span> Reportes
+                  </a>
+                </li>
+                <li>
                   <a href="/solicitar-sala" class="menu-item">
                     <span class="menu-icono" aria-hidden="true">➕</span> Publicar una sala
                   </a>
@@ -202,6 +207,11 @@
                 <li>
                   <a href="/cuenta/administracion/usuarios" class="menu-item">
                     <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
+                  </a>
+                </li>
+                <li>
+                  <a href="/recaudacion/reportes" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">📊</span> Reportes
                   </a>
                 </li>
                 <li>
