@@ -3306,6 +3306,8 @@ dd {
 .filtros-cartelera-acciones {
   /* En fila */
   display: flex;
+  /* Si no entran, el segundo baja: en «Películas», a 360 px, los dos botones se salían */
+  flex-wrap: wrap;
   /* Separación entre botones */
   gap: var(--espacio-2);
 }
@@ -5791,13 +5793,27 @@ dd {
   table-layout: fixed;
 }
 
-/* En partes del ancho: el rol arranca cerca del medio de la tabla, no contra el borde derecho */
+/* En partes del ancho: la conducta, el rol y el estado mantienen la tabla alineada entre páginas */
+.tabla-admin-columna-conducta {
+  width: 18%;
+}
+
 .tabla-admin-columna-rol {
-  width: 35%;
+  width: 26%;
 }
 
 .tabla-admin-columna-estado {
-  width: 20%;
+  width: 16%;
+}
+
+.tabla-admin-conducta {
+  display: block;
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.conducta-bajo-umbral {
+  color: var(--color-advertencia);
 }
 
 /* El desplegable del rol, del ancho del rol más largo y no de toda la columna, como el wireframe */
@@ -5929,6 +5945,10 @@ dd {
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
   background-color: var(--color-superficie);
+}
+
+.panel-dato-alerta {
+  border-color: var(--color-advertencia);
 }
 
 /* «USUARIOS REGISTRADOS», en versalitas como los títulos de las columnas */
@@ -7727,6 +7747,33 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto-inverso);
 }
 
+/*
+ * En el celular, los tres pasos con nombre no entran (llegaban a 464 px en 360): la línea entre
+ * pasos se acorta y sólo se ve el nombre del actual. Los otros quedan para el lector de pantalla,
+ * que igual los lee en orden, y el número dice dónde está cada uno.
+ */
+@media (max-width: 480px) {
+  .pasos-reserva {
+    gap: var(--espacio-2);
+  }
+
+  .paso-reserva + .paso-reserva::before {
+    width: 1rem;
+  }
+
+  .paso-reserva:not(.paso-actual) .paso-reserva-nombre {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
 .formulario-reserva .grupo-campo {
   max-width: 12rem;
 }
@@ -7936,6 +7983,34 @@ a.tabla-admin-principal:focus-visible {
   .mi-cuenta-panel {
     padding: var(--espacio-5);
   }
+}
+
+.aviso-verificacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin-block: var(--espacio-4);
+}
+
+.ficha-reserva-formulario.aviso-verificacion {
+  margin-block: 0;
+}
+
+.formulario-reenviar-verificacion {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.mi-cuenta-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-6);
+}
+
+.mi-cuenta-formulario {
+  max-width: 32rem;
+  margin-top: var(--espacio-4);
 }
 
 /* El comprobante en papel (E4-04.2): sólo el código y los datos de la reserva, en negro sobre

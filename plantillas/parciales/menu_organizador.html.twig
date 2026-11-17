@@ -42,6 +42,10 @@
       <li>
         <a href="/organizador/bloqueados" class="panel-menu-enlace{% if activa == 'bloqueados' %} activo{% endif %}"{% if activa == 'bloqueados' %} aria-current="page"{% endif %}>Usuarios bloqueados</a>
       </li>
+      {# Pedidos activos de espectadores para programar (EF-11.3) #}
+      <li>
+        <a href="/organizador/pedidos" class="panel-menu-enlace{% if activa == 'pedidos' %} activo{% endif %}"{% if activa == 'pedidos' %} aria-current="page"{% endif %}>Pedidos para programar</a>
+      </li>
       {# Otra sala pasa por la solicitud, como la primera: es una página del sitio, fuera del panel #}
       <li>
         <a href="/solicitar-sala" class="panel-menu-enlace">Publicar una sala</a>

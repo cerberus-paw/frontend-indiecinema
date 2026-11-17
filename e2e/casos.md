@@ -105,7 +105,7 @@ prueba.
 | --- | --- | --- |
 | PG-1 | En la compu, aprieta el número 2 del paginado | Sin recargar, la página 2, con el 2 marcado como la actual |
 | PG-2 | En el celular, baja hasta el final de la cartelera | Sin números de página, se agregan las funciones de la página siguiente |
-| PG-3 | En el celular, elige «Tradicional» en «Paginado» y recarga | Sigue en «Tradicional», con los números de página |
+| PG-3 | En el celular, elige «Tradicional» en «Paginado» y recarga | Sigue en «Tradicional», con los números de página si hay más de una |
 | PG-4 | Sin JavaScript, abre la cartelera | No ve «Paginado», y los números de página llevan a cada página |
 
 ## Últimas búsquedas

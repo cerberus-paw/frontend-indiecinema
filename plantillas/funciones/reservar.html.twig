@@ -10,6 +10,7 @@
     acordó), precio (por lugar, ya escrito), sala y localidad.
   - con_pago: (bool, opcional) si la reserva se paga con Mercado Pago.
   - motivo: (string|null) por qué ya no se puede reservar; entonces no hay formulario.
+  - aviso_conducta: (string|null, opcional) advertencia por historial de conducta (EF-13.2).
   - reglas.cantidad: minimo y maximo, los mismos que controla el servidor.
   - valores.cantidad: lo que mandó, para volver a mostrarlo.
   - errores: (map) el error de cada campo.
@@ -68,6 +69,9 @@
       <a href="{{ funcion.url }}" class="boton boton-secundario">Volver a la función</a>
     </div>
   {% else %}
+    {% if aviso_conducta|default(null) %}
+      {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: aviso_conducta } only %}
+    {% endif %}
     {# Si la reserva volvió con errores: «Revisá 1 campo» con el link a la cantidad, o la regla que
        no se cumplió, como «Quedan 3 lugares.» (E4-10.5) #}
     {% include 'parciales/resumen_de_errores.html.twig' with {
