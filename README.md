@@ -19,7 +19,8 @@ Siguiendo las decisiones arquitectónicas de la Entrega 2:
 frontend-indiecinema/
 ├── composer.json               # Definición del paquete cerberus-paw/frontend-indiecinema
 ├── README.md                   # Documentación técnica del paquete
-├── package.json                # stylelint para el CI y Playwright para las pruebas de punta a punta
+├── package.json                # ESLint y stylelint para el CI, y Playwright para las pruebas de punta a punta
+├── eslint.config.mjs           # Reglas recomendadas de ESLint sobre estaticos/js (lo corre el CI)
 ├── e2e/                        # Pruebas de punta a punta: los casos (casos.md) y su código (README)
 ├── herramientas/
 │   └── compilar-plantillas.php # Compila todas las plantillas con el Twig del núcleo (lo corre el CI)
@@ -66,7 +67,12 @@ frontend-indiecinema/
 │   │   ├── reservas_de_la_funcion.html.twig # Las reservas de una función para su organizador: asistencia y CSV
 │   │   └── administracion_reservas.html.twig # Todas las reservas para el administrador, con la anulación
 │   ├── moderacion/             # Del subsistema moderacion (EF-01): vacía hasta EF-07
-│   └── recaudacion/            # Del subsistema recaudacion (EF-02): vacía hasta EF-08
+│   └── recaudacion/            # Del subsistema recaudacion
+│       ├── reportes.html.twig  # Qué pasó en las salas en un período y qué conviene hacer (EF-09.1)
+│       ├── reportes_funciones.html.twig # Los totales de cada mes y las funciones de uno, con el CSV (EF-09.2)
+│       ├── reportes_obras.html.twig # Cómo le fue a cada obra del dueño, en cualquier sala (EF-09.3)
+│       ├── reportes_obra.html.twig # El detalle de una obra del dueño, con sus votaciones
+│       └── administracion_reparto.html.twig # Con cuánto se reparte lo cobrado y desde cuándo, para el administrador (EF-08.1)
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
     ├── css/
     │   └── estilos.css         # Hoja de estilos con paleta cinematográfica oscura y responsive
@@ -361,6 +367,8 @@ Sin librerías y con una clase por archivo. La plantilla base carga, con `defer`
 
 Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.iniciar()`, la carga condicionada a que su contenedor esté en la página.
 
+Dos líneas más, o el CI falla (IC-447): el archivo del componente arranca con `/* exported <Clase> */`, porque quien la usa es `app.js` y no él mismo, y el nombre de la clase se suma a la lista de `/* global … */` que encabeza `app.js`. Los archivos se cargan con `<script>` y no son módulos, así que ésa es la única forma que tiene ESLint de saber qué publica cada archivo y qué toma de otro; a cambio, un nombre de componente mal escrito en `app.js` falla en el CI en lugar de fallar en el navegador. `PAW` no hace falta declararla: está en `eslint.config.mjs`.
+
 ## 9. Integración continua
 
 En cada PR y en cada push a `main` o a `dev` (`.github/workflows/ci.yml`):
@@ -368,7 +376,7 @@ En cada PR y en cada push a `main` o a `dev` (`.github/workflows/ci.yml`):
 - **Pruebas del back:** el back con el front del PR al lado, y las pruebas de cada subsistema. El back es el de la rama del mismo nombre si existe allá; si no, el de la base del PR (`dev` o `main`): un cambio que toca los dos repositorios va en ramas que se llaman igual, y sus dos PR pasan sin esperar al otro. Es el espejo del CI del back.
 - **Plantillas:** `herramientas/compilar-plantillas.php` compila todas con el Twig del núcleo (del back de la misma rama, como las pruebas); falla con un error de sintaxis o un filtro que no existe.
 - **CSS:** stylelint, sólo con reglas que encuentran errores (una variable que no existe, una propiedad mal escrita, un selector repetido). En local: `npm ci && npm run css`.
-- **JavaScript:** `node --check` sobre cada archivo de `estaticos/js`.
+- **JavaScript:** ESLint con las reglas recomendadas sobre `estaticos/js` (IC-447), que encuentran errores y no cuestiones de estilo: un método repetido en una clase, un nombre que no existe, una variable que sobra. Reemplaza al `node --check` de antes, que sólo veía la sintaxis. En local: `npm ci && npm run js`.
 - **Secretos:** gitleaks sobre todo el historial, como en el back.
 
 Cuando la CI pasa en un push a `main` o a `dev`, `.github/workflows/cd.yml` publica el cambio en el servidor de esa rama, con el mismo script que el back. Cada subtarea sale de `dev` y su PR apunta ahí; a producción llega por un PR de `dev` a `main` (README del back, «Ramas y entornos» y «Despliegue continuo»).
