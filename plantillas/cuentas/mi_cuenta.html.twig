@@ -1,16 +1,17 @@
 {#
-  «Mi cuenta» en /cuenta/ (E4-10.13), como el wireframe mi-cuenta-mis-datos: la tarjeta del
-  usuario arriba de la barra (la inicial, el nombre, desde cuándo tiene la cuenta y sus roles) y
-  «Mis datos» con el nombre y el correo. Es sólo de lectura: editar los datos y cambiar la
-  contraseña todavía no tienen ruta en el back, así que quedan afuera el formulario, «Editar
-  perfil» y «Seguridad». También las secciones de la barra sin pantalla y «Eliminar mi cuenta».
+  «Mi cuenta» en /cuenta/ (E4-10.13 / EF-15.1): la tarjeta del usuario arriba de la barra (la
+  inicial, el nombre, desde cuándo tiene la cuenta y sus roles), «Mis datos» con el nombre y el
+  correo, el aviso si falta verificar el correo (X-02.4) y los accesos a editar datos y cambiar la
+  contraseña (/cuenta/datos y /cuenta/contrasena).
 
   «Mi solicitud de sala» (EF-07.6) muestra en qué quedó la última solicitud de sala, con el enlace
   a /solicitar-sala para verla o, si la rechazaron, corregirla y reenviarla.
 
   Variables:
   - cuenta: {nombre, correo, roles (lista de 'espectador', 'organizador', 'moderador' o
-    'administrador', de menor a mayor), desde ('marzo de 2025')}.
+    'administrador', de menor a mayor), desde ('marzo de 2025'), correo_verificado (bool)}.
+  - verificacion_reenviada: (bool, opcional) true si volvió del POST tras reenviar el enlace.
+  - error_verificacion: (string|null, opcional) error al reenviar el enlace.
   - solicitud_de_sala (opcional): {estado (pendiente, en_revision_manual, aprobada o rechazada),
     sala, motivo (o null), fecha (dd/mm/aaaa)}. No viene si nunca mandó una o si moderación no
     respondió.
@@ -41,6 +42,15 @@
   <h1 id="mis-datos-titulo" class="solicitud-titulo">Mis datos</h1>
   <p class="solicitud-bajada">Con estos datos entrás a IndieCinema.</p>
 
+  {% if not (cuenta.correo_verificado ?? true) %}
+    {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+      mensaje: 'Hasta que lo confirmes no vas a poder votar ni reservar.',
+      csrf: csrf,
+      reenviada: verificacion_reenviada|default(false),
+      error_verificacion: error_verificacion|default(null)
+    } only %}
+  {% endif %}
+
   <h2 class="mi-cuenta-subtitulo">Información personal</h2>
   <dl class="mi-cuenta-datos">
     <div>
@@ -52,6 +62,18 @@
       <dd>{{ cuenta.correo }}</dd>
     </div>
   </dl>
+  <div class="mi-cuenta-acciones">
+    {% include 'parciales/boton.html.twig' with {
+      texto: 'Editar datos',
+      url: '/cuenta/datos',
+      variante: 'secundario'
+    } only %}
+    {% include 'parciales/boton.html.twig' with {
+      texto: 'Cambiar contraseña',
+      url: '/cuenta/contrasena',
+      variante: 'secundario'
+    } only %}
+  </div>
 
   {% if solicitud_de_sala is defined %}
     {% set solicitud = solicitud_de_sala %}
