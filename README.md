@@ -72,7 +72,9 @@ frontend-indiecinema/
 │       ├── reportes_funciones.html.twig # Los totales de cada mes y las funciones de uno, con el CSV (EF-09.2)
 │       ├── reportes_obras.html.twig # Cómo le fue a cada obra del dueño, en cualquier sala (EF-09.3)
 │       ├── reportes_obra.html.twig # El detalle de una obra del dueño, con sus votaciones
-│       └── administracion_reparto.html.twig # Con cuánto se reparte lo cobrado y desde cuándo, para el administrador (EF-08.1)
+│       ├── administracion_reparto.html.twig # Con cuánto se reparte lo cobrado y desde cuándo, para el administrador (EF-08.1)
+│       ├── liquidaciones.html.twig # Lo que le toca al organizador y al dueño, mes por mes (EF-08.3)
+│       └── administracion_liquidaciones.html.twig # Todas las del mes y la marca de transferida, para el administrador (EF-08.3)
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
     ├── css/
     │   └── estilos.css         # Hoja de estilos con paleta cinematográfica oscura y responsive

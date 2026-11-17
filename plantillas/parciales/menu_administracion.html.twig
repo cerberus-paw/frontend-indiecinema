@@ -8,7 +8,7 @@
 
   Parámetros recibidos:
   - activa: (string) la sección actual: 'usuarios', 'reservas', 'reportes', 'reparto',
-    'solicitudes', 'documentos', 'obras' o 'denuncias'.
+    'liquidaciones', 'solicitudes', 'documentos', 'obras' o 'denuncias'.
   - usuario: el usuario en sesión.
   - csrf: el token del formulario para salir.
 #}
@@ -36,6 +36,10 @@
       {# Con cuánto se reparte lo cobrado entre la sala, el dueño y la plataforma (EF-08.1) #}
       <li>
         <a href="/recaudacion/administracion/reparto" class="panel-menu-enlace{% if activa == 'reparto' %} activo{% endif %}"{% if activa == 'reparto' %} aria-current="page"{% endif %}>Reparto</a>
+      </li>
+      {# Lo que hay que transferirle a cada uno en el mes, y la marca de que ya se hizo (EF-08.3) #}
+      <li>
+        <a href="/recaudacion/administracion/liquidaciones" class="panel-menu-enlace{% if activa == 'liquidaciones' %} activo{% endif %}"{% if activa == 'liquidaciones' %} aria-current="page"{% endif %}>Liquidaciones</a>
       </li>
     </ul>
   </nav>
