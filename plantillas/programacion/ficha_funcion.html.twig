@@ -46,6 +46,10 @@
       - reservable: (bool) si todavía se puede reservar: no se canceló, no empezó ni está agotada. Con sesión se
         ve el formulario, que manda la reserva al subsistema funciones; sin sesión, el enlace
         para ingresar.
+      - aviso_conducta: (string|null, opcional) advertencia cuando el espectador está bajo el umbral
+        de conducta (EF-13.2).
+      - limite_conducta_alcanzado: (bool, opcional) true si además alcanzó su tope de reservas
+        simultáneas por conducta y no puede iniciar otra hasta liberar una.
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
   - funcion.votacion_cierra: (string|null) hasta cuándo se vota, «15 nov 20:00» (EF-03.1); funcion.votacion_vencida:
@@ -92,7 +96,7 @@
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       titulo: '¡Votación cerrada con éxito!',
-      mensaje: 'La votación de títulos fue cerrada correctamente. La obra más votada ha sido seleccionada y la función pasó al estado «En acuerdo de fecha».'
+      mensaje: 'La votación de títulos fue cerrada correctamente. Quedaron las obras más votadas, hasta las películas por función de la sala, y la función pasó al estado «En acuerdo de fecha».'
     } only %}
   {% endif %}
 
@@ -245,16 +249,32 @@
             </div>
           {% endif %}
         </div>
-        {% if usuario %}
+        {% if usuario and not usuario.correoVerificado %}
+          {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+            clase: 'ficha-reserva-formulario',
+            mensaje: 'Verificá tu correo para reservar.',
+            csrf: csrf,
+            volver: '/cartelera/' ~ funcion.id,
+            reenviada: verificacion_reenviada|default(false)
+          } only %}
+        {% elseif usuario %}
           {# data-formulario-reserva: el enganche del componente que lo manda sin recargar (E4-05.3).
              El tope por persona y lo que le queda al espectador los manda funciones con la
              ocupación (IC-463): los componentes los leen de acá y no tienen su propio número. Sin
              el dato (funciones no respondió), el campo llega hasta los lugares o el cupo y la
              reserva la controla funciones igual. #}
+          {% set aviso_conducta = funcion.aviso_conducta|default(null) %}
+          {% set bloqueado_conducta = funcion.limite_conducta_alcanzado|default(false) %}
+          {% if aviso_conducta %}
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'advertencia',
+              mensaje: aviso_conducta
+            } only %}
+          {% endif %}
           {% set tope_por_persona = funcion.maximo_por_persona|default(null) %}
           {% set restantes_usuario = funcion.lugares_restantes_usuario|default(null) %}
-          {% set sin_lugares_propios = restantes_usuario is same as(0) %}
-          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva{% if tope_por_persona is not null and restantes_usuario is not null %} data-maximo-por-persona="{{ tope_por_persona }}" data-restantes-usuario="{{ restantes_usuario }}"{% endif %}>
+          {% set sin_lugares_propios = (restantes_usuario is same as(0)) or bloqueado_conducta %}
+          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva{% if tope_por_persona is not null and restantes_usuario is not null %} data-maximo-por-persona="{{ tope_por_persona }}" data-restantes-usuario="{{ restantes_usuario }}"{% endif %}{% if bloqueado_conducta %} data-bloqueado-conducta="1"{% endif %}>
             <input type="hidden" name="_csrf" value="{{ csrf }}">
             {# valor_maximo nunca menos de 1: con el tope alcanzado el campo va deshabilitado, y un
                max por debajo del min no tiene sentido. #}
@@ -372,6 +392,14 @@
         {% endif %}
 
         {% if usuario %}
+          {% if not usuario.correoVerificado and not funcion.votacion_vencida|default(false) %}
+            {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+              mensaje: 'Verificá tu correo para votar.',
+              csrf: csrf,
+              volver: '/cartelera/' ~ funcion.id,
+              reenviada: verificacion_reenviada|default(false)
+            } only %}
+          {% endif %}
           {# Mensaje de estado si ya emitió un voto #}
           {% if tiene_voto %}
             <div class="ficha-votacion-aviso-voto" role="status">
@@ -435,6 +463,8 @@
                       <div class="candidata-voto-registrado" role="status">
                         <span class="voto-registrado-texto">Esta es tu elección actual. Podés cambiarla votando por otra candidata.</span>
                       </div>
+                    {% elseif not usuario.correoVerificado %}
+                      {# Sin correo verificado: se muestra el aviso arriba y se oculta el botón. #}
                     {% else %}
                       <form action="{{ accion_voto|default('/cartelera/' ~ funcion.id ~ '/votar') }}" method="POST" class="formulario-voto-obra" data-formulario-voto>
                         <input type="hidden" name="_csrf" value="{{ csrf }}">
@@ -536,7 +566,7 @@
       {# El organizador no marca sus propias franjas: el mínimo lo junta el público (E3-13.F7). Pasada
          la fecha límite no se marca más, aunque falte que el organizador confirme (E3-13.F8). #}
       {% set se_vota = not sin_franjas and not es_sin_quorum and votacion_abierta %}
-      {% set marca_franjas = usuario and not es_organizador and se_vota %}
+      {% set marca_franjas = usuario and usuario.correoVerificado and not es_organizador and se_vota %}
       {% set franja_lider = funcion.franja_ganadora|default(null) %}
       {% set max_votos = franja_lider.votos|default(0) %}
 
@@ -645,6 +675,13 @@
 
             {% if not usuario and se_vota %}
               <p class="ficha-acuerdo-ingresar"><a href="/cuenta/ingresar">Ingresá</a> para marcar «Me sirve» en las franjas a las que podés ir.</p>
+            {% elseif usuario and not usuario.correoVerificado and not es_organizador and se_vota %}
+              {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+                mensaje: 'Verificá tu correo para votar y marcar «Me sirve» en las franjas.',
+                csrf: csrf,
+                volver: '/cartelera/' ~ funcion.id,
+                reenviada: verificacion_reenviada|default(false)
+              } only %}
             {% endif %}
 
             <ul class="ficha-franjas">

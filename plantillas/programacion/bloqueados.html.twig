@@ -1,0 +1,186 @@
+{#
+  «Usuarios bloqueados» del organizador, en /organizador/bloqueados (EF-12.1 / IC-580): permite
+  bloquear a un espectador en una de sus salas indicando un motivo obligatorio, ver quiénes están
+  bloqueados en sus salas y desbloquearlos. Quien está bloqueado en una sala no puede votar ni
+  reservar en sus funciones; las reservas ya hechas no se cancelan solas.
+
+  Variables:
+  - salas: lista de {id, nombre} de las salas del organizador.
+  - sala_elegida: {id, nombre} seleccionada en el formulario, o null si no tiene salas.
+  - usuario_elegido_nombre: ?string con el nombre del espectador preseleccionado por ?usuario=, o null.
+  - bloqueos: lista de {sala_id, sala_nombre, usuario_id, usuario_nombre (o null), motivo, bloqueado_en}.
+  - valores: {usuario_id, motivo} para completar al llegar desde una reserva o al volver con errores.
+  - errores: mapa de errores por campo ('usuario_id', 'motivo').
+  - error_general: (string, opcional) por qué no se pudo guardar el bloqueo.
+  - bloqueado: (bool) aviso tras bloquear a un espectador.
+  - desbloqueado: (bool) aviso tras desbloquear a un espectador.
+#}
+{% extends 'organizador.html.twig' %}
+
+{% block titulo %}Usuarios bloqueados{% endblock %}
+
+{% block seccion %}bloqueados{% endblock %}
+
+{% block panel %}
+<div class="contenedor">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Usuarios bloqueados</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Usuarios bloqueados</h1>
+      <p class="solicitud-bajada">Bloqueá a un espectador en una de tus salas con un motivo, o quitá bloqueos activos. Quien está bloqueado no puede votar ni reservar en esa sala.</p>
+    </div>
+  </header>
+
+  {% if bloqueado|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      mensaje: 'El espectador quedó bloqueado en la sala. Ya no puede votar ni reservar en sus funciones.'
+    } only %}
+  {% endif %}
+
+  {% if desbloqueado|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      mensaje: 'El espectador quedó desbloqueado. Ya puede volver a votar y reservar en la sala.'
+    } only %}
+  {% endif %}
+
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    errores: errores ?? {},
+    error_general: error_general ?? null,
+    titulo: 'No se pudo bloquear al espectador'
+  } only %}
+
+  {% if salas is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'Todavía no tenés ninguna sala para administrar bloqueos.'
+    } only %}
+  {% else %}
+    <section aria-labelledby="titulo-bloquear">
+      <h2 id="titulo-bloquear" class="ficha-sala-seccion-titulo">Bloquear a un espectador</h2>
+
+      {% if salas|length > 1 %}
+        <form action="/organizador/bloqueados" method="GET" class="panel-filtros" aria-label="Elegir sala" data-enviar-al-elegir>
+          {% if (valores.usuario_id ?? '') != '' %}
+            <input type="hidden" name="usuario" value="{{ valores.usuario_id }}">
+          {% endif %}
+          <label for="selector-sala-bloqueo" class="campo-etiqueta">Sala</label>
+          <select id="selector-sala-bloqueo" name="sala" class="campo-control control-select">
+            {% for sala in salas %}
+              <option value="{{ sala.id }}"{% if sala_elegida and sala.id == sala_elegida.id %} selected{% endif %}>{{ sala.nombre }}</option>
+            {% endfor %}
+          </select>
+          <noscript>
+            {% include 'parciales/boton.html.twig' with { texto: 'Elegir sala', tipo: 'submit', variante: 'secundario', tamano: 'chico' } only %}
+          </noscript>
+        </form>
+      {% endif %}
+
+      <form action="/organizador/salas/{{ sala_elegida.id }}/bloqueos" method="POST" class="formulario-sala">
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+        <fieldset class="seccion-formulario">
+          <legend class="seccion-leyenda">
+            <span class="seccion-titulo">Sala: {{ sala_elegida.nombre }}</span>
+            <span class="seccion-subtitulo">El motivo queda guardado para tu control; el espectador solo ve que no puede operar en la sala.</span>
+          </legend>
+
+          {% if usuario_elegido_nombre|default(null) %}
+            <p class="solicitud-bajada">Espectador seleccionado: <strong>{{ usuario_elegido_nombre }}</strong></p>
+          {% endif %}
+
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'usuario_id',
+            etiqueta: 'Identificador del espectador',
+            tipo: 'text',
+            valor: valores.usuario_id ?? '',
+            errores: errores ?? {},
+            requerido: true,
+            ayuda: 'El código de cuenta (UUID) del espectador; al venir desde las reservas de una función se completa solo.'
+          } only %}
+
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'motivo',
+            etiqueta: 'Motivo del bloqueo',
+            tipo: 'textarea',
+            valor: valores.motivo ?? '',
+            errores: errores ?? {},
+            requerido: true,
+            maximo: 500,
+            filas: 3,
+            ayuda: 'Contá brevemente por qué bloqueás a este espectador (hasta 500 caracteres).'
+          } only %}
+
+          <div class="pie-formulario-acciones">
+            {% include 'parciales/boton.html.twig' with {
+              texto: 'Bloquear en la sala',
+              tipo: 'submit',
+              variante: 'primario'
+            } only %}
+          </div>
+        </fieldset>
+      </form>
+    </section>
+
+    <section aria-labelledby="titulo-bloqueados">
+      <h2 id="titulo-bloqueados" class="ficha-sala-seccion-titulo">Bloqueados en tus salas</h2>
+      {% if bloqueos is empty %}
+        {% include 'parciales/mensaje.html.twig' with {
+          tipo: 'info',
+          mensaje: 'Todavía no hay espectadores bloqueados en tus salas.'
+        } only %}
+      {% else %}
+        <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Usuarios bloqueados">
+          <table class="tabla-admin">
+            <thead>
+              <tr>
+                <th scope="col">Espectador</th>
+                <th scope="col">Sala</th>
+                <th scope="col">Motivo</th>
+                <th scope="col">Bloqueado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for bloqueo in bloqueos %}
+                <tr data-bloqueo="{{ bloqueo.sala_id }}-{{ bloqueo.usuario_id }}">
+                  <td>
+                    {% if bloqueo.usuario_nombre %}
+                      <span class="tabla-admin-principal">{{ bloqueo.usuario_nombre }}</span>
+                      <span class="tabla-admin-secundario">{{ bloqueo.usuario_id }}</span>
+                    {% else %}
+                      <span class="tabla-admin-principal">{{ bloqueo.usuario_id }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ bloqueo.sala_nombre }}</td>
+                  <td>{{ bloqueo.motivo }}</td>
+                  <td>{{ bloqueo.bloqueado_en }}</td>
+                  <td class="tabla-admin-acciones">
+                    <form action="/organizador/salas/{{ bloqueo.sala_id }}/bloqueos/{{ bloqueo.usuario_id }}/quitar" method="POST" class="formulario-accion-tabla">
+                      <input type="hidden" name="_csrf" value="{{ csrf }}">
+                      {% include 'parciales/boton.html.twig' with {
+                        texto: 'Desbloquear',
+                        tipo: 'submit',
+                        variante: 'secundario',
+                        tamano: 'chico',
+                        aria_label: 'Desbloquear a ' ~ (bloqueo.usuario_nombre ?? bloqueo.usuario_id) ~ ' de ' ~ bloqueo.sala_nombre
+                      } only %}
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

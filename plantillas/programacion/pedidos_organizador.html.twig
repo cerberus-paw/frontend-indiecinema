@@ -1,0 +1,96 @@
+{#
+  «Pedidos para programar» en el panel del organizador, en /organizador/pedidos (EF-11.3 / IC-578):
+  muestra los pedidos activos disponibles según las 48 horas de prioridad de reputación de sala
+  (promedio >= 4) y permite tomarlos cargando la obra precargada o eligiendo una del catálogo propio.
+
+  Variables:
+  - pedidos: lista de pedidos activos {id, titulo, anio, director, adhesiones}.
+  - tiene_prioridad: (bool) si el organizador tiene alguna sala con promedio >= 4.0.
+  - obras: lista de obras activas del organizador {id, titulo, anio}.
+  - tomado: (bool) aviso tras tomar un pedido correctamente.
+  - error_general: ?string con el motivo si no se pudo tomar el pedido.
+#}
+{% extends 'organizador.html.twig' %}
+
+{% block titulo %}Pedidos para programar{% endblock %}
+
+{% block seccion %}pedidos{% endblock %}
+
+{% block panel %}
+<div class="contenedor">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Pedidos para programar</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Pedidos para programar</h1>
+      <p class="solicitud-bajada">
+        {% if tiene_prioridad %}
+          Tu sala cuenta con prioridad de 48 horas sobre los pedidos recién activados (promedio 4 o más).
+        {% else %}
+          Ves los pedidos activos disponibles para todas las salas (pasadas las 48 horas de prioridad para las mejor calificadas).
+        {% endif %}
+      </p>
+    </div>
+  </header>
+
+  {% if tomado|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: 'Pedido tomado',
+      mensaje: 'Tomaste el pedido con tu obra, lo quitamos del ranking y avisamos por correo a quienes lo pidieron.'
+    } only %}
+  {% endif %}
+
+  {% include 'parciales/resumen_de_errores.html.twig' with {
+    errores: {},
+    error_general: error_general ?? null,
+    titulo: 'No se pudo tomar el pedido'
+  } only %}
+
+  {% if pedidos is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'Todavía no hay pedidos activos disponibles para programar en este momento.'
+    } only %}
+  {% else %}
+    <h2 class="sr-only">Pedidos activos disponibles</h2>
+    <ul class="lista-pedidos-organizador">
+      {% for pedido in pedidos %}
+        <li class="ranking-pedido-item" data-pedido="{{ pedido.id }}">
+          <h3 class="pedido-titulo">{{ pedido.titulo }} ({{ pedido.anio }})</h3>
+          <p class="pedido-meta">
+            Dirección: {{ pedido.director }}
+            · <strong>{{ pedido.adhesiones }} {{ pedido.adhesiones == 1 ? 'adhesión' : 'adhesiones' }}</strong>
+          </p>
+          <p>
+            <a href="/organizador/obras/nueva?pedido={{ pedido.id }}" class="boton boton-primario boton-chico">Cargar obra para este pedido</a>
+          </p>
+          {% if obras is not empty %}
+            <form action="/organizador/pedidos/{{ pedido.id }}/tomar" method="POST" class="formulario-accion-tabla">
+              <input type="hidden" name="_csrf" value="{{ csrf }}">
+              <label for="obra-{{ pedido.id }}" class="campo-etiqueta">O elegí una de tus obras</label>
+              <select id="obra-{{ pedido.id }}" name="obra_id" class="campo-control control-select">
+                {% for obra in obras %}
+                  <option value="{{ obra.id }}">{{ obra.titulo }} ({{ obra.anio }})</option>
+                {% endfor %}
+              </select>
+              {% include 'parciales/boton.html.twig' with {
+                texto: 'Tomar con esta obra',
+                tipo: 'submit',
+                variante: 'secundario',
+                tamano: 'chico'
+              } only %}
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+{% endblock %}
