@@ -18,7 +18,8 @@
   - errores: campo => qué está mal.
   - corrigiendo: si la última la rechazaron y el formulario es para corregirla.
   - solicitud: la última que mandó, {estado (pendiente, aprobada o rechazada), sala, imagen,
-    enviada, resuelta, motivo}, o null.
+    enviada, resuelta, motivo, documentos}, o null. documentos (EF-07.4): lista de {nombre,
+    vence (dd/mm/aaaa), url}; vacía en las que se mandaron antes de que se pidieran.
   - error_general: si hubo errores (opcional).
   - mensaje_exito: si la acaba de mandar (opcional).
 #}
@@ -70,6 +71,16 @@
             {# nl2br escapa antes de agregar los <br> #}
             <p class="progreso-solicitud-aviso-texto">«{{ solicitud.motivo|nl2br }}»</p>
           </div>
+        </div>
+      {% endif %}
+      {% if solicitud.documentos is defined and solicitud.documentos is not empty %}
+        <div class="progreso-solicitud-documentos">
+          <p class="progreso-solicitud-aviso-titulo">Documentación que mandaste</p>
+          <ul>
+            {% for documento in solicitud.documentos %}
+              <li><a href="{{ documento.url }}" download>{{ documento.nombre }} (PDF)</a>, vence el {{ documento.vence }}</li>
+            {% endfor %}
+          </ul>
         </div>
       {% endif %}
     </section>
@@ -160,7 +171,7 @@
           {% endif %}
           {% include 'parciales/campo.html.twig' with reglas.imagen|merge({
             nombre: 'imagen',
-            zona_de_imagen: true,
+            zona_de_archivo: 'Arrastrá la imagen acá, o elegila:',
             etiqueta: corrigiendo ? 'Otra foto de la sala' : 'Foto de la sala',
             tipo: 'file',
             ayuda: 'JPG, PNG o WebP, hasta 5 MB.' ~ (corrigiendo ? ' Si no elegís otra, queda la que mandaste.' : ''),
@@ -205,6 +216,44 @@
           </div>
         </div>
       </fieldset>
+
+      {# EF-07.4: el seguro y la habilitación en PDF, cada uno con su vencimiento. Las reglas pueden faltar si el back todavía no las manda #}
+      {% if reglas.seguro is defined %}
+      <fieldset class="seccion-formulario seccion-lateral">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Documentación</span>
+          <span class="seccion-subtitulo">La revisa la moderación antes de publicar la sala. Sólo la ven ella y vos.</span>
+        </legend>
+        <div class="seccion-campos">
+          {% for documento in [
+            { archivo: 'seguro', fecha: 'vence_seguro', etiqueta: 'Seguro del espacio', vence: 'Vencimiento del seguro' },
+            { archivo: 'habilitacion_pdf', fecha: 'vence_habilitacion', etiqueta: 'Habilitación del espacio', vence: 'Vencimiento de la habilitación' }
+          ] %}
+            {# Al corregir, el que ya mandó: si no sube otro, queda ése #}
+            {% set anterior = corrigiendo and solicitud.documentos is defined ? solicitud.documentos|filter(d => d.campo == documento.archivo)|first : null %}
+            {% if anterior %}
+              <p class="solicitud-documento-actual">Mandaste <a href="{{ anterior.url }}" download>este PDF</a>, que vence el {{ anterior.vence }}.</p>
+            {% endif %}
+            {% include 'parciales/campo.html.twig' with reglas[documento.archivo]|merge({
+              nombre: documento.archivo,
+              zona_de_archivo: 'Arrastrá el PDF acá, o elegilo:',
+              etiqueta: anterior ? 'Otro PDF: ' ~ documento.etiqueta|lower : documento.etiqueta,
+              tipo: 'file',
+              ayuda: 'En PDF, hasta 5 MB.' ~ (anterior ? ' Si no subís otro, queda el que mandaste.' : ''),
+              errores: errores
+            }) only %}
+            {% include 'parciales/campo.html.twig' with reglas[documento.fecha]|merge({
+              nombre: documento.fecha,
+              etiqueta: documento.vence,
+              tipo: 'date',
+              valor: valores[documento.fecha] ?? '',
+              ayuda: 'La que dice el papel. Antes de esa fecha te vamos a pedir uno nuevo.',
+              errores: errores
+            }) only %}
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% endif %}
 
       <fieldset class="seccion-formulario seccion-lateral">
         <legend class="seccion-leyenda">

@@ -95,7 +95,7 @@ frontend-indiecinema/
     │       ├── parametros-de-sala.js # ParametrosDeSala: los parámetros de la sala elegida, en el alta de función
     │       ├── validacion-en-linea.js # ValidacionEnLinea: los errores de los formularios de carga mientras se escribe
     │       ├── votacion-titulos.js # VotacionTitulos: la elección de la obra en la votación de títulos
-    │       └── zona-de-imagen.js # ZonaDeImagen: arrastrar y soltar la imagen, con vista previa
+    │       └── zona-de-archivo.js # ZonaDeArchivo: arrastrar y soltar la imagen (con vista previa) o el PDF
     └── img/
         ├── icon.svg            # Isotipo e icono oficial de IndieCinema (favicon)
         ├── logo-horizontal-dark.svg # Logotipo horizontal oficial sobre fondo oscuro
@@ -363,7 +363,7 @@ Sin librerías y con una clase por archivo. La plantilla base carga, con `defer`
   - `validacion-en-linea.js`, `ValidacionEnLinea` (`[data-validar-en-linea]`, IC-295 / E4-09.1 y E4-09.3): en la solicitud de sala, la edición de sala y el alta de función, muestra el error de cada campo al dejarlo, y en cada tecla una vez que tiene error, y no deja mandar el formulario con algo mal. Qué está mal lo dice el navegador (`campo.validity`, con los `required`, `min`, `max` y `pattern` que salen de las reglas del back); el texto lo manda el back en los `data-error-*` de cada campo, el mismo con el que rechazaría el POST. Sin JavaScript valida el navegador, y el servidor vuelve a validar todo.
   - `votacion-titulos.js`, `VotacionTitulos` (`[data-formulario-votacion]`, IC-148 / E3-12): gestiona la accesibilidad y sincronización visual al seleccionar obras candidatas en la ficha de la función, actualizando `aria-checked` y la clase `.seleccionada` en las tarjetas. Sin JavaScript, el formulario opera mediante POST estándar nativo (mejora progresiva).
 
-  - `zona-de-imagen.js`, `ZonaDeImagen` (`[data-zona-de-imagen]`, IC-296 / E4-09.2): envuelve el campo de archivo de la foto de la sala para poder arrastrar y soltar la imagen, con vista previa. El campo sigue ahí y se usa igual con el teclado; lo que se suelta se revisa contra su `accept`, con el mismo mensaje que daría el servidor.
+  - `zona-de-archivo.js`, `ZonaDeArchivo` (`[data-zona-de-archivo]`, IC-296 / E4-09.2): envuelve el campo de archivo de la foto de la sala, del afiche de la obra y de los PDF de la solicitud de sala (EF-07.4) para poder arrastrar y soltar el archivo: una imagen se ve antes de mandarla, y de un PDF se muestran el nombre y el tamaño. El texto de la zona lo pone la plantilla. El campo sigue ahí y se usa igual con el teclado; lo que se suelta se revisa contra su `accept`, con el mismo mensaje que daría el servidor.
 
 Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.iniciar()`, la carga condicionada a que su contenedor esté en la página.
 

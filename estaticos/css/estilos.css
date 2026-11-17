@@ -1853,9 +1853,9 @@ dd {
   line-height: 1.35;
 }
 
-/* Zona para arrastrar y soltar la imagen, con vista previa (IC-296). El campo de archivo queda
-   adentro: se llega con el tabulador y se abre con Enter, como siempre */
-.zona-de-imagen {
+/* Zona para arrastrar y soltar un archivo, con vista previa si es una imagen (IC-296, EF-07.4). El
+   campo de archivo queda adentro: se llega con el tabulador y se abre con Enter, como siempre */
+.zona-de-archivo {
   /* Vista previa, texto, campo y nombre, uno debajo del otro y centrados */
   display: flex;
   flex-direction: column;
@@ -1873,7 +1873,7 @@ dd {
 }
 
 /* Mientras hay algo encima para soltar */
-.zona-de-imagen-encima {
+.zona-de-archivo-encima {
   /* Borde del color primario, lleno */
   border-style: solid;
   border-color: var(--color-primario);
@@ -1882,7 +1882,7 @@ dd {
 }
 
 /* La foto elegida, antes de mandarla */
-.zona-de-imagen-vista {
+.zona-de-archivo-vista {
   /* Entra en la zona sin deformarse */
   max-width: 100%;
   max-height: 14rem;
@@ -1891,16 +1891,16 @@ dd {
   border-radius: var(--radio-sm);
 }
 
-/* «Arrastrá la imagen acá, o elegila:» */
-.zona-de-imagen-texto {
+/* «Arrastrá la imagen acá, o elegila:», «Arrastrá el PDF acá, o elegilo:» */
+.zona-de-archivo-texto {
   /* Sin margen propio: el gap de la zona separa */
   margin: 0;
   color: var(--color-texto-secundario);
   font-size: var(--texto-sm);
 }
 
-/* El nombre del archivo, para quien no ve la vista previa */
-.zona-de-imagen-nombre {
+/* El nombre del archivo, para quien no ve la vista previa; de un PDF, con su tamaño */
+.zona-de-archivo-nombre {
   margin: 0;
   color: var(--color-texto-atenuado);
   font-size: var(--texto-xs);
@@ -1911,7 +1911,7 @@ dd {
 
 /* Sin animación para quien la desactivó */
 @media (prefers-reduced-motion: reduce) {
-  .zona-de-imagen {
+  .zona-de-archivo {
     transition: none;
   }
 }
@@ -6795,6 +6795,11 @@ a.tabla-admin-principal:focus-visible {
 /* Un aviso suelto, fuera de la caja de la lista */
 .bandeja-nota-suelta {
   padding: 0 0 var(--espacio-2);
+}
+
+/* Un documento con el vencimiento pasado (EF-07.4): en el color de los errores */
+.bandeja-vencido {
+  color: var(--color-error);
 }
 
 /* El motivo a todo el ancho, debajo de las columnas */

@@ -18,7 +18,8 @@
   - solicitudes: lista de {id, estado, sala, localidad, solicitante (o null), enviada, elegida}.
   - elegida: {id, estado, enviada, resuelta, motivo, sala: {id, nombre, localidad, capacidad,
     imagen, descripcion, direccion, peliculas_por_funcion, duracion_funcion,
-    tiempo_entre_funciones}, en_el_sitio, solicitante: {nombre, correo, cuenta_creada,
+    tiempo_entre_funciones}, en_el_sitio, documentos (EF-07.4: lista de {nombre, vence, vencido,
+    estado, url}, vacía en las que se mandaron antes de que se pidiera), solicitante: {nombre, correo, cuenta_creada,
     es_organizador} (null si ya no existe, false si cuentas no respondió), solicitante_nombre,
     solicitudes_previas, propia}, o null. propia: la mandó el moderador en sesión, que no la
     resuelve ni retira su sala (EF-07.3); se ve sin los formularios. en_el_sitio es cómo está la sala de una aprobada según
@@ -148,6 +149,25 @@
             <dt>Tiempo entre funciones</dt>
             <dd>{{ sala.tiempo_entre_funciones }} minutos</dd>
           </dl>
+
+          {# EF-07.4: el seguro y la habilitación, con is defined por si el back todavía no los manda #}
+          {% if elegida.documentos is defined %}
+            <h3 class="bandeja-subtitulo">Documentación</h3>
+            {% if elegida.documentos is empty %}
+              <p class="bandeja-nota bandeja-nota-suelta">Sin documentación: se mandó antes de que se pidiera.</p>
+            {% else %}
+              <dl class="bandeja-ficha">
+                {% for documento in elegida.documentos %}
+                  <dt>{{ documento.nombre }}</dt>
+                  <dd>
+                    <a href="{{ documento.url }}" download>Bajar el PDF</a>
+                    · {% if documento.vencido %}<strong class="bandeja-vencido">Venció el {{ documento.vence }}</strong>{% else %}Vence el {{ documento.vence }}{% endif %}
+                    {% if documento.estado != 'pendiente' %}· {{ documento.estado|capitalize }}{% endif %}
+                  </dd>
+                {% endfor %}
+              </dl>
+            {% endif %}
+          {% endif %}
 
           <h3 class="bandeja-subtitulo">Historial del solicitante</h3>
           {% if elegida.solicitante is same as(false) %}
