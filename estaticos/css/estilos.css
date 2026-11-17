@@ -5705,6 +5705,10 @@ dd {
 .tabla-admin-contenedor {
   /* Desplazamiento horizontal propio */
   overflow-x: auto;
+  /* Posicionada para que lo absoluto de adentro (el .sr-only de «de 5» en las estrellas) se
+     ubique en la caja y lo recorte el overflow: si no, se ubica respecto de la página y la
+     estira, y a 360 px la ficha de una sala con historial medía 648 (IC-654) */
+  position: relative;
   /* Borde y fondo como las tarjetas */
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
