@@ -7,6 +7,7 @@
   - valores: (array/map, opcional) Lo que cargó el usuario (sólo el correo: la contraseña no vuelve).
   - errores: (array/map, opcional) Diccionario de errores de validación por campo.
   - error_general: (string, opcional) Error que no es de un campo, como un correo o una contraseña incorrectos.
+  - mensaje_exito: (string, opcional) Confirmación luego de recuperar la contraseña (X-02.2).
 #}
 {% extends 'base.html.twig' %}
 
@@ -21,6 +22,14 @@
         Entrá con tu correo y tu contraseña para votar títulos y reservar entradas.
       </p>
     </header>
+
+    {% if mensaje_exito|default(null) %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'exito',
+        titulo: 'Contraseña actualizada',
+        mensaje: mensaje_exito
+      } only %}
+    {% endif %}
 
     {# Si el envío volvió con errores (E4-10.5): «Revisá N campos» con un link a cada uno, o el
        motivo general, como un correo o una contraseña incorrectos (sin decir cuál de los dos) o
@@ -68,6 +77,9 @@
     </form>
 
     <footer class="autenticacion-pie">
+      <p class="autenticacion-enlace-texto">
+        <a href="/cuenta/recuperar" class="enlace-destacado">¿Te olvidaste la contraseña?</a>
+      </p>
       <p class="autenticacion-enlace-texto">
         ¿Todavía no tenés cuenta?
         <a href="/cuenta/registro" class="enlace-destacado">Crear cuenta</a>
