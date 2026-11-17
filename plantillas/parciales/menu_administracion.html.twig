@@ -8,7 +8,7 @@
 
   Parámetros recibidos:
   - activa: (string) la sección actual: 'usuarios', 'reservas', 'reportes', 'reparto',
-    'solicitudes' o 'documentos'.
+    'solicitudes', 'documentos' u 'obras'.
   - usuario: el usuario en sesión.
   - csrf: el token del formulario para salir.
 #}
@@ -49,6 +49,9 @@
       </li>
       <li>
         <a href="/moderacion/documentos" class="panel-menu-enlace{% if activa == 'documentos' %} activo{% endif %}"{% if activa == 'documentos' %} aria-current="page"{% endif %}>Documentos</a>
+      </li>
+      <li>
+        <a href="/moderacion/obras" class="panel-menu-enlace{% if activa == 'obras' %} activo{% endif %}"{% if activa == 'obras' %} aria-current="page"{% endif %}>Obras</a>
       </li>
     </ul>
   </nav>
