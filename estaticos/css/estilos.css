@@ -2544,6 +2544,11 @@ dd {
   margin-top: auto;
   /* Ancho completo */
   width: 100%;
+  /* Con dos botones («Editar» y «Documentación» en Mis salas), uno debajo del otro y separados:
+     antes quedaban pegados (F-02) */
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
 }
 
 /* Realce específico para funciones en votación de títulos en la cartelera (IC-151) */
@@ -6438,25 +6443,33 @@ dd {
     padding: var(--espacio-6) var(--espacio-4) var(--espacio-12);
   }
 
+  /* Las secciones en una sola fila que se desliza de costado. Partidas en varios renglones el
+     menú ocupaba unos 420 px y el contenido empezaba recién en la segunda pantalla, y los nombres
+     de los grupos caían a veces solos y a veces junto a sus secciones (F-02) */
   .panel-menu-lista {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    /* Que se vea que la fila sigue: la última sección asoma cortada contra el borde */
+    margin-right: calc(-1 * var(--espacio-4));
+    padding-right: var(--espacio-4);
   }
 
-  /* El grupo sigue en la fila: su nombre y sus secciones al lado, sin la sangría */
-  .panel-menu-grupo {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+  .panel-menu-enlace {
+    white-space: nowrap;
   }
 
+  /* Los grupos se disuelven en la fila: sus secciones («Mis funciones», «Reportes»…) se entienden
+     solas. El nombre del grupo sigue nombrando su lista para los lectores de pantalla, que leen
+     aria-labelledby aunque el elemento esté oculto */
+  .panel-menu-grupo,
   .panel-menu-grupo .panel-menu-lista {
-    padding-left: 0;
+    display: contents;
   }
 
   .panel-menu-subtitulo {
-    padding: var(--espacio-2) var(--espacio-1) var(--espacio-2) var(--espacio-3);
-    color: var(--color-texto-apagado);
+    display: none;
   }
 
   .panel-filtros {
@@ -7079,6 +7092,14 @@ a.tabla-admin-principal:focus-visible {
   grid-template-columns: 1fr;
   gap: var(--espacio-8);
   width: 100%;
+}
+
+/* En una columna, el lateral (los parámetros de la sala, o los detalles de la función al proponer
+   franjas) va arriba del formulario: abajo quedaba después de «Guardar» y nadie lo veía (F-02) */
+@media (max-width: 991.98px) {
+  .panel-organizador-lateral {
+    order: -1;
+  }
 }
 
 @media (min-width: 992px) {
@@ -9537,5 +9558,84 @@ a.tabla-admin-principal:focus-visible {
 
   .ranking-pedido-accion {
     justify-self: start;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   PEDIDOS PARA PROGRAMAR: LA TARJETA DEL ORGANIZADOR (F-02)
+   Para plantillas/programacion/pedidos_organizador.html.twig. Tiene su propia tarjeta: la del
+   ranking público reserva una columna de 3rem para el puesto, y acá no hay puesto.
+   -------------------------------------------------------------------------- */
+
+.lista-pedidos-organizador {
+  list-style: none;
+  margin: var(--espacio-4) 0 var(--espacio-8);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+/* Los datos a la izquierda y las acciones a la derecha, en una columna de ancho fijo para que
+   las de todos los pedidos queden alineadas */
+.pedido-organizador {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+  align-items: start;
+  gap: var(--espacio-4) var(--espacio-6);
+  padding: var(--espacio-4) var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.pedido-organizador .pedido-titulo {
+  margin: 0;
+  font-size: var(--texto-lg);
+  line-height: 1.2;
+}
+
+.pedido-organizador .pedido-meta {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* «Cargar obra» arriba y, debajo, la otra manera: elegir una obra ya cargada */
+.pedido-organizador-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--espacio-3);
+}
+
+.pedido-organizador-tomar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  margin: 0;
+}
+
+/* El desplegable se queda con el ancho que sobra y el botón, a su lado, con el mismo alto */
+.pedido-organizador-tomar-fila {
+  display: flex;
+  align-items: stretch;
+  gap: var(--espacio-2);
+}
+
+.pedido-organizador-tomar-fila .campo-control {
+  flex: 1;
+  min-width: 0;
+}
+
+/* En el celular, todo apilado y a lo ancho */
+@media (max-width: 720px) {
+  .pedido-organizador {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--espacio-3) var(--espacio-4);
+  }
+
+  .pedido-organizador-tomar-fila {
+    flex-direction: column;
   }
 }

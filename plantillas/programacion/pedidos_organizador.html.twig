@@ -73,34 +73,41 @@
     } only %}
   {% else %}
     <h2 class="sr-only">Pedidos activos disponibles</h2>
+    {# Cada pedido en su tarjeta: los datos a la izquierda y las dos maneras de tomarlo a la
+       derecha. Antes reusaba la tarjeta del ranking público, que tiene una columna angosta para
+       el puesto, y el título caía ahí y se partía en sílabas (F-02). #}
     <ul class="lista-pedidos-organizador">
       {% for pedido in pedidos %}
-        <li class="ranking-pedido-item" data-pedido="{{ pedido.id }}">
-          <h3 class="pedido-titulo">{{ pedido.titulo }} ({{ pedido.anio }})</h3>
-          <p class="pedido-meta">
-            Dirección: {{ pedido.director }}
-            · <strong>{{ pedido.adhesiones }} {{ pedido.adhesiones == 1 ? 'adhesión' : 'adhesiones' }}</strong>
-          </p>
-          <p>
+        <li class="pedido-organizador" data-pedido="{{ pedido.id }}">
+          <div class="pedido-organizador-datos">
+            <h3 class="pedido-titulo">{{ pedido.titulo }} <span class="pedido-anio">({{ pedido.anio }})</span></h3>
+            <p class="pedido-meta">
+              Dirección: {{ pedido.director }}
+              · <strong>{{ pedido.adhesiones }} {{ pedido.adhesiones == 1 ? 'adhesión' : 'adhesiones' }}</strong>
+            </p>
+          </div>
+          <div class="pedido-organizador-acciones">
             <a href="/organizador/obras/nueva?pedido={{ pedido.id }}" class="boton boton-primario boton-chico">Cargar obra para este pedido</a>
-          </p>
-          {% if obras is not empty %}
-            <form action="/organizador/pedidos/{{ pedido.id }}/tomar" method="POST" class="formulario-accion-tabla">
-              <input type="hidden" name="_csrf" value="{{ csrf }}">
-              <label for="obra-{{ pedido.id }}" class="campo-etiqueta">O elegí una de tus obras</label>
-              <select id="obra-{{ pedido.id }}" name="obra_id" class="campo-control control-select">
-                {% for obra in obras %}
-                  <option value="{{ obra.id }}">{{ obra.titulo }} ({{ obra.anio }})</option>
-                {% endfor %}
-              </select>
-              {% include 'parciales/boton.html.twig' with {
-                texto: 'Tomar con esta obra',
-                tipo: 'submit',
-                variante: 'secundario',
-                tamano: 'chico'
-              } only %}
-            </form>
-          {% endif %}
+            {% if obras is not empty %}
+              <form action="/organizador/pedidos/{{ pedido.id }}/tomar" method="POST" class="pedido-organizador-tomar">
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                <label for="obra-{{ pedido.id }}" class="campo-etiqueta">O elegí una de tus obras</label>
+                <div class="pedido-organizador-tomar-fila">
+                  <select id="obra-{{ pedido.id }}" name="obra_id" class="campo-control control-select">
+                    {% for obra in obras %}
+                      <option value="{{ obra.id }}">{{ obra.titulo }} ({{ obra.anio }})</option>
+                    {% endfor %}
+                  </select>
+                  {% include 'parciales/boton.html.twig' with {
+                    texto: 'Tomar con esta obra',
+                    tipo: 'submit',
+                    variante: 'secundario',
+                    tamano: 'chico'
+                  } only %}
+                </div>
+              </form>
+            {% endif %}
+          </div>
         </li>
       {% endfor %}
     </ul>
