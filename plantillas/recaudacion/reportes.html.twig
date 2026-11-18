@@ -16,7 +16,13 @@
   - sin_ventas: (bool) funciones no respondió: no hay ocupación, asistencia ni calificaciones.
   - resumen: {funciones, ocupacion, asistencia, promedio, conversion} de todo el período (ya
     escritos; los que no se pudieron calcular, null), o null.
-  - dias_flojos: lista de {sala, dia, funciones, ocupacion, resto (o null)}.
+  - dias_flojos: lista de {sala, dia, funciones, ocupacion, resto (o null), para_dar (o null)}:
+    para_dar es la obra que el público de esa sala más votó sin que ganara, {titulo, votaciones,
+    votos, porcentaje} (EF-09.5).
+  - precios: lista de {sala, funciones_gorra, gorra, funciones_pagas, pagas, sensible}: sensible
+    si a la gorra llena bastante más (un descuento sirve); si no, con precio llena igual (EF-09.5).
+  - sin_reserva: lista de {sala, votantes, sin_reserva}: los que votaron y no reservaron (EF-09.5).
+  - agotadas: lista de {titulo, sala, funciones, agotadas, ocupacion} (EF-09.5).
   - titulos: lista de {titulo, funciones, ocupacion, asistencia, promedio}.
   - pedidos: lista de {titulo, votaciones, votos, porcentaje}.
   - salas: lista de {nombre, funciones, ocupacion, asistencia, promedio, conversion}, de la que
@@ -120,6 +126,58 @@
                 <strong>{{ dia.sala }}, los {{ dia.dia }}:</strong> vendió el {{ dia.ocupacion }} de los lugares{% if dia.resto %}, contra el {{ dia.resto }} del resto de la semana{% endif %}.
               </p>
               <p class="reporte-sugerencia-nota">Probá una promoción los {{ dia.dia }}. Sale de {{ dia.funciones }} funciones.</p>
+              {# Qué dar ese día: lo que el público de la sala votó y no vio. Cruza las dos cosas en una
+                 sola decisión, que es lo que sólo puede hacer un cine con votación (EF-09.5). #}
+              {% if dia.para_dar %}
+                <p class="reporte-sugerencia-nota">Para ese día: <strong>{{ dia.para_dar.titulo }}</strong>, que el público de esta sala votó y no vio ({{ dia.para_dar.votos }} {{ dia.para_dar.votos == 1 ? 'voto' : 'votos' }} en {{ dia.para_dar.votaciones }} {{ dia.para_dar.votaciones == 1 ? 'votación' : 'votaciones' }}, el {{ dia.para_dar.porcentaje }}).</p>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+
+    {# Qué promoción conviene, no sólo cuándo: si a la gorra llena mucho más, el precio es lo que
+       frena al público. Sin las dos clases de funciones en una sala no se puede comparar, así que
+       la sección no aparece si ninguna sala las tiene (EF-09.5). #}
+    {% if precios is not empty %}
+      <section class="reporte-seccion" aria-labelledby="reporte-precios">
+        <h3 id="reporte-precios" class="reporte-subtitulo">A la gorra o con precio</h3>
+        <ul class="reporte-sugerencias">
+          {% for precio in precios %}
+            <li class="reporte-sugerencia">
+              {% if precio.sensible %}
+                <p class="reporte-sugerencia-texto">
+                  <strong>{{ precio.sala }}:</strong> a la gorra llenó el {{ precio.gorra }} de los lugares; con precio, el {{ precio.pagas }}.
+                </p>
+                <p class="reporte-sugerencia-nota">Su público es sensible al precio: un descuento puede traerlo. Sale de {{ precio.funciones_gorra }} funciones a la gorra y {{ precio.funciones_pagas }} con precio.</p>
+              {% else %}
+                <p class="reporte-sugerencia-texto">
+                  <strong>{{ precio.sala }}:</strong> con precio llenó el {{ precio.pagas }} de los lugares, igual o más que a la gorra ({{ precio.gorra }}).
+                </p>
+                <p class="reporte-sugerencia-nota">El precio no le quita público: se pueden cobrar las funciones que hoy son a la gorra. Sale de {{ precio.funciones_gorra }} funciones a la gorra y {{ precio.funciones_pagas }} con precio.</p>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {# Personas y no un porcentaje: una promoción apunta a gente, y éstas ya mostraron interés (EF-09.5) #}
+    <section class="reporte-seccion" aria-labelledby="reporte-sin-reserva">
+      <h3 id="reporte-sin-reserva" class="reporte-subtitulo">Votaron y no reservaron</h3>
+      {% if sin_ventas %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
+      {% elseif sin_reserva is empty %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Casi todos los que votaron reservaron: no hace falta ir a buscarlos.' } only %}
+      {% else %}
+        <ul class="reporte-sugerencias">
+          {% for sala in sin_reserva %}
+            <li class="reporte-sugerencia">
+              <p class="reporte-sugerencia-texto">
+                <strong>{{ sala.sala }}:</strong> {{ sala.sin_reserva }} de las {{ sala.votantes }} personas que votaron no reservaron ninguna función.
+              </p>
+              <p class="reporte-sugerencia-nota">Ya mostraron interés: una promoción para quienes votaron puede traerlas.</p>
             </li>
           {% endfor %}
         </ul>
@@ -159,6 +217,23 @@
         </div>
       {% endif %}
     </section>
+
+    {# Distinta de «para repetir», que mira si gustó: ésta dice que faltaron lugares (EF-09.5) #}
+    {% if not sin_ventas and agotadas is not empty %}
+      <section class="reporte-seccion" aria-labelledby="reporte-agotadas">
+        <h3 id="reporte-agotadas" class="reporte-subtitulo">Sumá una función</h3>
+        <ul class="reporte-sugerencias">
+          {% for obra in agotadas %}
+            <li class="reporte-sugerencia">
+              <p class="reporte-sugerencia-texto">
+                <strong>{{ obra.titulo }}</strong>, en {{ obra.sala }}: se agotó en {{ obra.agotadas }} de sus {{ obra.funciones }} {{ obra.funciones == 1 ? 'función' : 'funciones' }} ({{ obra.ocupacion }} de los lugares vendidos).
+              </p>
+              <p class="reporte-sugerencia-nota">La demanda llegó al cupo: sumá otra función.</p>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
 
     <section class="reporte-seccion" aria-labelledby="reporte-pedidos">
       <h3 id="reporte-pedidos" class="reporte-subtitulo">Lo que el público pidió y no vio</h3>
