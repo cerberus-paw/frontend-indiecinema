@@ -1,13 +1,14 @@
 {#
   Los reportes del organizador y del administrador, en /recaudacion/reportes (EF-09): lo que pasó
-  en las salas en un período y qué conviene hacer. No hay frame en los wireframes de la E2: sigue
+  en las salas en un período y las recomendaciones. No hay frame en los wireframes de la E2: sigue
   el armado de las reservas de una función (panel-organizador), con las tarjetas de números, el
   filtro en fila y las tablas. Primero las sugerencias, que es lo que se usa para decidir; los
   totales por función y el CSV están en la otra pestaña (reportes_funciones.html.twig).
 
   Variables:
-  - periodo: desde y hasta (AAAA-MM-DD, para el filtro) y texto («del 1 de agosto al 29 de octubre
-    de 2026», o null si el elegido no sirve).
+  - periodo: desde y hasta (AAAA-MM-DD, para el filtro; vacío si no se eligió: ese lado no tiene
+    límite) y texto («del 1 de agosto al 29 de octubre de 2026», o null si es todo o no sirve).
+  Sin textos que expliquen cada recomendación (IC-658): el título y el dato alcanzan.
   - administrador: (bool) ve todas las salas y va con la barra del administrador.
   - error: (string, opcional) por qué no se pudo usar el período; entonces no hay datos.
   - avisos: lista de textos: lo que faltó porque un subsistema no respondió.
@@ -20,7 +21,6 @@
   - pedidos: lista de {titulo, votaciones, votos, porcentaje}.
   - salas: lista de {nombre, funciones, ocupacion, asistencia, promedio, conversion}, de la que
     más rinde a la que menos.
-  - umbrales: los de config.ini, ya escritos, para explicar de dónde sale cada sugerencia.
 #}
 {% extends administrador ? 'administracion.html.twig' : 'organizador.html.twig' %}
 
@@ -31,9 +31,6 @@
 {% block panel %}
 <header class="panel-cabecera">
   <h1 class="panel-titulo">Reportes</h1>
-  <p class="panel-bajada">
-    Lo que pasó {{ administrador ? 'en todas las salas' : 'en tus salas' }}{% if periodo.texto %} {{ periodo.texto }}{% endif %}, y qué conviene hacer con eso.
-  </p>
 </header>
 
 {% include 'parciales/pestanas_reportes.html.twig' with { activa: 'sugerencias', periodo: periodo, administrador: administrador } only %}
@@ -41,11 +38,11 @@
 <form class="panel-filtros reporte-filtros" action="/recaudacion/reportes" method="get" aria-label="Elegir el período">
   <label class="reporte-filtro">
     <span class="reporte-filtro-etiqueta">Desde</span>
-    <input type="date" name="desde" value="{{ periodo.desde }}" class="campo-control" required>
+    <input type="date" name="desde" value="{{ periodo.desde }}" class="campo-control">
   </label>
   <label class="reporte-filtro">
     <span class="reporte-filtro-etiqueta">Hasta</span>
-    <input type="date" name="hasta" value="{{ periodo.hasta }}" class="campo-control" required>
+    <input type="date" name="hasta" value="{{ periodo.hasta }}" class="campo-control">
   </label>
   {% include 'parciales/boton.html.twig' with { texto: 'Ver el período', tipo: 'submit', variante: 'primario' } only %}
 </form>
@@ -94,13 +91,10 @@
       </dl>
     {% endif %}
 
-    <h2 class="reporte-titulo">Qué conviene hacer</h2>
+    <h2 class="reporte-titulo">Recomendaciones</h2>
 
     <section class="reporte-seccion" aria-labelledby="reporte-dias-flojos">
       <h3 id="reporte-dias-flojos" class="reporte-subtitulo">Días para una promoción</h3>
-      <p class="reporte-explicacion">
-        Los días de la semana en que una sala vendió el {{ umbrales.dia_flojo }} de los lugares o menos, en {{ umbrales.dia_flojo_funciones }} funciones o más, y menos que el resto de la semana. Un descuento ese día puede llenar los lugares que quedan vacíos.
-      </p>
       {% if sin_ventas %}
         {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
       {% elseif dias_flojos is empty %}
@@ -121,9 +115,6 @@
 
     <section class="reporte-seccion" aria-labelledby="reporte-titulos">
       <h3 id="reporte-titulos" class="reporte-subtitulo">Títulos para repetir</h3>
-      <p class="reporte-explicacion">
-        Los que llenaron el {{ umbrales.repetir_ocupacion }} de los lugares o más, a los que fue el {{ umbrales.repetir_asistencia }} o más de los que reservaron y que tienen {{ umbrales.repetir_promedio }} de promedio o más.
-      </p>
       {% if sin_ventas %}
         {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
       {% elseif titulos is empty %}
@@ -158,9 +149,6 @@
 
     <section class="reporte-seccion" aria-labelledby="reporte-pedidos">
       <h3 id="reporte-pedidos" class="reporte-subtitulo">Lo que el público pidió y no vio</h3>
-      <p class="reporte-explicacion">
-        Las obras que perdieron una votación con el {{ umbrales.pedido }} de los votos o más y no se proyectaron en el período. Se pueden programar con fecha fija, sin votación.
-      </p>
       {% if pedidos is empty %}
         {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Ninguna obra quedó afuera con tantos votos.' } only %}
       {% else %}
@@ -178,9 +166,6 @@
 
     <section class="reporte-seccion" aria-labelledby="reporte-salas">
       <h3 id="reporte-salas" class="reporte-subtitulo">Salas que más rinden</h3>
-      <p class="reporte-explicacion">
-        Ordenadas por ocupación, después por asistencia y por promedio. «Votaron y reservaron» es cuántos de los que votaron títulos sacaron entrada: mide si la votación trae gente.
-      </p>
       {% if sin_ventas %}
         {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
       {% elseif salas is not empty %}
