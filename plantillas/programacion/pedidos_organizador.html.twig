@@ -6,7 +6,10 @@
   Variables:
   - pedidos: lista de pedidos activos {id, titulo, anio, director, adhesiones}.
   - tiene_prioridad: (bool) si el organizador tiene alguna sala con promedio >= 4.0.
-  - obras: lista de obras activas del organizador {id, titulo, anio}.
+  - obras: lista de obras activas y aprobadas del organizador {id, titulo, anio}: sólo con una
+    aprobada se toma un pedido, porque el aviso lleva a su ficha del catálogo (EF-07.7, IC-657).
+  - obras_pendientes: los títulos de las suyas que esperan a la moderación, para decirle por qué no
+    están en la lista.
   - tomado: (bool) aviso tras tomar un pedido correctamente.
   - error_general: ?string con el motivo si no se pudo tomar el pedido.
 #}
@@ -44,6 +47,16 @@
       tipo: 'exito',
       titulo: 'Pedido tomado',
       mensaje: 'Tomaste el pedido con tu obra, lo quitamos del ranking y avisamos por correo a quienes lo pidieron.'
+    } only %}
+  {% endif %}
+
+  {% if obras_pendientes|default([]) is not empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      titulo: 'Obras esperando a la moderación',
+      mensaje: (obras_pendientes|map(t => '«' ~ t ~ '»')|join(', ')) ~ (obras_pendientes|length == 1
+        ? ' todavía no está aprobada: cuando la moderación la apruebe, la vas a poder elegir para tomar un pedido.'
+        : ' todavía no están aprobadas: cuando la moderación las apruebe, las vas a poder elegir para tomar un pedido.')
     } only %}
   {% endif %}
 
