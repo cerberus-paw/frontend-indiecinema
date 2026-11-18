@@ -160,7 +160,7 @@
                     {% endif %}
                   </td>
                   <td>{{ bloqueo.sala_nombre }}</td>
-                  <td>{{ bloqueo.motivo }}</td>
+                  <td><span class="tabla-admin-texto">{{ bloqueo.motivo }}</span></td>
                   <td>{{ bloqueo.bloqueado_en }}</td>
                   <td class="tabla-admin-acciones">
                     <form action="/organizador/salas/{{ bloqueo.sala_id }}/bloqueos/{{ bloqueo.usuario_id }}/quitar" method="POST" class="formulario-accion-tabla">
