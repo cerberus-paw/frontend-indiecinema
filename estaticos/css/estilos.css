@@ -9994,3 +9994,78 @@ a.tabla-admin-principal:focus-visible {
 .reparto-vigencia {
   max-width: 24rem;
 }
+
+/* --------------------------------------------------------------------------
+   SEGUIR SALAS Y ORGANIZADORES (EF-15.4)
+   Los botones de la ficha de la sala (plantillas/programacion/sala.html.twig) y «Lo que seguís»
+   en Mi cuenta (plantillas/cuentas/mi_cuenta.html.twig).
+   -------------------------------------------------------------------------- */
+
+/* «Seguir la sala», «Seguir a quien la organiza» y «Denunciar», en una fila bajo el nombre */
+.ficha-sala-seguir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2) var(--espacio-3);
+  margin-top: var(--espacio-4);
+}
+
+.ficha-sala-seguir .ficha-denunciar {
+  margin: 0 0 0 var(--espacio-2);
+}
+
+.seguir-formulario {
+  margin: 0;
+}
+
+/* Siguiendo: con el color principal, para que se distinga de «Seguir» */
+.seguir-boton-activo {
+  border-color: var(--color-primario);
+  color: var(--color-primario);
+}
+
+.mi-cuenta-vacio {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.seguidos-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+/* Cada seguido: el nombre y qué es a la izquierda, «Dejar de seguir» a la derecha */
+.seguido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  padding: var(--espacio-3) var(--espacio-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.seguido-datos {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.seguido-nombre {
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.seguido-detalle {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+.seguido-formulario {
+  margin: 0;
+  flex-shrink: 0;
+}
