@@ -11,6 +11,10 @@
 {% set ruta = (prefijo ?? '') ~ (ruta_actual ?? '') %}
 {# El administrador no usa el sitio público: sin buscador ni navegación, sólo el acceso a su panel #}
 {% set es_admin = usr and usr.alcanza('administrador') %}
+{# El moderador alcanza el rol de organizador (puede abrir esas pantallas), pero lo del organizador
+   no le sirve: ve lo suyo, la moderación (IC-662). La sesión trae un solo rol, el más alto. #}
+{% set es_moderador = usr and usr.alcanza('moderador') and not es_admin %}
+{% set es_organizador = usr and usr.alcanza('organizador') and not usr.alcanza('moderador') %}
 {# Elemento semántico header que representa la cabecera superior y fija de la página #}
 <header class="encabezado">
   {# Contenedor con ancho máximo centrado para mantener alineación consistente con el resto de la interfaz #}
@@ -78,11 +82,17 @@
           <a href="/acerca-de" class="nav-enlace{% if ruta starts with '/acerca-de' %} activo{% endif %}">Acerca de</a>
         </li>
 
-        {# Acceso directo en barra para Organizador: lo ven el organizador y el moderador #}
-        {% if usr and usr.alcanza('organizador') %}
+        {# Acceso directo en la barra: «Mis salas» para el organizador y «Moderación» para el moderador #}
+        {% if es_organizador %}
           <li class="nav-item-rol">
             <a href="/organizador/salas" class="nav-enlace enlace-rol{% if ruta starts with '/organizador/salas' %} activo{% endif %}" title="Mis salas">
               Mis salas
+            </a>
+          </li>
+        {% elseif es_moderador %}
+          <li class="nav-item-rol">
+            <a href="/moderacion/solicitudes" class="nav-enlace enlace-rol{% if ruta starts with '/moderacion' %} activo{% endif %}" title="Moderación">
+              Moderación
             </a>
           </li>
         {% endif %}
@@ -156,8 +166,8 @@
             </ul>
             {% endif %}
 
-            {# Sección condicional de opciones del Organizador, también para el moderador #}
-            {% if usr.alcanza('organizador') and not es_admin %}
+            {# Sección condicional de opciones del Organizador: sólo el organizador (IC-662) #}
+            {% if es_organizador %}
               <div class="menu-separador"></div>
               <div class="menu-seccion-titulo" id="menu-seccion-organizador">Panel del Organizador</div>
               <ul class="menu-seccion" aria-labelledby="menu-seccion-organizador">
@@ -199,14 +209,29 @@
               </ul>
             {% endif %}
 
-            {# Sección de moderación: el moderador, además de su panel de organizador; el administrador la tiene en la suya #}
-            {% if usr.alcanza('moderador') and not es_admin %}
+            {# Sección de moderación: las cuatro bandejas del moderador; el administrador la tiene en la suya #}
+            {% if es_moderador %}
               <div class="menu-separador"></div>
               <div class="menu-seccion-titulo" id="menu-seccion-moderacion">Moderación</div>
               <ul class="menu-seccion" aria-labelledby="menu-seccion-moderacion">
                 <li>
                   <a href="/moderacion/solicitudes" class="menu-item">
                     <span class="menu-icono" aria-hidden="true">📨</span> Solicitudes de sala
+                  </a>
+                </li>
+                <li>
+                  <a href="/moderacion/documentos" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">📄</span> Documentos
+                  </a>
+                </li>
+                <li>
+                  <a href="/moderacion/obras" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">🎬</span> Obras
+                  </a>
+                </li>
+                <li>
+                  <a href="/moderacion/denuncias" class="menu-item">
+                    <span class="menu-icono" aria-hidden="true">⚑</span> Denuncias
                   </a>
                 </li>
               </ul>
