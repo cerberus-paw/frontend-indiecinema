@@ -1,0 +1,35 @@
+{#
+  Editar un comercio asociado, en /recaudacion/administracion/comercios/{id} (EF-17.3).
+
+  Variables:
+  - comercio: {id, nombre, beneficio, direccion, localidad, activo}, como está guardado.
+  - valores, errores: los del formulario.
+#}
+{% extends 'administracion.html.twig' %}
+
+{% block titulo %}Editar comercio{% endblock %}
+
+{% block seccion %}comercios{% endblock %}
+
+{% block panel %}
+<nav class="navegacion-migas" aria-label="Migas de pan">
+  <ol class="lista-migas">
+    <li class="item-miga"><a href="/recaudacion/administracion/comercios" class="enlace-miga">Comercios</a></li>
+    <li class="separador-miga" aria-hidden="true">/</li>
+    <li class="item-miga miga-activa" aria-current="page">{{ comercio.nombre }}</li>
+  </ol>
+</nav>
+
+<header class="panel-cabecera">
+  <h1 class="panel-titulo">Editar «{{ comercio.nombre }}»</h1>
+</header>
+
+<form action="/recaudacion/administracion/comercios/{{ comercio.id }}" method="POST" class="formulario-sala formulario-comercio">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+  {% include 'parciales/campos_comercio.html.twig' with { valores: valores, errores: errores } only %}
+  <div class="pie-formulario-acciones">
+    <a href="/recaudacion/administracion/comercios" class="boton boton-secundario">Cancelar</a>
+    {% include 'parciales/boton.html.twig' with { texto: 'Guardar cambios', tipo: 'submit', variante: 'primario' } only %}
+  </div>
+</form>
+{% endblock %}
