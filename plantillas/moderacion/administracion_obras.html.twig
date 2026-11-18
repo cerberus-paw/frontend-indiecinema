@@ -80,7 +80,7 @@
                 <span class="estado-cuenta">Pendiente</span>
               </span>
               <span class="bandeja-item-datos">{{ obra.tipo }} · {{ obra.anio }}</span>
-              {% if obra.cargada %}<span class="bandeja-item-datos"><span aria-hidden="true">📅</span> Cargada {{ obra.cargada }}</span>{% endif %}
+              {% if obra.cargada %}<span class="bandeja-item-datos">{% include 'parciales/icono.html.twig' with { nombre: 'calendario' } only %} Cargada {{ obra.cargada }}</span>{% endif %}
             </a>
           </li>
         {% endfor %}
@@ -155,7 +155,7 @@
                   </label>
                 {% endfor %}
                 {% if errores.resolucion is defined %}
-                  <span id="error-resolucion" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.resolucion }}</span>
+                  <span id="error-resolucion" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.resolucion }}</span>
                 {% endif %}
               </fieldset>
             {% endif %}

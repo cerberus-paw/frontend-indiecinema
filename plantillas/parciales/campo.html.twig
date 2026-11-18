@@ -241,7 +241,7 @@
     {# Elemento span con role alert para que lectores de pantalla lo verbalicen de inmediato #}
     <span id="{{ id_error }}" class="campo-error" role="alert">
       {# Icono de advertencia triangular #}
-      <span class="error-icono" aria-hidden="true">⚠️</span>
+      {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %}
       {# Texto explicativo del motivo del rechazo de la validación #}
       {{ mensaje_error }}
     {# Cierre del mensaje de error #}

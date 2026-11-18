@@ -57,7 +57,7 @@
 <form class="panel-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios" data-enviar-al-elegir>
   <label class="panel-busqueda">
     <span class="sr-only">Buscar por nombre o correo</span>
-    <span class="panel-busqueda-icono" aria-hidden="true">🔍</span>
+    {% include 'parciales/icono.html.twig' with { nombre: 'lupa', clase: 'panel-busqueda-icono' } only %}
     <input type="search" name="q" value="{{ filtros.q ?? '' }}" placeholder="Buscar por nombre o correo" maxlength="254" class="campo-control">
   </label>
   <label>

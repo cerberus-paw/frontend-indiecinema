@@ -23,7 +23,7 @@
         <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="tarjeta-funcion-imagen" loading="lazy">
       {% else %}
         <div class="tarjeta-funcion-afiche-placeholder">
-          <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+          {% include 'parciales/icono.html.twig' with { nombre: 'pelicula', clase: 'afiche-placeholder-icono' } only %}
           <span class="afiche-placeholder-texto">SALA</span>
         </div>
       {% endif %}
@@ -47,11 +47,11 @@
         </p>
       {% else %}
         <p class="tarjeta-funcion-dato">
-          <span class="meta-icono" aria-hidden="true">📍</span>
+          {% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'meta-icono' } only %}
           <span class="meta-texto">{{ sala.localidad ?? '' }}</span>
         </p>
         <p class="tarjeta-funcion-dato">
-          <span class="meta-icono" aria-hidden="true">💺</span>
+          {% include 'parciales/icono.html.twig' with { nombre: 'butaca', clase: 'meta-icono' } only %}
           <span class="meta-texto">{{ sala.capacidad ?? '—' }} butacas</span>
         </p>
       {% endif %}

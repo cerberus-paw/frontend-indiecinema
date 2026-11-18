@@ -111,7 +111,7 @@
                 <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="tarjeta-funcion-imagen" loading="lazy">
               {% else %}
                 <div class="tarjeta-funcion-afiche-placeholder">
-                  <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+                  {% include 'parciales/icono.html.twig' with { nombre: 'pelicula', clase: 'afiche-placeholder-icono' } only %}
                   <span class="afiche-placeholder-texto">AFICHE</span>
                 </div>
               {% endif %}
@@ -155,19 +155,19 @@
             <div class="tarjeta-funcion-meta">
               {% if obra.director is defined and obra.director %}
                 <p class="tarjeta-funcion-dato meta-director">
-                  <span class="meta-icono" aria-hidden="true">🎬</span>
+                  {% include 'parciales/icono.html.twig' with { nombre: 'claqueta', clase: 'meta-icono' } only %}
                   <span class="meta-texto">{{ obra.director }}</span>
                 </p>
               {% endif %}
               {% if duracion_obra %}
                 <p class="tarjeta-funcion-dato meta-duracion">
-                  <span class="meta-icono" aria-hidden="true">⏱️</span>
+                  {% include 'parciales/icono.html.twig' with { nombre: 'reloj', clase: 'meta-icono' } only %}
                   <span class="meta-texto">{{ duracion_obra }} min</span>
                 </p>
               {% endif %}
               {% if obra.origen_copia is defined and obra.origen_copia %}
                 <p class="tarjeta-funcion-dato meta-copia">
-                  <span class="meta-icono" aria-hidden="true">📜</span>
+                  {% include 'parciales/icono.html.twig' with { nombre: 'documento', clase: 'meta-icono' } only %}
                   <span class="meta-texto">{{ obra.origen_copia_etiqueta ?? obra.origen_copia }}</span>
                 </p>
               {% endif %}

@@ -2595,6 +2595,32 @@ input[type='datetime-local'].campo-control {
   color: var(--color-texto-apagado);
 }
 
+/* Los lugares que antes tenían un emoji y ahora un ícono de línea (F-02): el tamaño lo daba la
+   letra y el SVG necesita uno propio. La lupa del buscador, un poco más chica y apagada */
+svg.afiche-placeholder-icono {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+svg.buscador-icono,
+svg.panel-busqueda-icono {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--color-texto-apagado);
+}
+
+svg.menu-icono {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-texto-secundario);
+}
+
+svg.error-icono,
+svg.enlace-denunciar-icono {
+  width: 0.95em;
+  height: 0.95em;
+}
+
 /* Íconos de línea (parciales/icono): en línea con el texto y sin achicarse dentro de una fila flexible */
 .icono {
   /* Se alinea con la línea de texto */

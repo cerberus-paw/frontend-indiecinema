@@ -8,5 +8,5 @@
   - texto: (opcional) el del link; «Denunciar» si no viene.
 #}
 <a href="/moderacion/denuncias/nueva?tipo={{ tipo|url_encode }}&amp;id={{ id|url_encode }}" class="enlace-denunciar" rel="nofollow">
-  <span aria-hidden="true">⚑</span> {{ texto ?? 'Denunciar' }}
+  {% include 'parciales/icono.html.twig' with { nombre: 'bandera', clase: 'enlace-denunciar-icono' } only %} {{ texto ?? 'Denunciar' }}
 </a>

@@ -232,7 +232,7 @@
 
         {% if error_generos %}
           <span id="error-generos" class="campo-error" role="alert">
-            <span class="error-icono" aria-hidden="true">⚠️</span>
+            {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %}
             {{ error_generos }}
           </span>
         {% endif %}
