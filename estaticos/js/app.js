@@ -1,6 +1,6 @@
 /* global AccionesDeReserva, AcuerdoFecha, BotonImprimir, BuscadorDeCartelera, Carrusel, Compartir,
    ConfirmarEnvio, EnviarAlElegir, FormularioDeReserva, GestorFranjas, LugaresLibres, MenuUsuario,
-   ModoFuncion, ParametrosDeSala, ResumenDeErrores, ValidacionEnLinea, VotacionTitulos, ZonaDeArchivo */
+   ModoFuncion, ParametrosDeSala, ResumenDeErrores, Seguir, ValidacionEnLinea, VotacionTitulos, ZonaDeArchivo */
 
 /**
  * La aplicación: cuando el DOM está listo, carga e inicia los componentes que la página necesita.
@@ -77,6 +77,11 @@ class App {
     // El gestor de franjas horarias y mínimo de asistentes (IC-154 / E3-13.2).
     if (document.querySelector('[data-gestor-franjas]')) {
       PAW.cargarScript('GestorFranjas', `${App.COMPONENTES}/gestor-franjas.js`, () => new GestorFranjas('[data-gestor-franjas]'));
+    }
+    // «Seguir» la sala o a quien la organiza, en la ficha de la sala (EF-15.4).
+    const seguir = document.querySelectorAll('form[data-seguir]');
+    if (seguir.length > 0) {
+      PAW.cargarScript('Seguir', `${App.COMPONENTES}/seguir.js`, () => seguir.forEach((formulario) => new Seguir(formulario)));
     }
     // «Compartir», en la cabecera de la ficha de la función (E3-13.F10).
     if (document.querySelector('[data-compartir]')) {
