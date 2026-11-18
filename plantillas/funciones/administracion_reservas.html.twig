@@ -6,11 +6,15 @@
 
   Variables:
   - reservas: lista de {id, codigo, cantidad, total, estado, estado_etiqueta, creada (ya escrita),
-    anulable, funcion: {titulo, url, fecha} o null si programación no respondió}.
+    reembolso, anulable, funcion: {titulo, url, fecha} o null si programación no respondió}.
+  - reserva.reembolso: (string|null) qué pasó con la plata (EF-06.4): «hecho» si se devolvió,
+    «pendiente» si se canceló estando pagada y la devolución no salió, y null si no había nada que
+    devolver.
   - estados: lista de {valor, etiqueta}, para el filtro.
   - filtro: (string|null) el estado elegido.
   - paginado: numero, total_paginas, total, anterior y siguiente (URL o null) y paginas: lista de
-    {numero, url, actual}.
+    {numero, url, actual}, con null donde se saltean páginas («…»): la primera, la última y dos a
+    cada lado de la actual, como «Usuarios y roles» (IC-656).
   - anulada: (string|null) el código de la reserva que se acaba de anular.
   - error_general: (string, opcional) por qué no se anuló.
 #}
@@ -21,12 +25,12 @@
 {% block seccion %}reservas{% endblock %}
 
 {% block panel %}
-{% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
+{% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio', ausente: '' } %}
 {# data-panel-de-reservas: el enganche del componente que anula sin recargar la lista (E4-05.5). #}
 <div data-panel-de-reservas>
 <header class="panel-cabecera">
   <h1 class="panel-titulo">Reservas</h1>
-  <p class="panel-bajada">Las reservas de todas las funciones. Anular una la cancela y libera sus lugares.</p>
+  <p class="panel-bajada">Las reservas de todas las funciones. Anular una la cancela y libera sus lugares, y si estaba pagada se le devuelve la plata.</p>
 </header>
 
 <form class="panel-filtros" action="/funcion/administracion/reservas" method="get" role="search" aria-label="Filtrar reservas" data-enviar-al-elegir>
@@ -93,7 +97,15 @@
             <td>{{ reserva.cantidad }}</td>
             <td>{{ reserva.total }}</td>
             <td>{{ reserva.creada }}</td>
-            <td><span class="estado-cuenta {{ clases_estado[reserva.estado] }}">{{ reserva.estado_etiqueta }}</span></td>
+            <td>
+              <span class="estado-cuenta {{ clases_estado[reserva.estado] }}">{{ reserva.estado_etiqueta }}</span>
+              {# Qué pasó con la plata (EF-06.4). «Pendiente» es el único que hay que atender: la
+                 reserva se canceló, se había pagado y Mercado Pago no devolvió el pago. El
+                 componente pinta y saca esta nota al anular sin recargar (data-reembolso). #}
+              {% if reserva.reembolso %}
+                <span class="tabla-admin-secundario" data-reembolso>{{ reserva.reembolso == 'pendiente' ? 'Reembolso pendiente' : 'Reembolsada' }}</span>
+              {% endif %}
+            </td>
             <td>
               {% if reserva.anulable %}
                 <form action="/funcion/administracion/reservas/{{ reserva.id }}/anular" method="POST" class="formulario-accion-tabla" data-accion-de-reserva data-hecho="—">
@@ -119,7 +131,9 @@
     <nav class="paginado-numerado" aria-label="Páginas de reservas">
       <ul>
         {% for pagina in paginado.paginas %}
-          {% if pagina.actual %}
+          {% if pagina is null %}
+            <li class="paginado-salto" aria-hidden="true">…</li>
+          {% elseif pagina.actual %}
             <li><a href="{{ pagina.url }}" class="paginado-numero actual" aria-current="page">{{ pagina.numero }}</a></li>
           {% else %}
             <li><a href="{{ pagina.url }}" class="paginado-numero"{% if pagina.url == paginado.anterior %} rel="prev"{% elseif pagina.url == paginado.siguiente %} rel="next"{% endif %} aria-label="Página {{ pagina.numero }}">{{ pagina.numero }}</a></li>

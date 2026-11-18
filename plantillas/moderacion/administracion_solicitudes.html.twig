@@ -1,0 +1,360 @@
+{#
+  Bandeja de solicitudes de sala, en /moderacion/solicitudes (EF-07.2), como el wireframe de la E2
+  (moderacion-solicitudes): el buscador y la lista a la izquierda; a la derecha la elegida, con la
+  sala, los datos del espacio y el historial de quien la mandó, y la resolución con su motivo
+  obligatorio. Una pendiente también pasa a revisión manual (EF-07.6) y sigue en la lista, con su
+  marca, hasta que se aprueba o se rechaza. «Ver historial de decisiones» lista las resueltas;
+  desde una aprobada la sala se retira del sitio o se vuelve a publicar, con un motivo que queda
+  en el registro. Cada resolución lleva el checklist de requisitos (EF-07.9): aprobar exige los
+  cuatro puntos. Queda afuera lo que todavía no existe: la categoría y guardar sin enviar.
+
+  Resolver es un POST con el token CSRF, la resolución (aprobar, rechazar o, en una pendiente,
+  revision), el motivo, que se le muestra a quien la mandó, y los puntos tildados del checklist
+  (requisitos[]). Aprobarla publica la sala y le da el rol de organizador.
+
+  Variables:
+  - historial: si la lista es la de las resueltas.
+  - q: lo que se buscó.
+  - total_pendientes: cuántas esperan, para la pestaña.
+  - total_en_la_lista: cuántas hay en la lista, aunque muestre menos.
+  - solicitudes: lista de {id, estado, sala, localidad, solicitante (o null), enviada, cambio,
+    elegida}. cambio (EF-07.6): si es un pedido de cambio de dirección de una sala publicada.
+  - elegida: {id, estado, enviada, resuelta, motivo, revision, sala: {id, nombre, localidad, capacidad,
+    imagen, descripcion, direccion, peliculas_por_funcion, duracion_funcion,
+    tiempo_entre_funciones}, en_el_sitio, documentos (EF-07.4: lista de {nombre, vence, vencido,
+    estado, url}, vacía en las que se mandaron antes de que se pidiera), solicitante: {nombre, correo, cuenta_creada,
+    es_organizador} (null si ya no existe, false si cuentas no respondió), solicitante_nombre,
+    solicitudes_previas, propia, revisiones}, o null. revisiones (EF-07.9): qué tildó cada
+    moderador al resolverla, del más viejo al más nuevo, lista de {resolucion (en_revision_manual,
+    aprobada o rechazada), fecha, moderador (el nombre, o null si cuentas no respondió), puntos:
+    lista de {nombre, cumple}}; vacía en las resueltas antes del checklist. revision (EF-07.6): {motivo, fecha} si pasó por la
+    revisión manual, o null. estado: pendiente, en_revision_manual, aprobada o rechazada. cambio
+    (EF-07.6): si es un pedido de cambio de dirección; direccion_actual: la que tiene la sala
+    ahora, en un cambio abierto ('Av. San Martín 450, Luján'), false si programación no respondió,
+    o null. propia: la mandó el moderador en sesión, que no la
+    resuelve ni retira su sala (EF-07.3); se ve sin los formularios. en_el_sitio es cómo está la sala de una aprobada según
+    programación: 'publicada', 'retirada', 'dada_de_baja', o 'desconocido' si programación no
+    respondió; null en las que no están aprobadas.
+  - valores: lo que mandó si hubo errores, {resolucion, motivo, requisitos (las claves tildadas),
+    motivo_sala}.
+  - requisitos (EF-07.9): los puntos del checklist, lista de {clave, nombre, aclaracion, vencido}.
+    vencido: el papel que lo respalda está vencido, así que no se puede tildar.
+  - errores: campo => qué está mal.
+  - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
+  - mensaje_exito: el aviso de lo que se acaba de hacer (opcional).
+#}
+{% extends 'administracion.html.twig' %}
+
+{% block titulo %}Solicitudes de sala{% endblock %}
+
+{% block seccion %}solicitudes{% endblock %}
+
+{% block panel %}
+{% set estados = { pendiente: 'Pendiente', en_revision_manual: 'En revisión manual', aprobada: 'Aprobada', rechazada: 'Rechazada' } %}
+{% set clases = { pendiente: 'estado-cuenta', en_revision_manual: 'estado-cuenta estado-cuenta-revision', aprobada: 'estado-cuenta estado-cuenta-activa', rechazada: 'estado-cuenta estado-cuenta-suspendida' } %}
+{% set abiertas = ['pendiente', 'en_revision_manual'] %}
+
+<header class="panel-cabecera bandeja-cabecera">
+  <div>
+    <h1 class="panel-titulo">Bandeja de solicitudes</h1>
+    <p class="panel-bajada">Revisá los datos del espacio y resolvé con un motivo registrado.</p>
+  </div>
+  {% if historial %}
+    <a href="{{ prefijo }}/solicitudes" class="boton boton-secundario">Volver a las pendientes</a>
+  {% else %}
+    <a href="{{ prefijo }}/solicitudes?ver=historial" class="boton boton-secundario">Ver historial de decisiones</a>
+  {% endif %}
+</header>
+
+{% if mensaje_exito is defined %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
+{% endif %}
+
+<nav class="pestanas" aria-label="Bandejas">
+  {% if historial %}
+    <a href="{{ prefijo }}/solicitudes?ver=historial" class="pestana activa" aria-current="page">Historial de decisiones</a>
+  {% else %}
+    <a href="{{ prefijo }}/solicitudes" class="pestana activa" aria-current="page">
+      Solicitudes de sala <span class="bandeja-cuenta">{{ total_pendientes }}</span>
+    </a>
+  {% endif %}
+</nav>
+
+<div class="bandeja">
+  <section class="bandeja-lista" aria-label="{{ historial ? 'Solicitudes resueltas' : 'Solicitudes por resolver' }}">
+    <form class="bandeja-buscador" action="{{ prefijo }}/solicitudes" method="get" role="search">
+      {% if historial %}<input type="hidden" name="ver" value="historial">{% endif %}
+      <label class="panel-busqueda">
+        <span class="sr-only">Buscar solicitud o solicitante</span>
+        {% include 'parciales/icono.html.twig' with { nombre: 'lupa', clase: 'panel-busqueda-icono' } only %}
+        <input type="search" name="q" value="{{ q }}" placeholder="Buscar solicitud o solicitante" maxlength="100" class="campo-control">
+      </label>
+    </form>
+
+    {% if solicitudes is empty %}
+      <p class="bandeja-nota">
+        {% if q != '' %}
+          Ninguna solicitud coincide con «{{ q }}».
+        {% else %}
+          {{ historial ? 'Todavía no resolviste ninguna solicitud.' : 'No hay solicitudes esperando.' }}
+        {% endif %}
+      </p>
+    {% else %}
+      <ul class="bandeja-items">
+        {% for solicitud in solicitudes %}
+          {% set url = prefijo ~ '/solicitudes?id=' ~ solicitud.id ~ (q != '' ? '&q=' ~ q|url_encode : '') %}
+          <li>
+            <a href="{{ url }}" class="bandeja-item{% if solicitud.elegida %} activo{% endif %}"{% if solicitud.elegida %} aria-current="true"{% endif %}>
+              <span class="bandeja-item-fila">
+                <span class="bandeja-item-sala">{{ solicitud.sala }}</span>
+                <span class="{{ clases[solicitud.estado] }}">{{ estados[solicitud.estado] }}</span>
+              </span>
+              {% if solicitud.cambio is defined and solicitud.cambio %}
+                <span class="bandeja-item-datos"><span aria-hidden="true">🔁</span> Cambio de dirección</span>
+              {% endif %}
+              <span class="bandeja-item-datos">{{ solicitud.solicitante ? solicitud.solicitante ~ ' · ' : '' }}{{ solicitud.localidad }}</span>
+              <span class="bandeja-item-datos">{% include 'parciales/icono.html.twig' with { nombre: 'calendario' } only %} Enviada {{ solicitud.enviada }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if total_en_la_lista > solicitudes|length %}
+        <p class="bandeja-nota">Se muestran {{ solicitudes|length }} de {{ total_en_la_lista }}. Buscá para encontrar las demás.</p>
+      {% endif %}
+    {% endif %}
+  </section>
+
+  {% if elegida %}
+    {% set sala = elegida.sala %}
+    {# La del moderador en sesión la resuelve otro (EF-07.3); con is defined, por si el back todavía no la manda #}
+    {% set propia = elegida.propia is defined and elegida.propia %}
+    {% set resolvible = elegida.estado in abiertas and not propia %}
+    {# EF-07.6: con is defined, por si el back todavía no la manda #}
+    {% set revision = elegida.revision is defined ? elegida.revision : null %}
+    <article class="bandeja-detalle" aria-labelledby="titulo-solicitud">
+      <header class="bandeja-detalle-cabecera">
+        <h2 id="titulo-solicitud" class="bandeja-detalle-titulo">{{ sala.nombre }}</h2>
+        <span class="{{ clases[elegida.estado] }}">{{ estados[elegida.estado] }}</span>
+      </header>
+      {# EF-07.6: con is defined, por si el back todavía no los manda #}
+      {% set cambio = elegida.cambio is defined and elegida.cambio %}
+      {% if cambio %}
+        <p class="bandeja-detalle-datos">
+          <strong>Cambio de dirección</strong> de una sala publicada: sigue con la dirección de antes hasta que lo apruebes.
+          {% if elegida.direccion_actual is defined and elegida.direccion_actual is same as(false) %}
+            No pudimos consultar la dirección que tiene ahora.
+          {% elseif elegida.direccion_actual is defined and elegida.direccion_actual %}
+            Ahora: {{ elegida.direccion_actual }}.
+          {% endif %}
+        </p>
+      {% endif %}
+      <p class="bandeja-detalle-datos bandeja-detalle-meta">
+        <span>{% include 'parciales/icono.html.twig' with { nombre: 'ubicacion' } only %} {{ cambio ? 'Nueva: ' : '' }}{{ sala.direccion }}, {{ sala.localidad }}</span>
+        <span>{% include 'parciales/icono.html.twig' with { nombre: 'personas' } only %} {{ sala.capacidad }} lugares declarados</span>
+        <span>Enviada el {{ elegida.enviada }}</span>
+      </p>
+
+      {# En una pendiente, el formulario abarca la resolución y el motivo, que en el wireframe
+         están en lugares distintos de la pantalla #}
+      {% if resolvible %}
+        {# Si la resolución volvió con errores: «Revisá N campos» con un link a cada uno (E4-10.5) #}
+        {% include 'parciales/resumen_de_errores.html.twig' with { errores: errores } only %}
+        <form action="{{ prefijo }}/solicitudes/{{ elegida.id }}/resolver" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+      {% endif %}
+      <div class="bandeja-columnas">
+        <div>
+          {# La sala tiene una sola foto, no la fila de miniaturas del wireframe: arriba de la
+             columna, la resolución queda al lado y no un hueco #}
+          {% if sala.imagen %}
+            <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="bandeja-foto">
+          {% endif %}
+          <h3 class="bandeja-subtitulo">Datos del espacio</h3>
+          {# nl2br escapa antes de agregar los <br> #}
+          <p class="bandeja-texto">{{ sala.descripcion|nl2br }}</p>
+          <dl class="bandeja-ficha">
+            <dt>Películas por función</dt>
+            <dd>{{ sala.peliculas_por_funcion }}</dd>
+            <dt>Duración máxima de la función</dt>
+            <dd>{{ sala.duracion_funcion }} minutos</dd>
+            <dt>Tiempo entre funciones</dt>
+            <dd>{{ sala.tiempo_entre_funciones }} minutos</dd>
+          </dl>
+
+          {# EF-07.4: el seguro y la habilitación, con is defined por si el back todavía no los manda #}
+          {% if elegida.documentos is defined %}
+            <h3 class="bandeja-subtitulo">Documentación</h3>
+            {% if elegida.documentos is empty %}
+              <p class="bandeja-nota bandeja-nota-suelta">Sin documentación: se mandó antes de que se pidiera.</p>
+            {% else %}
+              <dl class="bandeja-ficha">
+                {% for documento in elegida.documentos %}
+                  <dt>{{ documento.nombre }}</dt>
+                  <dd>
+                    <a href="{{ documento.url }}" download>Bajar el PDF</a>
+                    · {% if documento.vencido %}<strong class="bandeja-vencido">Venció el {{ documento.vence }}</strong>{% else %}Vence el {{ documento.vence }}{% endif %}
+                    {% if documento.estado != 'pendiente' %}· {{ documento.estado|capitalize }}{% endif %}
+                  </dd>
+                {% endfor %}
+              </dl>
+            {% endif %}
+          {% endif %}
+
+          <h3 class="bandeja-subtitulo">Historial del solicitante</h3>
+          {% if elegida.solicitante is same as(false) %}
+            <p class="bandeja-nota bandeja-nota-suelta">No pudimos consultar los datos de la cuenta. Probá de nuevo en un rato.</p>
+          {% elseif elegida.solicitante is null %}
+            <p class="bandeja-nota bandeja-nota-suelta">La cuenta que la mandó ya no existe.</p>
+          {% endif %}
+          <dl class="bandeja-ficha">
+            {% if elegida.solicitante %}
+              <dt>Cuenta</dt>
+              <dd>{{ elegida.solicitante.nombre }} · <a href="mailto:{{ elegida.solicitante.correo|url_encode|replace({'%40': '@'}) }}">{{ elegida.solicitante.correo }}</a></dd>
+              <dt>Cuenta creada</dt>
+              <dd>{{ elegida.solicitante.cuenta_creada }}</dd>
+              <dt>Rol</dt>
+              <dd>{{ elegida.solicitante.es_organizador ? 'Ya es organizador' : 'Espectador: aprobarla lo hace organizador' }}</dd>
+            {% elseif elegida.solicitante_nombre %}
+              <dt>Cuenta</dt>
+              <dd>{{ elegida.solicitante_nombre }}</dd>
+            {% endif %}
+            <dt>Solicitudes previas</dt>
+            <dd>{{ elegida.solicitudes_previas }}</dd>
+          </dl>
+        </div>
+
+        <div>
+          {% if revision %}
+            <div class="bandeja-caja">
+              <p class="bandeja-caja-titulo">Revisión manual</p>
+              <p class="bandeja-detalle-datos">Desde el {{ revision.fecha }}</p>
+              <p class="bandeja-texto">{{ revision.motivo|nl2br }}</p>
+            </div>
+          {% endif %}
+          {# EF-07.9: qué tildó cada moderador, de solo lectura #}
+          {% if elegida.revisiones is defined and elegida.revisiones is not empty %}
+            <div class="bandeja-caja">
+              <p class="bandeja-caja-titulo">Requisitos revisados</p>
+              {% for registro in elegida.revisiones %}
+                <p class="bandeja-detalle-datos">{{ estados[registro.resolucion] }} el {{ registro.fecha }}{% if registro.moderador %} por {{ registro.moderador }}{% endif %}</p>
+                <ul class="bandeja-checklist">
+                  {% for punto in registro.puntos %}
+                    <li class="bandeja-checklist-punto {{ punto.cumple ? 'cumple' : 'no-cumple' }}"><span aria-hidden="true">{{ punto.cumple ? '✓' : '✗' }}</span> <span class="sr-only">{{ punto.cumple ? 'Tildado:' : 'Sin tildar:' }}</span> {{ punto.nombre }}</li>
+                  {% endfor %}
+                </ul>
+              {% endfor %}
+            </div>
+          {% endif %}
+          {% if propia and elegida.estado in abiertas %}
+            <div class="bandeja-caja">
+              <p class="bandeja-caja-titulo">Resolución</p>
+              <p class="bandeja-texto">La mandaste vos: la resuelve otro moderador.</p>
+            </div>
+          {% elseif resolvible %}
+              <fieldset id="resolucion" class="bandeja-caja{% if errores.resolucion is defined %} con-error{% endif %}">
+                <legend class="bandeja-caja-titulo">Resolución</legend>
+                {% set opciones = { aprobar: 'Aprobar y publicar la sala', rechazar: 'Rechazar la solicitud' } %}
+                {% if elegida.estado == 'pendiente' %}
+                  {% set opciones = opciones|merge({ revision: 'Pasar a revisión manual (por ejemplo, para coordinar una visita)' }) %}
+                {% endif %}
+                {% for valor, texto in opciones %}
+                  <label class="bandeja-opcion">
+                    <input type="radio" name="resolucion" value="{{ valor }}" required{% if (valores.resolucion ?? '') == valor %} checked{% endif %}{% if errores.resolucion is defined %} aria-invalid="true" aria-describedby="error-resolucion"{% endif %}>
+                    {{ texto }}
+                  </label>
+                {% endfor %}
+                {% if errores.resolucion is defined %}
+                  <span id="error-resolucion" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.resolucion }}</span>
+                {% endif %}
+              </fieldset>
+              {# EF-07.9: lo que controló, un checkbox por punto con lo que hay que mirar. Arranca
+                 vacío; si volvió con errores, con lo que había tildado #}
+              {% if requisitos is defined %}
+                {% set tildados = valores.requisitos ?? [] %}
+                <fieldset id="requisitos" class="bandeja-caja{% if errores.requisitos is defined %} con-error{% endif %}">
+                  <legend class="bandeja-caja-titulo">Requisitos</legend>
+                  {% for requisito in requisitos %}
+                    <label class="bandeja-opcion bandeja-requisito">
+                      <input type="checkbox" name="requisitos[]" value="{{ requisito.clave }}"{% if requisito.vencido %} disabled{% elseif requisito.clave in tildados %} checked{% endif %} aria-describedby="aclaracion-{{ requisito.clave }}{% if errores.requisitos is defined %} error-requisitos{% endif %}">
+                      <span>
+                        {{ requisito.nombre }}
+                        {% if requisito.vencido %}<strong class="bandeja-vencido">vencido</strong>{% endif %}
+                        <span id="aclaracion-{{ requisito.clave }}" class="bandeja-requisito-aclaracion">{{ requisito.aclaracion }}</span>
+                      </span>
+                    </label>
+                  {% endfor %}
+                  {% if errores.requisitos is defined %}
+                    <span id="error-requisitos" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.requisitos }}</span>
+                  {% endif %}
+                </fieldset>
+              {% endif %}
+          {% else %}
+            <div class="bandeja-caja">
+              <p class="bandeja-caja-titulo">Resolución</p>
+              <p class="bandeja-detalle-datos">{{ estados[elegida.estado] }} el {{ elegida.resuelta }}</p>
+              <p class="bandeja-texto">{{ elegida.motivo|nl2br }}</p>
+            </div>
+            {% if elegida.estado == 'aprobada' %}
+              {% set publicada = elegida.en_el_sitio == 'publicada' %}
+              <div class="bandeja-caja">
+                <p class="bandeja-caja-titulo">La sala en el sitio</p>
+                <p class="bandeja-detalle-datos">
+                  {{ {
+                    publicada: 'Publicada: se ve en el listado de salas y sus funciones en la cartelera.',
+                    retirada: 'Retirada: no se ve en el sitio.',
+                    dada_de_baja: 'Su organizador la dio de baja.',
+                    desconocido: 'No pudimos consultar si está publicada. Probá de nuevo en un rato.'
+                  }[elegida.en_el_sitio] }}
+                </p>
+                {% if propia %}
+                  <p class="bandeja-texto">Es tu sala: la retira o la vuelve a publicar otro moderador.</p>
+                {% elseif elegida.en_el_sitio in ['publicada', 'retirada'] %}
+                  <form action="{{ prefijo }}/solicitudes/{{ elegida.id }}/{{ publicada ? 'deshabilitar-sala' : 'habilitar-sala' }}" method="post" class="solicitud-acciones-inferior">
+                    <input type="hidden" name="_csrf" value="{{ csrf }}">
+                    {% include 'parciales/campo.html.twig' with {
+                      nombre: 'motivo_sala',
+                      etiqueta: publicada ? 'Por qué la retirás' : 'Por qué la volvés a publicar',
+                      tipo: 'textarea',
+                      filas: 2,
+                      valor: valores.motivo_sala ?? '',
+                      requerido: true,
+                      maximo: maximo_motivo,
+                      ayuda: 'Queda en el registro, con tu nombre.',
+                      errores: errores
+                    } only %}
+                    <button type="submit" class="boton {{ publicada ? 'boton-secundario' : 'boton-primario' }} boton-chico">{{ publicada ? 'Retirar del sitio' : 'Volver a publicar' }}</button>
+                    {% if publicada %}
+                      <a href="/salas/{{ sala.id }}" class="boton boton-fantasma boton-chico">Ver la ficha pública</a>
+                    {% endif %}
+                  </form>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+
+      {% if resolvible %}
+        <div class="bandeja-motivo">
+          {% include 'parciales/campo.html.twig' with {
+            nombre: 'motivo',
+            etiqueta: 'Motivo de la resolución',
+            tipo: 'textarea',
+            filas: 4,
+            valor: valores.motivo ?? '',
+            requerido: true,
+            maximo: maximo_motivo,
+            ayuda: 'Obligatorio en cualquier resolución. Queda registrado en el historial de la solicitud.',
+            errores: errores
+          } only %}
+          <div class="bandeja-acciones">
+            <button type="submit" class="boton boton-primario">Enviar resolución</button>
+            <p class="bandeja-acciones-nota">El motivo se le muestra a quien la mandó.</p>
+          </div>
+        </div>
+        </form>
+      {% endif %}
+    </article>
+  {% endif %}
+</div>
+{% endblock %}

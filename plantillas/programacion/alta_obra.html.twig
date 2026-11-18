@@ -59,6 +59,14 @@
     } only %}
   {% endif %}
 
+  {% if pedido is defined and pedido %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      titulo: 'Pedido de la comunidad',
+      mensaje: 'La obra queda esperando a la moderación, como todas. Cuando la aprueben, vas a poder tomar el pedido «' ~ pedido.titulo ~ ' (' ~ pedido.anio ~ ')» con ella desde «Pedidos para programar», y ahí se avisa a quienes se sumaron.'
+    } only %}
+  {% endif %}
+
   {% set opciones_tipo = tipos_obra ?? [
     { valor: 'pelicula', etiqueta: 'Película' },
     { valor: 'cortometraje', etiqueta: 'Cortometraje' }
@@ -72,6 +80,11 @@
 
   <form action="{{ accion|default('/organizador/obras/nueva') }}" method="POST" enctype="multipart/form-data" class="formulario-sala formulario-alta-obra" data-validar-en-linea>
     <input type="hidden" name="_csrf" value="{{ csrf }}">
+    {% if pedido is defined and pedido %}
+      <input type="hidden" name="pedido_id" value="{{ pedido.id }}">
+    {% elseif valores.pedido_id is defined and valores.pedido_id %}
+      <input type="hidden" name="pedido_id" value="{{ valores.pedido_id }}">
+    {% endif %}
 
     {# ==================================================================== #}
     {# SECCIÓN 1: DATOS PRINCIPALES DE LA OBRA                              #}
@@ -219,7 +232,7 @@
 
         {% if error_generos %}
           <span id="error-generos" class="campo-error" role="alert">
-            <span class="error-icono" aria-hidden="true">⚠️</span>
+            {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %}
             {{ error_generos }}
           </span>
         {% endif %}
@@ -267,13 +280,13 @@
         ayuda: 'Formatos admitidos: JPG, PNG o WebP (máx. 5 MB). Relación de aspecto sugerida vertical (2:3).',
         requerido: not (es_edicion|default(false) and afiche_actual),
         error: errores.afiche ?? null,
-        zona_de_imagen: true
+        zona_de_archivo: 'Arrastrá la imagen acá, o elegila:'
       }) only %}
     </fieldset>
 
     {# Botones finales #}
     <footer class="pie-formulario-acciones">
-      <a href="/organizador/obras" class="boton boton-secundario">Cancelar</a>
+      <a href="/organizador/obras" class="boton boton-secundario boton-grande">Cancelar</a>
       {% include 'parciales/boton.html.twig' with {
         texto: es_edicion|default(false) ? 'Guardar cambios' : 'Cargar obra',
         tipo: 'submit',

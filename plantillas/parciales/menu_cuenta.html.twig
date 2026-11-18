@@ -1,18 +1,24 @@
 {#
   Barra lateral de «Mi cuenta» (E4-10.13), como los wireframes mi-cuenta-mis-datos y
   mi-cuenta-mis-reservas, con las secciones que ya tienen pantalla: «Mis datos», «Mis reservas» y,
-  a quien alcanza el rol de organizador (también el moderador), su panel. El administrador no usa
+  a quien alcanza el rol de organizador, su panel, y al moderador, la moderación (IC-662). El administrador no usa
   el sitio público, como en el encabezado: no ve el enlace al panel del organizador.
 
   Parámetros recibidos:
-  - activa: (string) la sección actual: 'datos' o 'reservas'.
+  - activa: (string) la sección actual: 'datos', 'editar_datos', 'contrasena' o 'reservas'.
   - usuario: el usuario en sesión.
 #}
 {% set secciones = [
   { clave: 'datos', texto: 'Mis datos', url: '/cuenta/' },
+  { clave: 'editar_datos', texto: 'Editar datos', url: '/cuenta/datos' },
+  { clave: 'contrasena', texto: 'Contraseña', url: '/cuenta/contrasena' },
   { clave: 'reservas', texto: 'Mis reservas', url: '/funcion/reservas' },
+  { clave: 'puntos', texto: 'Mis puntos', url: '/recaudacion/puntos' },
 ] %}
-{% if usuario and usuario.alcanza('organizador') and not usuario.alcanza('administrador') %}
+{# El moderador alcanza el rol de organizador, pero lo suyo es la moderación (IC-662) #}
+{% if usuario and usuario.alcanza('moderador') and not usuario.alcanza('administrador') %}
+  {% set secciones = secciones|merge([{ clave: 'moderacion', texto: 'Moderación', url: '/moderacion/solicitudes' }]) %}
+{% elseif usuario and usuario.alcanza('organizador') and not usuario.alcanza('administrador') %}
   {% set secciones = secciones|merge([{ clave: 'organizador', texto: 'Panel del organizador', url: '/organizador/salas' }]) %}
 {% endif %}
 <nav class="mi-cuenta-menu" aria-label="Mi cuenta">

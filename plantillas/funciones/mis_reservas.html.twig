@@ -2,15 +2,27 @@
   «Mis reservas» del espectador, en /funcion/reservas (E4-04.1), como el wireframe
   mi-cuenta-mis-reservas: con la barra lateral de «Mi cuenta» (E4-10.13), el título con «Ir a la
   cartelera», la tabla con la función, la sala, la fecha, los lugares, el estado y las acciones de
-  cada una, y el paginado numerado. Queda afuera lo que todavía no tiene datos: la tarjeta del
-  usuario arriba de la barra (funciones no tiene la fecha de alta), las tarjetas de conducta,
-  actividad y beneficios, las pestañas, los filtros y el pago.
+  cada una, y el paginado numerado. Incluye las tarjetas de puntaje de conducta y actividad del
+  espectador (EF-13.3). Queda afuera lo que todavía no tiene datos: la tarjeta del usuario arriba de
+  la barra (funciones no tiene la fecha de alta), los beneficios, las pestañas, los filtros y el
+  pago.
 
   Variables:
+  - resumen_conducta: (opcional) {puntaje, puntaje_inicial, umbral, bajo_umbral,
+    tope_bajo_umbral, asistencias, ausencias, conducta_positivas, conducta_negativas,
+    negativas_vigentes, calificaciones_funciones}.
   - reservas: lista de {id, codigo (8 caracteres; se muestra en dos grupos de 4), cantidad, total
-    (ya escrito), estado ('confirmada' | 'cancelada' | 'asistio'), estado_etiqueta, cancelable,
-    funcion}. funcion es {id, titulo, url, fecha (o null), precio, sala, localidad}, o null si
+    (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio' |
+    'ausente'),
+    estado_etiqueta, cancelable, calificable (si puede calificar la función: asistió, terminó y
+    todavía no la calificó; EF-04.2), calificacion ({puntaje, comentario} si la calificó con esta
+    reserva, o null; EF-04.5), enlace_de_pago (a Mercado Pago, sólo en una pendiente que todavía
+    está a tiempo; si no, null), motivo (por qué se canceló, ya redactado para el espectador:
+    «Venció el plazo para pagar.», «Se canceló la función.»; null si no está cancelada o si la
+    canceló él; EF-06.3), reembolsada_en (cuándo le volvió la plata, ya escrito; null si no se
+    reembolsó), funcion}. funcion es {id, titulo, url, fecha (o null), precio, sala, localidad}, o null si
     programación no la devolvió.
+  - calificada: (bool) si se acaba de guardar una calificación, para el aviso.
   - sin_programacion: (bool) programación no respondió: ninguna fila tiene los datos de su función.
   - paginado: numero, total_paginas, total, anterior y siguiente (URL o null) y paginas: lista de
     {numero, url, actual}.
@@ -22,7 +34,8 @@
 {% block miga %}Mis reservas{% endblock %}
 
 {% block panel %}
-{% set clases_estado = { confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio' } %}
+{# La pendiente de pago va con la píldora de contorno, sin modificador. #}
+{% set clases_estado = { pendiente_pago: '', confirmada: 'estado-cuenta-activa', cancelada: 'estado-cuenta-cancelada', asistio: 'estado-cuenta-asistio', ausente: '' } %}
 <div class="panel-reservas mis-reservas">
   <header class="encabezado-formulario-solicitud">
     <div class="solicitud-texto-cabecera">
@@ -35,6 +48,39 @@
       variante: 'secundario'
     } only %}
   </header>
+
+  {% set conducta = resumen_conducta|default(null) %}
+  {% if conducta is not null %}
+    <dl class="panel-resumen" aria-label="Tu conducta y actividad">
+      <div class="panel-dato{% if conducta.bajo_umbral %} panel-dato-alerta{% endif %}">
+        <dt>Puntaje de conducta</dt>
+        <dd class="panel-dato-valor">{{ conducta.puntaje }}</dd>
+        <dd class="panel-dato-nota">de {{ conducta.puntaje_inicial }} · {% if conducta.bajo_umbral %}bajo umbral (hasta {{ conducta.tope_bajo_umbral }} reservas a la vez){% else %}sin restricciones{% endif %}</dd>
+      </div>
+      <div class="panel-dato">
+        <dt>Asistencias</dt>
+        <dd class="panel-dato-valor">{{ conducta.asistencias }}</dd>
+        <dd class="panel-dato-nota">{{ conducta.asistencias == 1 ? 'función a la que fuiste' : 'funciones a las que fuiste' }}</dd>
+      </div>
+      <div class="panel-dato">
+        <dt>Ausencias</dt>
+        <dd class="panel-dato-valor">{{ conducta.ausencias }}</dd>
+        <dd class="panel-dato-nota">{{ conducta.ausencias == 1 ? 'vez que no asististe' : 'veces que no asististe' }}</dd>
+      </div>
+      <div class="panel-dato">
+        <dt>Calificaciones</dt>
+        <dd class="panel-dato-valor">{{ conducta.conducta_positivas + conducta.conducta_negativas }}</dd>
+        <dd class="panel-dato-nota">{{ conducta.conducta_positivas }} pos · {{ conducta.conducta_negativas }} neg ({{ conducta.negativas_vigentes }} vig.) · {{ conducta.calificaciones_funciones }} {{ conducta.calificaciones_funciones == 1 ? 'función calificada' : 'funciones calificadas' }}</dd>
+      </div>
+    </dl>
+  {% endif %}
+
+  {% if calificada|default(false) %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      mensaje: '¡Gracias por calificar! Tu calificación ya cuenta para la sala y la película.'
+    } only %}
+  {% endif %}
 
   {% if sin_programacion|default(false) %}
     {% include 'parciales/mensaje.html.twig' with {
@@ -69,7 +115,7 @@
               {% if reserva.funcion %}
                 <td><a href="{{ reserva.funcion.url }}" class="tabla-admin-principal">{{ reserva.funcion.titulo }}</a></td>
                 <td>{{ reserva.funcion.sala }} <span class="tabla-admin-secundario">{{ reserva.funcion.localidad }}</span></td>
-                <td>{{ reserva.funcion.fecha ?? 'A confirmar' }}</td>
+                <td class="mis-reservas-fecha">{{ reserva.funcion.fecha ?? 'A confirmar' }}</td>
               {% elseif sin_programacion|default(false) %}
                 <td colspan="3"><span class="tabla-admin-secundario">—</span></td>
               {% else %}
@@ -77,9 +123,41 @@
               {% endif %}
               <td>{{ reserva.cantidad }}</td>
               <td><span class="panel-reservas-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</span></td>
-              <td><span class="estado-cuenta {{ clases_estado[reserva.estado] }}">{{ reserva.estado_etiqueta }}</span></td>
+              <td>
+                <span class="estado-cuenta {{ clases_estado[reserva.estado] ?? '' }}">{{ reserva.estado_etiqueta }}</span>
+                {# Por qué se canceló y si volvió la plata (EF-06.3): un «Cancelada» solo no dice si
+                   el espectador tiene algo que esperar. Las dos van en su renglón, abajo de la
+                   píldora, con el gris de los datos secundarios de la tabla. #}
+                {% if reserva.motivo|default(null) %}
+                  <span class="tabla-admin-secundario">{{ reserva.motivo }}</span>
+                {% endif %}
+                {% if reserva.reembolsada_en|default(null) %}
+                  <span class="tabla-admin-secundario">Reembolsada el {{ reserva.reembolsada_en }}</span>
+                {% endif %}
+              </td>
               <td>
                 <div class="mis-reservas-acciones">
+                  {# El historial de calificaciones de la propuesta (EF-04.5): lo que puso, al lado de
+                     la reserva con la que fue. #}
+                  {% if reserva.calificacion|default(null) %}
+                    <p class="mis-reservas-calificacion">
+                      <span class="calificacion-estrellas" aria-hidden="true">{% for estrella in 1..5 %}{{ estrella <= reserva.calificacion.puntaje ? '★' : '☆' }}{% endfor %}</span>
+                      <span class="sr-only">Calificaste {{ reserva.calificacion.puntaje }} de 5.</span>
+                      {% if reserva.calificacion.comentario %}
+                        <span class="mis-reservas-comentario">«{{ reserva.calificacion.comentario }}»</span>
+                      {% endif %}
+                    </p>
+                  {% elseif reserva.estado == 'ausente' %}
+                    <span class="tabla-admin-secundario">Reservaste y no asististe</span>
+                  {% endif %}
+                  {% if reserva.enlace_de_pago|default(null) %}
+                    {% include 'parciales/boton.html.twig' with {
+                      texto: 'Pagar',
+                      url: reserva.enlace_de_pago,
+                      tamano: 'chico',
+                      aria_label: 'Pagar la reserva ' ~ reserva.codigo ~ ' con Mercado Pago'
+                    } only %}
+                  {% endif %}
                   {% include 'parciales/boton.html.twig' with {
                     texto: 'Ver comprobante',
                     url: '/funcion/reservas/' ~ reserva.id,
@@ -87,6 +165,14 @@
                     tamano: 'chico',
                     aria_label: 'Ver el comprobante de la reserva ' ~ reserva.codigo
                   } only %}
+                  {% if reserva.calificable|default(false) %}
+                    {% include 'parciales/boton.html.twig' with {
+                      texto: 'Calificar función',
+                      url: '/funcion/reservas/' ~ reserva.id ~ '/calificar',
+                      tamano: 'chico',
+                      aria_label: 'Calificar la función de la reserva ' ~ reserva.codigo
+                    } only %}
+                  {% endif %}
                   {% if reserva.cancelable %}
                     {% include 'parciales/boton.html.twig' with {
                       texto: 'Cancelar',

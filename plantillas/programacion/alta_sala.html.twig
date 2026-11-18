@@ -11,6 +11,10 @@
   - observacion_moderador: (string, opcional) Observación de moderación si la sala fue observada.
   - error_general: (string, opcional) Mensaje de error general de la operación.
   - mensaje_exito: (string, opcional) Mensaje de confirmación tras guardar la sala.
+  - direccion_bloqueada: (bool, opcional) EF-07.6: la dirección y la localidad se ven sin
+    editarse, porque las revisa la moderación.
+  - pedir_cambio_de_direccion: (string o null, opcional) EF-07.6: el pedido de cambio de dirección
+    a la moderación, en una sala publicada.
 #}
 {% extends 'organizador.html.twig' %}
 
@@ -107,6 +111,8 @@
         error: errores.descripcion ?? null
       }) %}
 
+      {# EF-07.6: la dirección la revisa la moderación; con is defined, por si el back todavía no la manda #}
+      {% set direccion_bloqueada = direccion_bloqueada is defined and direccion_bloqueada %}
       <div class="fila-campos-doble">
         {# Campo: Dirección #}
         {% include 'parciales/campo.html.twig' with reglas.direccion|merge({
@@ -115,8 +121,11 @@
           tipo: 'text',
           valor: valores.direccion ?? '',
           placeholder: 'Ej: Av. San Martín 450',
-          ayuda: 'Ubicación física donde se realizan las proyecciones.',
-          requerido: true,
+          ayuda: direccion_bloqueada
+            ? 'La revisa la moderación con el seguro y la habilitación: no se cambia desde acá.'
+            : 'Ubicación física donde se realizan las proyecciones.',
+          requerido: not direccion_bloqueada,
+          deshabilitado: direccion_bloqueada,
           error: errores.direccion ?? null
         }) %}
 
@@ -127,11 +136,20 @@
           tipo: 'text',
           valor: valores.localidad ?? '',
           placeholder: 'Ej: Luján',
-          ayuda: 'Ciudad o municipio para filtrado geográfico.',
-          requerido: true,
+          ayuda: direccion_bloqueada
+            ? 'Va con la dirección: también la revisa la moderación.'
+            : 'Ciudad o municipio para filtrado geográfico.',
+          requerido: not direccion_bloqueada,
+          deshabilitado: direccion_bloqueada,
           error: errores.localidad ?? null
         }) %}
       </div>
+      {% if pedir_cambio_de_direccion is defined and pedir_cambio_de_direccion %}
+        <p class="campo-ayuda">
+          ¿Mudaste la sala? <a href="{{ pedir_cambio_de_direccion }}" class="enlace-destacado">Pedir el cambio de dirección</a>.
+          Mientras la moderación lo revisa, la sala sigue publicada con la dirección de antes.
+        </p>
+      {% endif %}
     </fieldset>
 
     {# ==================================================================== #}
@@ -151,7 +169,7 @@
           tipo: 'number',
           valor: valores.capacidad ?? '',
           placeholder: 'Ej: 60',
-          ayuda: 'Cantidad máxima de espectadores que admite la sala.',
+          ayuda: 'Cantidad máxima de espectadores que admite la sala.' ~ (direccion_bloqueada ? ' Podés bajarla; para subirla, pedí el cambio a la moderación.' : ''),
           requerido: true,
           error: errores.capacidad ?? null
         }) %}
@@ -159,7 +177,7 @@
         {# Campo: Imagen de la sala #}
         {% include 'parciales/campo.html.twig' with reglas.imagen|merge({
           nombre: 'imagen',
-          zona_de_imagen: true,
+          zona_de_archivo: 'Arrastrá la imagen acá, o elegila:',
           etiqueta: 'Fotografía de la sala',
           tipo: 'file',
           ayuda: 'Foto representativa de la sala (JPG, PNG o WebP, máx. 5 MB).',
@@ -221,7 +239,7 @@
     {# ACCIONES FINALES DEL FORMULARIO                                      #}
     {# ==================================================================== #}
     <footer class="pie-formulario-acciones">
-      <a href="/organizador/salas" class="boton boton-secundario">Cancelar</a>
+      <a href="/organizador/salas" class="boton boton-secundario boton-grande">Cancelar</a>
 
       {% include 'parciales/boton.html.twig' with {
         texto: es_edicion ?? false ? 'Guardar cambios' : 'Publicar sala',

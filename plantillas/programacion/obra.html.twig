@@ -5,8 +5,11 @@
 
   Variables:
   - obra: datos de la obra (id, titulo, anio, director, duracion, tipo, tipo_etiqueta,
-    origen_copia, origen_copia_etiqueta, generos, sinopsis, afiche, editable, tiene_funciones_futuras).
+    origen_copia, origen_copia_etiqueta, generos, sinopsis, afiche, editable, tiene_funciones_futuras,
+    denunciable: si muestra «Denunciar», a todos menos a su dueño, EF-07.8).
   - funciones: lista de funciones de esta obra (formato para parciales/tarjeta_funcion.html.twig).
+  - calificaciones: {promedio (o null), cantidad, ultimas} de las funciones donde se dio, como las
+    recibe parciales/calificaciones_ultimas.html.twig; null si funciones no respondió (EF-04.3).
   - mensaje_exito: (?string) confirmación si se guardaron cambios.
   - error_baja: (?string) error si falló la baja.
   - csrf: token CSRF.
@@ -52,7 +55,7 @@
         <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="ficha-obra-portada-imagen" loading="lazy">
       {% else %}
         <div class="tarjeta-funcion-afiche-placeholder ficha-obra-placeholder">
-          <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+          {% include 'parciales/icono.html.twig' with { nombre: 'pelicula', clase: 'afiche-placeholder-icono' } only %}
           <span class="afiche-placeholder-texto">AFICHE</span>
         </div>
       {% endif %}
@@ -70,24 +73,27 @@
         {% endif %}
       </div>
 
+      {% if calificaciones %}
+        {% include 'parciales/calificacion_promedio.html.twig' with { promedio: calificaciones.promedio, cantidad: calificaciones.cantidad } only %}
+      {% endif %}
       <div class="ficha-obra-metas">
         {% if obra.director is defined and obra.director %}
           <p class="tarjeta-funcion-dato meta-director">
-            <span class="meta-icono" aria-hidden="true">🎬</span>
+            {% include 'parciales/icono.html.twig' with { nombre: 'claqueta', clase: 'meta-icono' } only %}
             <span class="meta-texto">Dirección: <strong>{{ obra.director }}</strong></span>
           </p>
         {% endif %}
 
         {% if duracion_obra %}
           <p class="tarjeta-funcion-dato meta-duracion">
-            <span class="meta-icono" aria-hidden="true">⏱️</span>
+            {% include 'parciales/icono.html.twig' with { nombre: 'reloj', clase: 'meta-icono' } only %}
             <span class="meta-texto">Duración: <strong>{{ duracion_obra }} minutos</strong></span>
           </p>
         {% endif %}
 
         {% if obra.origen_copia is defined and obra.origen_copia %}
           <p class="tarjeta-funcion-dato meta-copia">
-            <span class="meta-icono" aria-hidden="true">📜</span>
+            {% include 'parciales/icono.html.twig' with { nombre: 'documento', clase: 'meta-icono' } only %}
             <span class="meta-texto">Origen de la copia: <strong>{{ obra.origen_copia_etiqueta ?? obra.origen_copia }}</strong></span>
           </p>
         {% endif %}
@@ -132,6 +138,11 @@
           </form>
         </div>
       {% endif %}
+
+      {# EF-07.8: cualquiera menos su dueño la denuncia #}
+      {% if obra.denunciable is defined and obra.denunciable %}
+        <p class="ficha-denunciar">{% include 'parciales/denunciar.html.twig' with { tipo: 'obra', id: obra.id } only %}</p>
+      {% endif %}
     </div>
   </header>
 
@@ -150,5 +161,11 @@
       </div>
     {% endif %}
   </section>
+
+  {% include 'parciales/calificaciones_ultimas.html.twig' with {
+    calificaciones: calificaciones,
+    id: 'ficha-obra-calificaciones-titulo',
+    vacio: 'Todavía nadie calificó una función de esta película.'
+  } only %}
 </div>
 {% endblock %}

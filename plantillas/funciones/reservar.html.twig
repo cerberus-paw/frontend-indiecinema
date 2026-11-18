@@ -1,13 +1,16 @@
 {#
   La reserva de una función, en /funcion/reservar/{id} (E4-01.3). Es el paso «Lugares» del
-  wireframe reserva-pago-comprobante, sin el pago: la reserva se confirma sin cobrar. El
-  formulario de siempre está en la ficha; esta página es la misma con los errores, o la que se ve
-  si se llega escribiendo la dirección.
+  wireframe reserva-pago-comprobante. Si la función se cobra con Mercado Pago (X-01), después
+  viene el paso «Pago»; si no, la reserva se confirma sin cobrar. El formulario de siempre está en
+  la ficha; esta página es la misma con los errores, o la que se ve si se llega escribiendo la
+  dirección.
 
   Variables:
   - funcion: id, titulo, url (de su ficha), fecha (string ya escrito, o null si todavía no se
     acordó), precio (por lugar, ya escrito), sala y localidad.
+  - con_pago: (bool, opcional) si la reserva se paga con Mercado Pago.
   - motivo: (string|null) por qué ya no se puede reservar; entonces no hay formulario.
+  - aviso_conducta: (string|null, opcional) advertencia por historial de conducta (EF-13.2).
   - reglas.cantidad: minimo y maximo, los mismos que controla el servidor.
   - valores.cantidad: lo que mandó, para volver a mostrarlo.
   - errores: (map) el error de cada campo.
@@ -29,12 +32,16 @@
     </ol>
   </nav>
 
-  {% include 'funciones/pasos_reserva.html.twig' with { actual: 1 } only %}
+  {% include 'funciones/pasos_reserva.html.twig' with { actual: 1, con_pago: con_pago|default(false) } only %}
 
   <header class="encabezado-formulario-solicitud">
     <div class="solicitud-texto-cabecera">
       <h1 class="solicitud-titulo">Reservá tus lugares</h1>
-      <p class="solicitud-bajada">La reserva se confirma en el momento y recibís un código para presentar en la puerta.</p>
+      {% if con_pago|default(false) %}
+        <p class="solicitud-bajada">Elegí cuántos lugares y pagalos con Mercado Pago: con el pago acreditado, recibís un código para presentar en la puerta.</p>
+      {% else %}
+        <p class="solicitud-bajada">La reserva se confirma en el momento y recibís un código para presentar en la puerta.</p>
+      {% endif %}
     </div>
   </header>
 
@@ -62,6 +69,9 @@
       <a href="{{ funcion.url }}" class="boton boton-secundario">Volver a la función</a>
     </div>
   {% else %}
+    {% if aviso_conducta|default(null) %}
+      {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: aviso_conducta } only %}
+    {% endif %}
     {# Si la reserva volvió con errores: «Revisá 1 campo» con el link a la cantidad, o la regla que
        no se cumplió, como «Quedan 3 lugares.» (E4-10.5) #}
     {% include 'parciales/resumen_de_errores.html.twig' with {
@@ -82,6 +92,9 @@
         valor_maximo: reglas.cantidad.maximo,
         ayuda: 'Máximo ' ~ (reglas.cantidad.maximo_por_persona ?? reglas.cantidad.maximo) ~ ' lugares por persona.'
       } only %}
+      {% if funcion.precio starts with '$' %}
+        {% include 'parciales/campo_cupon.html.twig' with { valor: valores.cupon ?? '', errores: errores } only %}
+      {% endif %}
 
       <div class="pie-formulario-acciones">
         {% include 'parciales/boton.html.twig' with { texto: 'Reservar mis lugares', tipo: 'submit' } only %}

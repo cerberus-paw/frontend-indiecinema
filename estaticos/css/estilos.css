@@ -55,6 +55,33 @@
   src: url('../fuentes/fira-sans-condensed-latin-400-italic.woff2') format('woff2');
 }
 
+/* Fira Mono, de la misma familia y la misma licencia: la de los rótulos en versalitas (las píldoras,
+   los pasos de la función, «Fecha», «Entrada»). Antes la pedía como JetBrains Mono, que el sitio no
+   sirve, y cada navegador caía en su monoespaciada de sistema, tipo Courier (F-02) */
+@font-face {
+  font-family: 'Fira Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fuentes/fira-mono-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fuentes/fira-mono-latin-500-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fuentes/fira-mono-latin-700-normal.woff2') format('woff2');
+}
+
 /* --------------------------------------------------------------------------
    1. VARIABLES DE DISEÑO (DESIGN TOKENS) EN :ROOT
    Centralizan los valores de la identidad visual de la Entrega 1.
@@ -135,14 +162,19 @@
   --fuente-titulos: 'Fira Sans Condensed', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   /* Fira Sans Condensed: tipografía oficial para cuerpo de texto y controles */
   --fuente-cuerpo: 'Fira Sans Condensed', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  /* Monospace: para trazas técnicas de error, tokens CSRF y bloques de depuración */
-  --fuente-codigo: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+  /* Monospace: los rótulos en versalitas del wireframe, los códigos de reserva y las trazas de error */
+  --fuente-codigo: 'Fira Mono', 'SFMono-Regular', Consolas, monospace;
 
   /* ── 1.7 Escala Tipográfica Fluida ────────────────────────────────────── */
   /* 12px: badges, leyendas y microtexto */
   --texto-xs: 0.75rem;
   /* 14px: inputs, botones chicos y navegación */
   --texto-sm: 0.875rem;
+  /* El alto del encabezado fijo en escritorio, para lo que queda pegado debajo de él */
+  --alto-encabezado: 4.5rem;
+  /* El alto de un campo (.campo-control): su renglón, el relleno de arriba y abajo y el borde. Lo
+     usa el botón que va al lado de los campos de un filtro, para quedar del mismo alto (F-02) */
+  --alto-control: calc(var(--texto-sm) * 1.6 + 1.3rem + 2px);
   /* 16px: texto normal de párrafos */
   --texto-base: 1rem;
   /* 18px: subtítulos pequeños y resúmenes */
@@ -234,8 +266,10 @@ html {
   color-scheme: dark;
   /* Impide que el elemento html exceda el 100% de la ventana */
   max-width: 100%;
-  /* Desactiva scroll horizontal en la raíz del documento */
-  overflow-x: hidden;
+  /* Corta lo que se sale a los costados. clip y no hidden: hidden lo vuelve un contenedor con
+     desplazamiento propio y rompe todo position: sticky de la página (el encabezado y los filtros
+     de la cartelera se iban con el resto, F-02) */
+  overflow-x: clip;
 }
 
 /* Cuerpo de la aplicación con estructura flexbox vertical */
@@ -260,8 +294,8 @@ body.cuerpo-app {
   width: 100%;
   /* Restringe el ancho máximo al 100% sin desbordes */
   max-width: 100%;
-  /* Bloquea barras de scroll horizontal involuntarias */
-  overflow-x: hidden;
+  /* Bloquea barras de scroll horizontal involuntarias, con clip por lo mismo que en html */
+  overflow-x: clip;
   /* Suavizado subpixel para renderizado en navegadores WebKit */
   -webkit-font-smoothing: antialiased;
   /* Suavizado de tipografías en navegadores Firefox */
@@ -1692,6 +1726,39 @@ dd {
 }
 
 /* Placeholder estilizado con tono atenuado */
+/* El campo de archivo: el botón para elegirlo, como un botón secundario del sitio. Sin esto era el
+   gris del sistema, claro sobre el fondo oscuro (F-02). El texto («Elegir archivo», «Ningún
+   archivo seleccionado») lo pone el navegador en su idioma */
+input[type='file'].campo-control {
+  color: var(--color-texto-secundario);
+  cursor: pointer;
+}
+
+input[type='file'].campo-control::file-selector-button {
+  margin-right: var(--espacio-3);
+  padding: var(--espacio-1) var(--espacio-3);
+  font-family: var(--fuente-cuerpo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-sm);
+  cursor: pointer;
+  transition: background-color var(--transicion-rapida);
+}
+
+input[type='file'].campo-control:hover::file-selector-button {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* El de fecha, del mismo alto que los demás: el selector del navegador lo hacía 2 px más alto y,
+   en una fila de filtros, descuadraba los campos de al lado (F-02) */
+input[type='date'].campo-control,
+input[type='datetime-local'].campo-control {
+  height: var(--alto-control);
+}
+
 .campo-control::placeholder {
   /* Color de texto atenuado para no competir con el contenido real */
   color: var(--color-texto-atenuado);
@@ -1853,9 +1920,9 @@ dd {
   line-height: 1.35;
 }
 
-/* Zona para arrastrar y soltar la imagen, con vista previa (IC-296). El campo de archivo queda
-   adentro: se llega con el tabulador y se abre con Enter, como siempre */
-.zona-de-imagen {
+/* Zona para arrastrar y soltar un archivo, con vista previa si es una imagen (IC-296, EF-07.4). El
+   campo de archivo queda adentro: se llega con el tabulador y se abre con Enter, como siempre */
+.zona-de-archivo {
   /* Vista previa, texto, campo y nombre, uno debajo del otro y centrados */
   display: flex;
   flex-direction: column;
@@ -1873,7 +1940,7 @@ dd {
 }
 
 /* Mientras hay algo encima para soltar */
-.zona-de-imagen-encima {
+.zona-de-archivo-encima {
   /* Borde del color primario, lleno */
   border-style: solid;
   border-color: var(--color-primario);
@@ -1882,7 +1949,7 @@ dd {
 }
 
 /* La foto elegida, antes de mandarla */
-.zona-de-imagen-vista {
+.zona-de-archivo-vista {
   /* Entra en la zona sin deformarse */
   max-width: 100%;
   max-height: 14rem;
@@ -1891,16 +1958,16 @@ dd {
   border-radius: var(--radio-sm);
 }
 
-/* «Arrastrá la imagen acá, o elegila:» */
-.zona-de-imagen-texto {
+/* «Arrastrá la imagen acá, o elegila:», «Arrastrá el PDF acá, o elegilo:» */
+.zona-de-archivo-texto {
   /* Sin margen propio: el gap de la zona separa */
   margin: 0;
   color: var(--color-texto-secundario);
   font-size: var(--texto-sm);
 }
 
-/* El nombre del archivo, para quien no ve la vista previa */
-.zona-de-imagen-nombre {
+/* El nombre del archivo, para quien no ve la vista previa; de un PDF, con su tamaño */
+.zona-de-archivo-nombre {
   margin: 0;
   color: var(--color-texto-atenuado);
   font-size: var(--texto-xs);
@@ -1911,7 +1978,7 @@ dd {
 
 /* Sin animación para quien la desactivó */
 @media (prefers-reduced-motion: reduce) {
-  .zona-de-imagen {
+  .zona-de-archivo {
     transition: none;
   }
 }
@@ -2528,6 +2595,32 @@ dd {
   color: var(--color-texto-apagado);
 }
 
+/* Los lugares que antes tenían un emoji y ahora un ícono de línea (F-02): el tamaño lo daba la
+   letra y el SVG necesita uno propio. La lupa del buscador, un poco más chica y apagada */
+svg.afiche-placeholder-icono {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+svg.buscador-icono,
+svg.panel-busqueda-icono {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--color-texto-apagado);
+}
+
+svg.menu-icono {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-texto-secundario);
+}
+
+svg.error-icono,
+svg.enlace-denunciar-icono {
+  width: 0.95em;
+  height: 0.95em;
+}
+
 /* Íconos de línea (parciales/icono): en línea con el texto y sin achicarse dentro de una fila flexible */
 .icono {
   /* Se alinea con la línea de texto */
@@ -2544,6 +2637,11 @@ dd {
   margin-top: auto;
   /* Ancho completo */
   width: 100%;
+  /* Con dos botones («Editar» y «Documentación» en Mis salas), uno debajo del otro y separados:
+     antes quedaban pegados (F-02) */
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
 }
 
 /* Realce específico para funciones en votación de títulos en la cartelera (IC-151) */
@@ -2947,8 +3045,9 @@ dd {
 .seccion-leyenda {
   /* Disposición en bloque */
   display: block;
-  /* Margen inferior */
-  margin-bottom: var(--espacio-4);
+  /* Sin margen abajo: el relleno de arriba del fieldset ya va después de la leyenda, y los dos
+     sumaban 40 px entre la explicación de la sección y su primer campo (F-02) */
+  margin-bottom: 0;
   /* Relleno cero */
   padding: 0;
   /* Ancho completo */
@@ -3154,6 +3253,17 @@ dd {
     /* La columna no se estira hasta el alto de la grilla */
     align-items: start;
   }
+
+  /* Los filtros acompañan el desplazamiento: quedan debajo del encabezado mientras se recorren los
+     resultados, sin volver arriba para cambiar uno (F-02). Si la pantalla es más baja que la
+     columna, se desplaza adentro */
+  .cartelera-cuerpo > .filtros-columna {
+    position: sticky;
+    top: calc(var(--alto-encabezado) + var(--espacio-4));
+    max-height: calc(100vh - var(--alto-encabezado) - var(--espacio-8));
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
 }
 
 /* Los resultados no desbordan su celda de la grilla */
@@ -3306,6 +3416,8 @@ dd {
 .filtros-cartelera-acciones {
   /* En fila */
   display: flex;
+  /* Si no entran, el segundo baja: en «Películas», a 360 px, los dos botones se salían */
+  flex-wrap: wrap;
   /* Separación entre botones */
   gap: var(--espacio-2);
 }
@@ -3413,8 +3525,10 @@ dd {
    del wireframe «sala-indie» de Figma
    -------------------------------------------------------------------------- */
 
-/* La portada empieza pegada al encabezado: sin el relleno superior del main */
-.contenido-principal:has(> .ficha-sala:first-child) {
+/* La portada empieza pegada al encabezado: sin el relleno superior del main. La ficha de la obra
+   reusa la clase pero no tiene portada: con el relleno, sus migas no quedan pegadas al encabezado
+   (F-02) */
+.contenido-principal:has(> .ficha-sala:not(.ficha-pelicula):first-child) {
   /* Sin relleno arriba */
   padding-top: 0;
 }
@@ -3760,8 +3874,10 @@ dd {
 
 /* Un parámetro */
 .ficha-sala-parametro {
-  /* Nombre y valor en fila */
+  /* Nombre y valor en fila, y la regla debajo */
   display: flex;
+  /* La regla baja a su propia línea */
+  flex-wrap: wrap;
   /* A los extremos */
   justify-content: space-between;
   /* Separación mínima */
@@ -3786,11 +3902,47 @@ dd {
   text-align: right;
 }
 
-/* En tablet y celular, una sola columna: el costado después de las funciones */
+/* Qué regla aplica el parámetro (EF-05.3), debajo del nombre y el valor */
+.ficha-sala-parametro .ficha-sala-parametro-regla {
+  /* Ocupa toda la línea */
+  flex-basis: 100%;
+  /* Peso normal: la explicación no compite con el valor */
+  font-weight: 400;
+  /* Alineada a la izquierda, como el nombre */
+  text-align: left;
+  /* Texto secundario */
+  color: var(--color-texto-secundario);
+}
+
+/* En tablet y celular, una sola columna. El costado («Dónde queda» y los parámetros) va después de
+   «Sobre la sala» y antes de las funciones: al final quedaba debajo de todas las reseñas, y la
+   dirección se encontraba recién al pie (F-02). La columna principal se disuelve en la grilla
+   para poder intercalarlo, y la separación entre secciones la pone la grilla */
 @media (max-width: 900px) {
   .ficha-sala-columnas {
     /* Una sola columna */
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-10);
+  }
+
+  .ficha-sala-principal {
+    display: contents;
+  }
+
+  .ficha-sala-principal > .ficha-sala-seccion {
+    order: 2;
+  }
+
+  .ficha-sala-principal > .ficha-sala-seccion:first-child {
+    order: 0;
+  }
+
+  .ficha-sala-costado {
+    order: 1;
+  }
+
+  .ficha-sala-seccion + .ficha-sala-seccion {
+    margin-top: 0;
   }
 }
 
@@ -4167,12 +4319,12 @@ dd {
   padding: var(--espacio-10) var(--espacio-12);
 }
 
-/* Los cuatro pasos en una fila */
+/* Los seis pasos en filas de a tres */
 .acerca-de-lista-pasos {
   /* Cuadrícula */
   display: grid;
-  /* Cuatro columnas iguales */
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Tres columnas iguales */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   /* 32 px entre pasos */
   gap: var(--espacio-8);
   /* Sin la numeración ni el sangrado de la lista */
@@ -4223,8 +4375,9 @@ dd {
 .acerca-de-roles {
   /* Cuadrícula */
   display: grid;
-  /* Tres columnas que bajan cuando no entran */
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  /* Columnas que bajan cuando no entran. Con auto-fit y no auto-fill: con tres tarjetas en un
+     ancho para cuatro, auto-fill dejaba la cuarta columna vacía a la derecha (F-02) */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   /* Separación */
   gap: var(--espacio-6);
   /* Sin viñetas */
@@ -4415,6 +4568,11 @@ dd {
   transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida), color var(--transicion-rapida);
 }
 
+/* «Anterior» y «Siguiente», del mismo alto que los números de página: eran más bajos (F-02) */
+.paginado-numerado > .boton {
+  min-height: 2.25rem;
+}
+
 .paginado-enlace:hover {
   background-color: var(--color-superficie-hover);
   color: var(--color-texto);
@@ -4583,6 +4741,11 @@ dd {
   margin: 0;
 }
 
+/* «Denunciar», al final de las acciones y a la misma altura que los botones */
+.ficha-cabecera-acciones .ficha-denunciar {
+  margin: 0 0 0 var(--espacio-2);
+}
+
 /* La caja de la línea de estados */
 .ficha-estados {
   padding: var(--espacio-4) var(--espacio-5);
@@ -4657,6 +4820,32 @@ dd {
 .ficha-estado-pendiente {
   border: 1px dashed var(--color-borde-medio);
   color: var(--color-texto-apagado);
+}
+
+/* En el celular los cuatro no entran en un renglón y, partidos en tres desparejos, perdían las
+   líneas que los unen: van uno debajo del otro, unidos por una línea vertical (F-02) */
+@media (max-width: 600px) {
+  .ficha-estados-lista {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--espacio-3);
+  }
+
+  .ficha-estado:not(:first-child) {
+    margin-left: 0;
+  }
+
+  .ficha-estado:not(:first-child)::before {
+    top: auto;
+    right: auto;
+    bottom: 100%;
+    left: 1.25rem;
+    width: 0;
+    height: var(--espacio-3);
+    margin-right: 0;
+    border-top: none;
+    border-left: 1px solid var(--color-borde-medio);
+  }
 }
 
 /* El acuerdo en dos columnas: las franjas y, al costado, el lateral */
@@ -5288,6 +5477,12 @@ dd {
   margin: 0;
 }
 
+/* Hasta cuándo se vota (EF-03.1), debajo de la bajada */
+.ficha-votacion-cierre {
+  font-size: var(--texto-base);
+  margin: var(--espacio-2) 0 0;
+}
+
 .ficha-votacion-confirmacion,
 .ficha-votacion-error {
   margin-bottom: var(--espacio-4);
@@ -5683,10 +5878,55 @@ dd {
 .tabla-admin-contenedor {
   /* Desplazamiento horizontal propio */
   overflow-x: auto;
+  /* Posicionada para que lo absoluto de adentro (el .sr-only de «de 5» en las estrellas) se
+     ubique en la caja y lo recorte el overflow: si no, se ubica respecto de la página y la
+     estira, y a 360 px la ficha de una sala con historial medía 648 (IC-654) */
+  position: relative;
   /* Borde y fondo como las tarjetas */
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
   background-color: var(--color-superficie);
+}
+
+/* En el celular las tablas no entran y se desplazan de costado. Para que se note que siguen, una
+   sombra en el borde del lado que queda tapado: los dos primeros fondos son del color de la caja y
+   se mueven con el contenido (local), así que tapan la sombra (los otros dos, fijos) cuando ya se
+   llegó a ese borde. Antes no había ninguna señal y parecía que faltaban columnas (F-02) */
+@media (max-width: 720px) {
+  .tabla-admin-contenedor {
+    background:
+      linear-gradient(to right, var(--color-superficie) 30%, transparent) left / 2.5rem 100% no-repeat local,
+      linear-gradient(to left, var(--color-superficie) 30%, transparent) right / 2.5rem 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgb(255 255 255 / 0.16), transparent) left / 0.875rem 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgb(255 255 255 / 0.16), transparent) right / 0.875rem 100% no-repeat scroll,
+      var(--color-superficie);
+  }
+
+  /* Ya que se desplaza, cada columna toma el ancho de su contenido: los datos cortos (fechas,
+     montos, estados) en un renglón, en vez de «$» arriba y «5.000» abajo. Los textos largos (el
+     nombre de la fila y su dato secundario, o un motivo) se parten, pero en un ancho legible y no
+     palabra por palabra. «Usuarios y roles» no: tiene sus columnas de ancho fijo */
+  .tabla-admin:not(.tabla-admin-usuarios) {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .tabla-admin:not(.tabla-admin-usuarios) td {
+    white-space: nowrap;
+  }
+
+  .tabla-admin:not(.tabla-admin-usuarios) :is(.tabla-admin-principal, .tabla-admin-secundario, .tabla-admin-texto) {
+    display: block;
+    max-width: 14rem;
+    white-space: normal;
+  }
+}
+
+/* Una celda de datos cortos (una fecha, «$ 2.500» y «80 lugares») en un renglón cada uno: si no,
+   la tabla le daba a esa columna lo mínimo y quedaba «A la / gorra» o «Mié 25 nov / · 20:00» (F-02) */
+.tabla-admin td.tabla-admin-celda-corta,
+.tabla-admin td.tabla-admin-celda-corta :is(.tabla-admin-principal, .tabla-admin-secundario) {
+  white-space: nowrap;
 }
 
 /* Se puede enfocar con el teclado para desplazarla: se marca el foco */
@@ -5773,6 +6013,20 @@ dd {
   gap: var(--espacio-2);
 }
 
+/* La nota de la transferencia y su botón, en una fila: el campo ocupaba todo el ancho de la celda
+   y empujaba «Marcar transferida» fuera de la tabla (F-02) */
+.tabla-admin-transferencia {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin: 0;
+}
+
+.tabla-admin-transferencia .campo-control {
+  flex: 1 1 12rem;
+  min-width: 10rem;
+}
+
 /* Formulario en línea para acciones en la tabla de administración (IC-150) */
 .formulario-accion-tabla {
   display: inline-flex;
@@ -5785,13 +6039,27 @@ dd {
   table-layout: fixed;
 }
 
-/* En partes del ancho: el rol arranca cerca del medio de la tabla, no contra el borde derecho */
+/* En partes del ancho: la conducta, el rol y el estado mantienen la tabla alineada entre páginas */
+.tabla-admin-columna-conducta {
+  width: 18%;
+}
+
 .tabla-admin-columna-rol {
-  width: 35%;
+  width: 26%;
 }
 
 .tabla-admin-columna-estado {
-  width: 20%;
+  width: 16%;
+}
+
+.tabla-admin-conducta {
+  display: block;
+  font-weight: 600;
+  color: var(--color-texto-brillante);
+}
+
+.conducta-bajo-umbral {
+  color: var(--color-advertencia);
 }
 
 /* El desplegable del rol, del ancho del rol más largo y no de toda la columna, como el wireframe */
@@ -5883,6 +6151,8 @@ dd {
   /* Contorno, para la pendiente */
   border: 1px solid var(--color-borde-medio);
   color: var(--color-texto-secundario);
+  /* Una píldora en un renglón: «CON / ASISTENCIA» partida no se lee como un estado (IC-661) */
+  white-space: nowrap;
 }
 
 /* Cuenta activa: la píldora llena */
@@ -5923,6 +6193,10 @@ dd {
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
   background-color: var(--color-superficie);
+}
+
+.panel-dato-alerta {
+  border-color: var(--color-advertencia);
 }
 
 /* «USUARIOS REGISTRADOS», en versalitas como los títulos de las columnas */
@@ -6139,6 +6413,17 @@ dd {
   margin-bottom: var(--espacio-6);
 }
 
+/* El botón de un filtro, del alto de los campos y alineado con su borde de abajo: era unos 10 px
+   más bajo y, en una columna de la grilla, se estiraba a lo ancho de esa columna (F-02) */
+:is(.panel-filtros, .portada-buscador, .buscador-obras, .buscador-salas) .boton {
+  min-height: var(--alto-control);
+}
+
+.panel-filtros > .boton {
+  justify-self: start;
+  align-self: end;
+}
+
 /* El buscador con la lupa adentro */
 .panel-busqueda {
   position: relative;
@@ -6156,6 +6441,144 @@ dd {
 .panel-busqueda .campo-control {
   /* Lugar para la lupa */
   padding-left: 2.4rem;
+}
+
+/* Más de un botón en la cabecera de una página, como «Ver el reporte» y «Cargar obra» */
+.encabezado-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+}
+
+/* Reportes (EF-09): el período en una fila, con las etiquetas a la vista porque son fechas */
+.reporte-filtros {
+  grid-template-columns: repeat(2, minmax(150px, 220px)) auto;
+  justify-content: start;
+  align-items: end;
+}
+
+.reporte-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.reporte-filtro-etiqueta {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.reporte-titulo {
+  margin: var(--espacio-8) 0 var(--espacio-4);
+  font-size: var(--texto-xl);
+}
+
+.reporte-seccion {
+  margin-bottom: var(--espacio-8);
+}
+
+.reporte-subtitulo {
+  margin: 0;
+  font-size: var(--texto-lg);
+}
+
+/* De dónde sale la sugerencia: los umbrales, para que se entienda por qué aparece */
+.reporte-explicacion {
+  margin: var(--espacio-1) 0 var(--espacio-4);
+  max-width: 70ch;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.reporte-sugerencias {
+  display: grid;
+  gap: var(--espacio-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cada sugerencia, con el borde del color principal: es lo que hay que leer primero */
+.reporte-sugerencia {
+  padding: var(--espacio-4) var(--espacio-5);
+  border: 1px solid var(--color-borde);
+  border-left: 3px solid var(--color-primario);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie);
+}
+
+.reporte-sugerencia-texto {
+  margin: 0;
+}
+
+.reporte-sugerencia-nota {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* Con la sala, un campo más en la fila */
+.reporte-filtros-con-sala {
+  grid-template-columns: repeat(2, minmax(150px, 200px)) minmax(160px, 240px) auto;
+}
+
+/* Las dos partes del reporte, como pestañas: la actual subrayada con el color principal */
+.reporte-pestanas {
+  display: flex;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-5);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.reporte-pestana {
+  padding: var(--espacio-2) var(--espacio-3);
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+}
+
+.reporte-pestana:hover {
+  color: var(--color-texto);
+}
+
+.reporte-pestana.activa {
+  border-bottom-color: var(--color-primario);
+  color: var(--color-texto-brillante);
+  font-weight: 600;
+}
+
+/* El mes que se muestra abajo, marcado en la tabla de los meses */
+.reporte-fila-actual td {
+  background-color: var(--color-primario-suave);
+}
+
+/* El total del período, al pie, separado y en negrita */
+.reporte-fila-total th,
+.reporte-fila-total td {
+  border-top: 1px solid var(--color-borde-fuerte);
+  font-weight: 700;
+  color: var(--color-texto-brillante);
+}
+
+.reporte-fila-total th {
+  /* Sin las versalitas de los títulos de las columnas: es un total, no un encabezado */
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  text-align: left;
+}
+
+/* Un título sin explicación debajo, pegado a su tabla: un poco de aire */
+.reporte-subtitulo + .tabla-admin-contenedor {
+  margin-top: var(--espacio-3);
+}
+
+@media (max-width: 600px) {
+  .reporte-filtros,
+  .reporte-filtros-con-sala {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Paginado numerado, como el wireframe: un cuadrado por página */
@@ -6254,25 +6677,33 @@ dd {
     padding: var(--espacio-6) var(--espacio-4) var(--espacio-12);
   }
 
+  /* Las secciones en una sola fila que se desliza de costado. Partidas en varios renglones el
+     menú ocupaba unos 420 px y el contenido empezaba recién en la segunda pantalla, y los nombres
+     de los grupos caían a veces solos y a veces junto a sus secciones (F-02) */
   .panel-menu-lista {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    /* Que se vea que la fila sigue: la última sección asoma cortada contra el borde */
+    margin-right: calc(-1 * var(--espacio-4));
+    padding-right: var(--espacio-4);
   }
 
-  /* El grupo sigue en la fila: su nombre y sus secciones al lado, sin la sangría */
-  .panel-menu-grupo {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+  .panel-menu-enlace {
+    white-space: nowrap;
   }
 
+  /* Los grupos se disuelven en la fila: sus secciones («Mis funciones», «Reportes»…) se entienden
+     solas. El nombre del grupo sigue nombrando su lista para los lectores de pantalla, que leen
+     aria-labelledby aunque el elemento esté oculto */
+  .panel-menu-grupo,
   .panel-menu-grupo .panel-menu-lista {
-    padding-left: 0;
+    display: contents;
   }
 
   .panel-menu-subtitulo {
-    padding: var(--espacio-2) var(--espacio-1) var(--espacio-2) var(--espacio-3);
-    color: var(--color-texto-apagado);
+    display: none;
   }
 
   .panel-filtros {
@@ -6331,7 +6762,7 @@ a.tabla-admin-principal:focus-visible {
 
 /* --------------------------------------------------------------------------
    24. BANDEJA DE SOLICITUDES DE SALA (IC-112 / IC-246)
-   Componentes de programacion/administracion_solicitudes.html.twig: como el wireframe
+   Componentes de moderacion/administracion_solicitudes.html.twig: como el wireframe
    moderacion-solicitudes, la lista a la izquierda y la elegida a la derecha
    -------------------------------------------------------------------------- */
 
@@ -6571,6 +7002,37 @@ a.tabla-admin-principal:focus-visible {
   min-width: 0;
 }
 
+/* Las salas suspendidas por denuncia, abajo de la pestaña «Denuncias» (EF-07.8): cada una con su
+   formulario para levantar la suspensión. */
+.bandeja-seccion {
+  margin-top: var(--espacio-8);
+}
+
+.panel-subtitulo {
+  margin: 0 0 var(--espacio-3);
+  font-size: var(--texto-xl);
+}
+
+.bandeja-levantar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-3);
+}
+
+.bandeja-levantar textarea {
+  width: 100%;
+}
+
+.bandeja-levantar .boton {
+  align-self: flex-start;
+}
+
+/* El formulario de la denuncia: la caja de las categorías separada del detalle. */
+.formulario-denuncia .bandeja-caja {
+  margin-bottom: var(--espacio-4);
+}
+
 .bandeja-caja + .bandeja-caja {
   margin-top: var(--espacio-4);
 }
@@ -6593,7 +7055,9 @@ a.tabla-admin-principal:focus-visible {
 .bandeja-opcion {
   clear: both;
   display: flex;
-  align-items: center;
+  /* El botón a la altura del primer renglón: centrado, en una opción de tres renglones («Pasar a
+     revisión manual…») quedaba a mitad del texto (F-02) */
+  align-items: baseline;
   gap: var(--espacio-2);
   padding: var(--espacio-1) 0;
   cursor: pointer;
@@ -6601,6 +7065,38 @@ a.tabla-admin-principal:focus-visible {
 
 .bandeja-opcion input {
   accent-color: var(--color-primario);
+}
+
+/* Un punto del checklist de requisitos (EF-07.9): el checkbox arriba, junto al nombre, y la
+   aclaración debajo, más apagada */
+.bandeja-requisito {
+  align-items: flex-start;
+}
+
+.bandeja-requisito input {
+  margin-top: 0.2em;
+}
+
+.bandeja-requisito-aclaracion {
+  display: block;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-apagado);
+}
+
+/* Lo que tildó cada moderador (EF-07.9), de solo lectura: un renglón por punto, con ✓ o ✗ */
+.bandeja-checklist {
+  clear: both;
+  list-style: none;
+  margin: 0 0 var(--espacio-3);
+  padding: 0;
+}
+
+.bandeja-checklist-punto.cumple span[aria-hidden] {
+  color: var(--color-exito);
+}
+
+.bandeja-checklist-punto.no-cumple span[aria-hidden] {
+  color: var(--color-error);
 }
 
 /* El error de la resolución, debajo de las opciones */
@@ -6617,6 +7113,44 @@ a.tabla-admin-principal:focus-visible {
 /* Un aviso suelto, fuera de la caja de la lista */
 .bandeja-nota-suelta {
   padding: 0 0 var(--espacio-2);
+}
+
+/* Las suspensiones y los documentos de la documentación de una sala (EF-07.5) */
+.documentacion-lista {
+  margin: 0;
+  padding-left: var(--espacio-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+/* La pestaña «Documentos» de la bandeja (EF-07.5): una tarjeta por renovación */
+.bandeja-documentos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.bandeja-documento {
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-borde-medio);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie);
+}
+
+.bandeja-documento-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-3);
+}
+
+/* Un documento con el vencimiento pasado (EF-07.4): en el color de los errores */
+.bandeja-vencido {
+  color: var(--color-error);
 }
 
 /* El motivo a todo el ancho, debajo de las columnas */
@@ -6796,6 +7330,14 @@ a.tabla-admin-principal:focus-visible {
   width: 100%;
 }
 
+/* En una columna, el lateral (los parámetros de la sala, o los detalles de la función al proponer
+   franjas) va arriba del formulario: abajo quedaba después de «Guardar» y nadie lo veía (F-02) */
+@media (max-width: 991.98px) {
+  .panel-organizador-lateral {
+    order: -1;
+  }
+}
+
 @media (min-width: 992px) {
   .panel-organizador-grid {
     grid-template-columns: 1fr 310px;
@@ -6825,7 +7367,7 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .parametros-sala-titulo {
-  font-family: var(--fuente-mono, monospace);
+  font-family: var(--fuente-codigo);
   font-size: var(--texto-xs);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -7190,6 +7732,12 @@ a.tabla-admin-principal:focus-visible {
   font-weight: 600;
 }
 
+.estado-cuenta-revision {
+  background-color: rgba(240, 166, 59, 0.15);
+  border-color: rgba(240, 166, 59, 0.4);
+  color: var(--color-advertencia);
+}
+
 .estado-cuenta-acuerdo {
   background-color: rgba(240, 166, 59, 0.18);
   border-color: rgba(240, 166, 59, 0.5);
@@ -7225,6 +7773,13 @@ a.tabla-admin-principal:focus-visible {
 
 .contenedor-confirmacion-cancelacion {
   max-width: 680px;
+}
+
+/* Dentro del panel, los formularios angostos (editar sala, cancelar función) arrancan contra la
+   izquierda, donde arrancan las demás pantallas del panel: centrados, el título quedaba a 349 o a
+   489 px en vez de a 316, y saltaba al pasar de una sección a otra (F-02) */
+.panel-contenido :is(.contenedor-formulario-amplio, .contenedor-confirmacion-cancelacion) {
+  margin-left: 0;
 }
 
 .tarjeta-resumen-cancelacion {
@@ -7442,6 +7997,11 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .ficha-recuadro {
+  /* El dato abajo de todo: si un rótulo parte en dos renglones («Duración total» en el celular),
+     los valores de una misma fila siguen a la misma altura (F-02) */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   padding: var(--espacio-4);
   background: var(--color-superficie);
   border: 1px solid var(--color-borde-medio);
@@ -7500,10 +8060,32 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto);
 }
 
-/* En tablet y celular, una columna: la reserva baja después del detalle */
+/* En tablet y celular, una columna. La reserva va después de las obras y los cuatro recuadros, y
+   antes de «La sala»: al final de todo, la acción principal de la página quedaba casi al pie
+   (F-02). El detalle se disuelve en la grilla para poder ordenar sus secciones con la reserva */
 @media (max-width: 900px) {
   .ficha-detalle-con-lateral {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ficha-detalle-con-lateral .ficha-detalle-principal {
+    display: contents;
+  }
+
+  .ficha-detalle-con-lateral .ficha-seccion-obras {
+    order: 1;
+  }
+
+  .ficha-detalle-con-lateral .ficha-recuadros {
+    order: 2;
+  }
+
+  .ficha-detalle-con-lateral .ficha-detalle-lateral {
+    order: 3;
+  }
+
+  .ficha-detalle-con-lateral .ficha-seccion-sala {
+    order: 4;
   }
 
   .ficha-recuadros {
@@ -7581,6 +8163,33 @@ a.tabla-admin-principal:focus-visible {
   background-color: var(--color-primario);
   border-color: var(--color-primario);
   color: var(--color-texto-inverso);
+}
+
+/*
+ * En el celular, los tres pasos con nombre no entran (llegaban a 464 px en 360): la línea entre
+ * pasos se acorta y sólo se ve el nombre del actual. Los otros quedan para el lector de pantalla,
+ * que igual los lee en orden, y el número dice dónde está cada uno.
+ */
+@media (max-width: 480px) {
+  .pasos-reserva {
+    gap: var(--espacio-2);
+  }
+
+  .paso-reserva + .paso-reserva::before {
+    width: 1rem;
+  }
+
+  .paso-reserva:not(.paso-actual) .paso-reserva-nombre {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
 }
 
 .formulario-reserva .grupo-campo {
@@ -7698,7 +8307,9 @@ a.tabla-admin-principal:focus-visible {
 
 .mi-cuenta-desde {
   margin: var(--espacio-1) 0 0;
-  font-size: var(--texto-sm);
+  /* «Desde noviembre de 2026» en un renglón: partido, la tarjeta de «Mis datos» crecía (F-02) */
+  font-size: var(--texto-xs);
+  white-space: nowrap;
   color: var(--color-texto-secundario);
 }
 
@@ -7794,6 +8405,34 @@ a.tabla-admin-principal:focus-visible {
   }
 }
 
+.aviso-verificacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+  margin-block: var(--espacio-4);
+}
+
+.ficha-reserva-formulario.aviso-verificacion {
+  margin-block: 0;
+}
+
+.formulario-reenviar-verificacion {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.mi-cuenta-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-6);
+}
+
+.mi-cuenta-formulario {
+  max-width: 32rem;
+  margin-top: var(--espacio-4);
+}
+
 /* El comprobante en papel (E4-04.2): sólo el código y los datos de la reserva, en negro sobre
    blanco y sin el resto del sitio, para que entre en una hoja y se lea en la puerta */
 @media print {
@@ -7878,6 +8517,8 @@ a.tabla-admin-principal:focus-visible {
 
 /* Año en cabecera de tarjeta de obra */
 .tarjeta-obra-anio {
+  /* Contra el borde derecho de la cabecera, haya o no un estado al lado del tipo */
+  margin-left: auto;
   font-family: var(--fuente-cuerpo);
   font-size: var(--texto-sm);
   font-weight: 600;
@@ -7911,8 +8552,10 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .baja-ayuda-bloqueo {
+  margin: 0;
+  padding: var(--espacio-2) 0 0;
   font-size: var(--texto-xs);
-  color: var(--color-texto-apagado);
+  color: var(--color-texto-secundario);
   text-align: center;
   display: block;
 }
@@ -8052,6 +8695,23 @@ a.tabla-admin-principal:focus-visible {
   margin-top: var(--espacio-4);
 }
 
+/* «Denunciar» en las fichas y en los comentarios (EF-07.8): discreto, pero subrayado para que se
+   lea como un link. */
+.ficha-denunciar {
+  margin-top: var(--espacio-4);
+}
+
+.enlace-denunciar {
+  color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+  text-decoration: underline;
+}
+
+.enlace-denunciar:hover,
+.enlace-denunciar:focus-visible {
+  color: inherit;
+}
+
 @media (max-width: 768px) {
   .ficha-obra-cabecera {
     grid-template-columns: 1fr;
@@ -8109,6 +8769,14 @@ a.tabla-admin-principal:focus-visible {
     grid-template-columns: 1fr 1fr;
     /* Separación entre columnas */
     gap: var(--espacio-6);
+  }
+}
+
+/* Hasta 1024 px el encabezado ocupa varios renglones (el buscador y el menú bajan): pegado arriba
+   taparía buena parte de la pantalla, así que se va con la página. Fijo, sólo en escritorio */
+@media (max-width: 1024px) {
+  .encabezado {
+    position: relative;
   }
 }
 
@@ -8441,8 +9109,16 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .panel-reservas-codigo {
-  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-family: var(--fuente-codigo);
   letter-spacing: 0.08em;
+  /* En un renglón: partido en «UU3H-» y «HVJW» no se lee como un código (IC-661) */
+  white-space: nowrap;
+}
+
+/* La fecha de cada reserva en un renglón: partida en «Mar 24 / nov · / 20:00» quedaba apretada.
+   Si no entra, la tabla se desplaza dentro de su caja (IC-661) */
+.mis-reservas-fecha {
+  white-space: nowrap;
 }
 
 /* --------------------------------------------------------------------------
@@ -8944,4 +9620,672 @@ a.tabla-admin-principal:focus-visible {
   .carrusel-miniatura {
     transition: none;
   }
+}
+
+/* ── Calificar una función (EF-04.2) ──────────────────────────────────────────────────────────
+   Los cinco puntajes, uno por renglón: la estrella sola no dice qué significa, así que va con el
+   número y la palabra. */
+.calificacion-puntajes {
+  border: none;
+  margin: 0 0 var(--espacio-5);
+  padding: 0;
+}
+
+.calificacion-opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-2) 0;
+  cursor: pointer;
+}
+
+.calificacion-opcion input {
+  accent-color: var(--color-primario);
+}
+
+.calificacion-estrellas {
+  color: var(--color-primario);
+  letter-spacing: 0.1em;
+}
+
+.calificacion-puntajes.con-error .calificacion-opcion {
+  color: var(--color-error);
+}
+
+/* ── Calificaciones en las fichas de la sala y de la obra (EF-04.3) ───────────────────────── */
+.calificacion-promedio {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin: var(--espacio-2) 0 0;
+}
+
+.calificacion-cantidad,
+.calificacion-item-fecha {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+/* La sección, separada de lo que tenga arriba: en la ficha de la obra quedaba pegada a las
+   tarjetas de las próximas funciones (F-02) */
+.calificaciones-ultimas {
+  margin-top: var(--espacio-10);
+}
+
+/* En tarjetas, de a varias por fila: tres en la ficha de la obra, dos en la columna de la sala */
+.calificaciones-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--espacio-3);
+}
+
+.calificacion-item {
+  display: flex;
+  flex-direction: column;
+  padding: var(--espacio-3) var(--espacio-4);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* «Denunciar el comentario», al pie de la tarjeta */
+.calificacion-item-denunciar {
+  margin: auto 0 0;
+  padding-top: var(--espacio-2);
+}
+
+/* Las que no entran a la vista, detrás de «Ver N más» */
+.calificaciones-mas {
+  margin-top: var(--espacio-3);
+}
+
+.calificaciones-mas > .calificaciones-lista {
+  margin-top: var(--espacio-3);
+}
+
+.calificaciones-mas-boton {
+  display: inline-block;
+  padding: var(--espacio-2) var(--espacio-4);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie-elevada);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto);
+  cursor: pointer;
+  list-style: none;
+}
+
+.calificaciones-mas-boton::-webkit-details-marker {
+  display: none;
+}
+
+.calificaciones-mas-boton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Abierta, el botón ya no hace falta: las demás quedan a la vista */
+.calificaciones-mas[open] > .calificaciones-mas-boton {
+  display: none;
+}
+
+.calificacion-item-cabecera {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin: 0;
+}
+
+.calificacion-item-comentario {
+  margin: var(--espacio-2) 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* Lo que calificó el espectador, en «Mis reservas» (EF-04.5): las estrellas y el comentario,
+   que puede ser largo, cortado en dos líneas. */
+.mis-reservas-calificacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  margin: 0;
+  max-width: 18rem;
+}
+
+.mis-reservas-comentario {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   PEDIDOS DE TÍTULOS: EL RANKING (EF-11.2, IC-660)
+   Para plantillas/programacion/pedidos.html.twig. Antes no tenía estilos: era una lista numerada
+   suelta, con los números colgando fuera de la columna y los pedidos pegados entre sí.
+   -------------------------------------------------------------------------- */
+
+/* La lista, sin viñetas: el puesto lo escribe la plantilla dentro de cada tarjeta */
+.ranking-pedidos {
+  list-style: none;
+  margin: var(--espacio-4) 0 var(--espacio-8);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+/* Cada pedido, una tarjeta en fila: puesto, título, avance y acción */
+.ranking-pedido-item {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) minmax(12rem, 16rem) auto;
+  align-items: center;
+  gap: var(--espacio-4);
+  padding: var(--espacio-4) var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* El que ya llegó al umbral se distingue: ya lo pueden tomar las salas */
+.ranking-pedido-item.activo {
+  border-color: var(--color-primario);
+}
+
+/* El puesto en el ranking, grande y apagado, como una referencia y no como el dato principal */
+.ranking-pedido-puesto {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-2xl);
+  font-weight: 700;
+  color: var(--color-texto-apagado);
+  text-align: center;
+}
+
+/* El título, más chico que el h3 general: son muchos en una página */
+.ranking-pedido-item .pedido-titulo {
+  margin: 0;
+  font-size: var(--texto-lg);
+  line-height: 1.2;
+}
+
+/* El año, secundario al título */
+.pedido-anio {
+  font-weight: 400;
+  color: var(--color-texto-secundario);
+}
+
+/* La dirección, debajo del título */
+.ranking-pedido-item .pedido-meta {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* El avance: la barra (o «Activo») y cuántas adhesiones tiene */
+.ranking-pedido-avance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-1);
+}
+
+.pedido-avance-texto {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* La barra es un <progress>: la CSP no deja fijar el ancho de un div con un estilo en línea */
+.pedido-progreso {
+  width: 100%;
+  height: 0.5rem;
+  appearance: none;
+  border: none;
+  border-radius: var(--radio-full);
+  background-color: var(--color-superficie-elevada);
+  overflow: hidden;
+}
+
+.pedido-progreso::-webkit-progress-bar {
+  border-radius: var(--radio-full);
+  background-color: var(--color-superficie-elevada);
+}
+
+.pedido-progreso::-webkit-progress-value {
+  border-radius: var(--radio-full);
+  background-color: var(--color-primario);
+}
+
+.pedido-progreso::-moz-progress-bar {
+  border-radius: var(--radio-full);
+  background-color: var(--color-primario);
+}
+
+/* La acción, a la derecha */
+.ranking-pedido-accion {
+  justify-self: end;
+}
+
+.ranking-pedido-accion form {
+  margin: 0;
+}
+
+/* En tableta y celular: el puesto a la izquierda y lo demás apilado a su derecha */
+@media (max-width: 720px) {
+  .ranking-pedido-item {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: var(--espacio-2) var(--espacio-3);
+    padding: var(--espacio-3) var(--espacio-4);
+  }
+
+  .ranking-pedido-puesto {
+    grid-row: span 3;
+    align-self: start;
+    font-size: var(--texto-xl);
+  }
+
+  .ranking-pedido-avance,
+  .ranking-pedido-accion {
+    grid-column: 2;
+  }
+
+  .ranking-pedido-accion {
+    justify-self: start;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   PEDIDOS PARA PROGRAMAR: LA TARJETA DEL ORGANIZADOR (F-02)
+   Para plantillas/programacion/pedidos_organizador.html.twig. Tiene su propia tarjeta: la del
+   ranking público reserva una columna de 3rem para el puesto, y acá no hay puesto.
+   -------------------------------------------------------------------------- */
+
+.lista-pedidos-organizador {
+  list-style: none;
+  margin: var(--espacio-4) 0 var(--espacio-8);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+/* Los datos a la izquierda y las acciones a la derecha, en una columna de ancho fijo para que
+   las de todos los pedidos queden alineadas */
+.pedido-organizador {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+  align-items: start;
+  gap: var(--espacio-4) var(--espacio-6);
+  padding: var(--espacio-4) var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.pedido-organizador .pedido-titulo {
+  margin: 0;
+  font-size: var(--texto-lg);
+  line-height: 1.2;
+}
+
+.pedido-organizador .pedido-meta {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* «Cargar obra» arriba y, debajo, la otra manera: elegir una obra ya cargada */
+.pedido-organizador-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--espacio-3);
+}
+
+.pedido-organizador-tomar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  margin: 0;
+}
+
+/* El desplegable se queda con el ancho que sobra y el botón, a su lado, con el mismo alto */
+.pedido-organizador-tomar-fila {
+  display: flex;
+  align-items: stretch;
+  gap: var(--espacio-2);
+}
+
+.pedido-organizador-tomar-fila .campo-control {
+  flex: 1;
+  min-width: 0;
+}
+
+/* En el celular, todo apilado y a lo ancho */
+@media (max-width: 720px) {
+  .pedido-organizador {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--espacio-3) var(--espacio-4);
+  }
+
+  .pedido-organizador-tomar-fila {
+    flex-direction: column;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   REPARTO: EL FORMULARIO (F-02)
+   Para plantillas/recaudacion/administracion_reparto.html.twig: los tres porcentajes en una fila y
+   la fecha con el ancho de una fecha.
+   -------------------------------------------------------------------------- */
+.reparto-porcentajes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0 var(--espacio-5);
+  align-items: start;
+}
+
+.reparto-vigencia {
+  max-width: 24rem;
+}
+
+/* --------------------------------------------------------------------------
+   BENEFICIOS: LOS COMERCIOS ASOCIADOS (EF-17.3)
+   La página pública (plantillas/recaudacion/beneficios.html.twig) y el formulario del
+   administrador (parciales/campos_comercio.html.twig).
+   -------------------------------------------------------------------------- */
+
+.beneficios-localidad + .beneficios-localidad {
+  margin-top: var(--espacio-8);
+}
+
+.beneficios-localidad-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin: 0 0 var(--espacio-4);
+  font-size: var(--texto-lg);
+}
+
+/* Tarjetas de a varias por fila */
+.beneficios-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: var(--espacio-4);
+}
+
+.beneficio {
+  padding: var(--espacio-4) var(--espacio-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.beneficio-nombre {
+  margin: 0;
+  font-size: var(--texto-md);
+}
+
+/* El beneficio, lo que importa, en el color principal */
+.beneficio-texto {
+  margin: var(--espacio-2) 0;
+  color: var(--color-primario);
+  font-weight: 600;
+}
+
+.beneficio-direccion {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* Nombre y localidad en una fila; dirección y beneficio, a lo ancho */
+.comercio-campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--espacio-5);
+  max-width: 48rem;
+}
+
+.comercio-campos > :nth-child(n + 3) {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 720px) {
+  .comercio-campos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   PUNTOS Y CUPONES (EF-17.1)
+   «Mis puntos» (plantillas/recaudacion/puntos.html.twig) y el campo del cupón en la reserva
+   (parciales/campo_cupon.html.twig).
+   -------------------------------------------------------------------------- */
+
+/* El saldo con la barra hasta el próximo cupón, y el botón para canjearlo al lado */
+.puntos-saldo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--espacio-4);
+  margin: var(--espacio-6) 0 var(--espacio-2);
+  padding: var(--espacio-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.puntos-saldo form {
+  margin: 0;
+}
+
+.puntos-saldo-rotulo {
+  margin: 0;
+  font-family: var(--fuente-codigo);
+  font-size: var(--texto-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+.puntos-saldo-valor {
+  margin: var(--espacio-1) 0 var(--espacio-2);
+  font-size: var(--texto-3xl);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-texto-brillante);
+}
+
+.puntos-saldo-valor span {
+  font-size: var(--texto-md);
+  font-weight: 400;
+  color: var(--color-texto-secundario);
+}
+
+.puntos-barra {
+  width: 16rem;
+  max-width: 100%;
+  height: 0.5rem;
+  accent-color: var(--color-primario);
+}
+
+.puntos-saldo-nota {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.puntos-cupones,
+.puntos-movimientos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+/* Cada cupón: el código grande para dictarlo, los datos y el estado a la derecha */
+.puntos-cupon {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-4);
+  padding: var(--espacio-3) var(--espacio-4);
+  border: 1px dashed var(--color-borde-medio);
+  border-radius: var(--radio-md);
+}
+
+.puntos-cupon-disponible {
+  border-color: var(--color-primario);
+}
+
+.puntos-cupon-codigo {
+  font-family: var(--fuente-codigo);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-texto-brillante);
+}
+
+.puntos-cupon-datos {
+  flex: 1;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+.puntos-cupon-usado .puntos-cupon-codigo,
+.puntos-cupon-vencido .puntos-cupon-codigo {
+  color: var(--color-texto-apagado);
+  text-decoration: line-through;
+}
+
+.puntos-movimiento {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--espacio-3);
+  padding: var(--espacio-2) 0;
+  border-bottom: 1px solid var(--color-borde);
+  font-size: var(--texto-sm);
+}
+
+.puntos-movimiento-fecha {
+  color: var(--color-texto-secundario);
+}
+
+.puntos-movimiento-puntos {
+  font-weight: 700;
+  color: var(--color-exito, var(--color-primario));
+}
+
+.puntos-movimiento-resta {
+  color: var(--color-texto-secundario);
+}
+
+/* «¿Tenés un cupón de descuento?»: cerrado, una línea más en la reserva */
+.reserva-cupon {
+  margin: var(--espacio-1) 0 var(--espacio-3);
+}
+
+.reserva-cupon-titulo {
+  cursor: pointer;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.reserva-cupon[open] > .reserva-cupon-titulo {
+  margin-bottom: var(--espacio-2);
+}
+
+.comprobante-cupon {
+  font-size: var(--texto-sm);
+  font-weight: 400;
+  color: var(--color-texto-secundario);
+}
+
+/* --------------------------------------------------------------------------
+   SEGUIR SALAS Y ORGANIZADORES (EF-15.4)
+   Los botones de la ficha de la sala (plantillas/programacion/sala.html.twig) y «Lo que seguís»
+   en Mi cuenta (plantillas/cuentas/mi_cuenta.html.twig).
+   -------------------------------------------------------------------------- */
+
+/* «Seguir la sala», «Seguir a quien la organiza» y «Denunciar», en una fila bajo el nombre */
+.ficha-sala-seguir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-2) var(--espacio-3);
+  margin-top: var(--espacio-4);
+}
+
+.ficha-sala-seguir .ficha-denunciar {
+  margin: 0 0 0 var(--espacio-2);
+}
+
+.seguir-formulario {
+  margin: 0;
+}
+
+/* Siguiendo: con el color principal, para que se distinga de «Seguir» */
+.seguir-boton-activo {
+  border-color: var(--color-primario);
+  color: var(--color-primario);
+}
+
+.mi-cuenta-vacio {
+  color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.seguidos-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+/* Cada seguido: el nombre y qué es a la izquierda, «Dejar de seguir» a la derecha */
+.seguido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  padding: var(--espacio-3) var(--espacio-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.seguido-datos {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.seguido-nombre {
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.seguido-detalle {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+.seguido-formulario {
+  margin: 0;
+  flex-shrink: 0;
 }

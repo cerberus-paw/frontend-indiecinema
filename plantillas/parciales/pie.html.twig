@@ -8,6 +8,8 @@
 {% set usr = usuario ?? null %}
 {# El administrador no usa el sitio público: su pie lleva sólo la marca, su panel y los créditos #}
 {% set es_admin = usr and usr.alcanza('administrador') %}
+{# Lo del organizador, sólo para el organizador: el moderador lo alcanza pero no lo usa (IC-662) #}
+{% set es_organizador = usr and usr.alcanza('organizador') and not usr.alcanza('moderador') %}
 {# Elemento semántico footer que engloba el pie de página de la aplicación #}
 <footer class="pie-pagina">
   {# Contenedor con ancho delimitado y padding horizontal para centrar el contenido #}
@@ -37,7 +39,8 @@
       <h2 class="pie-subtitulo">Administración</h2>
       <ul class="pie-enlaces">
         <li><a href="/cuenta/administracion/usuarios">Usuarios y roles</a></li>
-        <li><a href="/administracion/solicitudes">Solicitudes de sala</a></li>
+        <li><a href="/recaudacion/reportes">Reportes</a></li>
+        <li><a href="/moderacion/solicitudes">Solicitudes de sala</a></li>
       </ul>
     </div>
     {% else %}
@@ -69,13 +72,20 @@
           {% if not usr.alcanza('organizador') %}
             <li><a href="/solicitar-sala">Abrir una sala</a></li>
           {% endif %}
-          {% if usr.alcanza('organizador') %}
+          {% if es_organizador %}
             <li><a href="/organizador/salas">Mis salas</a></li>
             <li><a href="/organizador/obras">Mis obras</a></li>
             <li><a href="/organizador/obras/nueva">Cargar obra</a></li>
             <li><a href="/organizador/funciones">Mis funciones</a></li>
             <li><a href="/organizador/funciones/nueva">Programar una función</a></li>
+            <li><a href="/recaudacion/reportes">Reportes</a></li>
             <li><a href="/solicitar-sala">Publicar una sala</a></li>
+          {% endif %}
+          {% if usr.alcanza('moderador') %}
+            <li><a href="/moderacion/solicitudes">Solicitudes de sala</a></li>
+            <li><a href="/moderacion/documentos">Documentos</a></li>
+            <li><a href="/moderacion/obras">Obras</a></li>
+            <li><a href="/moderacion/denuncias">Denuncias</a></li>
           {% endif %}
         {% else %}
           <li><a href="/cuenta/ingresar">Ingresar</a></li>
@@ -92,7 +102,9 @@
       <ul class="pie-enlaces">
         {# Las secciones de «Acerca de IndieCinema» #}
         <li><a href="/acerca-de#quienes-somos">Quiénes somos</a></li>
-        <li><a href="/acerca-de#como-funciona">Cómo funciona</a></li>
+        <li><a href="/como-funciona">Cómo funciona</a></li>
+        {# Los comercios asociados (EF-17.3) #}
+        <li><a href="/recaudacion/beneficios">Beneficios</a></li>
       </ul>
     </div>
     {% endif %}

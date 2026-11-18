@@ -1,0 +1,76 @@
+{#
+  La pestaña «Documentos» de la bandeja de moderación, en /moderacion/documentos (EF-07.5): las
+  renovaciones del seguro o de la habilitación que suben los organizadores desde la documentación
+  de su sala, de la más vieja a la más nueva. Cada una se acepta o se rechaza con un motivo, que le
+  llega al organizador por correo; aceptarla vuelve a publicar la sala si estaba suspendida sólo
+  por ese papel. Sin checklist: eso es de las solicitudes.
+
+  Variables:
+  - documentos: lista de {id, nombre (Seguro o Habilitación), sala, vence, vencido, subido, url,
+    valores {resolucion, motivo} y errores (los del que volvió con errores)}.
+  - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
+  - mensaje_exito: lo que se acaba de hacer (opcional).
+#}
+{% extends 'administracion.html.twig' %}
+
+{% block titulo %}Documentos para revisar{% endblock %}
+
+{% block seccion %}documentos{% endblock %}
+
+{% block panel %}
+<header class="panel-cabecera bandeja-cabecera">
+  <div>
+    <h1 class="panel-titulo">Documentos para revisar</h1>
+    <p class="panel-bajada">El seguro o la habilitación nuevos de salas que ya están en el sitio. Resolvé con un motivo: le llega al organizador.</p>
+  </div>
+</header>
+
+{% if mensaje_exito is defined %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
+{% endif %}
+
+{% if documentos is empty %}
+  <p class="bandeja-nota bandeja-nota-suelta">No hay documentos esperando revisión.</p>
+{% else %}
+  <ul class="bandeja-documentos">
+    {% for documento in documentos %}
+      <li class="bandeja-documento" id="documento-{{ documento.id }}">
+        <h2 class="bandeja-subtitulo">{{ documento.nombre }} de «{{ documento.sala }}»</h2>
+        <p class="bandeja-detalle-datos">
+          <a href="{{ documento.url }}" download>Bajar el PDF</a>
+          · {% if documento.vencido %}<strong class="bandeja-vencido">Venció el {{ documento.vence }}</strong>{% else %}vence el {{ documento.vence }}{% endif %}
+          · subido el {{ documento.subido }}
+        </p>
+        <form action="{{ prefijo }}/documentos/{{ documento.id }}/resolver" method="post" class="bandeja-documento-formulario">
+          <input type="hidden" name="_csrf" value="{{ csrf }}">
+          <fieldset id="resolucion-{{ documento.id }}" class="bandeja-caja{% if documento.errores.resolucion is defined %} con-error{% endif %}">
+            <legend class="bandeja-caja-titulo">Resolución</legend>
+            {% for valor, texto in { aceptar: 'Aceptarlo', rechazar: 'Rechazarlo' } %}
+              <label class="bandeja-opcion">
+                <input type="radio" name="resolucion" value="{{ valor }}" required{% if (documento.valores.resolucion ?? '') == valor %} checked{% endif %}>
+                {{ texto }}
+              </label>
+            {% endfor %}
+            {% if documento.errores.resolucion is defined %}
+              <span class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ documento.errores.resolucion }}</span>
+            {% endif %}
+          </fieldset>
+          {# A mano y no con parciales/campo: hay un formulario por documento, y cada campo necesita su propio id #}
+          <div class="grupo-campo{% if documento.errores.motivo is defined %} con-error{% endif %}">
+            <label for="motivo-{{ documento.id }}" class="campo-etiqueta">Motivo</label>
+            <textarea id="motivo-{{ documento.id }}" name="motivo" rows="2" maxlength="{{ maximo_motivo }}" required class="campo-control"
+              aria-describedby="{{ documento.errores.motivo is defined ? 'error-motivo-' : 'ayuda-motivo-' }}{{ documento.id }}"
+              {% if documento.errores.motivo is defined %}aria-invalid="true"{% endif %}>{{ documento.valores.motivo ?? '' }}</textarea>
+            {% if documento.errores.motivo is defined %}
+              <span id="error-motivo-{{ documento.id }}" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ documento.errores.motivo }}</span>
+            {% else %}
+              <span id="ayuda-motivo-{{ documento.id }}" class="campo-ayuda">Le llega al organizador por correo.</span>
+            {% endif %}
+          </div>
+          <button type="submit" class="boton boton-primario boton-chico">Enviar resolución</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

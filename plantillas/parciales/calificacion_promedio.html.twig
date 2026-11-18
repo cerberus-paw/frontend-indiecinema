@@ -1,0 +1,16 @@
+{#
+  El promedio de las calificaciones de una sala o de una obra (EF-04.3), como el wireframe
+  «sala-indie»: las estrellas, el número y cuántas son. Las estrellas son decoración: el lector de
+  pantalla lee «4,7 de 5, 82 calificaciones».
+
+  Parámetros recibidos:
+  - promedio: (float|null) de 1 a 5, con un decimal; null si todavía no la calificó nadie.
+  - cantidad: (int) cuántas calificaciones.
+#}
+{% if promedio is not null %}
+  <p class="calificacion-promedio">
+    <span class="calificacion-estrellas" aria-hidden="true">{% for estrella in 1..5 %}{{ estrella <= promedio|round ? '★' : '☆' }}{% endfor %}</span>
+    <strong>{{ promedio|number_format(1, ',') }}</strong><span class="sr-only"> de 5,</span>
+    <span class="calificacion-cantidad">({{ cantidad }} {{ cantidad == 1 ? 'calificación' : 'calificaciones' }})</span>
+  </p>
+{% endif %}

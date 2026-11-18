@@ -1,0 +1,88 @@
+{#
+  «Comercios» del administrador, en /recaudacion/administracion/comercios (EF-17.3 / IC-598): el
+  alta arriba y la tabla con todos abajo, como las otras pantallas del administrador. La baja no
+  borra: deja el comercio inactivo, que no sale en /recaudacion/beneficios, y se puede reactivar.
+
+  Variables:
+  - comercios: lista de {id, nombre, beneficio, direccion, localidad, activo}, primero los activos.
+  - valores, errores: los del formulario del alta.
+  - guardado, cambiado: (bool) avisos después de guardar o de dar de baja o reactivar.
+#}
+{% extends 'administracion.html.twig' %}
+
+{% block titulo %}Comercios{% endblock %}
+
+{% block seccion %}comercios{% endblock %}
+
+{% block panel %}
+<header class="panel-cabecera">
+  <h1 class="panel-titulo">Comercios</h1>
+  <p class="panel-bajada">Los comercios asociados y su beneficio para los espectadores. Los activos se ven en <a href="/recaudacion/beneficios">Beneficios</a>.</p>
+</header>
+
+{% if guardado %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Guardamos el comercio.' } only %}
+{% endif %}
+{% if cambiado %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Listo: el cambio ya se ve en Beneficios.' } only %}
+{% endif %}
+
+<section class="reporte-seccion" aria-labelledby="titulo-alta-comercio">
+  <h2 id="titulo-alta-comercio" class="reporte-subtitulo">Sumar un comercio</h2>
+  <form action="/recaudacion/administracion/comercios" method="POST" class="formulario-sala formulario-comercio">
+    <input type="hidden" name="_csrf" value="{{ csrf }}">
+    {% include 'parciales/campos_comercio.html.twig' with { valores: valores, errores: errores } only %}
+    {% include 'parciales/boton.html.twig' with { texto: 'Sumar el comercio', tipo: 'submit', variante: 'primario' } only %}
+  </form>
+</section>
+
+<section class="reporte-seccion" aria-labelledby="titulo-comercios">
+  <h2 id="titulo-comercios" class="reporte-subtitulo">Comercios cargados</h2>
+  {% if comercios is empty %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Todavía no hay ninguno.' } only %}
+  {% else %}
+    <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="titulo-comercios">
+      <table class="tabla-admin">
+        <thead>
+          <tr>
+            <th scope="col">Comercio</th>
+            <th scope="col">Beneficio</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for comercio in comercios %}
+            <tr>
+              <td>
+                <span class="tabla-admin-principal">{{ comercio.nombre }}</span>
+                <span class="tabla-admin-secundario">{{ comercio.direccion }} · {{ comercio.localidad }}</span>
+              </td>
+              <td><span class="tabla-admin-texto">{{ comercio.beneficio }}</span></td>
+              <td>
+                <span class="estado-cuenta{{ comercio.activo ? ' estado-cuenta-activa' : '' }}">{{ comercio.activo ? 'Activo' : 'De baja' }}</span>
+              </td>
+              <td class="tabla-admin-acciones">
+                <div class="tabla-admin-acciones-grupo">
+                  <a href="/recaudacion/administracion/comercios/{{ comercio.id }}" class="boton boton-secundario boton-chico" aria-label="Editar {{ comercio.nombre }}">Editar</a>
+                  <form action="/recaudacion/administracion/comercios/{{ comercio.id }}/activo" method="POST" class="formulario-accion-tabla">
+                    <input type="hidden" name="_csrf" value="{{ csrf }}">
+                    <input type="hidden" name="activo" value="{{ comercio.activo ? '0' : '1' }}">
+                    {% include 'parciales/boton.html.twig' with {
+                      texto: comercio.activo ? 'Dar de baja' : 'Reactivar',
+                      tipo: 'submit',
+                      variante: 'secundario',
+                      tamano: 'chico',
+                      aria_label: (comercio.activo ? 'Dar de baja ' : 'Reactivar ') ~ comercio.nombre
+                    } only %}
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

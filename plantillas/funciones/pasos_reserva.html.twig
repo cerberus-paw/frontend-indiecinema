@@ -1,11 +1,14 @@
 {#
-  Los pasos de la reserva, como el wireframe reserva-pago-comprobante, sin el del pago.
+  Los pasos de la reserva, como el wireframe reserva-pago-comprobante. El del pago sólo está
+  cuando la reserva se cobra con Mercado Pago (X-01); a la gorra, o con el cobro apagado, son dos.
 
   Variables:
-  - actual: (int) 1 (lugares) o 2 (comprobante).
+  - actual: (int) 1 (lugares), 2 (pago, o el comprobante si no hay pago) o 3 (comprobante).
+  - con_pago: (bool, opcional) si se muestra el paso del pago.
 #}
+{% set pasos = con_pago|default(false) ? { 1: 'Lugares', 2: 'Pago', 3: 'Comprobante' } : { 1: 'Lugares', 2: 'Comprobante' } %}
 <ol class="pasos-reserva" aria-label="Pasos de la reserva">
-  {% for numero, nombre in { 1: 'Lugares', 2: 'Comprobante' } %}
+  {% for numero, nombre in pasos %}
     <li class="paso-reserva{% if numero == actual %} paso-actual{% elseif numero < actual %} paso-hecho{% endif %}"{% if numero == actual %} aria-current="step"{% endif %}>
       <span class="paso-reserva-numero" aria-hidden="true">{{ numero }}</span>
       <span class="paso-reserva-nombre">{{ nombre }}</span>

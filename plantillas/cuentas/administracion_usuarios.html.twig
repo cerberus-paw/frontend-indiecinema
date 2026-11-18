@@ -2,23 +2,26 @@
   «Usuarios y roles» del administrador, en /cuenta/administracion/usuarios, como el wireframe de la
   E2 (administracion-usuarios-parametros): la barra lateral de administración, las tarjetas de
   números, el buscador con los filtros de rol, estado y año de alta, la tabla y el paginado
-  numerado. Queda afuera lo que todavía no existe: las tarjetas de funciones y recaudación, las
-  columnas de conducta y funciones, «Acciones» (ver, suspender, dar de baja), exportar, invitar y
-  los parámetros. Los filtros son un formulario GET, así viajan en la URL. Como en el wireframe, no
-  hay «Buscar»: el texto se busca con Enter y los desplegables se aplican al elegir
-  (componentes/enviar-al-elegir.js). Sin JavaScript, «Buscar» vuelve, en el <noscript>.
+  numerado, junto con la columna de conducta desde funciones (EF-13.3). Queda afuera lo que
+  todavía no existe: las tarjetas de funciones y recaudación, la columna de funciones, «Acciones»
+  (ver, suspender, dar de baja), exportar, invitar y los parámetros. Los filtros son un formulario
+  GET, así viajan en la URL. Como en el wireframe, no hay «Buscar»: el texto se busca con Enter y
+  los desplegables se aplican al elegir (componentes/enviar-al-elegir.js). Sin JavaScript,
+  «Buscar» vuelve, en el <noscript>.
 
   El rol de cada fila es un desplegable, como en el wireframe, y la tabla entera es un formulario:
   al elegir otro rol aparece abajo la barra con «Guardar cambios» y «Descartar cambios» (con CSS,
   sin JavaScript), y guardar manda en un POST los de toda la página, con el token CSRF y los
   filtros en campos ocultos, para volver a la misma búsqueda. Junto a cada rol va el que tenía al
-  mostrarse (antes[id]): el servidor cambia sólo el que se tocó. Al moderador y al administrador no
-  se los cambia desde la web: su desplegable está deshabilitado y no se manda.
+  mostrarse (antes[id]): el servidor cambia sólo el que se tocó. Se elige espectador, organizador o
+  moderador (EF-07.3); al administrador no se lo cambia desde la web: su desplegable está
+  deshabilitado y no se manda.
 
   Variables:
   - resumen: {usuarios, nuevos (este mes), organizadores (con la cuenta activa)}, sobre todas las
     cuentas.
-  - usuarios: lista de {id, nombre, correo, rol (el mayor), estado (pendiente, activa o suspendida)}.
+  - usuarios: lista de {id, nombre, correo, rol (el mayor), estado (pendiente, activa o suspendida),
+    conducta ({puntaje, bajo_umbral, negativas, ausencias}|null)}.
   - filtros: los filtros aplicados (q, rol, estado, alta); falta el que no se aplicó.
   - anios_de_alta: los años en que se creó alguna cuenta, del más nuevo al más viejo.
   - avisos: lista de textos, uno por cada filtro inválido que se dejó afuera.
@@ -54,7 +57,7 @@
 <form class="panel-filtros" action="/cuenta/administracion/usuarios" method="get" role="search" aria-label="Buscar usuarios" data-enviar-al-elegir>
   <label class="panel-busqueda">
     <span class="sr-only">Buscar por nombre o correo</span>
-    <span class="panel-busqueda-icono" aria-hidden="true">🔍</span>
+    {% include 'parciales/icono.html.twig' with { nombre: 'lupa', clase: 'panel-busqueda-icono' } only %}
     <input type="search" name="q" value="{{ filtros.q ?? '' }}" placeholder="Buscar por nombre o correo" maxlength="254" class="campo-control">
   </label>
   <label>
@@ -124,12 +127,14 @@
       <thead>
         <tr>
           <th scope="col">Usuario</th>
+          <th scope="col" class="tabla-admin-columna-conducta">Conducta</th>
           <th scope="col" class="tabla-admin-columna-rol">Rol</th>
           <th scope="col" class="tabla-admin-columna-estado">Estado</th>
         </tr>
       </thead>
       <tbody>
         {% for usuario in usuarios %}
+          {% set conducta = usuario.conducta|default(null) %}
           <tr data-usuario="{{ usuario.id }}">
             <td>
               <div class="tabla-admin-usuario">
@@ -141,11 +146,24 @@
               </div>
             </td>
             <td>
-              {% if usuario.rol in ['espectador', 'organizador'] %}
+              {% if conducta is not null %}
+                <span class="tabla-admin-conducta{% if conducta.bajo_umbral %} conducta-bajo-umbral{% endif %}">{{ conducta.puntaje }} pts</span>
+                {% if conducta.negativas > 0 or conducta.ausencias > 0 %}
+                  <span class="tabla-admin-secundario">{{ conducta.negativas }} neg. · {{ conducta.ausencias }} aus.</span>
+                {% elseif conducta.bajo_umbral %}
+                  <span class="tabla-admin-secundario">Bajo umbral</span>
+                {% endif %}
+              {% else %}
+                <span class="tabla-admin-secundario">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if usuario.rol in ['espectador', 'organizador', 'moderador'] %}
                 <input type="hidden" name="antes[{{ usuario.id }}]" value="{{ usuario.rol }}">
                 <select name="roles[{{ usuario.id }}]" class="campo-control control-select" aria-label="Rol de {{ usuario.nombre }}">
                   <option value="espectador"{% if usuario.rol == 'espectador' %} selected{% endif %}>Espectador</option>
                   <option value="organizador"{% if usuario.rol == 'organizador' %} selected{% endif %}>Organizador</option>
+                  <option value="moderador"{% if usuario.rol == 'moderador' %} selected{% endif %}>Moderador</option>
                 </select>
               {% else %}
                 <select class="campo-control control-select tabla-admin-rol-fijo" disabled aria-label="Rol de {{ usuario.nombre }}: no se cambia desde la web" title="Este rol no se cambia desde la web">

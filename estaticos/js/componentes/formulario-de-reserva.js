@@ -183,21 +183,33 @@ class FormularioDeReserva {
    * Reemplaza el formulario por el comprobante, con el código y el enlace a la reserva, y se lleva
    * el foco: quien navega con teclado o lector de pantalla se quedaría en un botón que ya no está.
    *
-   * @param {{reserva: {codigo: string, cantidad: number, total: string}, url: string}} datos
+   * Si la reserva espera el pago (X-01), el aviso no dice «confirmada» ni da el código, que todavía
+   * no sirve en la puerta: lleva al paso «Pago», con el enlace a Mercado Pago.
+   *
+   * @param {{reserva: {codigo: string, cantidad: number, total: string, estado?: string, vence?: ?string}, url: string}} datos
    */
   confirmar(datos) {
     const reserva = datos.reserva ?? {};
     const cantidad = reserva.cantidad ?? 0;
-    const aviso = PAW.nuevoElemento('div', '', { class: 'alerta alerta-exito', role: 'status', tabindex: '-1' });
+    const lugares = `${cantidad} ${cantidad === 1 ? 'lugar' : 'lugares'}`;
+    const pendiente = reserva.estado === 'pendiente_pago';
+    const aviso = PAW.nuevoElemento('div', '', { class: `alerta ${pendiente ? 'alerta-info' : 'alerta-exito'}`, role: 'status', tabindex: '-1' });
     const icono = PAW.nuevoElemento('div', '', { class: 'alerta-icono', 'aria-hidden': 'true' });
-    icono.append(PAW.nuevoElemento('span', '✓', { class: 'icono-simbolo' }));
+    icono.append(PAW.nuevoElemento('span', pendiente ? 'i' : '✓', { class: 'icono-simbolo' }));
     const contenido = PAW.nuevoElemento('div', '', { class: 'alerta-contenido' });
-    contenido.append(
-      PAW.nuevoElemento('strong', 'Reserva confirmada', { class: 'alerta-titulo' }),
-      PAW.nuevoElemento('p', `Reservaste ${cantidad} ${cantidad === 1 ? 'lugar' : 'lugares'} por ${reserva.total ?? ''}. Código ${FormularioDeReserva.codigo(reserva.codigo)}.`, { class: 'alerta-texto' }),
-    );
+    if (pendiente) {
+      contenido.append(
+        PAW.nuevoElemento('strong', 'Falta el pago', { class: 'alerta-titulo' }),
+        PAW.nuevoElemento('p', `Reservaste ${lugares} por ${reserva.total ?? ''}${reserva.vence ? `, hasta las ${reserva.vence}` : ''}. Pagalos con Mercado Pago para confirmar la reserva.`, { class: 'alerta-texto' }),
+      );
+    } else {
+      contenido.append(
+        PAW.nuevoElemento('strong', 'Reserva confirmada', { class: 'alerta-titulo' }),
+        PAW.nuevoElemento('p', `Reservaste ${lugares} por ${reserva.total ?? ''}. Código ${FormularioDeReserva.codigo(reserva.codigo)}.`, { class: 'alerta-texto' }),
+      );
+    }
     if (typeof datos.url === 'string' && datos.url !== '') {
-      contenido.append(PAW.nuevoElemento('a', 'Ver el comprobante', { href: datos.url, class: 'enlace-destacado' }));
+      contenido.append(PAW.nuevoElemento('a', pendiente ? 'Ir a pagar' : 'Ver el comprobante', { href: datos.url, class: 'enlace-destacado' }));
     }
     aviso.append(icono, contenido);
 

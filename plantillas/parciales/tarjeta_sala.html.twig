@@ -8,8 +8,9 @@
 
   Parámetros:
   - sala: id, nombre, localidad, capacidad, imagen (la URL de la foto, o null) y habilitada.
-  - editable: (bool, opcional) en «Mis salas»: muestra si está publicada y el botón para editarla;
-    si no, el botón lleva a la ficha.
+  - editable: (bool, opcional) en «Mis salas»: muestra si está publicada, el botón para editarla y
+    el de su documentación en moderación (EF-07.5), donde está el motivo si está suspendida; si
+    no, el botón lleva a la ficha.
   - compacta: (bool, opcional) horizontal, con la foto chica a la izquierda y la localidad y la
     capacidad en una línea, como en la portada.
 #}
@@ -22,7 +23,7 @@
         <img src="{{ sala.imagen }}" alt="Foto de {{ sala.nombre }}" class="tarjeta-funcion-imagen" loading="lazy">
       {% else %}
         <div class="tarjeta-funcion-afiche-placeholder">
-          <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+          {% include 'parciales/icono.html.twig' with { nombre: 'pelicula', clase: 'afiche-placeholder-icono' } only %}
           <span class="afiche-placeholder-texto">SALA</span>
         </div>
       {% endif %}
@@ -46,11 +47,11 @@
         </p>
       {% else %}
         <p class="tarjeta-funcion-dato">
-          <span class="meta-icono" aria-hidden="true">📍</span>
+          {% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'meta-icono' } only %}
           <span class="meta-texto">{{ sala.localidad ?? '' }}</span>
         </p>
         <p class="tarjeta-funcion-dato">
-          <span class="meta-icono" aria-hidden="true">💺</span>
+          {% include 'parciales/icono.html.twig' with { nombre: 'butaca', clase: 'meta-icono' } only %}
           <span class="meta-texto">{{ sala.capacidad ?? '—' }} butacas</span>
         </p>
       {% endif %}
@@ -61,6 +62,13 @@
           texto: 'Editar',
           url: '/organizador/salas/' ~ sala.id ~ '/editar',
           variante: 'secundario',
+          tamano: 'chico',
+          bloque: true
+        } %}
+        {% include 'parciales/boton.html.twig' with {
+          texto: 'Documentación',
+          url: '/moderacion/salas/' ~ sala.id ~ '/documentacion',
+          variante: 'fantasma',
           tamano: 'chico',
           bloque: true
         } %}

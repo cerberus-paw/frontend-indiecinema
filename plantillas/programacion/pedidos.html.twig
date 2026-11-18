@@ -1,0 +1,194 @@
+{#
+  Ranking público de pedidos de títulos ausentes, en /pedidos (EF-11.2 / IC-577).
+  Ordena los pedidos abiertos y activos por cantidad de adhesiones, permite buscar por título o
+  director, paginar resultados y sumarse o dejar de pedirlos manteniendo una única adhesión por
+  espectador. Los pedidos ya tomados salen del ranking y enlazan a la obra en el catálogo.
+
+  Variables:
+  - pedidos: lista de {id, titulo, anio, director, estado, estado_etiqueta, es_activo, adhesiones,
+    umbral, faltan_para_activar, adherido, obra_id, obra_titulo, url_obra}.
+  - tomados: lista de pedidos ya tomados con {id, titulo, anio, director, obra_id, obra_titulo, url_obra}.
+  - filtros: mapa con filtros aplicados ({q}).
+  - filtrada: si hay algún filtro activo.
+  - paginado: {numero, total_paginas, total_pedidos, por_pagina, anterior, siguiente, paginas}.
+  - umbral: umbral configurado para activar un pedido.
+  - por_pagina: tamaño de página del ranking.
+  - hay_sesion: si el visitante inició sesión.
+  - mensaje_exito: confirmación tras sumarse o quitar adhesión, o null.
+  - aviso: advertencia ante regla incumplida, o null.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Pedidos de títulos{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga"><a href="/obras" class="enlace-miga">Películas</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Pedidos de títulos</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Pedidos de títulos</h1>
+      <p class="solicitud-bajada">
+        Los títulos ausentes más pedidos por la comunidad. Al alcanzar {{ umbral }} {{ umbral == 1 ? 'adhesión' : 'adhesiones' }},
+        pasan a estado activo para que las salas puedan programarlos.
+      </p>
+    </div>
+    <div class="filtros-cartelera-acciones">
+      {% include 'parciales/boton.html.twig' with { texto: 'Pedir un título', url: '/pedidos/nuevo', variante: 'primario' } only %}
+    </div>
+  </header>
+
+  {% if mensaje_exito %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'exito',
+      titulo: 'Pedido actualizado',
+      mensaje: mensaje_exito
+    } only %}
+  {% endif %}
+
+  {% if aviso %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'advertencia',
+      titulo: 'Aviso',
+      mensaje: aviso
+    } only %}
+  {% endif %}
+
+  <form class="filtros-cartelera buscador-obras" action="/pedidos" method="get" role="search" aria-label="Buscar pedidos de títulos">
+    {% include 'parciales/campo.html.twig' with {
+      nombre: 'q',
+      etiqueta: 'Buscar',
+      tipo: 'search',
+      valor: filtros.q ?? '',
+      placeholder: 'Título o director'
+    } only %}
+
+    <div class="filtros-cartelera-acciones">
+      {% include 'parciales/boton.html.twig' with { texto: 'Buscar', variante: 'primario' } only %}
+      {% if filtrada ?? false %}
+        {% include 'parciales/boton.html.twig' with { texto: 'Limpiar', url: '/pedidos', variante: 'fantasma' } only %}
+      {% endif %}
+    </div>
+  </form>
+
+  {% if pedidos is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: filtrada ?? false
+        ? 'No hay pedidos que coincidan con la búsqueda. Probá con otro título o director.'
+        : 'Todavía no hay pedidos de títulos pendientes.'
+    } only %}
+  {% else %}
+    <div class="cartelera-resumen cartelera-barra">
+      <p class="cartelera-resultados" role="status">
+        {{ paginado.total_pedidos }} {{ paginado.total_pedidos == 1 ? 'pedido' : 'pedidos' }} · Umbral de activación: {{ umbral }}
+      </p>
+    </div>
+
+    <h2 class="sr-only">Ranking de pedidos</h2>
+    {# Cada pedido es una tarjeta en fila: el puesto, el título, el avance hacia el umbral y la
+       acción (IC-660). El puesto va escrito, no como número de la lista: así queda dentro de la
+       tarjeta en vez de colgar fuera de la columna. #}
+    <ol class="ranking-pedidos" start="{{ (paginado.numero - 1) * por_pagina + 1 }}">
+      {% for pedido in pedidos %}
+        {% set puesto = (paginado.numero - 1) * por_pagina + loop.index %}
+        <li class="ranking-pedido-item{% if pedido.es_activo %} activo{% endif %}" data-pedido="{{ pedido.id }}">
+          <span class="ranking-pedido-puesto" aria-hidden="true">{{ puesto }}</span>
+          <div class="ranking-pedido-datos">
+            <h3 class="pedido-titulo">{{ pedido.titulo }} <span class="pedido-anio">({{ pedido.anio }})</span></h3>
+            <p class="pedido-meta">Dirección: {{ pedido.director }}</p>
+          </div>
+          <div class="ranking-pedido-avance">
+            {% if pedido.es_activo %}
+              <span class="badge-alerta-negra">Activo</span>
+              <span class="pedido-avance-texto"><strong>{{ pedido.adhesiones }} {{ pedido.adhesiones == 1 ? 'adhesión' : 'adhesiones' }}</strong></span>
+            {% else %}
+              <progress class="pedido-progreso" value="{{ pedido.adhesiones }}" max="{{ pedido.umbral }}">{{ pedido.adhesiones }} de {{ pedido.umbral }}</progress>
+              <span class="pedido-avance-texto">
+                <strong>{{ pedido.adhesiones }} de {{ pedido.umbral }} adhesiones</strong>
+                · {{ pedido.faltan_para_activar == 1 ? 'falta 1 para activarse' : 'faltan ' ~ pedido.faltan_para_activar ~ ' para activarse' }}
+              </span>
+            {% endif %}
+          </div>
+          <div class="ranking-pedido-accion">
+            {% if hay_sesion %}
+              <form action="/pedidos/{{ pedido.id }}/sumarme" method="post" class="pedido-accion-form">
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                <input type="hidden" name="origen" value="ranking">
+                {% if pedido.adherido %}
+                  <input type="hidden" name="quitar" value="1">
+                  {% include 'parciales/boton.html.twig' with {
+                    texto: 'Dejar de pedirlo',
+                    tipo: 'submit',
+                    variante: 'secundario',
+                    tamano: 'chico',
+                    aria_label: 'Dejar de pedir ' ~ pedido.titulo
+                  } only %}
+                {% else %}
+                  {% include 'parciales/boton.html.twig' with {
+                    texto: 'Sumarme',
+                    tipo: 'submit',
+                    variante: 'primario',
+                    tamano: 'chico',
+                    aria_label: 'Sumarme al pedido de ' ~ pedido.titulo
+                  } only %}
+                {% endif %}
+              </form>
+            {% else %}
+              <a href="/cuenta/ingresar" class="boton boton-secundario boton-chico">Ingresá para sumarte</a>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+
+    {% if paginado.total_paginas > 1 %}
+      <nav class="paginado paginado-numerado" aria-label="Páginas de pedidos">
+        {% if paginado.anterior %}
+          <a href="{{ paginado.anterior }}" class="boton boton-secundario boton-chico" rel="prev">Anterior</a>
+        {% endif %}
+        {% if paginado.paginas is defined and paginado.paginas is not empty %}
+          <ul class="paginado-lista">
+            {% for item in paginado.paginas %}
+              {% if item is null %}
+                <li class="paginado-elipsis" aria-hidden="true">…</li>
+              {% elseif item.actual %}
+                <li class="paginado-item"><span class="paginado-enlace activo" aria-current="page">{{ item.numero }}</span></li>
+              {% else %}
+                <li class="paginado-item"><a href="{{ item.url }}" class="paginado-enlace">{{ item.numero }}</a></li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <span class="paginado-actual sr-only">Página {{ paginado.numero }} de {{ paginado.total_paginas }}</span>
+        {% if paginado.siguiente %}
+          <a href="{{ paginado.siguiente }}" class="boton boton-secundario boton-chico" rel="next">Siguiente</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% endif %}
+
+  {% if tomados is not empty %}
+    <section class="seccion-formulario" aria-labelledby="titulo-tomados">
+      <h2 id="titulo-tomados" class="ficha-sala-seccion-titulo">Títulos pedidos que ya están en el catálogo</h2>
+      <ul class="lista-pedidos-tomados">
+        {% for tomado in tomados %}
+          <li>
+            <a href="/obras/{{ tomado.obra_id }}" class="enlace-destacado">{{ tomado.titulo }} ({{ tomado.anio }})</a>
+            — Dirección: {{ tomado.director }}
+            {% if tomado.obra_titulo %} · En el catálogo como «{{ tomado.obra_titulo }}»{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 /* global AccionesDeReserva, AcuerdoFecha, BotonImprimir, BuscadorDeCartelera, Carrusel, Compartir,
    ConfirmarEnvio, EnviarAlElegir, FormularioDeReserva, GestorFranjas, LugaresLibres, MenuUsuario,
-   ModoFuncion, ParametrosDeSala, ResumenDeErrores, ValidacionEnLinea, VotacionTitulos, ZonaDeImagen */
+   ModoFuncion, ParametrosDeSala, ResumenDeErrores, Seguir, ValidacionEnLinea, VotacionTitulos, ZonaDeArchivo */
 
 /**
  * La aplicación: cuando el DOM está listo, carga e inicia los componentes que la página necesita.
@@ -27,6 +27,14 @@ class App {
     // Las barras de compromisos del acuerdo de fecha: el ancho viene en data-porcentaje.
     for (const barra of document.querySelectorAll('[data-porcentaje]')) {
       barra.style.width = `${barra.dataset.porcentaje}%`;
+    }
+    // En el celular el menú del panel es una fila que se desliza de costado: si la sección actual
+    // quedó fuera de la vista, la fila se corre hasta mostrarla. Sólo la fila, no la página.
+    for (const activo of document.querySelectorAll('.panel-menu-enlace.activo')) {
+      const fila = activo.closest('nav > .panel-menu-lista');
+      if (fila && fila.scrollWidth > fila.clientWidth) {
+        fila.scrollLeft = activo.offsetLeft - fila.offsetLeft - (fila.clientWidth - activo.offsetWidth) / 2;
+      }
     }
     // Los carruseles, como el de destacadas de la portada (E4-07): cada uno recibe su contenedor.
     const carruseles = document.querySelectorAll('[data-carrusel]');
@@ -70,6 +78,11 @@ class App {
     if (document.querySelector('[data-gestor-franjas]')) {
       PAW.cargarScript('GestorFranjas', `${App.COMPONENTES}/gestor-franjas.js`, () => new GestorFranjas('[data-gestor-franjas]'));
     }
+    // «Seguir» la sala o a quien la organiza, en la ficha de la sala (EF-15.4).
+    const seguir = document.querySelectorAll('form[data-seguir]');
+    if (seguir.length > 0) {
+      PAW.cargarScript('Seguir', `${App.COMPONENTES}/seguir.js`, () => seguir.forEach((formulario) => new Seguir(formulario)));
+    }
     // «Compartir», en la cabecera de la ficha de la función (E3-13.F10).
     if (document.querySelector('[data-compartir]')) {
       PAW.cargarScript('Compartir', `${App.COMPONENTES}/compartir.js`, () => new Compartir('[data-compartir]'));
@@ -80,8 +93,8 @@ class App {
       PAW.cargarScript('ValidacionEnLinea', `${App.COMPONENTES}/validacion-en-linea.js`, () => new ValidacionEnLinea(formulario));
     }
     // Arrastrar y soltar la imagen, con vista previa (E4-09.2 / IC-296).
-    for (const campo of document.querySelectorAll('[data-zona-de-imagen]')) {
-      PAW.cargarScript('ZonaDeImagen', `${App.COMPONENTES}/zona-de-imagen.js`, () => new ZonaDeImagen(campo));
+    for (const campo of document.querySelectorAll('[data-zona-de-archivo]')) {
+      PAW.cargarScript('ZonaDeArchivo', `${App.COMPONENTES}/zona-de-archivo.js`, () => new ZonaDeArchivo(campo));
     }
     // Los lugares libres de la ficha, al día sin recargar (E4-05.2 / IC-273).
     if (document.querySelector('[data-lugares-libres]')) {

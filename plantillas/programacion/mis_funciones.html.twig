@@ -84,7 +84,7 @@
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       titulo: '¡Votación cerrada!',
-      mensaje: 'La votación se cerró correctamente. La función pasó a acuerdo de fecha con la obra más votada.'
+      mensaje: 'La votación se cerró correctamente. La función pasó a acuerdo de fecha con las obras más votadas.'
     } only %}
   {% endif %}
 
@@ -164,7 +164,7 @@
                   <span class="tabla-admin-secundario">esperando habilitación</span>
                 {% endif %}
               </td>
-              <td>{{ funcion.fecha ?? 'Sin fecha todavía' }}</td>
+              <td class="tabla-admin-celda-corta">{{ funcion.fecha ?? 'Sin fecha todavía' }}</td>
               <td>
                 {% if funcion.estado_valor == 'programada' %}
                   <span class="estado-cuenta estado-cuenta-activa">{{ funcion.estado }}</span>
@@ -180,7 +180,7 @@
                   <span class="estado-cuenta">{{ funcion.estado }}</span>
                 {% endif %}
               </td>
-              <td>
+              <td class="tabla-admin-celda-corta">
                 <span class="tabla-admin-principal">{{ funcion.precio }}</span>
                 <span class="tabla-admin-secundario">{{ funcion.cupo }} lugares</span>
               </td>

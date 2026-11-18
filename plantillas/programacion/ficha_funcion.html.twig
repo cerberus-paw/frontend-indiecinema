@@ -38,14 +38,22 @@
         programada, mientras todavía no se dio).
       - cerrable: (bool) si quien la mira es su organizador y la votación de títulos está abierta,
         para cerrarla con la candidata ganadora (E3-12.4 / IC-150).
+      - denunciable: (bool) si muestra «Denunciar»: está en la cartelera y quien la mira no es su
+        organizador (EF-07.8).
       - lugares_libres: (int|null) cuántos lugares quedan (E4-02), sólo de una programada. null si
         el subsistema funciones no respondió: la ficha se muestra igual, sin ese dato.
       - agotada: (bool) si no queda ningún lugar.
       - reservable: (bool) si todavía se puede reservar: no se canceló, no empezó ni está agotada. Con sesión se
         ve el formulario, que manda la reserva al subsistema funciones; sin sesión, el enlace
         para ingresar.
+      - aviso_conducta: (string|null, opcional) advertencia cuando el espectador está bajo el umbral
+        de conducta (EF-13.2).
+      - limite_conducta_alcanzado: (bool, opcional) true si además alcanzó su tope de reservas
+        simultáneas por conducta y no puede iniciar otra hasta liberar una.
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
+  - funcion.votacion_cierra: (string|null) hasta cuándo se vota, «15 nov 20:00» (EF-03.1); funcion.votacion_vencida:
+    (bool) si ya pasó, aunque la tarea todavía no la haya cerrado.
   - votacion_cerrada: (bool) aviso de éxito al volver de cerrar la votación de títulos (IC-150 / E3-12.4).
   - voto_usuario: (string|null) UUID de la obra que votó el usuario autenticado (E3-12.2 / E3-12.3).
   - conteo_votos: (array<string, int>) mapa asociativo [obra_id => total_votos] con el conteo por candidata.
@@ -88,7 +96,7 @@
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       titulo: '¡Votación cerrada con éxito!',
-      mensaje: 'La votación de títulos fue cerrada correctamente. La obra más votada ha sido seleccionada y la función pasó al estado «En acuerdo de fecha».'
+      mensaje: 'La votación de títulos fue cerrada correctamente. Quedaron las obras más votadas, hasta las películas por función de la sala, y la función pasó al estado «En acuerdo de fecha».'
     } only %}
   {% endif %}
 
@@ -193,6 +201,11 @@
             variante: 'peligro'
           } only %}
         {% endif %}
+        {# «Denunciar» va con las acciones y no suelto en la cabecera: suelto, el reparto de la
+           fila dejaba «Compartir» flotando a mitad de camino y a otra altura (F-02). #}
+        {% if funcion.denunciable is defined and funcion.denunciable %}
+          <p class="ficha-denunciar">{% include 'parciales/denunciar.html.twig' with { tipo: 'funcion', id: funcion.id } only %}</p>
+        {% endif %}
       </div>
     </header>
 
@@ -238,16 +251,32 @@
             </div>
           {% endif %}
         </div>
-        {% if usuario %}
+        {% if usuario and not usuario.correoVerificado %}
+          {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+            clase: 'ficha-reserva-formulario',
+            mensaje: 'Verificá tu correo para reservar.',
+            csrf: csrf,
+            volver: '/cartelera/' ~ funcion.id,
+            reenviada: verificacion_reenviada|default(false)
+          } only %}
+        {% elseif usuario %}
           {# data-formulario-reserva: el enganche del componente que lo manda sin recargar (E4-05.3).
              El tope por persona y lo que le queda al espectador los manda funciones con la
              ocupación (IC-463): los componentes los leen de acá y no tienen su propio número. Sin
              el dato (funciones no respondió), el campo llega hasta los lugares o el cupo y la
              reserva la controla funciones igual. #}
+          {% set aviso_conducta = funcion.aviso_conducta|default(null) %}
+          {% set bloqueado_conducta = funcion.limite_conducta_alcanzado|default(false) %}
+          {% if aviso_conducta %}
+            {% include 'parciales/mensaje.html.twig' with {
+              tipo: 'advertencia',
+              mensaje: aviso_conducta
+            } only %}
+          {% endif %}
           {% set tope_por_persona = funcion.maximo_por_persona|default(null) %}
           {% set restantes_usuario = funcion.lugares_restantes_usuario|default(null) %}
-          {% set sin_lugares_propios = restantes_usuario is same as(0) %}
-          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva{% if tope_por_persona is not null and restantes_usuario is not null %} data-maximo-por-persona="{{ tope_por_persona }}" data-restantes-usuario="{{ restantes_usuario }}"{% endif %}>
+          {% set sin_lugares_propios = (restantes_usuario is same as(0)) or bloqueado_conducta %}
+          <form action="/funcion/reservar/{{ funcion.id }}" method="POST" class="ficha-reserva-formulario" data-formulario-reserva{% if tope_por_persona is not null and restantes_usuario is not null %} data-maximo-por-persona="{{ tope_por_persona }}" data-restantes-usuario="{{ restantes_usuario }}"{% endif %}{% if bloqueado_conducta %} data-bloqueado-conducta="1"{% endif %}>
             <input type="hidden" name="_csrf" value="{{ csrf }}">
             {# valor_maximo nunca menos de 1: con el tope alcanzado el campo va deshabilitado, y un
                max por debajo del min no tiene sentido. #}
@@ -265,6 +294,9 @@
               {% set campo_cantidad = campo_cantidad|merge({ayuda: 'Máximo ' ~ tope_por_persona ~ ' lugares por persona.'}) %}
             {% endif %}
             {% include 'parciales/campo.html.twig' with campo_cantidad only %}
+            {% if funcion.precio starts with '$' %}
+              {% include 'parciales/campo_cupon.html.twig' only %}
+            {% endif %}
             {% include 'parciales/boton.html.twig' with {
               texto: 'Reservar mis lugares',
               tipo: 'submit',
@@ -309,6 +341,13 @@
             <p class="ficha-votacion-bajada">
               Esta función está abierta a votación de títulos por los espectadores. Elegí cuál de las siguientes películas candidatas querés ver en la sala: el título más votado por la comunidad será proyectado y la fecha definitiva se acordará al finalizar el plazo.
             </p>
+            {# Hasta cuándo se vota (EF-03.1). Vencida, la tarea la cierra en unos minutos con la más
+               votada, y mientras tanto ya no se vota: el servidor también lo rechaza. #}
+            {% if funcion.votacion_vencida|default(false) %}
+              <p class="ficha-votacion-cierre" role="status"><strong>La votación ya cerró.</strong> En unos minutos se ve el título elegido.</p>
+            {% elseif funcion.votacion_cierra|default(null) %}
+              <p class="ficha-votacion-cierre">La votación cierra el <strong>{{ funcion.votacion_cierra }}</strong>.</p>
+            {% endif %}
           </div>
         </div>
 
@@ -358,6 +397,14 @@
         {% endif %}
 
         {% if usuario %}
+          {% if not usuario.correoVerificado and not funcion.votacion_vencida|default(false) %}
+            {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+              mensaje: 'Verificá tu correo para votar.',
+              csrf: csrf,
+              volver: '/cartelera/' ~ funcion.id,
+              reenviada: verificacion_reenviada|default(false)
+            } only %}
+          {% endif %}
           {# Mensaje de estado si ya emitió un voto #}
           {% if tiene_voto %}
             <div class="ficha-votacion-aviso-voto" role="status">
@@ -415,10 +462,14 @@
                     <span class="conteo-total"><strong>{{ votos_obra }}</strong> {{ votos_obra == 1 ? 'voto' : 'votos' }}</span>
                   </p>
                   <div class="candidata-accion">
-                    {% if es_votada %}
+                    {% if funcion.votacion_vencida|default(false) %}
+                      {# Ya no se vota: sin botón, para no ofrecer algo que el servidor rechaza. #}
+                    {% elseif es_votada %}
                       <div class="candidata-voto-registrado" role="status">
                         <span class="voto-registrado-texto">Esta es tu elección actual. Podés cambiarla votando por otra candidata.</span>
                       </div>
+                    {% elseif not usuario.correoVerificado %}
+                      {# Sin correo verificado: se muestra el aviso arriba y se oculta el botón. #}
                     {% else %}
                       <form action="{{ accion_voto|default('/cartelera/' ~ funcion.id ~ '/votar') }}" method="POST" class="formulario-voto-obra" data-formulario-voto>
                         <input type="hidden" name="_csrf" value="{{ csrf }}">
@@ -520,7 +571,7 @@
       {# El organizador no marca sus propias franjas: el mínimo lo junta el público (E3-13.F7). Pasada
          la fecha límite no se marca más, aunque falte que el organizador confirme (E3-13.F8). #}
       {% set se_vota = not sin_franjas and not es_sin_quorum and votacion_abierta %}
-      {% set marca_franjas = usuario and not es_organizador and se_vota %}
+      {% set marca_franjas = usuario and usuario.correoVerificado and not es_organizador and se_vota %}
       {% set franja_lider = funcion.franja_ganadora|default(null) %}
       {% set max_votos = franja_lider.votos|default(0) %}
 
@@ -552,7 +603,7 @@
           {% if not sin_franjas and not es_sin_quorum and not votacion_abierta %}
             {% include 'parciales/mensaje.html.twig' with {
               tipo: 'info',
-              mensaje: 'Ya pasó la fecha límite para marcar «Me sirve». Falta que el organizador confirme la franja que llegó al mínimo.'
+              mensaje: 'Ya pasó la fecha límite para marcar «Me sirve». En unos minutos la función queda programada en la franja que llegó al mínimo.'
             } only %}
           {% endif %}
           {% if es_sin_quorum %}
@@ -601,7 +652,9 @@
                     <p class="ficha-panel-texto">La del {{ franja_lider.fecha }}, de {{ franja_lider.hora_inicio }} a {{ franja_lider.hora_fin }}, tiene {{ max_votos }} {{ max_votos == 1 ? 'compromiso' : 'compromisos' }} y el mínimo es {{ minimo }}. Al confirmarla, la función queda programada con esa fecha.</p>
                   {% else %}
                     <h3 id="ficha-panel-organizador-titulo" class="ficha-panel-titulo">Gestión del acuerdo de fecha</h3>
-                    <p class="ficha-panel-texto">Cuando una franja llegue al mínimo la vas a poder confirmar desde acá. Si el acuerdo no reúne el interés esperado, podés cerrarlo y decidir si proponés otras franjas o cancelás la función.</p>
+                    {# Al vencer el acuerdo lo cierra la tarea programada (EF-03.2): con el mínimo la
+                       programa, y sin él la cancela. Antes del límite, el organizador decide. #}
+                    <p class="ficha-panel-texto">Cuando una franja llegue al mínimo la vas a poder confirmar desde acá; si no la confirmás, se confirma sola al llegar la fecha límite. Si al llegar la fecha límite ninguna llegó al mínimo, la función se cancela sola y les avisamos a quienes marcaron «Me sirve». Antes de eso podés cerrar el acuerdo y proponer otras franjas.</p>
                   {% endif %}
                   <div class="ficha-panel-acciones">
                     {% if confirmable %}
@@ -627,6 +680,13 @@
 
             {% if not usuario and se_vota %}
               <p class="ficha-acuerdo-ingresar"><a href="/cuenta/ingresar">Ingresá</a> para marcar «Me sirve» en las franjas a las que podés ir.</p>
+            {% elseif usuario and not usuario.correoVerificado and not es_organizador and se_vota %}
+              {% include 'parciales/aviso_verificacion_correo.html.twig' with {
+                mensaje: 'Verificá tu correo para votar y marcar «Me sirve» en las franjas.',
+                csrf: csrf,
+                volver: '/cartelera/' ~ funcion.id,
+                reenviada: verificacion_reenviada|default(false)
+              } only %}
             {% endif %}
 
             <ul class="ficha-franjas">
@@ -692,8 +752,12 @@
             <ul class="ficha-titulos">
               {% for obra in funcion.obras %}
                 <li class="ficha-titulo">
-                  {# Todavía no hay una ruta que sirva el afiche: va el marcador, como en las obras. #}
-                  <span class="ficha-titulo-afiche ficha-titulo-afiche-vacio" aria-hidden="true">Afiche</span>
+                  {# Como en la votación: el afiche lo sirve /obras/{id}/afiche; sin afiche cargado, el marcador (F-02.1). #}
+                  {% if obra.afiche ?? null %}
+                    <img src="{{ obra.afiche }}" alt="" class="ficha-titulo-afiche" loading="lazy">
+                  {% else %}
+                    <span class="ficha-titulo-afiche ficha-titulo-afiche-vacio" aria-hidden="true">Afiche</span>
+                  {% endif %}
                   <div>
                     <p class="ficha-titulo-nombre">{{ obra.titulo }}</p>
                     <p class="ficha-titulo-datos">{{ obra.anio }} · {{ obra.duracion }} min</p>
@@ -726,9 +790,9 @@
             {% include 'parciales/icono.html.twig' with { nombre: 'advertencia' } only %}
             <p>
               {% if es_sin_quorum %}
-                Este acuerdo cerró sin llegar al mínimo de {{ minimo }} {{ minimo == 1 ? 'asistente' : 'asistentes' }}: la función no se programa, y el organizador decide si propone otras fechas o la cancela.
+                Este acuerdo cerró sin llegar al mínimo de {{ minimo }} {{ minimo == 1 ? 'asistente' : 'asistentes' }}: la función no se programa con estas franjas. El organizador puede proponer otras o cancelarla.
               {% else %}
-                Marcar <strong>Me sirve</strong> es comprometerte a ir, pero no reserva ni cobra nada. Si ninguna franja llega al mínimo antes de la fecha límite, la función no se programa y el organizador decide si propone otras fechas o la cancela.
+                Marcar <strong>Me sirve</strong> es comprometerte a ir, pero no reserva ni cobra nada. Si ninguna franja llega al mínimo antes de la fecha límite, la función se cancela y te avisamos por correo.
               {% endif %}
             </p>
           </div>

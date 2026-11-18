@@ -4,8 +4,11 @@
   editar y dar de baja (solo si no tienen funciones futuras programadas).
 
   Variables:
-  - obras: lista de obras del organizador.
+  - obras: lista de obras del organizador. Cada una con estado (EF-07.7): pendiente, aprobada o
+    rechazada; sólo la aprobada está en el catálogo y tiene ficha pública. motivo: por qué la
+    rechazaron (null si no); editarla la vuelve a pendiente.
   - creada: (bool) aviso de que se acaba de cargar una obra nueva.
+  - para_pedido: (bool) si la cargó para un pedido, que se toma cuando la aprueben (IC-657).
   - guardada: (bool) aviso de que se guardaron los cambios de una obra.
   - dada_de_baja: (bool) aviso de que la obra fue dada de baja lógicamente.
   - error_baja: (?string) error si la baja fue rechazada (ej. por funciones futuras).
@@ -30,11 +33,19 @@
       <h1 class="solicitud-titulo">Mis obras</h1>
       <p class="solicitud-bajada">Las películas y cortometrajes que cargaste para programar en tus funciones comunitarias.</p>
     </div>
-    {% include 'parciales/boton.html.twig' with {
-      texto: 'Cargar obra',
-      url: '/organizador/obras/nueva',
-      variante: 'primario'
-    } only %}
+    <div class="encabezado-acciones">
+      {# Cómo le fue a cada obra en las funciones que ya terminaron (EF-09.3) #}
+      {% include 'parciales/boton.html.twig' with {
+        texto: 'Ver el reporte',
+        url: '/recaudacion/reportes/obras',
+        variante: 'secundario'
+      } only %}
+      {% include 'parciales/boton.html.twig' with {
+        texto: 'Cargar obra',
+        url: '/organizador/obras/nueva',
+        variante: 'primario'
+      } only %}
+    </div>
   </header>
 
   {# Alertas de estado #}
@@ -42,7 +53,9 @@
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'exito',
       titulo: '¡Obra cargada!',
-      mensaje: 'La obra se cargó exitosamente en el catálogo y ya podés seleccionarla al proponer funciones.'
+      mensaje: para_pedido|default(false)
+        ? 'La moderación la revisa antes de que entre en el catálogo: cuando la apruebe, tomá el pedido con ella desde «Pedidos para programar».'
+        : 'La moderación la revisa antes de que entre en el catálogo: cuando la apruebe, vas a poder elegirla al proponer funciones.'
     } only %}
   {% endif %}
 
@@ -88,18 +101,21 @@
       {% for obra in obras %}
         {% set tiene_futuras = obra.tiene_funciones_futuras|default(false) %}
         {% set duracion_obra = obra.duracion_minutos ?? (obra.duracion ?? null) %}
+        {# EF-07.7: con is defined, por si el back todavía no lo manda #}
+        {% set estado_obra = obra.estado is defined ? obra.estado : 'aprobada' %}
+        {% set publicada = estado_obra == 'aprobada' %}
         <article class="tarjeta-funcion tarjeta-obra tarjeta-mi-obra" aria-label="{{ obra.titulo }}{% if obra.anio %} ({{ obra.anio }}){% endif %}">
           <div class="tarjeta-funcion-afiche">
-            <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">
+            {% if publicada %}<a href="/obras/{{ obra.id }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">{% endif %}
               {% if obra.afiche ?? false %}
                 <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="tarjeta-funcion-imagen" loading="lazy">
               {% else %}
                 <div class="tarjeta-funcion-afiche-placeholder">
-                  <span class="afiche-placeholder-icono" aria-hidden="true">🎬</span>
+                  {% include 'parciales/icono.html.twig' with { nombre: 'pelicula', clase: 'afiche-placeholder-icono' } only %}
                   <span class="afiche-placeholder-texto">AFICHE</span>
                 </div>
               {% endif %}
-            </a>
+            {% if publicada %}</a>{% endif %}
           </div>
 
           <div class="tarjeta-funcion-cuerpo">
@@ -109,31 +125,49 @@
                   {{ obra.tipo_etiqueta ?? (obra.tipo == 'cortometraje' ? 'CORTOMETRAJE' : 'PELÍCULA') }}
                 </span>
               {% endif %}
+              {# El estado antes del año: el año va siempre contra el borde derecho, como en las
+                 tarjetas sin estado; después, «Pendiente de revisión» lo corría al medio (F-02). #}
+              {% if estado_obra == 'pendiente' %}
+                <span class="estado-cuenta estado-cuenta-revision">Pendiente de revisión</span>
+              {% elseif estado_obra == 'rechazada' %}
+                <span class="estado-cuenta estado-cuenta-suspendida">Rechazada</span>
+              {% endif %}
               {% if obra.anio is defined and obra.anio %}
                 <span class="tarjeta-obra-anio">{{ obra.anio }}</span>
               {% endif %}
             </div>
 
             <h3 class="tarjeta-funcion-titulo">
-              <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-titulo-enlace">{{ obra.titulo }}</a>
+              {% if publicada %}
+                <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-titulo-enlace">{{ obra.titulo }}</a>
+              {% else %}
+                {{ obra.titulo }}
+              {% endif %}
             </h3>
+
+            {% if estado_obra == 'rechazada' and obra.motivo is defined and obra.motivo %}
+              <p class="tarjeta-funcion-dato">
+                <strong>Por qué la rechazaron:</strong> {{ obra.motivo|nl2br }}
+                Corregila con «Editar» y vuelve a revisión.
+              </p>
+            {% endif %}
 
             <div class="tarjeta-funcion-meta">
               {% if obra.director is defined and obra.director %}
                 <p class="tarjeta-funcion-dato meta-director">
-                  <span class="meta-icono" aria-hidden="true">🎬</span>
+                  {% include 'parciales/icono.html.twig' with { nombre: 'claqueta', clase: 'meta-icono' } only %}
                   <span class="meta-texto">{{ obra.director }}</span>
                 </p>
               {% endif %}
               {% if duracion_obra %}
                 <p class="tarjeta-funcion-dato meta-duracion">
-                  <span class="meta-icono" aria-hidden="true">⏱️</span>
+                  {% include 'parciales/icono.html.twig' with { nombre: 'reloj', clase: 'meta-icono' } only %}
                   <span class="meta-texto">{{ duracion_obra }} min</span>
                 </p>
               {% endif %}
               {% if obra.origen_copia is defined and obra.origen_copia %}
                 <p class="tarjeta-funcion-dato meta-copia">
-                  <span class="meta-icono" aria-hidden="true">📜</span>
+                  {% include 'parciales/icono.html.twig' with { nombre: 'documento', clase: 'meta-icono' } only %}
                   <span class="meta-texto">{{ obra.origen_copia_etiqueta ?? obra.origen_copia }}</span>
                 </p>
               {% endif %}
@@ -150,18 +184,19 @@
             {# Acciones: Ver ficha, Editar y Dar de baja #}
             <div class="tarjeta-mi-obra-acciones">
               <div class="acciones-fila-enlaces">
-                <a href="/obras/{{ obra.id }}" class="boton boton-secundario boton-chico">Ver ficha</a>
+                {% if publicada %}
+                  <a href="/obras/{{ obra.id }}" class="boton boton-secundario boton-chico">Ver ficha</a>
+                {% endif %}
                 <a href="/organizador/obras/{{ obra.id }}/editar" class="boton boton-secundario boton-chico">Editar</a>
               </div>
 
               {# Formulario POST seguro con CSRF para dar de baja la obra (E4-08.4) #}
               <form action="/organizador/obras/{{ obra.id }}/baja" method="POST" class="formulario-baja-obra" data-confirmar="¿Confirmás que querés dar de baja esta obra? Ya no podrá usarse en nuevas funciones.">
                 <input type="hidden" name="_csrf" value="{{ csrf }}">
+                {# Sin un botón deshabilitado: rosa apagado sobre bordó casi no se leía, y repetía lo
+                   mismo que la nota de abajo (F-02). Queda sólo la razón, legible. #}
                 {% if tiene_futuras %}
-                  <button type="button" class="boton boton-peligro-suave boton-chico boton-bloque" disabled title="No se puede dar de baja porque tiene funciones futuras programadas" aria-disabled="true">
-                    Con funciones futuras
-                  </button>
-                  <span class="baja-ayuda-bloqueo">Tiene funciones futuras</span>
+                  <p class="baja-ayuda-bloqueo">No se puede dar de baja: tiene funciones futuras.</p>
                 {% else %}
                   <button type="submit" class="boton boton-peligro-suave boton-chico boton-bloque">
                     Dar de baja

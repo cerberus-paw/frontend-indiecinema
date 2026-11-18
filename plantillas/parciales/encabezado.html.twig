@@ -11,6 +11,10 @@
 {% set ruta = (prefijo ?? '') ~ (ruta_actual ?? '') %}
 {# El administrador no usa el sitio público: sin buscador ni navegación, sólo el acceso a su panel #}
 {% set es_admin = usr and usr.alcanza('administrador') %}
+{# El moderador alcanza el rol de organizador (puede abrir esas pantallas), pero lo del organizador
+   no le sirve: ve lo suyo, la moderación (IC-662). La sesión trae un solo rol, el más alto. #}
+{% set es_moderador = usr and usr.alcanza('moderador') and not es_admin %}
+{% set es_organizador = usr and usr.alcanza('organizador') and not usr.alcanza('moderador') %}
 {# Elemento semántico header que representa la cabecera superior y fija de la página #}
 <header class="encabezado">
   {# Contenedor con ancho máximo centrado para mantener alineación consistente con el resto de la interfaz #}
@@ -37,7 +41,7 @@
         {# Contenedor relativo que posiciona el icono de lupa dentro del campo de texto #}
         <div class="buscador-caja">
           {# Icono decorativo de lupa posicionado de forma absoluta dentro del input #}
-          <span class="buscador-icono" aria-hidden="true">🔍</span>
+          {% include 'parciales/icono.html.twig' with { nombre: 'lupa', clase: 'buscador-icono' } only %}
           {# Campo de entrada de tipo search que permite autocompletado y borrado nativo #}
           <input type="search" id="campo-busqueda" name="q" class="buscador-input" placeholder="Película, director o sala" aria-label="Buscar en la cartelera por película, director o sala" value="{{ filtros.q ?? consulta_busqueda ?? '' }}">
         {# Cierre de la caja del buscador #}
@@ -69,20 +73,26 @@
         <li>
           <a href="/salas" class="nav-enlace{% if ruta starts with '/salas' %} activo{% endif %}">Salas</a>
         </li>
-        {# Enlace a la explicación de la dinámica colaborativa, una sección de «Acerca de IndieCinema» #}
+        {# Enlace a «Cómo funciona IndieCinema»: el circuito paso a paso y los roles #}
         <li>
-          <a href="/acerca-de#como-funciona" class="nav-enlace">Cómo funciona</a>
+          <a href="/como-funciona" class="nav-enlace{% if ruta starts with '/como-funciona' %} activo{% endif %}">Cómo funciona</a>
         </li>
         {# Enlace a «Acerca de IndieCinema»: quiénes somos y cómo funciona el sitio #}
         <li>
           <a href="/acerca-de" class="nav-enlace{% if ruta starts with '/acerca-de' %} activo{% endif %}">Acerca de</a>
         </li>
 
-        {# Acceso directo en barra para Organizador: lo ven el organizador y el moderador #}
-        {% if usr and usr.alcanza('organizador') %}
+        {# Acceso directo en la barra: «Mis salas» para el organizador y «Moderación» para el moderador #}
+        {% if es_organizador %}
           <li class="nav-item-rol">
             <a href="/organizador/salas" class="nav-enlace enlace-rol{% if ruta starts with '/organizador/salas' %} activo{% endif %}" title="Mis salas">
               Mis salas
+            </a>
+          </li>
+        {% elseif es_moderador %}
+          <li class="nav-item-rol">
+            <a href="/moderacion/solicitudes" class="nav-enlace enlace-rol{% if ruta starts with '/moderacion' %} activo{% endif %}" title="Moderación">
+              Moderación
             </a>
           </li>
         {% endif %}
@@ -136,59 +146,92 @@
               {# Enlace al panel principal de cuenta #}
               <li>
                 <a href="/cuenta/" class="menu-item">
-                  <span class="menu-icono" aria-hidden="true">👤</span> Panel de mi cuenta
+                  {% include 'parciales/icono.html.twig' with { nombre: 'persona', clase: 'menu-icono' } only %} Panel de mi cuenta
                 </a>
               </li>
               {# Las reservas del espectador, con el comprobante de cada una (E4-04.1) #}
               <li>
                 <a href="/funcion/reservas" class="menu-item">
-                  <span class="menu-icono" aria-hidden="true">🎟️</span> Mis reservas
+                  {% include 'parciales/icono.html.twig' with { nombre: 'entrada', clase: 'menu-icono' } only %} Mis reservas
                 </a>
               </li>
               {# Quien todavía no es organizador puede pedirlo con la solicitud #}
               {% if not usr.alcanza('organizador') %}
               <li>
                 <a href="/solicitar-sala" class="menu-item">
-                  <span class="menu-icono" aria-hidden="true">🎬</span> Abrir una sala
+                  {% include 'parciales/icono.html.twig' with { nombre: 'mas', clase: 'menu-icono' } only %} Abrir una sala
                 </a>
               </li>
               {% endif %}
             </ul>
             {% endif %}
 
-            {# Sección condicional de opciones del Organizador, también para el moderador #}
-            {% if usr.alcanza('organizador') and not es_admin %}
+            {# Sección condicional de opciones del Organizador: sólo el organizador (IC-662) #}
+            {% if es_organizador %}
               <div class="menu-separador"></div>
               <div class="menu-seccion-titulo" id="menu-seccion-organizador">Panel del Organizador</div>
               <ul class="menu-seccion" aria-labelledby="menu-seccion-organizador">
                 <li>
                   <a href="/organizador/salas" class="menu-item">
-                    <span class="menu-icono" aria-hidden="true">🏛️</span> Mis salas
+                    {% include 'parciales/icono.html.twig' with { nombre: 'butaca', clase: 'menu-icono' } only %} Mis salas
                   </a>
                 </li>
                 <li>
                   <a href="/organizador/obras" class="menu-item">
-                    <span class="menu-icono" aria-hidden="true">🎬</span> Mis obras
+                    {% include 'parciales/icono.html.twig' with { nombre: 'pelicula', clase: 'menu-icono' } only %} Mis obras
                   </a>
                 </li>
                 <li>
                   <a href="/organizador/obras/nueva" class="menu-item">
-                    <span class="menu-icono" aria-hidden="true">➕</span> Cargar obra
+                    {% include 'parciales/icono.html.twig' with { nombre: 'mas', clase: 'menu-icono' } only %} Cargar obra
                   </a>
                 </li>
                 <li>
                   <a href="/organizador/funciones" class="menu-item">
-                    <span class="menu-icono" aria-hidden="true">🎞️</span> Mis funciones
+                    {% include 'parciales/icono.html.twig' with { nombre: 'calendario', clase: 'menu-icono' } only %} Mis funciones
                   </a>
                 </li>
                 <li>
                   <a href="/organizador/funciones/nueva" class="menu-item">
-                    <span class="menu-icono" aria-hidden="true">🎬</span> Programar función
+                    {% include 'parciales/icono.html.twig' with { nombre: 'mas', clase: 'menu-icono' } only %} Programar función
+                  </a>
+                </li>
+                <li>
+                  <a href="/recaudacion/reportes" class="menu-item">
+                    {% include 'parciales/icono.html.twig' with { nombre: 'grafico', clase: 'menu-icono' } only %} Reportes
                   </a>
                 </li>
                 <li>
                   <a href="/solicitar-sala" class="menu-item">
-                    <span class="menu-icono" aria-hidden="true">➕</span> Publicar una sala
+                    {% include 'parciales/icono.html.twig' with { nombre: 'mas', clase: 'menu-icono' } only %} Publicar una sala
+                  </a>
+                </li>
+              </ul>
+            {% endif %}
+
+            {# Sección de moderación: las cuatro bandejas del moderador; el administrador la tiene en la suya #}
+            {% if es_moderador %}
+              <div class="menu-separador"></div>
+              <div class="menu-seccion-titulo" id="menu-seccion-moderacion">Moderación</div>
+              <ul class="menu-seccion" aria-labelledby="menu-seccion-moderacion">
+                <li>
+                  <a href="/moderacion/solicitudes" class="menu-item">
+                    {% include 'parciales/icono.html.twig' with { nombre: 'sobre', clase: 'menu-icono' } only %} Solicitudes de sala
+                  </a>
+                </li>
+                <li>
+                  <a href="/moderacion/documentos" class="menu-item">
+                    {% include 'parciales/icono.html.twig' with { nombre: 'documento', clase: 'menu-icono' } only %} Documentos
+                  </a>
+                </li>
+                <li>
+                  <a href="/moderacion/obras" class="menu-item">
+                    {% include 'parciales/icono.html.twig' with { nombre: 'pelicula', clase: 'menu-icono' } only %} Obras
+                  </a>
+                </li>
+                <li>
+                  <a href="/moderacion/denuncias" class="menu-item">
+                    {% include 'parciales/icono.html.twig' with { nombre: 'bandera', clase: 'menu-icono' } only %} Denuncias
                   </a>
                 </li>
               </ul>
@@ -201,12 +244,17 @@
               <ul class="menu-seccion" aria-labelledby="menu-seccion-administracion">
                 <li>
                   <a href="/cuenta/administracion/usuarios" class="menu-item">
-                    <span class="menu-icono" aria-hidden="true">👥</span> Usuarios y roles
+                    {% include 'parciales/icono.html.twig' with { nombre: 'personas', clase: 'menu-icono' } only %} Usuarios y roles
                   </a>
                 </li>
                 <li>
-                  <a href="/administracion/solicitudes" class="menu-item">
-                    <span class="menu-icono" aria-hidden="true">📨</span> Solicitudes de sala
+                  <a href="/recaudacion/reportes" class="menu-item">
+                    {% include 'parciales/icono.html.twig' with { nombre: 'grafico', clase: 'menu-icono' } only %} Reportes
+                  </a>
+                </li>
+                <li>
+                  <a href="/moderacion/solicitudes" class="menu-item">
+                    {% include 'parciales/icono.html.twig' with { nombre: 'sobre', clase: 'menu-icono' } only %} Solicitudes de sala
                   </a>
                 </li>
               </ul>
@@ -218,7 +266,7 @@
             <form action="/cuenta/salir" method="POST" class="form-menu-item form-cerrar-sesion">
               <input type="hidden" name="_csrf" value="{{ csrf }}">
               <button type="submit" class="menu-item menu-item-cerrar">
-                <span class="menu-icono" aria-hidden="true">🚪</span> Cerrar sesión
+                {% include 'parciales/icono.html.twig' with { nombre: 'salir', clase: 'menu-icono' } only %} Cerrar sesión
               </button>
             </form>
           {# Cierre del menú flotante #}

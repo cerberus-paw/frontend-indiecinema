@@ -1,0 +1,53 @@
+{#
+  Los comercios asociados y su beneficio para los espectadores, en /recaudacion/beneficios
+  (EF-17.3): los activos que cargó el administrador, por localidad. Pública: se ve sin sesión.
+
+  Variables:
+  - localidades: lista de {localidad, comercios: lista de {id, nombre, beneficio, direccion}},
+    por localidad y, adentro, por nombre.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Beneficios{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Beneficios</li>
+    </ol>
+  </nav>
+
+  <header class="encabezado-formulario-solicitud">
+    <div class="solicitud-texto-cabecera">
+      <h1 class="solicitud-titulo">Beneficios</h1>
+      <p class="solicitud-bajada">Comercios cerca de las salas que acompañan al cine independiente. Mostrá tu entrada de IndieCinema para usar el beneficio.</p>
+    </div>
+  </header>
+
+  {% if localidades is empty %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Todavía no hay comercios asociados. Pronto vas a encontrar acá descuentos cerca de las salas.' } only %}
+  {% else %}
+    {# Agrupados por localidad: quien va a una sala busca lo que tiene cerca. #}
+    {% for grupo in localidades %}
+      <section class="beneficios-localidad" aria-labelledby="beneficios-{{ loop.index }}">
+        <h2 id="beneficios-{{ loop.index }}" class="beneficios-localidad-titulo">
+          {% include 'parciales/icono.html.twig' with { nombre: 'ubicacion', clase: 'meta-icono' } only %}
+          {{ grupo.localidad }}
+        </h2>
+        <ul class="beneficios-lista">
+          {% for comercio in grupo.comercios %}
+            <li class="beneficio">
+              <h3 class="beneficio-nombre">{{ comercio.nombre }}</h3>
+              <p class="beneficio-texto">{{ comercio.beneficio }}</p>
+              <p class="beneficio-direccion">{{ comercio.direccion }}</p>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

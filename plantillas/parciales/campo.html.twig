@@ -26,8 +26,9 @@
     'decimal' en un campo de texto que lleva un número con coma. No cambia lo que el campo acepta:
     eso lo dicen el tipo y el patrón.
   - aceptar: (string, opcional) Para 'file': los tipos que se pueden elegir (accept).
-  - zona_de_imagen: (bool, opcional) Para 'file': marca el campo para que el componente lo
-    envuelva en la zona de arrastrar y soltar con vista previa (E4-09.2).
+  - zona_de_archivo: (string, opcional) Para 'file': el texto de la zona, como «Arrastrá la imagen
+    acá, o elegila:». Marca el campo para que el componente lo envuelva en la zona de arrastrar y
+    soltar (E4-09.2), con vista previa si es una imagen y el nombre y el tamaño si no (EF-07.4).
   - mensajes: (map, opcional) Los textos con los que el backend rechaza este campo, por regla
     (requerido, maximo, minimo, valor_minimo, valor_maximo, patron, tipo). Salen como atributos
     data-error-* y los usa el componente de validación en línea para decir lo mismo que el
@@ -220,8 +221,8 @@
         {% if aceptar is defined %}accept="{{ aceptar }}"{% endif %}
         {# El teclado que le conviene al celular, sin cambiar lo que el campo acepta #}
         {% if modo_de_entrada is defined %}inputmode="{{ modo_de_entrada }}"{% endif %}
-        {# El enganche de la zona para arrastrar y soltar la imagen, con vista previa (E4-09.2) #}
-        {% if zona_de_imagen ?? false %}data-zona-de-imagen{% endif %}
+        {# El enganche de la zona para arrastrar y soltar el archivo, con su texto (E4-09.2) #}
+        {% if zona_de_archivo is defined %}data-zona-de-archivo="{{ zona_de_archivo }}"{% endif %}
         {# Pista para que el navegador sugiera el dato guardado (correo, teléfono…) #}
         {% if autocompletar is defined %}autocomplete="{{ autocompletar }}"{% endif %}
         {# Soporte de accesibilidad anunciando el mensaje de error o texto de ayuda #}
@@ -240,7 +241,7 @@
     {# Elemento span con role alert para que lectores de pantalla lo verbalicen de inmediato #}
     <span id="{{ id_error }}" class="campo-error" role="alert">
       {# Icono de advertencia triangular #}
-      <span class="error-icono" aria-hidden="true">⚠️</span>
+      {% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %}
       {# Texto explicativo del motivo del rechazo de la validación #}
       {{ mensaje_error }}
     {# Cierre del mensaje de error #}

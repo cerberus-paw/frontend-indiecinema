@@ -19,7 +19,8 @@ Siguiendo las decisiones arquitectónicas de la Entrega 2:
 frontend-indiecinema/
 ├── composer.json               # Definición del paquete cerberus-paw/frontend-indiecinema
 ├── README.md                   # Documentación técnica del paquete
-├── package.json                # stylelint para el CI y Playwright para las pruebas de punta a punta
+├── package.json                # ESLint y stylelint para el CI, y Playwright para las pruebas de punta a punta
+├── eslint.config.mjs           # Reglas recomendadas de ESLint sobre estaticos/js (lo corre el CI)
 ├── e2e/                        # Pruebas de punta a punta: los casos (casos.md) y su código (README)
 ├── herramientas/
 │   └── compilar-plantillas.php # Compila todas las plantillas con el Twig del núcleo (lo corre el CI)
@@ -44,7 +45,6 @@ frontend-indiecinema/
 │   │   └── registro.html.twig  # Formulario de alta de usuario
 │   ├── programacion/           # Plantillas del subsistema programación
 │   │   ├── acerca_de.html.twig # «Acerca de IndieCinema»: quiénes somos y cómo funciona
-│   │   ├── administracion_solicitudes.html.twig # Bandeja de solicitudes de sala del administrador
 │   │   ├── alta_funcion.html.twig # Formulario de alta para programar o abrir a votación una función (IC-121 / IC-147)
 │   │   ├── alta_sala.html.twig # Formulario de edición de sala
 │   │   ├── cancelar_funcion.html.twig # Confirmación para cancelar una función propia
@@ -55,16 +55,26 @@ frontend-indiecinema/
 │   │   ├── mis_salas.html.twig # Gestión de salas del organizador
 │   │   ├── proponer_franjas.html.twig # Las franjas horarias y el mínimo de asistentes del acuerdo de fecha
 │   │   ├── sala.html.twig      # Ficha pública de una sala con sus próximas funciones
-│   │   ├── solicitar_sala.html.twig # Solicitud para abrir una sala, con su estado
 │   │   └── salas.html.twig     # Catálogo público de salas indie habilitadas, con buscador
-│   └── funciones/              # Plantillas específicas del subsistema funciones
-│       ├── reservar.html.twig  # Reserva de lugares de una función, con los errores
-│       ├── reserva_confirmada.html.twig # Confirmación de la reserva con su código (el comprobante)
-│       ├── cancelar_reserva.html.twig # Confirmación para cancelar una reserva propia
-│       ├── pasos_reserva.html.twig # Los pasos de la reserva (Lugares → Comprobante)
-│       ├── mis_reservas.html.twig # «Mis reservas» del espectador
-│       ├── reservas_de_la_funcion.html.twig # Las reservas de una función para su organizador: asistencia y CSV
-│       └── administracion_reservas.html.twig # Todas las reservas para el administrador, con la anulación
+│   ├── funciones/              # Plantillas específicas del subsistema funciones
+│   │   ├── reservar.html.twig  # Reserva de lugares de una función, con los errores
+│   │   ├── reserva_confirmada.html.twig # Confirmación de la reserva con su código (el comprobante)
+│   │   ├── cancelar_reserva.html.twig # Confirmación para cancelar una reserva propia
+│   │   ├── pasos_reserva.html.twig # Los pasos de la reserva (Lugares → Comprobante)
+│   │   ├── mis_reservas.html.twig # «Mis reservas» del espectador
+│   │   ├── reservas_de_la_funcion.html.twig # Las reservas de una función para su organizador: asistencia y CSV
+│   │   └── administracion_reservas.html.twig # Todas las reservas para el administrador, con la anulación
+│   ├── moderacion/             # Del subsistema moderacion (EF-01)
+│   │   ├── administracion_solicitudes.html.twig # Bandeja de solicitudes de sala, en /moderacion/solicitudes (EF-07.2)
+│   │   └── solicitar_sala.html.twig # Solicitud para abrir una sala, con su estado
+│   └── recaudacion/            # Del subsistema recaudacion
+│       ├── reportes.html.twig  # Qué pasó en las salas en un período y qué conviene hacer (EF-09.1)
+│       ├── reportes_funciones.html.twig # Los totales de cada mes y las funciones de uno, con el CSV (EF-09.2)
+│       ├── reportes_obras.html.twig # Cómo le fue a cada obra del dueño, en cualquier sala (EF-09.3)
+│       ├── reportes_obra.html.twig # El detalle de una obra del dueño, con sus votaciones
+│       ├── administracion_reparto.html.twig # Con cuánto se reparte lo cobrado y desde cuándo, para el administrador (EF-08.1)
+│       ├── liquidaciones.html.twig # Lo que le toca al organizador y al dueño, mes por mes (EF-08.3)
+│       └── administracion_liquidaciones.html.twig # Todas las del mes y la marca de transferida, para el administrador (EF-08.3)
 └── estaticos/                  # Archivos estáticos servidos por el servidor web
     ├── css/
     │   └── estilos.css         # Hoja de estilos con paleta cinematográfica oscura y responsive
@@ -87,7 +97,7 @@ frontend-indiecinema/
     │       ├── parametros-de-sala.js # ParametrosDeSala: los parámetros de la sala elegida, en el alta de función
     │       ├── validacion-en-linea.js # ValidacionEnLinea: los errores de los formularios de carga mientras se escribe
     │       ├── votacion-titulos.js # VotacionTitulos: la elección de la obra en la votación de títulos
-    │       └── zona-de-imagen.js # ZonaDeImagen: arrastrar y soltar la imagen, con vista previa
+    │       └── zona-de-archivo.js # ZonaDeArchivo: arrastrar y soltar la imagen (con vista previa) o el PDF
     └── img/
         ├── icon.svg            # Isotipo e icono oficial de IndieCinema (favicon)
         ├── logo-horizontal-dark.svg # Logotipo horizontal oficial sobre fondo oscuro
@@ -166,6 +176,8 @@ El menú de usuario es un desplegable común (`<details>`/`<summary>`), no un me
    composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/cuentas
    composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/programacion
    composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/funciones
+   composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/moderacion
+   composer update cerberus-paw/frontend-indiecinema -d ../backend-indiecinema/recaudacion
    ```
    Con Docker (lo habitual), el README del back explica cómo levantar todo, también sin PHP en la máquina.
 3. Levantar el servidor local de desarrollo sin Docker:
@@ -302,18 +314,19 @@ Las próximas funciones de la ficha de la sala, una por fila, como el wireframe 
 - **`plantillas/cuentas/registro.html.twig`**: Formulario de creación de cuenta de usuario con token CSRF, campos de nombre, email, contraseña, confirmación y casilla de términos sin tildar por defecto (`marcado: valores.terminos ?? false`), mensajes de error y botón principal.
 - **`plantillas/programacion/acerca_de.html.twig`**: «Acerca de IndieCinema» en `/acerca-de`, estática: quiénes somos, los cuatro pasos de cómo funciona una función (como la sección del wireframe de la portada) y quién participa. Las secciones `#quienes-somos` y `#como-funciona` son las que enlazan el encabezado y el pie (IC-95).
 - **`plantillas/administracion.html.twig`**: Armado de las pantallas del administrador, como el wireframe `administracion-usuarios-parametros`: sin el encabezado ni el pie del sitio, con la barra lateral (`parciales/menu_administracion.html.twig`: el logo, los grupos «Administración» y «Moderación», y la sesión) y el contenido. Cada pantalla define `seccion` y `panel` (IC-245).
-- **`plantillas/programacion/administracion_solicitudes.html.twig`**: Bandeja de solicitudes de sala en `/administracion/solicitudes`, como el wireframe `moderacion-solicitudes`: buscador y lista a la izquierda, y la elegida a la derecha con la foto, los datos del espacio, el historial de quien la mandó y la resolución (aprobar o rechazar) con su motivo obligatorio; «Ver historial de decisiones» lista las resueltas (IC-246).
-- **`plantillas/programacion/solicitar_sala.html.twig`**: Solicitud para abrir una sala en `/solicitar-sala`, como el wireframe `solicitud-de-sala`, para el espectador y el organizador: los datos del espacio, la foto, los parámetros y las declaraciones, con las validaciones que manda el backend, que también avisa mientras se carga, y la foto que se puede arrastrar (E4-09). Arriba, el estado de la última que mandó; si la rechazaron, el motivo y el formulario con la sala para corregirla (IC-246).
+- **`plantillas/moderacion/administracion_solicitudes.html.twig`**: Bandeja de solicitudes de sala en `/moderacion/solicitudes` (de moderación desde EF-07.2), como el wireframe `moderacion-solicitudes`: buscador y lista a la izquierda, y la elegida a la derecha con la foto, los datos del espacio, el historial de quien la mandó y la resolución (aprobar o rechazar) con su motivo obligatorio; «Ver historial de decisiones» lista las resueltas (IC-246); desde una aprobada, la sala se retira del sitio o se vuelve a publicar con un motivo.
+- **`plantillas/moderacion/solicitar_sala.html.twig`**: Solicitud para abrir una sala en `/solicitar-sala`, que atiende moderación desde EF-07.2, como el wireframe `solicitud-de-sala`, para el espectador y el organizador: los datos del espacio, la foto, los parámetros y las declaraciones, con las validaciones que manda el backend, que también avisa mientras se carga, y la foto que se puede arrastrar (E4-09). Arriba, el estado de la última que mandó; si la rechazaron, el motivo y el formulario con la sala para corregirla (IC-246).
 - **`plantillas/programacion/alta_funcion.html.twig`**: Formulario de alta y edición para programar o editar una función en `/organizador/funciones/nueva` y `/organizador/funciones/{id}/editar` (IC-121 / IC-122 / IC-147 / E3-11.2 / E3-11.3 / E3-12.1) con selector de modo («Función programada» vs «Abrir a votación de títulos»), selector de sala propia habilitada, selección de obras del catálogo (o candidatas para votación), fecha y horario de proyección condicionales al modo, precio y cupo de localidades, con los errores mientras se carga (E4-09.1).
 - **`plantillas/programacion/alta_sala.html.twig`**: Formulario de edición de sala indie para programación (IC-35 / IC-36) con datos del espacio (nombre, descripción, dirección, localidad), capacidad, fotografía (con arrastrar y soltar) y parámetros de proyección, y los errores mientras se carga (E4-09). Las salas nuevas entran por la solicitud de sala.
+- **`plantillas/programacion/bloqueados.html.twig`**: «Usuarios bloqueados» para organizadores en `/organizador/bloqueados` (EF-12.1 / IC-580): formulario para bloquear a un espectador en una sala propia indicando un motivo obligatorio (con preselección desde `?sala=` y `?usuario=`), listado de bloqueos activos en sus salas y botón POST para desbloquear.
 - **`plantillas/programacion/cancelar_funcion.html.twig`**: Pantalla de confirmación para cancelar una función propia en `/organizador/funciones/{id}/cancelar` (IC-123 / E3-11.4): migas de pan, advertencia de acción irreversible, ficha resumen de la función (sala, fecha/hora, precio, cupo y estado) y formulario POST con token CSRF para confirmar la baja lógica o volver al listado.
 - **`plantillas/programacion/ficha_funcion.html.twig`**: Ficha de una función en `/cartelera/{id}`, en cualquier estado: las obras (elegidas, o candidatas si está en votación) con su sinopsis, duración y géneros, la sala con su dirección y el enlace a su ficha, la fecha (o «Fecha a confirmar»), el precio, el cupo y el estado, con un aviso si se canceló (IC-86), y el panel para reservar sólo si está programada y todavía no empezó (en votación o en acuerdo de fecha no se reserva: F-01.2): con sesión, el formulario que manda la reserva a funciones; sin sesión, el enlace para ingresar (IC-252). Soporta aviso de confirmación tras editar y accesos de edición y cancelación para organizador dueño (IC-122 / IC-123 / E3-11.4). Cuando la función está en estado `en_votacion_titulos`, incorpora el bloque interactivo de «Votación de títulos» (IC-148 / E3-12) con las obras candidatas como opciones seleccionables, destaca el voto emitido por el espectador con opción a cambiarlo, confirmación accesible de voto y panel informativo de ingreso/registro para visitantes; el organizador ve los votos de cada obra y «Cerrar votación». En `en_acuerdo_fecha`, las franjas con sus «Me sirve», la fecha límite y, para el organizador, confirmar la ganadora o cerrar sin mínimo (E3-13). Los lugares libres van en la cabecera y en el recuadro de reserva, con la barra de lo reservado, y se actualizan solos (E4-02 / E4-05.2). Migas de pan, la sala y cada obra en tarjetas que en celular pasan a una columna, y encabezados sin saltos de nivel: `h1` la función, `h2` la sala y cada obra (IC-87).
 - **`plantillas/programacion/proponer_franjas.html.twig`**: «Proponer franjas horarias» en `/organizador/funciones/{id}/franjas`, a la que lleva cerrar la votación de títulos (E3-13.2): el mínimo de asistentes y de 2 a 5 franjas de fecha y horario, con los errores de cada una junto a su opción (IC-297). Al publicarlas, la función pasa a «En acuerdo de fecha».
-- **`plantillas/funciones/mis_reservas.html.twig`**: «Mis reservas» en `/funcion/reservas` (E4-04.1), como el wireframe `mi-cuenta-mis-reservas`: la función, la sala, la fecha, los lugares, el estado y las acciones de cada reserva, con el paginado.
-- **`plantillas/funciones/reservas_de_la_funcion.html.twig`**: las reservas de una función para su organizador en `/funcion/organizador/funciones/{id}/reservas` (E4-03): los números de arriba (reservados, libres, asistentes y recaudado), el registro de la asistencia con el código, la tabla y «Exportar listado» (el CSV).
+- **`plantillas/funciones/mis_reservas.html.twig`**: «Mis reservas» en `/funcion/reservas` (E4-04.1), como el wireframe `mi-cuenta-mis-reservas`: la función, la sala, la fecha, los lugares, el estado y las acciones de cada reserva, con el paginado. Una cancelada agrega abajo del estado por qué se canceló y, si la había pagado, «Reembolsada el …» con la fecha (EF-06.3).
+- **`plantillas/funciones/reservas_de_la_funcion.html.twig`**: las reservas de una función para su organizador en `/funcion/organizador/funciones/{id}/reservas` (E4-03): los números de arriba (reservados, libres, asistentes y el total cobrado, que es lo que se pagó menos lo devuelto; EF-06.5), el registro de la asistencia con el código, la tabla y «Exportar listado» (el CSV).
 - **`plantillas/funciones/administracion_reservas.html.twig`**: todas las reservas para el administrador en `/funcion/administracion/reservas` (E4-03), con el armado del panel, el filtro por estado y la anulación de una reserva confirmada.
 - **`plantillas/funciones/reservar.html.twig`**: Reserva de una función en `/funcion/reservar/{id}` (IC-252): el resumen de la función, la cantidad de lugares con los límites que manda el backend y el error si no quedan tantos; si la función ya no admite reservas, el motivo en lugar del formulario. Es la misma página a la que vuelve el formulario de la ficha cuando hay un error.
-- **`plantillas/funciones/reserva_confirmada.html.twig`**: Confirmación en `/funcion/reservas/{id}` (IC-252): el código de la reserva en dos grupos de cuatro para dictarlo en la puerta, la función, la fecha, la sala, los lugares y el total; mientras la función no empezó, el botón para cancelarla (IC-254).
+- **`plantillas/funciones/reserva_confirmada.html.twig`**: Confirmación en `/funcion/reservas/{id}` (IC-252): el código de la reserva en dos grupos de cuatro para dictarlo en la puerta, la función, la fecha, la sala, los lugares y el total; mientras la función no empezó, el botón para cancelarla (IC-254). Si está cancelada, el motivo va como aviso abajo de la tarjeta y la fecha del reembolso entra en los datos, que son los que quedan en el papel (EF-06.3).
 - **`plantillas/funciones/cancelar_reserva.html.twig`**: Confirmación para cancelar una reserva propia en `/funcion/reservas/{id}/cancelar` (IC-254): la advertencia de que los lugares quedan libres, el resumen y el formulario POST con token CSRF; si no se pudo, el motivo en lugar del formulario.
 - **`plantillas/programacion/inicio.html.twig`**: Portada en `/`: la presentación con un buscador GET (qué y dónde) que lleva a la cartelera filtrada, la cantidad de salas publicadas y de funciones en cartelera, el carrusel de destacadas (las próximas con afiche, en una franja propia porque el wireframe no dibuja un destacado; E4-07), las próximas cuatro funciones y tres salas, cada sección con el enlace a su listado y un mensaje propio si está vacía (IC-93).
 - **`plantillas/programacion/mis_funciones.html.twig`**: «Mis funciones» para organizadores en `/organizador/funciones`, con migas de pan: una tabla con las funciones de sus salas en cualquier estado, también las canceladas y las que todavía no tienen fecha, con la sala, la fecha (o «Sin fecha todavía»), el estado y la entrada. La columna de acciones tiene «Editar» sólo en las programadas que todavía no se dieron (IC-122 / E3-11.3) y «Cancelar» en las que están en votación o programadas y todavía no se dieron (IC-123 / E3-11.4), con el aviso al volver de cancelar. Sólo enlaza a la ficha de la función y a la de la sala si la sala está habilitada, y muestra un mensaje si no tiene ninguna función (IC-120).
@@ -336,7 +349,7 @@ Sin librerías y con una clase por archivo. La plantilla base carga, con `defer`
   - `avisoFlotante(texto, tipo)`: el aviso fijo abajo de la pantalla que comparten los componentes que hacen `fetch`, de carga (`role="status"`) o de error (`role="alert"`).
 - **`js/app.js`, la clase de aplicación `App`**: su constructor sólo espera a `DOMContentLoaded`; ahí, por cada componente cuyo contenedor está en la página, carga su script con `PAW.cargarScript()` y lo crea pasándole el contenedor.
 - **`js/componentes/`, una clase por componente**: el constructor recibe su contenedor (elemento o selector) y no busca nada fuera de él salvo los eventos del documento que necesite. Hoy:
-  - `acciones-de-reserva.js`, `AccionesDeReserva` (`[data-panel-de-reservas]`, IC-276 / E4-05.5): en el panel de reservas del organizador registra la asistencia, y en el del administrador anula, sin recargar la lista: manda el mismo POST y, con la respuesta en JSON, cambia la fila y el resumen de arriba, y anuncia el resultado en una región `aria-live`. Sin JavaScript, los formularios redirigen a la lista.
+  - `acciones-de-reserva.js`, `AccionesDeReserva` (`[data-panel-de-reservas]`, IC-276 / E4-05.5): en el panel de reservas del organizador registra la asistencia, y en el del administrador anula, sin recargar la lista: manda el mismo POST y, con la respuesta en JSON, cambia la fila y el resumen de arriba, y anuncia el resultado en una región `aria-live`. En el del administrador también deja en la fila qué pasó con la plata de una reserva pagada (IC-541 / EF-06.4): «Reembolsada» o «Reembolso pendiente», que es lo que el administrador tiene que atender, y lo dice además en el aviso. Sin JavaScript, los formularios redirigen a la lista.
   - `acuerdo-fecha.js`, `AcuerdoFecha` (`[data-seccion-acuerdo-fecha]`, E3-13): en la ficha, los formularios del acuerdo («Me sirve», confirmar la franja ganadora y cerrar sin mínimo) funcionan con un POST común; esto sólo evita el doble envío, que marcaría y quitaría la misma franja.
   - `boton-imprimir.js`, `BotonImprimir` (`[data-imprimir]`, IC-268 / E4-04.2): muestra el botón «Imprimir» del comprobante de la reserva, que llega oculto (`hidden`), y al tocarlo abre el diálogo de impresión. Sin JavaScript no aparece, y queda el «Imprimir» del navegador; los estilos `@media print` dejan en el papel sólo el código y los datos de la reserva.
   - `carrusel.js`, `Carrusel` (`[data-carrusel]`, E4-07): recibe sólo el contenedor y convierte cada `<li>` de su lista en una diapositiva, con flechas anterior y siguiente que dan la vuelta; las que no se ven quedan `inert`. Tiene tres transiciones hechas en CSS (`fundido`, `deslizar` y `zoom`), cada una una clase `carrusel-<nombre>` en el contenedor: se elige con `data-transicion` (la portada usa `deslizar`) o con la propiedad `transicion`; el JS sólo marca qué diapositiva entra, cuál sale y hacia qué lado. Mientras bajan las imágenes, una barra (`<progress>`) tapa la diapositiva y muestra el porcentaje (cada imagen distinta cuenta una vez, y una que falla cuenta igual para no trabarla); al llegar al 100 % arranca el pase automático, cada `data-intervalo` ms (6 s por defecto). Se pausa con su botón y mientras el mouse o el foco están sobre el carrusel o la pestaña no se ve. Se navega con las flechas de los costados, con las miniaturas de abajo (la misma imagen de cada diapositiva, con `aria-current` en la actual), deslizando el dedo o el mouse de costado (50 px; un gesto vertical sigue desplazando la página, y un deslizamiento que empezó sobre un enlace no lo abre) y, con el foco adentro, con ← y → (Inicio y Fin van a la primera y a la última). Si el foco estaba en la diapositiva que sale, pasa a la que entra. Es responsive: en tablet el afiche se achica y en el celular (≤ 768 px) la diapositiva pasa a una columna, con el afiche arriba y las flechas a su altura; a 360 px no desborda. Con `prefers-reduced-motion`, las diapositivas cambian sin animar y el pase automático arranca en pausa (el botón dice «Reanudar»). Sin JavaScript, la lista es una tira que se desplaza de costado. Un contenedor que no existe sólo avisa por consola.
@@ -352,9 +365,11 @@ Sin librerías y con una clase por archivo. La plantilla base carga, con `defer`
   - `validacion-en-linea.js`, `ValidacionEnLinea` (`[data-validar-en-linea]`, IC-295 / E4-09.1 y E4-09.3): en la solicitud de sala, la edición de sala y el alta de función, muestra el error de cada campo al dejarlo, y en cada tecla una vez que tiene error, y no deja mandar el formulario con algo mal. Qué está mal lo dice el navegador (`campo.validity`, con los `required`, `min`, `max` y `pattern` que salen de las reglas del back); el texto lo manda el back en los `data-error-*` de cada campo, el mismo con el que rechazaría el POST. Sin JavaScript valida el navegador, y el servidor vuelve a validar todo.
   - `votacion-titulos.js`, `VotacionTitulos` (`[data-formulario-votacion]`, IC-148 / E3-12): gestiona la accesibilidad y sincronización visual al seleccionar obras candidatas en la ficha de la función, actualizando `aria-checked` y la clase `.seleccionada` en las tarjetas. Sin JavaScript, el formulario opera mediante POST estándar nativo (mejora progresiva).
 
-  - `zona-de-imagen.js`, `ZonaDeImagen` (`[data-zona-de-imagen]`, IC-296 / E4-09.2): envuelve el campo de archivo de la foto de la sala para poder arrastrar y soltar la imagen, con vista previa. El campo sigue ahí y se usa igual con el teclado; lo que se suelta se revisa contra su `accept`, con el mismo mensaje que daría el servidor.
+  - `zona-de-archivo.js`, `ZonaDeArchivo` (`[data-zona-de-archivo]`, IC-296 / E4-09.2): envuelve el campo de archivo de la foto de la sala, del afiche de la obra y de los PDF de la solicitud de sala (EF-07.4) para poder arrastrar y soltar el archivo: una imagen se ve antes de mandarla, y de un PDF se muestran el nombre y el tamaño. El texto de la zona lo pone la plantilla. El campo sigue ahí y se usa igual con el teclado; lo que se suelta se revisa contra su `accept`, con el mismo mensaje que daría el servidor.
 
 Para sumar un componente: su clase en `componentes/<nombre>.js` y, en `App.iniciar()`, la carga condicionada a que su contenedor esté en la página.
+
+Dos líneas más, o el CI falla (IC-447): el archivo del componente arranca con `/* exported <Clase> */`, porque quien la usa es `app.js` y no él mismo, y el nombre de la clase se suma a la lista de `/* global … */` que encabeza `app.js`. Los archivos se cargan con `<script>` y no son módulos, así que ésa es la única forma que tiene ESLint de saber qué publica cada archivo y qué toma de otro; a cambio, un nombre de componente mal escrito en `app.js` falla en el CI en lugar de fallar en el navegador. `PAW` no hace falta declararla: está en `eslint.config.mjs`.
 
 ## 9. Integración continua
 
@@ -363,7 +378,7 @@ En cada PR y en cada push a `main` o a `dev` (`.github/workflows/ci.yml`):
 - **Pruebas del back:** el back con el front del PR al lado, y las pruebas de cada subsistema. El back es el de la rama del mismo nombre si existe allá; si no, el de la base del PR (`dev` o `main`): un cambio que toca los dos repositorios va en ramas que se llaman igual, y sus dos PR pasan sin esperar al otro. Es el espejo del CI del back.
 - **Plantillas:** `herramientas/compilar-plantillas.php` compila todas con el Twig del núcleo (del back de la misma rama, como las pruebas); falla con un error de sintaxis o un filtro que no existe.
 - **CSS:** stylelint, sólo con reglas que encuentran errores (una variable que no existe, una propiedad mal escrita, un selector repetido). En local: `npm ci && npm run css`.
-- **JavaScript:** `node --check` sobre cada archivo de `estaticos/js`.
+- **JavaScript:** ESLint con las reglas recomendadas sobre `estaticos/js` (IC-447), que encuentran errores y no cuestiones de estilo: un método repetido en una clase, un nombre que no existe, una variable que sobra. Reemplaza al `node --check` de antes, que sólo veía la sintaxis. En local: `npm ci && npm run js`.
 - **Secretos:** gitleaks sobre todo el historial, como en el back.
 
 Cuando la CI pasa en un push a `main` o a `dev`, `.github/workflows/cd.yml` publica el cambio en el servidor de esa rama, con el mismo script que el back. Cada subtarea sale de `dev` y su PR apunta ahí; a producción llega por un PR de `dev` a `main` (README del back, «Ramas y entornos» y «Despliegue continuo»).

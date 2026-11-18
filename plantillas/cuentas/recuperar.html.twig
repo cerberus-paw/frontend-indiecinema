@@ -1,0 +1,70 @@
+{#
+  Solicitud de recuperación de contraseña en /cuenta/recuperar (X-02.2 · IC-332).
+
+  Variables recibidas:
+  - enviado: (bool, opcional) true después de mandar el formulario con un correo válido.
+  - valores: (array/map, opcional) correo cargado por el usuario si hubo errores.
+  - errores: (array/map, opcional) errores de validación por campo.
+  - error_general: (string, opcional) mensaje de error general si aplica.
+#}
+{% extends 'base.html.twig' %}
+
+{% block titulo %}Recuperar contraseña{% endblock %}
+
+{% block contenido %}
+<div class="contenedor-autenticacion">
+  <div class="tarjeta-autenticacion">
+    <header class="autenticacion-cabecera">
+      <h1 class="autenticacion-titulo">Recuperar contraseña</h1>
+      <p class="autenticacion-subtitulo">
+        Ingresá el correo de tu cuenta y te enviaremos un enlace para elegir una contraseña nueva.
+      </p>
+    </header>
+
+    {% if enviado|default(false) %}
+      {% include 'parciales/mensaje.html.twig' with {
+        tipo: 'info',
+        titulo: 'Revisá tu correo',
+        mensaje: 'Si el correo está registrado, te mandamos un enlace.'
+      } only %}
+    {% else %}
+      {% include 'parciales/resumen_de_errores.html.twig' with {
+        errores: errores ?? {},
+        error_general: error_general ?? null,
+        titulo: 'No pudimos enviar el enlace'
+      } only %}
+
+      <form action="/cuenta/recuperar" method="POST" class="formulario-ingreso" novalidate>
+        <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+        {% include 'parciales/campo.html.twig' with {
+          nombre: 'email',
+          etiqueta: 'Correo electrónico',
+          tipo: 'email',
+          valor: valores.email ?? '',
+          placeholder: 'nombre@ejemplo.com',
+          requerido: true,
+          autocompletar: 'email',
+          error: errores.email ?? null
+        } %}
+
+        <div class="formulario-acciones">
+          {% include 'parciales/boton.html.twig' with {
+            texto: 'Enviar enlace de recuperación',
+            tipo: 'submit',
+            variante: 'primario',
+            tamano: 'grande',
+            bloque: true
+          } only %}
+        </div>
+      </form>
+    {% endif %}
+
+    <footer class="autenticacion-pie">
+      <p class="autenticacion-enlace-texto">
+        <a href="/cuenta/ingresar" class="enlace-destacado">Volver a iniciar sesión</a>
+      </p>
+    </footer>
+  </div>
+</div>
+{% endblock %}

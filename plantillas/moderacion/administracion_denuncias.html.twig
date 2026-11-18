@@ -1,0 +1,240 @@
+{#
+  La pestaña «Denuncias» de la bandeja de moderación, en /moderacion/denuncias (EF-07.8): lo
+  denunciado con denuncias abiertas a la izquierda, primero lo que lleva más tiempo, y la elegida a
+  la derecha, con lo denunciado y cada denuncia con quién la hizo. Se resuelven todas juntas con un
+  motivo: desestimándolas o actuando sobre lo denunciado.
+
+  Variables:
+  - historial: si la vista es la del historial («Ver historial»).
+  - cerradas: en el historial, lista de {tipo_etiqueta, titulo, categoria, desestimada, accion,
+    motivo, resuelta}.
+  - grupos: lista de {tipo, tipo_etiqueta, id, titulo, cantidad, desde, elegida}.
+  - elegida: {tipo, tipo_etiqueta, id, titulo, denunciado, denuncias, propia, acciones}, o null.
+    denunciado: los datos de lo denunciado según el tipo, con url (la ficha) y sancionado (si ya
+    se hizo lo que resuelve sus denuncias: se cierran sin repetirlo); null si ya no existe (se dio
+    de baja); false si su subsistema no respondió. denuncias: lista de {categoria, detalle (o
+    null), cuando, quien ({nombre, correo}, null si ya no existe o false si cuentas no
+    respondió)}. propia: es del moderador en sesión o denunció él, que no las resuelve. acciones:
+    lista de {valor, etiqueta}.
+  - valores: lo que mandó si hubo errores, {accion, motivo}.
+  - errores: campo => qué está mal.
+  - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
+  - suspendidas: las salas suspendidas por denuncia, lista de {sala_id, nombre (o null si
+    programación no la tiene), motivo, desde, propia}; false si programación no respondió. propia:
+    la sala es del moderador en sesión, que no levanta la suspensión.
+  - levantar: el levantamiento que volvió con error, {sala, motivo, error}, o null.
+  - mensaje_exito: el aviso de lo que se acaba de hacer (opcional).
+#}
+{% extends 'administracion.html.twig' %}
+
+{% block titulo %}Denuncias{% endblock %}
+
+{% block seccion %}denuncias{% endblock %}
+
+{% block panel %}
+<header class="panel-cabecera bandeja-cabecera">
+  <div>
+    <h1 class="panel-titulo">Denuncias</h1>
+    <p class="panel-bajada">Lo que denunciaron los usuarios. Resolvé con un motivo: cierra todas las denuncias de lo elegido.</p>
+  </div>
+  {% if historial %}
+    <a href="{{ prefijo }}/denuncias" class="boton boton-secundario">Volver a las abiertas</a>
+  {% else %}
+    <a href="{{ prefijo }}/denuncias?ver=historial" class="boton boton-secundario">Ver historial</a>
+  {% endif %}
+</header>
+
+{% if mensaje_exito is defined %}
+  {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: mensaje_exito } only %}
+{% endif %}
+
+{% if historial %}
+  {% if cerradas is empty %}
+    <p class="bandeja-nota bandeja-nota-suelta">Todavía no se cerró ninguna denuncia.</p>
+  {% else %}
+    <ul class="bandeja-items">
+      {% for cerrada in cerradas %}
+        <li class="bandeja-item">
+          <span class="bandeja-item-fila">
+            <span class="bandeja-item-sala">{{ cerrada.titulo }}</span>
+            <span class="estado-cuenta {{ cerrada.desestimada ? 'estado-cuenta-activa' : 'estado-cuenta-suspendida' }}">{{ cerrada.accion }}</span>
+          </span>
+          <span class="bandeja-item-datos">{{ cerrada.tipo_etiqueta }} · {{ cerrada.categoria }} · {{ cerrada.resuelta }}</span>
+          <span class="bandeja-item-datos">{{ cerrada.motivo }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% elseif grupos is empty %}
+  <p class="bandeja-nota bandeja-nota-suelta">No hay denuncias abiertas.</p>
+{% else %}
+  <div class="bandeja">
+    <section class="bandeja-lista" aria-label="Lo denunciado">
+      <ul class="bandeja-items">
+        {% for grupo in grupos %}
+          <li>
+            <a href="{{ prefijo }}/denuncias?tipo={{ grupo.tipo }}&amp;id={{ grupo.id }}" class="bandeja-item{% if grupo.elegida %} activo{% endif %}"{% if grupo.elegida %} aria-current="true"{% endif %}>
+              <span class="bandeja-item-fila">
+                <span class="bandeja-item-sala">{{ grupo.titulo }}</span>
+                <span class="estado-cuenta">{{ grupo.tipo_etiqueta }}</span>
+              </span>
+              <span class="bandeja-item-datos">{{ grupo.cantidad }} {{ grupo.cantidad == 1 ? 'denuncia' : 'denuncias' }}</span>
+              <span class="bandeja-item-datos">{% include 'parciales/icono.html.twig' with { nombre: 'calendario' } only %} Desde el {{ grupo.desde }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    {% if elegida %}
+      {% set resolvible = not elegida.propia %}
+      <article class="bandeja-detalle" aria-labelledby="titulo-denunciado">
+        <header class="bandeja-detalle-cabecera">
+          <h2 id="titulo-denunciado" class="bandeja-detalle-titulo">{{ elegida.titulo }}</h2>
+          <span class="estado-cuenta">{{ elegida.tipo_etiqueta }}</span>
+        </header>
+
+        <div class="bandeja-columnas">
+          <div>
+            {% if elegida.denunciado is same as(false) %}
+              <p class="bandeja-nota bandeja-nota-suelta">No pudimos consultar lo denunciado. Probá de nuevo en un rato.</p>
+            {% elseif elegida.denunciado is null %}
+              <p class="bandeja-nota bandeja-nota-suelta">Ya no está publicada: sólo se pueden desestimar sus denuncias.</p>
+            {% else %}
+              {% set d = elegida.denunciado %}
+              {% if d.sancionado %}
+                <p class="bandeja-nota bandeja-nota-suelta">
+                  {% if elegida.tipo == 'obra' %}Ya está rechazada: resolverlas así no la vuelve a rechazar.{% endif %}
+                  {% if elegida.tipo == 'sala' %}Ya está suspendida por una denuncia: resolverlas así no abre otra suspensión.{% endif %}
+                  {% if elegida.tipo == 'calificacion' %}Ya está oculto: resolverlas así no cambia nada en el sitio.{% endif %}
+                </p>
+              {% endif %}
+              {% if d.afiche is defined and d.afiche %}
+                <img src="{{ d.afiche }}" alt="Afiche de {{ elegida.titulo }}" class="bandeja-foto">
+              {% endif %}
+              {# Sin ninguno de estos datos (una sala no trae ninguno) la ficha no va: vacía se
+                 dibujaba igual, como un campo de texto sin nada adentro. #}
+              {% if d.tipo is defined or d.director is defined or d.sala is defined or d.obras is defined %}
+              <dl class="bandeja-ficha">
+                {% if d.tipo is defined %}<dt>Tipo</dt><dd>{{ d.tipo }}{% if d.anio is defined %} · {{ d.anio }}{% endif %}</dd>{% endif %}
+                {% if d.director is defined %}<dt>Dirección</dt><dd>{{ d.director }}</dd>{% endif %}
+                {% if d.sala is defined %}<dt>Sala</dt><dd>{{ d.sala }}</dd>{% endif %}
+                {% if d.obras is defined %}<dt>Obras</dt><dd>{{ d.obras|map(o => o.titulo)|join(' + ') }}</dd>{% endif %}
+              </dl>
+              {% endif %}
+              {% if d.comentario is defined and d.comentario %}
+                <h3 class="bandeja-subtitulo">El comentario{% if d.puntaje is defined %} · {{ d.puntaje }} de 5{% endif %}</h3>
+                <p class="bandeja-texto">{{ d.comentario|nl2br }}</p>
+              {% endif %}
+              {% if d.sinopsis is defined %}
+                <h3 class="bandeja-subtitulo">Sinopsis</h3>
+                <p class="bandeja-texto">{{ d.sinopsis|nl2br }}</p>
+              {% endif %}
+              <p class="bandeja-texto"><a href="{{ d.url }}">Ver en el sitio</a></p>
+            {% endif %}
+          </div>
+
+          <div>
+            <h3 class="bandeja-subtitulo">{{ elegida.denuncias|length == 1 ? 'La denuncia' : 'Las ' ~ elegida.denuncias|length ~ ' denuncias' }}</h3>
+            <ul class="bandeja-items">
+              {% for denuncia in elegida.denuncias %}
+                <li class="bandeja-item">
+                  <span class="bandeja-item-fila"><strong>{{ denuncia.categoria }}</strong></span>
+                  {% if denuncia.detalle %}<span class="bandeja-item-datos">{{ denuncia.detalle|nl2br }}</span>{% endif %}
+                  <span class="bandeja-item-datos">
+                    {{ denuncia.cuando }} ·
+                    {% if denuncia.quien is same as(false) %}
+                      no pudimos consultar quién
+                    {% elseif denuncia.quien is null %}
+                      la cuenta ya no existe
+                    {% else %}
+                      {{ denuncia.quien.nombre }} · <a href="mailto:{{ denuncia.quien.correo|url_encode|replace({'%40': '@'}) }}">{{ denuncia.quien.correo }}</a>
+                    {% endif %}
+                  </span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        {% if not resolvible %}
+          <div class="bandeja-caja">
+            <p class="bandeja-caja-titulo">Resolución</p>
+            <p class="bandeja-texto">Es tuyo o lo denunciaste vos: lo resuelve otro moderador.</p>
+          </div>
+        {% else %}
+          {% include 'parciales/resumen_de_errores.html.twig' with { errores: errores } only %}
+          <form action="{{ prefijo }}/denuncias/{{ elegida.tipo }}/{{ elegida.id }}/resolver" method="post">
+            <input type="hidden" name="_csrf" value="{{ csrf }}">
+            <fieldset id="accion" class="bandeja-caja{% if errores.accion is defined %} con-error{% endif %}">
+              <legend class="bandeja-caja-titulo">Resolución</legend>
+              {% for accion in elegida.acciones %}
+                <label class="bandeja-opcion">
+                  <input type="radio" name="accion" value="{{ accion.valor }}" required{% if (valores.accion ?? '') == accion.valor %} checked{% endif %}{% if errores.accion is defined %} aria-invalid="true" aria-describedby="error-accion"{% endif %}>
+                  {{ accion.etiqueta }}
+                </label>
+              {% endfor %}
+              {% if errores.accion is defined %}
+                <span id="error-accion" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.accion }}</span>
+              {% endif %}
+            </fieldset>
+            <div class="bandeja-motivo">
+              {% include 'parciales/campo.html.twig' with {
+                nombre: 'motivo',
+                etiqueta: 'Motivo de la resolución',
+                tipo: 'textarea',
+                filas: 4,
+                valor: valores.motivo ?? '',
+                requerido: true,
+                maximo: maximo_motivo,
+                ayuda: 'Obligatorio. Queda en el historial.',
+                errores: errores
+              } only %}
+              <div class="bandeja-acciones">
+                <button type="submit" class="boton boton-primario">Enviar resolución</button>
+              </div>
+            </div>
+          </form>
+        {% endif %}
+      </article>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% if not historial %}
+  <section class="bandeja-seccion" aria-labelledby="titulo-suspendidas">
+    <h2 id="titulo-suspendidas" class="panel-subtitulo">Salas suspendidas por denuncia</h2>
+    {% if suspendidas is same as(false) %}
+      <p class="bandeja-nota bandeja-nota-suelta">No pudimos consultar las salas. Probá de nuevo en un rato.</p>
+    {% elseif suspendidas is empty %}
+      <p class="bandeja-nota bandeja-nota-suelta">Ninguna sala está suspendida por una denuncia.</p>
+    {% else %}
+      <ul class="bandeja-items">
+        {% for suspendida in suspendidas %}
+          {% set con_error = levantar and levantar.sala == suspendida.sala_id %}
+          <li class="bandeja-item">
+            <span class="bandeja-item-fila">
+              <span class="bandeja-item-sala">{{ suspendida.nombre ?? 'Una sala que programación ya no tiene' }}</span>
+              <span class="estado-cuenta estado-cuenta-suspendida">Suspendida</span>
+            </span>
+            <span class="bandeja-item-datos">Desde el {{ suspendida.desde }} · {{ suspendida.motivo }}</span>
+            {% if suspendida.propia %}
+              <span class="bandeja-item-datos">Es tuya: la levanta otro moderador.</span>
+            {% else %}
+              <form action="{{ prefijo }}/denuncias/salas/{{ suspendida.sala_id }}/levantar" method="post" class="bandeja-levantar">
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                <label for="motivo-levantar-{{ suspendida.sala_id }}" class="campo-etiqueta">Motivo para levantarla</label>
+                <textarea id="motivo-levantar-{{ suspendida.sala_id }}" name="motivo" rows="2" maxlength="{{ maximo_motivo }}" required{% if con_error %} aria-invalid="true" aria-describedby="error-levantar-{{ suspendida.sala_id }}"{% endif %}>{{ con_error ? levantar.motivo : '' }}</textarea>
+                {% if con_error %}
+                  <span id="error-levantar-{{ suspendida.sala_id }}" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ levantar.error }}</span>
+                {% endif %}
+                <button type="submit" class="boton boton-secundario">Levantar la suspensión</button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+{% endif %}
+{% endblock %}

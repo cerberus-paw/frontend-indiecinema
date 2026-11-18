@@ -58,8 +58,8 @@
     </form>
 
     <p class="portada-resumen">
-      <span><span aria-hidden="true">📍</span> {{ total_salas }} {{ total_salas == 1 ? 'sala publicada' : 'salas publicadas' }}</span>
-      <span><span aria-hidden="true">📅</span> {{ total_funciones }} {{ total_funciones == 1 ? 'función' : 'funciones' }} en cartelera</span>
+      <span>{% include 'parciales/icono.html.twig' with { nombre: 'ubicacion' } only %} {{ total_salas }} {{ total_salas == 1 ? 'sala publicada' : 'salas publicadas' }}</span>
+      <span>{% include 'parciales/icono.html.twig' with { nombre: 'calendario' } only %} {{ total_funciones }} {{ total_funciones == 1 ? 'función' : 'funciones' }} en cartelera</span>
     </p>
   </div>
 </section>
