@@ -31,11 +31,11 @@
 <form class="panel-filtros reporte-filtros" action="/recaudacion/reportes/obras" method="get" aria-label="Elegir el período">
   <label class="reporte-filtro">
     <span class="reporte-filtro-etiqueta">Desde</span>
-    <input type="date" name="desde" value="{{ periodo.desde }}" class="campo-control" required>
+    <input type="date" name="desde" value="{{ periodo.desde }}" class="campo-control">
   </label>
   <label class="reporte-filtro">
     <span class="reporte-filtro-etiqueta">Hasta</span>
-    <input type="date" name="hasta" value="{{ periodo.hasta }}" class="campo-control" required>
+    <input type="date" name="hasta" value="{{ periodo.hasta }}" class="campo-control">
   </label>
   {% include 'parciales/boton.html.twig' with { texto: 'Ver el período', tipo: 'submit', variante: 'primario' } only %}
 </form>
