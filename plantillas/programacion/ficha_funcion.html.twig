@@ -294,6 +294,9 @@
               {% set campo_cantidad = campo_cantidad|merge({ayuda: 'Máximo ' ~ tope_por_persona ~ ' lugares por persona.'}) %}
             {% endif %}
             {% include 'parciales/campo.html.twig' with campo_cantidad only %}
+            {% if funcion.precio starts with '$' %}
+              {% include 'parciales/campo_cupon.html.twig' only %}
+            {% endif %}
             {% include 'parciales/boton.html.twig' with {
               texto: 'Reservar mis lugares',
               tipo: 'submit',

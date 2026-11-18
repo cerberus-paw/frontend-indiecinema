@@ -1,0 +1,76 @@
+{#
+  «Mis puntos», en Mi cuenta (EF-17.1 / IC-596): el saldo, cuánto falta para un cupón, el botón
+  para canjearlo, los cupones con su estado y los movimientos. Cada asistencia suma y cada canje
+  resta; si un cupón se usó lo dice funciones, y uno en una reserva cancelada vuelve a quedar
+  disponible.
+
+  Variables:
+  - saldo, faltan: (int) los puntos que tiene y los que le faltan para un cupón.
+  - por_asistencia, por_cupon, porcentaje, dias: las reglas del programa, para explicarlas.
+  - cupones: lista de {codigo, porcentaje, vence (dd/mm/aaaa), estado: disponible | usado | vencido}.
+  - movimientos: lista de {fecha, puntos (negativo en un canje), motivo: asistencia | canje, detalle (el código)}.
+  - canjeado: ?string el código del cupón recién canjeado.
+  - error: ?string si no se pudo canjear.
+#}
+{% extends 'cuenta.html.twig' %}
+
+{% block titulo %}Mis puntos{% endblock %}
+{% block seccion %}puntos{% endblock %}
+{% block miga %}Mis puntos{% endblock %}
+
+{% block panel %}
+<section class="mi-cuenta-panel" aria-labelledby="mis-puntos-titulo">
+  <h1 id="mis-puntos-titulo" class="solicitud-titulo">Mis puntos</h1>
+  <p class="solicitud-bajada">Cada función a la que vas suma {{ por_asistencia }} puntos. Con {{ por_cupon }} canjeás un cupón del {{ porcentaje }} % para tu próxima entrada, que vale {{ dias }} días.</p>
+
+  {% if canjeado %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', titulo: 'Canjeaste un cupón', mensaje: 'Tu código es ' ~ canjeado ~ '. Escribilo al reservar, en «¿Tenés un cupón de descuento?».' } only %}
+  {% endif %}
+  {% if error %}
+    {% include 'parciales/mensaje.html.twig' with { tipo: 'error', mensaje: error } only %}
+  {% endif %}
+
+  <div class="puntos-saldo">
+    <div>
+      <p class="puntos-saldo-rotulo">Tu saldo</p>
+      <p class="puntos-saldo-valor">{{ saldo }} <span>puntos</span></p>
+      <progress class="puntos-barra" max="{{ por_cupon }}" value="{{ min(saldo, por_cupon) }}" aria-label="{{ min(saldo, por_cupon) }} de {{ por_cupon }} puntos para un cupón"></progress>
+      <p class="puntos-saldo-nota">{{ faltan > 0 ? 'Te faltan ' ~ faltan ~ ' para un cupón.' : 'Ya podés canjear un cupón.' }}</p>
+    </div>
+    <form action="/recaudacion/puntos/canjear" method="POST">
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      {% include 'parciales/boton.html.twig' with { texto: 'Canjear un cupón del ' ~ porcentaje ~ ' %', tipo: 'submit', variante: 'primario', deshabilitado: faltan > 0 } only %}
+    </form>
+  </div>
+
+  <h2 class="mi-cuenta-subtitulo">Tus cupones</h2>
+  {% if cupones is empty %}
+    <p class="mi-cuenta-vacio">Todavía no canjeaste ninguno.</p>
+  {% else %}
+    <ul class="puntos-cupones">
+      {% for cupon in cupones %}
+        <li class="puntos-cupon puntos-cupon-{{ cupon.estado }}">
+          <span class="puntos-cupon-codigo">{{ cupon.codigo }}</span>
+          <span class="puntos-cupon-datos">{{ cupon.porcentaje }} % de descuento · vence el {{ cupon.vence }}</span>
+          <span class="estado-cuenta{{ cupon.estado == 'disponible' ? ' estado-cuenta-activa' : '' }}">{{ { disponible: 'Disponible', usado: 'Usado', vencido: 'Vencido' }[cupon.estado] }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <h2 class="mi-cuenta-subtitulo">Movimientos</h2>
+  {% if movimientos is empty %}
+    <p class="mi-cuenta-vacio">Todavía no sumaste puntos: se suman cuando el organizador registra tu asistencia en la puerta.</p>
+  {% else %}
+    <ul class="puntos-movimientos">
+      {% for movimiento in movimientos %}
+        <li class="puntos-movimiento">
+          <span class="puntos-movimiento-fecha">{{ movimiento.fecha }}</span>
+          <span class="puntos-movimiento-motivo">{{ movimiento.motivo == 'asistencia' ? 'Asististe a una función (reserva ' ~ movimiento.detalle ~ ')' : 'Canjeaste el cupón ' ~ movimiento.detalle }}</span>
+          <span class="puntos-movimiento-puntos{{ movimiento.puntos < 0 ? ' puntos-movimiento-resta' : '' }}">{{ movimiento.puntos > 0 ? '+' : '' }}{{ movimiento.puntos }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>
+{% endblock %}

@@ -13,6 +13,7 @@
   { clave: 'editar_datos', texto: 'Editar datos', url: '/cuenta/datos' },
   { clave: 'contrasena', texto: 'Contraseña', url: '/cuenta/contrasena' },
   { clave: 'reservas', texto: 'Mis reservas', url: '/funcion/reservas' },
+  { clave: 'puntos', texto: 'Mis puntos', url: '/recaudacion/puntos' },
 ] %}
 {# El moderador alcanza el rol de organizador, pero lo suyo es la moderación (IC-662) #}
 {% if usuario and usuario.alcanza('moderador') and not usuario.alcanza('administrador') %}
