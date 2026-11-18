@@ -125,13 +125,15 @@
                   {{ obra.tipo_etiqueta ?? (obra.tipo == 'cortometraje' ? 'CORTOMETRAJE' : 'PELÍCULA') }}
                 </span>
               {% endif %}
-              {% if obra.anio is defined and obra.anio %}
-                <span class="tarjeta-obra-anio">{{ obra.anio }}</span>
-              {% endif %}
+              {# El estado antes del año: el año va siempre contra el borde derecho, como en las
+                 tarjetas sin estado; después, «Pendiente de revisión» lo corría al medio (F-02). #}
               {% if estado_obra == 'pendiente' %}
                 <span class="estado-cuenta estado-cuenta-revision">Pendiente de revisión</span>
               {% elseif estado_obra == 'rechazada' %}
                 <span class="estado-cuenta estado-cuenta-suspendida">Rechazada</span>
+              {% endif %}
+              {% if obra.anio is defined and obra.anio %}
+                <span class="tarjeta-obra-anio">{{ obra.anio }}</span>
               {% endif %}
             </div>
 
@@ -191,11 +193,10 @@
               {# Formulario POST seguro con CSRF para dar de baja la obra (E4-08.4) #}
               <form action="/organizador/obras/{{ obra.id }}/baja" method="POST" class="formulario-baja-obra" data-confirmar="¿Confirmás que querés dar de baja esta obra? Ya no podrá usarse en nuevas funciones.">
                 <input type="hidden" name="_csrf" value="{{ csrf }}">
+                {# Sin un botón deshabilitado: rosa apagado sobre bordó casi no se leía, y repetía lo
+                   mismo que la nota de abajo (F-02). Queda sólo la razón, legible. #}
                 {% if tiene_futuras %}
-                  <button type="button" class="boton boton-peligro-suave boton-chico boton-bloque" disabled title="No se puede dar de baja porque tiene funciones futuras programadas" aria-disabled="true">
-                    Con funciones futuras
-                  </button>
-                  <span class="baja-ayuda-bloqueo">Tiene funciones futuras</span>
+                  <p class="baja-ayuda-bloqueo">No se puede dar de baja: tiene funciones futuras.</p>
                 {% else %}
                   <button type="submit" class="boton boton-peligro-suave boton-chico boton-bloque">
                     Dar de baja

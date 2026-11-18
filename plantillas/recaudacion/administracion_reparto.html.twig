@@ -79,11 +79,14 @@
   <form action="/recaudacion/administracion/reparto" method="POST" class="formulario-sala">
     <input type="hidden" name="_csrf" value="{{ csrf }}">
     <fieldset class="seccion-formulario">
+      {# Sin un segundo título: «Porcentajes y vigencia» repetía, justo debajo, lo que ya dice
+         «Cambiar el reparto» (F-02). La leyenda queda con la regla de la suma. Los tres porcentajes,
+         en una fila: a todo el ancho eran campos de 1000 px para números de dos cifras. #}
       <legend class="seccion-leyenda">
-        <span class="seccion-titulo">Porcentajes y vigencia</span>
         <span class="seccion-subtitulo">Los tres tienen que sumar 100 %. Se pueden usar hasta dos decimales, para repartos como 33,33 / 33,33 / 33,34.</span>
       </legend>
 
+      <div class="reparto-porcentajes">
       {% include 'parciales/campo.html.twig' with {
         nombre: 'sala',
         etiqueta: 'Sala (%)',
@@ -123,6 +126,9 @@
         ayuda: 'La comisión de IndieCinema. El redondeo de las partes también va acá.'
       } only %}
 
+      </div>
+
+      <div class="reparto-vigencia">
       {% include 'parciales/campo.html.twig' with {
         nombre: 'vigente_desde',
         etiqueta: 'Rige desde',
@@ -132,6 +138,7 @@
         requerido: true,
         ayuda: 'Puede ser más adelante, para anunciar el cambio antes de que valga. No puede empezar antes de ahora: lo que ya pasó no se vuelve a repartir.'
       } only %}
+      </div>
 
       <div class="pie-formulario-acciones">
         {% include 'parciales/boton.html.twig' with {

@@ -25,6 +25,17 @@
 {% block seccion %}liquidaciones{% endblock %}
 
 {% block panel %}
+{# Para el organizador, en un .contenedor y con migas, como sus otras pantallas del panel (Mis
+   funciones, Usuarios bloqueados): sin eso, el título arrancaba más arriba y 16 px más a la
+   izquierda que en ellas (F-02). El panel del administrador no usa ni lo uno ni lo otro. #}
+<div class="contenedor">
+<nav class="navegacion-migas" aria-label="Migas de pan">
+  <ol class="lista-migas">
+    <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+    <li class="separador-miga" aria-hidden="true">/</li>
+    <li class="item-miga miga-activa" aria-current="page">Mis liquidaciones</li>
+  </ol>
+</nav>
 <header class="panel-cabecera">
   <h1 class="panel-titulo">Mis liquidaciones</h1>
   <p class="panel-bajada">Lo que te toca de lo que se cobró en tus funciones, mes por mes: como organizador de la sala y como dueño de las obras que se proyectaron. Las transferencias las hace la administración fuera del sitio y las marca acá.</p>
@@ -118,4 +129,5 @@
     </section>
   {% endif %}
 {% endif %}
+</div>
 {% endblock %}

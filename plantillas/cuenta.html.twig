@@ -7,7 +7,7 @@
   Bloques de la pantalla:
   - seccion: la sección actual, 'datos' o 'reservas', para marcarla en la barra.
   - miga: el nombre de la sección, la última miga.
-  - tarjeta: opcional, lo que va arriba de la barra (la tarjeta del usuario en «Mis datos»).
+  - tarjeta: lo que va arriba de la barra: la tarjeta del usuario, que «Mis datos» completa.
   - panel: el contenido.
 #}
 {% extends 'base.html.twig' %}
@@ -26,7 +26,22 @@
 
   <div class="mi-cuenta-cuerpo">
     <div class="mi-cuenta-lateral">
-      {% block tarjeta %}{% endblock %}
+      {# La tarjeta del usuario en todas las secciones: sólo en «Mis datos», la barra subía y bajaba
+         al pasar de una sección a otra (F-02). «Mis datos» la redefine con la fecha de alta y todos
+         los roles; las demás la arman con lo que ya tiene el encabezado. #}
+      {% block tarjeta %}
+        {% if usuario ?? null %}
+          <section class="mi-cuenta-tarjeta" aria-label="Tu cuenta">
+            <span class="usuario-avatar mi-cuenta-avatar" aria-hidden="true">{{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}</span>
+            <div>
+              <p class="mi-cuenta-nombre">{{ usuario.nombre }}</p>
+            </div>
+            <ul class="mi-cuenta-roles" aria-label="Tu rol">
+              <li class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value|capitalize }}</li>
+            </ul>
+          </section>
+        {% endif %}
+      {% endblock %}
       {% include 'parciales/menu_cuenta.html.twig' with { activa: block('seccion'), usuario: usuario ?? null } only %}
     </div>
 
