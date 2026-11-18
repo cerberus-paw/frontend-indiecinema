@@ -64,7 +64,7 @@
         </label>
       {% endfor %}
       {% if errores.puntaje is defined %}
-        <span id="error-puntaje" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.puntaje }}</span>
+        <span id="error-puntaje" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.puntaje }}</span>
       {% endif %}
     </fieldset>
 

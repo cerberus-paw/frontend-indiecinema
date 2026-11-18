@@ -79,7 +79,7 @@
                 <span class="estado-cuenta">{{ grupo.tipo_etiqueta }}</span>
               </span>
               <span class="bandeja-item-datos">{{ grupo.cantidad }} {{ grupo.cantidad == 1 ? 'denuncia' : 'denuncias' }}</span>
-              <span class="bandeja-item-datos"><span aria-hidden="true">📅</span> Desde el {{ grupo.desde }}</span>
+              <span class="bandeja-item-datos">{% include 'parciales/icono.html.twig' with { nombre: 'calendario' } only %} Desde el {{ grupo.desde }}</span>
             </a>
           </li>
         {% endfor %}
@@ -175,7 +175,7 @@
                 </label>
               {% endfor %}
               {% if errores.accion is defined %}
-                <span id="error-accion" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.accion }}</span>
+                <span id="error-accion" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.accion }}</span>
               {% endif %}
             </fieldset>
             <div class="bandeja-motivo">
@@ -226,7 +226,7 @@
                 <label for="motivo-levantar-{{ suspendida.sala_id }}" class="campo-etiqueta">Motivo para levantarla</label>
                 <textarea id="motivo-levantar-{{ suspendida.sala_id }}" name="motivo" rows="2" maxlength="{{ maximo_motivo }}" required{% if con_error %} aria-invalid="true" aria-describedby="error-levantar-{{ suspendida.sala_id }}"{% endif %}>{{ con_error ? levantar.motivo : '' }}</textarea>
                 {% if con_error %}
-                  <span id="error-levantar-{{ suspendida.sala_id }}" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ levantar.error }}</span>
+                  <span id="error-levantar-{{ suspendida.sala_id }}" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ levantar.error }}</span>
                 {% endif %}
                 <button type="submit" class="boton boton-secundario">Levantar la suspensión</button>
               </form>

@@ -86,7 +86,7 @@
       {% if historial %}<input type="hidden" name="ver" value="historial">{% endif %}
       <label class="panel-busqueda">
         <span class="sr-only">Buscar solicitud o solicitante</span>
-        <span class="panel-busqueda-icono" aria-hidden="true">🔍</span>
+        {% include 'parciales/icono.html.twig' with { nombre: 'lupa', clase: 'panel-busqueda-icono' } only %}
         <input type="search" name="q" value="{{ q }}" placeholder="Buscar solicitud o solicitante" maxlength="100" class="campo-control">
       </label>
     </form>
@@ -113,7 +113,7 @@
                 <span class="bandeja-item-datos"><span aria-hidden="true">🔁</span> Cambio de dirección</span>
               {% endif %}
               <span class="bandeja-item-datos">{{ solicitud.solicitante ? solicitud.solicitante ~ ' · ' : '' }}{{ solicitud.localidad }}</span>
-              <span class="bandeja-item-datos"><span aria-hidden="true">📅</span> Enviada {{ solicitud.enviada }}</span>
+              <span class="bandeja-item-datos">{% include 'parciales/icono.html.twig' with { nombre: 'calendario' } only %} Enviada {{ solicitud.enviada }}</span>
             </a>
           </li>
         {% endfor %}
@@ -149,8 +149,8 @@
         </p>
       {% endif %}
       <p class="bandeja-detalle-datos bandeja-detalle-meta">
-        <span><span aria-hidden="true">📍</span> {{ cambio ? 'Nueva: ' : '' }}{{ sala.direccion }}, {{ sala.localidad }}</span>
-        <span><span aria-hidden="true">👥</span> {{ sala.capacidad }} lugares declarados</span>
+        <span>{% include 'parciales/icono.html.twig' with { nombre: 'ubicacion' } only %} {{ cambio ? 'Nueva: ' : '' }}{{ sala.direccion }}, {{ sala.localidad }}</span>
+        <span>{% include 'parciales/icono.html.twig' with { nombre: 'personas' } only %} {{ sala.capacidad }} lugares declarados</span>
         <span>Enviada el {{ elegida.enviada }}</span>
       </p>
 
@@ -264,7 +264,7 @@
                   </label>
                 {% endfor %}
                 {% if errores.resolucion is defined %}
-                  <span id="error-resolucion" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.resolucion }}</span>
+                  <span id="error-resolucion" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.resolucion }}</span>
                 {% endif %}
               </fieldset>
               {# EF-07.9: lo que controló, un checkbox por punto con lo que hay que mirar. Arranca
@@ -284,7 +284,7 @@
                     </label>
                   {% endfor %}
                   {% if errores.requisitos is defined %}
-                    <span id="error-requisitos" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.requisitos }}</span>
+                    <span id="error-requisitos" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.requisitos }}</span>
                   {% endif %}
                 </fieldset>
               {% endif %}

@@ -47,7 +47,7 @@
           </label>
         {% endfor %}
         {% if errores.categoria is defined %}
-          <span id="error-categoria" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ errores.categoria }}</span>
+          <span id="error-categoria" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ errores.categoria }}</span>
         {% endif %}
       </fieldset>
 

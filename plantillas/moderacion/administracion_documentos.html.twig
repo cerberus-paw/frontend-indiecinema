@@ -52,7 +52,7 @@
               </label>
             {% endfor %}
             {% if documento.errores.resolucion is defined %}
-              <span class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ documento.errores.resolucion }}</span>
+              <span class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ documento.errores.resolucion }}</span>
             {% endif %}
           </fieldset>
           {# A mano y no con parciales/campo: hay un formulario por documento, y cada campo necesita su propio id #}
@@ -62,7 +62,7 @@
               aria-describedby="{{ documento.errores.motivo is defined ? 'error-motivo-' : 'ayuda-motivo-' }}{{ documento.id }}"
               {% if documento.errores.motivo is defined %}aria-invalid="true"{% endif %}>{{ documento.valores.motivo ?? '' }}</textarea>
             {% if documento.errores.motivo is defined %}
-              <span id="error-motivo-{{ documento.id }}" class="campo-error" role="alert"><span class="error-icono" aria-hidden="true">⚠️</span> {{ documento.errores.motivo }}</span>
+              <span id="error-motivo-{{ documento.id }}" class="campo-error" role="alert">{% include 'parciales/icono.html.twig' with { nombre: 'advertencia', clase: 'error-icono' } only %} {{ documento.errores.motivo }}</span>
             {% else %}
               <span id="ayuda-motivo-{{ documento.id }}" class="campo-ayuda">Le llega al organizador por correo.</span>
             {% endif %}
