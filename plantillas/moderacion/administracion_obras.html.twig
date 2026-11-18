@@ -116,8 +116,11 @@
             <dl class="bandeja-ficha">
               <dt>Dirección</dt>
               <dd>{{ elegida.director }}</dd>
-              <dt>Géneros</dt>
-              <dd>{{ elegida.generos|join(', ') }}</dd>
+              {# Los géneros son opcionales al cargar la obra: sin ninguno, la fila no va. #}
+              {% if elegida.generos is not empty %}
+                <dt>Géneros</dt>
+                <dd>{{ elegida.generos|join(', ') }}</dd>
+              {% endif %}
               <dt>Derecho de la copia</dt>
               <dd>{{ elegida.origen_copia }}</dd>
             </dl>

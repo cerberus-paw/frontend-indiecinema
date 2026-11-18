@@ -28,6 +28,14 @@ class App {
     for (const barra of document.querySelectorAll('[data-porcentaje]')) {
       barra.style.width = `${barra.dataset.porcentaje}%`;
     }
+    // En el celular el menú del panel es una fila que se desliza de costado: si la sección actual
+    // quedó fuera de la vista, la fila se corre hasta mostrarla. Sólo la fila, no la página.
+    for (const activo of document.querySelectorAll('.panel-menu-enlace.activo')) {
+      const fila = activo.closest('nav > .panel-menu-lista');
+      if (fila && fila.scrollWidth > fila.clientWidth) {
+        fila.scrollLeft = activo.offsetLeft - fila.offsetLeft - (fila.clientWidth - activo.offsetWidth) / 2;
+      }
+    }
     // Los carruseles, como el de destacadas de la portada (E4-07): cada uno recibe su contenedor.
     const carruseles = document.querySelectorAll('[data-carrusel]');
     if (carruseles.length > 0) {

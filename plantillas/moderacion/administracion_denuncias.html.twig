@@ -112,12 +112,16 @@
               {% if d.afiche is defined and d.afiche %}
                 <img src="{{ d.afiche }}" alt="Afiche de {{ elegida.titulo }}" class="bandeja-foto">
               {% endif %}
+              {# Sin ninguno de estos datos (una sala no trae ninguno) la ficha no va: vacía se
+                 dibujaba igual, como un campo de texto sin nada adentro. #}
+              {% if d.tipo is defined or d.director is defined or d.sala is defined or d.obras is defined %}
               <dl class="bandeja-ficha">
                 {% if d.tipo is defined %}<dt>Tipo</dt><dd>{{ d.tipo }}{% if d.anio is defined %} · {{ d.anio }}{% endif %}</dd>{% endif %}
                 {% if d.director is defined %}<dt>Dirección</dt><dd>{{ d.director }}</dd>{% endif %}
                 {% if d.sala is defined %}<dt>Sala</dt><dd>{{ d.sala }}</dd>{% endif %}
                 {% if d.obras is defined %}<dt>Obras</dt><dd>{{ d.obras|map(o => o.titulo)|join(' + ') }}</dd>{% endif %}
               </dl>
+              {% endif %}
               {% if d.comentario is defined and d.comentario %}
                 <h3 class="bandeja-subtitulo">El comentario{% if d.puntaje is defined %} · {{ d.puntaje }} de 5{% endif %}</h3>
                 <p class="bandeja-texto">{{ d.comentario|nl2br }}</p>
