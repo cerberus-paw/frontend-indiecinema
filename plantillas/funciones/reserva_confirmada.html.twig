@@ -103,7 +103,7 @@
       </div>
       <div>
         <dt>Total</dt>
-        <dd>{{ reserva.total }}</dd>
+        <dd>{{ reserva.total }}{% if reserva.cupon ?? null %} <span class="comprobante-cupon">con el cupón {{ reserva.cupon }}</span>{% endif %}</dd>
       </div>
       {# En los datos y no en un aviso: los avisos no se imprimen (E4-04.2) y el reembolso es parte
          del comprobante de lo que pasó con la plata. #}

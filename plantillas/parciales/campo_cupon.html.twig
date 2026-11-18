@@ -1,0 +1,23 @@
+{#
+  «¿Tenés un cupón?», en el formulario de reserva (EF-17.1): un desplegable con el campo del código,
+  cerrado de entrada para no sumarle nada a la reserva de siempre. Se abre solo si volvió con el
+  código o con un error. Va sólo en las funciones que se pagan: a la gorra no hay qué descontar.
+
+  Variables:
+  - valor: (opcional) el código que mandó.
+  - errores: (opcional) los del formulario; se usa errores.cupon.
+#}
+{% set abierto = (valor ?? '') != '' or (errores.cupon ?? null) is not null %}
+<details class="reserva-cupon"{% if abierto %} open{% endif %}>
+  <summary class="reserva-cupon-titulo">¿Tenés un cupón de descuento?</summary>
+  {% include 'parciales/campo.html.twig' with {
+    nombre: 'cupon',
+    etiqueta: 'Código del cupón',
+    valor: valor ?? '',
+    errores: errores ?? {},
+    maximo: 8,
+    placeholder: 'Ej: K7M2Q9XR',
+    autocompletar: 'off',
+    ayuda: 'Lo canjeás con tus puntos en «Mis puntos».'
+  } only %}
+</details>

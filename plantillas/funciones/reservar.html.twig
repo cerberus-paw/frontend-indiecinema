@@ -92,6 +92,9 @@
         valor_maximo: reglas.cantidad.maximo,
         ayuda: 'Máximo ' ~ (reglas.cantidad.maximo_por_persona ?? reglas.cantidad.maximo) ~ ' lugares por persona.'
       } only %}
+      {% if funcion.precio starts with '$' %}
+        {% include 'parciales/campo_cupon.html.twig' with { valor: valores.cupon ?? '', errores: errores } only %}
+      {% endif %}
 
       <div class="pie-formulario-acciones">
         {% include 'parciales/boton.html.twig' with { texto: 'Reservar mis lugares', tipo: 'submit' } only %}
