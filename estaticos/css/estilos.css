@@ -3498,8 +3498,10 @@ input[type='datetime-local'].campo-control {
    del wireframe «sala-indie» de Figma
    -------------------------------------------------------------------------- */
 
-/* La portada empieza pegada al encabezado: sin el relleno superior del main */
-.contenido-principal:has(> .ficha-sala:first-child) {
+/* La portada empieza pegada al encabezado: sin el relleno superior del main. La ficha de la obra
+   reusa la clase pero no tiene portada: con el relleno, sus migas no quedan pegadas al encabezado
+   (F-02) */
+.contenido-principal:has(> .ficha-sala:not(.ficha-pelicula):first-child) {
   /* Sin relleno arriba */
   padding-top: 0;
 }
@@ -9618,15 +9620,70 @@ a.tabla-admin-principal:focus-visible {
   font-size: var(--texto-sm);
 }
 
+/* La sección, separada de lo que tenga arriba: en la ficha de la obra quedaba pegada a las
+   tarjetas de las próximas funciones (F-02) */
+.calificaciones-ultimas {
+  margin-top: var(--espacio-10);
+}
+
+/* En tarjetas, de a varias por fila: tres en la ficha de la obra, dos en la columna de la sala */
 .calificaciones-lista {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--espacio-3);
 }
 
 .calificacion-item {
-  padding: var(--espacio-3) 0;
-  border-bottom: 1px solid var(--color-borde);
+  display: flex;
+  flex-direction: column;
+  padding: var(--espacio-3) var(--espacio-4);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* «Denunciar el comentario», al pie de la tarjeta */
+.calificacion-item-denunciar {
+  margin: auto 0 0;
+  padding-top: var(--espacio-2);
+}
+
+/* Las que no entran a la vista, detrás de «Ver N más» */
+.calificaciones-mas {
+  margin-top: var(--espacio-3);
+}
+
+.calificaciones-mas > .calificaciones-lista {
+  margin-top: var(--espacio-3);
+}
+
+.calificaciones-mas-boton {
+  display: inline-block;
+  padding: var(--espacio-2) var(--espacio-4);
+  border: 1px solid var(--color-superficie-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie-elevada);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto);
+  cursor: pointer;
+  list-style: none;
+}
+
+.calificaciones-mas-boton::-webkit-details-marker {
+  display: none;
+}
+
+.calificaciones-mas-boton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Abierta, el botón ya no hace falta: las demás quedan a la vista */
+.calificaciones-mas[open] > .calificaciones-mas-boton {
+  display: none;
 }
 
 .calificacion-item-cabecera {
