@@ -170,6 +170,8 @@
   --texto-xs: 0.75rem;
   /* 14px: inputs, botones chicos y navegación */
   --texto-sm: 0.875rem;
+  /* El alto del encabezado fijo en escritorio, para lo que queda pegado debajo de él */
+  --alto-encabezado: 4.5rem;
   /* El alto de un campo (.campo-control): su renglón, el relleno de arriba y abajo y el borde. Lo
      usa el botón que va al lado de los campos de un filtro, para quedar del mismo alto (F-02) */
   --alto-control: calc(var(--texto-sm) * 1.6 + 1.3rem + 2px);
@@ -264,8 +266,10 @@ html {
   color-scheme: dark;
   /* Impide que el elemento html exceda el 100% de la ventana */
   max-width: 100%;
-  /* Desactiva scroll horizontal en la raíz del documento */
-  overflow-x: hidden;
+  /* Corta lo que se sale a los costados. clip y no hidden: hidden lo vuelve un contenedor con
+     desplazamiento propio y rompe todo position: sticky de la página (el encabezado y los filtros
+     de la cartelera se iban con el resto, F-02) */
+  overflow-x: clip;
 }
 
 /* Cuerpo de la aplicación con estructura flexbox vertical */
@@ -290,8 +294,8 @@ body.cuerpo-app {
   width: 100%;
   /* Restringe el ancho máximo al 100% sin desbordes */
   max-width: 100%;
-  /* Bloquea barras de scroll horizontal involuntarias */
-  overflow-x: hidden;
+  /* Bloquea barras de scroll horizontal involuntarias, con clip por lo mismo que en html */
+  overflow-x: clip;
   /* Suavizado subpixel para renderizado en navegadores WebKit */
   -webkit-font-smoothing: antialiased;
   /* Suavizado de tipografías en navegadores Firefox */
@@ -3221,6 +3225,17 @@ input[type='datetime-local'].campo-control {
     grid-template-columns: 15rem minmax(0, 1fr);
     /* La columna no se estira hasta el alto de la grilla */
     align-items: start;
+  }
+
+  /* Los filtros acompañan el desplazamiento: quedan debajo del encabezado mientras se recorren los
+     resultados, sin volver arriba para cambiar uno (F-02). Si la pantalla es más baja que la
+     columna, se desplaza adentro */
+  .cartelera-cuerpo > .filtros-columna {
+    position: sticky;
+    top: calc(var(--alto-encabezado) + var(--espacio-4));
+    max-height: calc(100vh - var(--alto-encabezado) - var(--espacio-8));
+    overflow-y: auto;
+    scrollbar-width: thin;
   }
 }
 
@@ -8705,6 +8720,14 @@ a.tabla-admin-principal:focus-visible {
     grid-template-columns: 1fr 1fr;
     /* Separación entre columnas */
     gap: var(--espacio-6);
+  }
+}
+
+/* Hasta 1024 px el encabezado ocupa varios renglones (el buscador y el menú bajan): pegado arriba
+   taparía buena parte de la pantalla, así que se va con la página. Fijo, sólo en escritorio */
+@media (max-width: 1024px) {
+  .encabezado {
+    position: relative;
   }
 }
 
