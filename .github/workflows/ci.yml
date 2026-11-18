@@ -119,7 +119,38 @@ jobs:
       - name: Compilar todas las plantillas
         run: php frontend-indiecinema/herramientas/compilar-plantillas.php backend-indiecinema/nucleo/vendor/autoload.php
 
+  # Si el PR cambia algo que usan las pruebas del back (IC-663). Las plantillas sí: el back las
+  # dibuja en cada prueba. El CSS, el JS, las imágenes, las e2e y los .md no: las pruebas del back no
+  # los cargan, y para ellos ya están stylelint, ESLint y las e2e del despliegue. Así un PR de estilos
+  # no espera las ~2.000 pruebas del back. En un push a dev o a main corren siempre.
+  cambios:
+    name: Qué cambió
+    runs-on: ubuntu-latest
+    outputs:
+      back: ${{ steps.mirar.outputs.back }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Mirar los archivos del PR
+        id: mirar
+        env:
+          EVENTO: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          if [ "$EVENTO" != pull_request ]; then
+            echo "back=true" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "origin/$BASE...HEAD" | grep -qvE '^(estaticos/(css|js|img|fuentes)/|e2e/)|\.md$'; then
+            echo "back=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "back=false" >> "$GITHUB_OUTPUT"
+          fi
+          git diff --name-only "origin/$BASE...HEAD" 2>/dev/null || true
+          cat "$GITHUB_OUTPUT"
+
   pruebas:
+    needs: cambios
+    if: needs.cambios.outputs.back == 'true'
     name: Pruebas del back de ${{ matrix.paquete }}
     runs-on: ubuntu-latest
     strategy:
@@ -135,7 +166,10 @@ jobs:
           MYSQL_ROOT_PASSWORD: pruebas
           MYSQL_DATABASE: pruebas
         ports: ["3306:3306"]
+        # Los datos en memoria (tmpfs): la base se tira al terminar, y crear tablas sin esperar al
+        # disco es lo que más tarda, porque cada prueba las rehace con las migraciones (IC-663).
         options: >-
+          --tmpfs /var/lib/mysql:rw
           --health-cmd="mysqladmin ping -h 127.0.0.1 -ppruebas"
           --health-interval=5s --health-timeout=5s --health-retries=24
     env:
@@ -143,6 +177,11 @@ jobs:
       PRUEBAS_MYSQL_PUERTO: 3306
       PRUEBAS_MYSQL_CLAVE: pruebas
     steps:
+      # Que MySQL no confirme cada escritura en el disco (IC-663): un service no acepta argumentos
+      # de mysqld, pero estas dos variables se cambian en caliente. Sólo para las pruebas, que no
+      # necesitan sobrevivir a un corte.
+      - name: MySQL sin esperar al disco
+        run: docker exec "${{ job.services.mysql.id }}" mysql -uroot -ppruebas -e "SET GLOBAL innodb_flush_log_at_trx_commit = 0; SET GLOBAL sync_binlog = 0;"
       # El espejo del CI del back: el back con el front de este PR al lado, como en la máquina de
       # cada uno (los subsistemas instalan el front desde ../../frontend-indiecinema).
       # La rama del back con el mismo nombre que ésta, si existe; si no, la rama a la que apunta
