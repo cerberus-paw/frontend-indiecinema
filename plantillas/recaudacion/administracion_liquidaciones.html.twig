@@ -113,7 +113,7 @@
                   {% if liquidacion.transferida %}
                     <span class="tabla-admin-secundario">{{ liquidacion.nota ?? 'Sin nota' }}</span>
                   {% else %}
-                    <form action="/recaudacion/administracion/liquidaciones/{{ liquidacion.id }}/transferida" method="POST" class="tabla-admin-acciones">
+                    <form action="/recaudacion/administracion/liquidaciones/{{ liquidacion.id }}/transferida" method="POST" class="tabla-admin-acciones tabla-admin-transferencia">
                       <input type="hidden" name="_csrf" value="{{ csrf }}">
                       <input type="text" name="nota" maxlength="500" class="campo-control" aria-label="Nota de la transferencia de {{ liquidacion.beneficiario ?? liquidacion.beneficiario_id }}" placeholder="Comprobante, banco…">
                       {% include 'parciales/boton.html.twig' with {
