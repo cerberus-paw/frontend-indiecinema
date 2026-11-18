@@ -55,6 +55,33 @@
   src: url('../fuentes/fira-sans-condensed-latin-400-italic.woff2') format('woff2');
 }
 
+/* Fira Mono, de la misma familia y la misma licencia: la de los rótulos en versalitas (las píldoras,
+   los pasos de la función, «Fecha», «Entrada»). Antes la pedía como JetBrains Mono, que el sitio no
+   sirve, y cada navegador caía en su monoespaciada de sistema, tipo Courier (F-02) */
+@font-face {
+  font-family: 'Fira Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fuentes/fira-mono-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fuentes/fira-mono-latin-500-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fuentes/fira-mono-latin-700-normal.woff2') format('woff2');
+}
+
 /* --------------------------------------------------------------------------
    1. VARIABLES DE DISEÑO (DESIGN TOKENS) EN :ROOT
    Centralizan los valores de la identidad visual de la Entrega 1.
@@ -135,8 +162,8 @@
   --fuente-titulos: 'Fira Sans Condensed', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   /* Fira Sans Condensed: tipografía oficial para cuerpo de texto y controles */
   --fuente-cuerpo: 'Fira Sans Condensed', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  /* Monospace: para trazas técnicas de error, tokens CSRF y bloques de depuración */
-  --fuente-codigo: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+  /* Monospace: los rótulos en versalitas del wireframe, los códigos de reserva y las trazas de error */
+  --fuente-codigo: 'Fira Mono', 'SFMono-Regular', Consolas, monospace;
 
   /* ── 1.7 Escala Tipográfica Fluida ────────────────────────────────────── */
   /* 12px: badges, leyendas y microtexto */
@@ -3807,11 +3834,35 @@ dd {
   color: var(--color-texto-secundario);
 }
 
-/* En tablet y celular, una sola columna: el costado después de las funciones */
+/* En tablet y celular, una sola columna. El costado («Dónde queda» y los parámetros) va después de
+   «Sobre la sala» y antes de las funciones: al final quedaba debajo de todas las reseñas, y la
+   dirección se encontraba recién al pie (F-02). La columna principal se disuelve en la grilla
+   para poder intercalarlo, y la separación entre secciones la pone la grilla */
 @media (max-width: 900px) {
   .ficha-sala-columnas {
     /* Una sola columna */
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-10);
+  }
+
+  .ficha-sala-principal {
+    display: contents;
+  }
+
+  .ficha-sala-principal > .ficha-sala-seccion {
+    order: 2;
+  }
+
+  .ficha-sala-principal > .ficha-sala-seccion:first-child {
+    order: 0;
+  }
+
+  .ficha-sala-costado {
+    order: 1;
+  }
+
+  .ficha-sala-seccion + .ficha-sala-seccion {
+    margin-top: 0;
   }
 }
 
@@ -4604,6 +4655,11 @@ dd {
   margin: 0;
 }
 
+/* «Denunciar», al final de las acciones y a la misma altura que los botones */
+.ficha-cabecera-acciones .ficha-denunciar {
+  margin: 0 0 0 var(--espacio-2);
+}
+
 /* La caja de la línea de estados */
 .ficha-estados {
   padding: var(--espacio-4) var(--espacio-5);
@@ -4678,6 +4734,32 @@ dd {
 .ficha-estado-pendiente {
   border: 1px dashed var(--color-borde-medio);
   color: var(--color-texto-apagado);
+}
+
+/* En el celular los cuatro no entran en un renglón y, partidos en tres desparejos, perdían las
+   líneas que los unen: van uno debajo del otro, unidos por una línea vertical (F-02) */
+@media (max-width: 600px) {
+  .ficha-estados-lista {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--espacio-3);
+  }
+
+  .ficha-estado:not(:first-child) {
+    margin-left: 0;
+  }
+
+  .ficha-estado:not(:first-child)::before {
+    top: auto;
+    right: auto;
+    bottom: 100%;
+    left: 1.25rem;
+    width: 0;
+    height: var(--espacio-3);
+    margin-right: 0;
+    border-top: none;
+    border-left: 1px solid var(--color-borde-medio);
+  }
 }
 
 /* El acuerdo en dos columnas: las franjas y, al costado, el lateral */
@@ -7131,7 +7213,7 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .parametros-sala-titulo {
-  font-family: var(--fuente-mono, monospace);
+  font-family: var(--fuente-codigo);
   font-size: var(--texto-xs);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -7754,6 +7836,11 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .ficha-recuadro {
+  /* El dato abajo de todo: si un rótulo parte en dos renglones («Duración total» en el celular),
+     los valores de una misma fila siguen a la misma altura (F-02) */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   padding: var(--espacio-4);
   background: var(--color-superficie);
   border: 1px solid var(--color-borde-medio);
@@ -7812,10 +7899,32 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto);
 }
 
-/* En tablet y celular, una columna: la reserva baja después del detalle */
+/* En tablet y celular, una columna. La reserva va después de las obras y los cuatro recuadros, y
+   antes de «La sala»: al final de todo, la acción principal de la página quedaba casi al pie
+   (F-02). El detalle se disuelve en la grilla para poder ordenar sus secciones con la reserva */
 @media (max-width: 900px) {
   .ficha-detalle-con-lateral {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ficha-detalle-con-lateral .ficha-detalle-principal {
+    display: contents;
+  }
+
+  .ficha-detalle-con-lateral .ficha-seccion-obras {
+    order: 1;
+  }
+
+  .ficha-detalle-con-lateral .ficha-recuadros {
+    order: 2;
+  }
+
+  .ficha-detalle-con-lateral .ficha-detalle-lateral {
+    order: 3;
+  }
+
+  .ficha-detalle-con-lateral .ficha-seccion-sala {
+    order: 4;
   }
 
   .ficha-recuadros {
@@ -8825,7 +8934,7 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .panel-reservas-codigo {
-  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-family: var(--fuente-codigo);
   letter-spacing: 0.08em;
   /* En un renglón: partido en «UU3H-» y «HVJW» no se lee como un código (IC-661) */
   white-space: nowrap;
