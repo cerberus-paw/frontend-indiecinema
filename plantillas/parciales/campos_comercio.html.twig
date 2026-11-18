@@ -1,0 +1,14 @@
+{#
+  Los campos de un comercio asociado (EF-17.3), para el alta y la edición del administrador. Los
+  máximos son los de Comercio en el back.
+
+  Variables:
+  - valores: {nombre, beneficio, direccion, localidad}.
+  - errores: los de cada campo.
+#}
+<div class="comercio-campos">
+  {% include 'parciales/campo.html.twig' with { nombre: 'nombre', etiqueta: 'Nombre del comercio', valor: valores.nombre, errores: errores, requerido: true, maximo: 120, placeholder: 'Ej: Bar La Estación' } only %}
+  {% include 'parciales/campo.html.twig' with { nombre: 'localidad', etiqueta: 'Localidad', valor: valores.localidad, errores: errores, requerido: true, maximo: 80, placeholder: 'Ej: Luján' } only %}
+  {% include 'parciales/campo.html.twig' with { nombre: 'direccion', etiqueta: 'Dirección', valor: valores.direccion, errores: errores, requerido: true, maximo: 160, placeholder: 'Ej: San Martín 410' } only %}
+  {% include 'parciales/campo.html.twig' with { nombre: 'beneficio', etiqueta: 'Beneficio', tipo: 'textarea', filas: 2, valor: valores.beneficio, errores: errores, requerido: true, maximo: 300, ayuda: 'Lo que obtiene el espectador al mostrar su entrada.', placeholder: 'Ej: 15 % de descuento antes o después de la función' } only %}
+</div>
