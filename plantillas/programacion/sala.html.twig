@@ -68,7 +68,33 @@
       {% if calificaciones %}
         {% include 'parciales/calificacion_promedio.html.twig' with { promedio: calificaciones.promedio, cantidad: calificaciones.cantidad } only %}
       {% endif %}
-      {% if sala.denunciable is defined and sala.denunciable %}
+      {# Seguir la sala o a quien la organiza (EF-15.4). La ficha no sabe si ya los sigue: el
+         componente Seguir le pregunta a cuentas y cambia el texto. Sin JavaScript, el formulario
+         manda «alternar» y cuentas vuelve a esta página. Sin sesión, el enlace a ingresar. #}
+      {% if sala.organizador_id is defined and not sala.es_propia|default(false) %}
+        <div class="ficha-sala-seguir">
+          {% if usuario %}
+            {% for objeto in [
+              { tipo: 'sala', id: sala.id, seguir: 'Seguir la sala', siguiendo: 'Siguiendo la sala' },
+              { tipo: 'organizador', id: sala.organizador_id, seguir: 'Seguir a quien la organiza', siguiendo: 'Siguiendo a quien la organiza' }
+            ] %}
+              <form action="/cuenta/seguimientos" method="POST" class="seguir-formulario" data-seguir>
+                <input type="hidden" name="_csrf" value="{{ csrf }}">
+                <input type="hidden" name="tipo" value="{{ objeto.tipo }}">
+                <input type="hidden" name="id" value="{{ objeto.id }}">
+                <input type="hidden" name="accion" value="alternar">
+                <input type="hidden" name="volver" value="/salas/{{ sala.id }}">
+                <button type="submit" class="boton boton-secundario boton-chico seguir-boton" data-texto-seguir="{{ objeto.seguir }}" data-texto-siguiendo="{{ objeto.siguiendo }}">{{ objeto.seguir }}</button>
+              </form>
+            {% endfor %}
+          {% else %}
+            <a href="/cuenta/ingresar?volver={{ ('/salas/' ~ sala.id)|url_encode }}" class="boton boton-secundario boton-chico">Ingresá para seguir la sala</a>
+          {% endif %}
+          {% if sala.denunciable is defined and sala.denunciable %}
+            <p class="ficha-denunciar">{% include 'parciales/denunciar.html.twig' with { tipo: 'sala', id: sala.id } only %}</p>
+          {% endif %}
+        </div>
+      {% elseif sala.denunciable is defined and sala.denunciable %}
         <p class="ficha-denunciar">{% include 'parciales/denunciar.html.twig' with { tipo: 'sala', id: sala.id } only %}</p>
       {% endif %}
     </header>

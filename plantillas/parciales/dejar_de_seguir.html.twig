@@ -1,0 +1,18 @@
+{#
+  «Dejar de seguir» de «Lo que seguís», en Mi cuenta (EF-15.4): el POST a /cuenta/seguimientos,
+  que vuelve a Mi cuenta. Sin JavaScript también anda: no hace falta saber el estado.
+
+  Variables:
+  - tipo: 'sala' u 'organizador'.
+  - id: el de la sala o el de la cuenta del organizador.
+  - nombre: para que el lector de pantalla sepa qué deja de seguir.
+  - csrf: el token del formulario.
+#}
+<form action="/cuenta/seguimientos" method="POST" class="seguido-formulario">
+  <input type="hidden" name="_csrf" value="{{ csrf }}">
+  <input type="hidden" name="tipo" value="{{ tipo }}">
+  <input type="hidden" name="id" value="{{ id }}">
+  <input type="hidden" name="accion" value="dejar">
+  <input type="hidden" name="volver" value="/cuenta/">
+  <button type="submit" class="boton boton-secundario boton-chico" aria-label="Dejar de seguir a {{ nombre }}">Dejar de seguir</button>
+</form>

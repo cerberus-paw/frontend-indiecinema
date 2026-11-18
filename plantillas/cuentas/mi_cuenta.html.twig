@@ -15,6 +15,8 @@
   - solicitud_de_sala (opcional): {estado (pendiente, en_revision_manual, aprobada o rechazada),
     sala, motivo (o null), fecha (dd/mm/aaaa)}. No viene si nunca mandó una o si moderación no
     respondió.
+  - seguidos (opcional): {salas: lista de {id, nombre, localidad}, organizadores: lista de {id,
+    nombre}, salas_sin_datos: si programación no respondió} (EF-15.4).
 #}
 {% extends 'cuenta.html.twig' %}
 
@@ -101,6 +103,40 @@
       {% endif %}
     </dl>
     <p><a href="/solicitar-sala" class="enlace-destacado">{{ solicitud.estado == 'rechazada' ? 'Corregirla y reenviarla' : 'Ver la solicitud' }}</a></p>
+  {% endif %}
+
+  {# «Lo que seguís» (EF-15.4): las salas, con enlace a su ficha, y los organizadores. Se deja de
+     seguir desde acá o desde la ficha. No viene cuando la página la arma otra pantalla (la
+     verificación del correo). #}
+  {% if seguidos is defined %}
+    <h2 class="mi-cuenta-subtitulo">Lo que seguís</h2>
+    {% if seguidos.salas_sin_datos %}
+      {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: 'Ahora no podemos mostrar las salas que seguís. Probá de nuevo en un rato.' } only %}
+    {% endif %}
+    {% if seguidos.salas is empty and seguidos.organizadores is empty and not seguidos.salas_sin_datos %}
+      <p class="mi-cuenta-vacio">Todavía no seguís ninguna sala. Desde la ficha de una sala podés seguirla a ella o a quien la organiza.</p>
+    {% else %}
+      <ul class="seguidos-lista">
+        {% for sala in seguidos.salas %}
+          <li class="seguido">
+            <span class="seguido-datos">
+              <a href="/salas/{{ sala.id }}" class="seguido-nombre">{{ sala.nombre }}</a>
+              <span class="seguido-detalle">Sala · {{ sala.localidad }}</span>
+            </span>
+            {% include 'parciales/dejar_de_seguir.html.twig' with { tipo: 'sala', id: sala.id, nombre: sala.nombre, csrf: csrf } only %}
+          </li>
+        {% endfor %}
+        {% for organizador in seguidos.organizadores %}
+          <li class="seguido">
+            <span class="seguido-datos">
+              <span class="seguido-nombre">{{ organizador.nombre }}</span>
+              <span class="seguido-detalle">Organiza funciones</span>
+            </span>
+            {% include 'parciales/dejar_de_seguir.html.twig' with { tipo: 'organizador', id: organizador.id, nombre: organizador.nombre, csrf: csrf } only %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
   {% endif %}
 </section>
 {% endblock %}
