@@ -9395,3 +9395,137 @@ a.tabla-admin-principal:focus-visible {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* --------------------------------------------------------------------------
+   PEDIDOS DE TÍTULOS: EL RANKING (EF-11.2, IC-660)
+   Para plantillas/programacion/pedidos.html.twig. Antes no tenía estilos: era una lista numerada
+   suelta, con los números colgando fuera de la columna y los pedidos pegados entre sí.
+   -------------------------------------------------------------------------- */
+
+/* La lista, sin viñetas: el puesto lo escribe la plantilla dentro de cada tarjeta */
+.ranking-pedidos {
+  list-style: none;
+  margin: var(--espacio-4) 0 var(--espacio-8);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+/* Cada pedido, una tarjeta en fila: puesto, título, avance y acción */
+.ranking-pedido-item {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) minmax(12rem, 16rem) auto;
+  align-items: center;
+  gap: var(--espacio-4);
+  padding: var(--espacio-4) var(--espacio-5);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+/* El que ya llegó al umbral se distingue: ya lo pueden tomar las salas */
+.ranking-pedido-item.activo {
+  border-color: var(--color-primario);
+}
+
+/* El puesto en el ranking, grande y apagado, como una referencia y no como el dato principal */
+.ranking-pedido-puesto {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-2xl);
+  font-weight: 700;
+  color: var(--color-texto-apagado);
+  text-align: center;
+}
+
+/* El título, más chico que el h3 general: son muchos en una página */
+.ranking-pedido-item .pedido-titulo {
+  margin: 0;
+  font-size: var(--texto-lg);
+  line-height: 1.2;
+}
+
+/* El año, secundario al título */
+.pedido-anio {
+  font-weight: 400;
+  color: var(--color-texto-secundario);
+}
+
+/* La dirección, debajo del título */
+.ranking-pedido-item .pedido-meta {
+  margin: var(--espacio-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* El avance: la barra (o «Activo») y cuántas adhesiones tiene */
+.ranking-pedido-avance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-1);
+}
+
+.pedido-avance-texto {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* La barra es un <progress>: la CSP no deja fijar el ancho de un div con un estilo en línea */
+.pedido-progreso {
+  width: 100%;
+  height: 0.5rem;
+  appearance: none;
+  border: none;
+  border-radius: var(--radio-full);
+  background-color: var(--color-superficie-elevada);
+  overflow: hidden;
+}
+
+.pedido-progreso::-webkit-progress-bar {
+  border-radius: var(--radio-full);
+  background-color: var(--color-superficie-elevada);
+}
+
+.pedido-progreso::-webkit-progress-value {
+  border-radius: var(--radio-full);
+  background-color: var(--color-primario);
+}
+
+.pedido-progreso::-moz-progress-bar {
+  border-radius: var(--radio-full);
+  background-color: var(--color-primario);
+}
+
+/* La acción, a la derecha */
+.ranking-pedido-accion {
+  justify-self: end;
+}
+
+.ranking-pedido-accion form {
+  margin: 0;
+}
+
+/* En tableta y celular: el puesto a la izquierda y lo demás apilado a su derecha */
+@media (max-width: 720px) {
+  .ranking-pedido-item {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: var(--espacio-2) var(--espacio-3);
+    padding: var(--espacio-3) var(--espacio-4);
+  }
+
+  .ranking-pedido-puesto {
+    grid-row: span 3;
+    align-self: start;
+    font-size: var(--texto-xl);
+  }
+
+  .ranking-pedido-avance,
+  .ranking-pedido-accion {
+    grid-column: 2;
+  }
+
+  .ranking-pedido-accion {
+    justify-self: start;
+  }
+}
