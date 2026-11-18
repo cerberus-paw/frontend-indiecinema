@@ -201,10 +201,12 @@
             variante: 'peligro'
           } only %}
         {% endif %}
+        {# «Denunciar» va con las acciones y no suelto en la cabecera: suelto, el reparto de la
+           fila dejaba «Compartir» flotando a mitad de camino y a otra altura (F-02). #}
+        {% if funcion.denunciable is defined and funcion.denunciable %}
+          <p class="ficha-denunciar">{% include 'parciales/denunciar.html.twig' with { tipo: 'funcion', id: funcion.id } only %}</p>
+        {% endif %}
       </div>
-      {% if funcion.denunciable is defined and funcion.denunciable %}
-        <p class="ficha-denunciar">{% include 'parciales/denunciar.html.twig' with { tipo: 'funcion', id: funcion.id } only %}</p>
-      {% endif %}
     </header>
 
     {# La línea de estados del wireframe: los cuatro, con los ya pasados tildados, el actual lleno
