@@ -115,7 +115,7 @@
               {% if reserva.funcion %}
                 <td><a href="{{ reserva.funcion.url }}" class="tabla-admin-principal">{{ reserva.funcion.titulo }}</a></td>
                 <td>{{ reserva.funcion.sala }} <span class="tabla-admin-secundario">{{ reserva.funcion.localidad }}</span></td>
-                <td>{{ reserva.funcion.fecha ?? 'A confirmar' }}</td>
+                <td class="mis-reservas-fecha">{{ reserva.funcion.fecha ?? 'A confirmar' }}</td>
               {% elseif sin_programacion|default(false) %}
                 <td colspan="3"><span class="tabla-admin-secundario">—</span></td>
               {% else %}
