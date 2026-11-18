@@ -3019,8 +3019,9 @@ input[type='datetime-local'].campo-control {
 .seccion-leyenda {
   /* Disposición en bloque */
   display: block;
-  /* Margen inferior */
-  margin-bottom: var(--espacio-4);
+  /* Sin margen abajo: el relleno de arriba del fieldset ya va después de la leyenda, y los dos
+     sumaban 40 px entre la explicación de la sección y su primer campo (F-02) */
+  margin-bottom: 0;
   /* Relleno cero */
   padding: 0;
   /* Ancho completo */
@@ -4537,6 +4538,11 @@ input[type='datetime-local'].campo-control {
   text-decoration: none;
   font-size: var(--texto-sm);
   transition: background-color var(--transicion-rapida), border-color var(--transicion-rapida), color var(--transicion-rapida);
+}
+
+/* «Anterior» y «Siguiente», del mismo alto que los números de página: eran más bajos (F-02) */
+.paginado-numerado > .boton {
+  min-height: 2.25rem;
 }
 
 .paginado-enlace:hover {
@@ -7021,7 +7027,9 @@ a.tabla-admin-principal:focus-visible {
 .bandeja-opcion {
   clear: both;
   display: flex;
-  align-items: center;
+  /* El botón a la altura del primer renglón: centrado, en una opción de tres renglones («Pasar a
+     revisión manual…») quedaba a mitad del texto (F-02) */
+  align-items: baseline;
   gap: var(--espacio-2);
   padding: var(--espacio-1) 0;
   cursor: pointer;
@@ -7739,6 +7747,13 @@ a.tabla-admin-principal:focus-visible {
   max-width: 680px;
 }
 
+/* Dentro del panel, los formularios angostos (editar sala, cancelar función) arrancan contra la
+   izquierda, donde arrancan las demás pantallas del panel: centrados, el título quedaba a 349 o a
+   489 px en vez de a 316, y saltaba al pasar de una sección a otra (F-02) */
+.panel-contenido :is(.contenedor-formulario-amplio, .contenedor-confirmacion-cancelacion) {
+  margin-left: 0;
+}
+
 .tarjeta-resumen-cancelacion {
   background-color: var(--color-superficie);
   border: 1px solid var(--color-borde);
@@ -8264,7 +8279,9 @@ a.tabla-admin-principal:focus-visible {
 
 .mi-cuenta-desde {
   margin: var(--espacio-1) 0 0;
-  font-size: var(--texto-sm);
+  /* «Desde noviembre de 2026» en un renglón: partido, la tarjeta de «Mis datos» crecía (F-02) */
+  font-size: var(--texto-xs);
+  white-space: nowrap;
   color: var(--color-texto-secundario);
 }
 
@@ -8472,6 +8489,8 @@ a.tabla-admin-principal:focus-visible {
 
 /* Año en cabecera de tarjeta de obra */
 .tarjeta-obra-anio {
+  /* Contra el borde derecho de la cabecera, haya o no un estado al lado del tipo */
+  margin-left: auto;
   font-family: var(--fuente-cuerpo);
   font-size: var(--texto-sm);
   font-weight: 600;
@@ -8505,8 +8524,10 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .baja-ayuda-bloqueo {
+  margin: 0;
+  padding: var(--espacio-2) 0 0;
   font-size: var(--texto-xs);
-  color: var(--color-texto-apagado);
+  color: var(--color-texto-secundario);
   text-align: center;
   display: block;
 }
@@ -9873,4 +9894,20 @@ a.tabla-admin-principal:focus-visible {
   .pedido-organizador-tomar-fila {
     flex-direction: column;
   }
+}
+
+/* --------------------------------------------------------------------------
+   REPARTO: EL FORMULARIO (F-02)
+   Para plantillas/recaudacion/administracion_reparto.html.twig: los tres porcentajes en una fila y
+   la fecha con el ancho de una fecha.
+   -------------------------------------------------------------------------- */
+.reparto-porcentajes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0 var(--espacio-5);
+  align-items: start;
+}
+
+.reparto-vigencia {
+  max-width: 24rem;
 }

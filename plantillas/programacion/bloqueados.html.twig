@@ -68,16 +68,20 @@
       <h2 id="titulo-bloquear" class="ficha-sala-seccion-titulo">Bloquear a un espectador</h2>
 
       {% if salas|length > 1 %}
-        <form action="/organizador/bloqueados" method="GET" class="panel-filtros" aria-label="Elegir sala" data-enviar-al-elegir>
+        {# El rótulo arriba y el desplegable debajo, como los filtros de los reportes: en la grilla
+           de .panel-filtros el desplegable caía suelto a mitad de la fila (F-02). #}
+        <form action="/organizador/bloqueados" method="GET" class="panel-filtros reporte-filtros" aria-label="Elegir sala" data-enviar-al-elegir>
           {% if (valores.usuario_id ?? '') != '' %}
             <input type="hidden" name="usuario" value="{{ valores.usuario_id }}">
           {% endif %}
-          <label for="selector-sala-bloqueo" class="campo-etiqueta">Sala</label>
-          <select id="selector-sala-bloqueo" name="sala" class="campo-control control-select">
-            {% for sala in salas %}
-              <option value="{{ sala.id }}"{% if sala_elegida and sala.id == sala_elegida.id %} selected{% endif %}>{{ sala.nombre }}</option>
-            {% endfor %}
-          </select>
+          <label class="reporte-filtro">
+            <span class="reporte-filtro-etiqueta">Sala</span>
+            <select id="selector-sala-bloqueo" name="sala" class="campo-control control-select">
+              {% for sala in salas %}
+                <option value="{{ sala.id }}"{% if sala_elegida and sala.id == sala_elegida.id %} selected{% endif %}>{{ sala.nombre }}</option>
+              {% endfor %}
+            </select>
+          </label>
           <noscript>
             {% include 'parciales/boton.html.twig' with { texto: 'Elegir sala', tipo: 'submit', variante: 'secundario', tamano: 'chico' } only %}
           </noscript>

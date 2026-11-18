@@ -19,7 +19,20 @@
 {% block titulo %}Denunciar «{{ denunciado.titulo }}»{% endblock %}
 
 {% block contenido %}
-<div class="contenedor-formulario">
+{# El contenedor de los demás formularios (pedir un título, solicitar una sala) y sus migas:
+   .contenedor-formulario no tiene estilos, y la página quedaba corrida 16 px respecto del resto
+   del sitio (F-02). #}
+<div class="contenedor-formulario-amplio">
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga"><a href="{{ denunciado.url }}" class="enlace-miga">{{ denunciado.titulo }}</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Denunciar</li>
+    </ol>
+  </nav>
+
   <header class="encabezado-formulario-solicitud">
     <h1 class="solicitud-titulo">Denunciar «{{ denunciado.titulo }}»</h1>
     <p class="solicitud-bajada">

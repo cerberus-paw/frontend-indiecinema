@@ -26,6 +26,19 @@
 {% block seccion %}reportes{% endblock %}
 
 {% block panel %}
+{# Para el organizador, en un .contenedor y con migas, como sus otras pantallas del panel (Mis
+   funciones, Usuarios bloqueados): sin eso, el título arrancaba más arriba y 16 px más a la
+   izquierda que en ellas (F-02). El panel del administrador no usa ni lo uno ni lo otro. #}
+{% if not administrador %}
+<div class="contenedor">
+<nav class="navegacion-migas" aria-label="Migas de pan">
+  <ol class="lista-migas">
+    <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+    <li class="separador-miga" aria-hidden="true">/</li>
+    <li class="item-miga miga-activa" aria-current="page">Reportes</li>
+  </ol>
+</nav>
+{% endif %}
 <header class="encabezado-formulario-solicitud">
   <div class="solicitud-texto-cabecera">
     <h1 class="panel-titulo">Reportes</h1>
@@ -154,4 +167,5 @@
     </section>
   {% endif %}
 {% endif %}
+{% if not administrador %}</div>{% endif %}
 {% endblock %}
