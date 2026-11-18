@@ -5923,6 +5923,8 @@ dd {
   /* Contorno, para la pendiente */
   border: 1px solid var(--color-borde-medio);
   color: var(--color-texto-secundario);
+  /* Una píldora en un renglón: «CON / ASISTENCIA» partida no se lee como un estado (IC-661) */
+  white-space: nowrap;
 }
 
 /* Cuenta activa: la píldora llena */
@@ -8804,6 +8806,14 @@ a.tabla-admin-principal:focus-visible {
 .panel-reservas-codigo {
   font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   letter-spacing: 0.08em;
+  /* En un renglón: partido en «UU3H-» y «HVJW» no se lee como un código (IC-661) */
+  white-space: nowrap;
+}
+
+/* La fecha de cada reserva en un renglón: partida en «Mar 24 / nov · / 20:00» quedaba apretada.
+   Si no entra, la tabla se desplaza dentro de su caja (IC-661) */
+.mis-reservas-fecha {
+  white-space: nowrap;
 }
 
 /* --------------------------------------------------------------------------
