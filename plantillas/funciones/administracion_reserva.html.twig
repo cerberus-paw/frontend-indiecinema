@@ -1,0 +1,85 @@
+{#
+  El detalle de una reserva para el administrador, en /funcion/administracion/reservas/{id}
+  (EF-18.6): sus datos arriba, en las tarjetas del panel, y abajo el historial de sus estados, de
+  la creación al último cambio, con quién hizo cada uno. Los cambios automáticos (la que vence sin
+  pagar, la que queda ausente) figuran como del sistema, no a nombre de una persona. Se llega desde
+  el código, en la lista de reservas.
+
+  Variables:
+  - reserva: lo mismo que una fila de administracion_reservas (codigo, cantidad, total, estado,
+    estado_etiqueta, creada, reembolso, anulable, funcion), más espectador (nombre o null si
+    cuentas no lo dio), pago (el id del pago de Mercado Pago o null) y cupon (o null).
+  - historial: lista de {fecha (ya escrita), estado, estado_etiqueta, anterior (etiqueta o null en
+    la creación y la devolución), quien («El sistema», «Organizador · Ana Pérez»…), motivo o null}.
+#}
+{% extends 'administracion.html.twig' %}
+
+{% block titulo %}Reserva {{ reserva.codigo }}{% endblock %}
+
+{% block seccion %}reservas{% endblock %}
+
+{% block panel %}
+<header class="panel-cabecera">
+  <p><a href="/funcion/administracion/reservas" class="boton boton-fantasma">← Todas las reservas</a></p>
+  <h1 class="panel-titulo">Reserva <span class="panel-reservas-codigo">{{ reserva.codigo }}</span></h1>
+  <p class="panel-bajada">
+    {% if reserva.funcion %}
+      <a href="{{ reserva.funcion.url }}">{{ reserva.funcion.titulo }}</a> · {{ reserva.funcion.fecha ?? 'Sin fecha' }}
+    {% else %}
+      No se pudo cargar la función.
+    {% endif %}
+  </p>
+</header>
+
+<dl class="panel-resumen">
+  <div class="panel-dato">
+    <dt>Estado</dt>
+    <dd class="panel-dato-valor">{{ reserva.estado_etiqueta|capitalize }}</dd>
+    <dd class="panel-dato-nota">
+      {% if reserva.reembolso == 'pendiente' %}reembolso pendiente{% elseif reserva.reembolso %}reembolsada{% else %}desde {{ (historial|last).fecha }}{% endif %}
+    </dd>
+  </div>
+  <div class="panel-dato">
+    <dt>Lugares</dt>
+    <dd class="panel-dato-valor">{{ reserva.cantidad }}</dd>
+    <dd class="panel-dato-nota">reservada el {{ reserva.creada }}</dd>
+  </div>
+  <div class="panel-dato">
+    <dt>Total</dt>
+    <dd class="panel-dato-valor">{{ reserva.total }}</dd>
+    <dd class="panel-dato-nota">{% if reserva.pago %}pago {{ reserva.pago }}{% else %}sin pago en Mercado Pago{% endif %}{% if reserva.cupon %} · cupón {{ reserva.cupon }}{% endif %}</dd>
+  </div>
+  <div class="panel-dato">
+    <dt>Espectador</dt>
+    <dd class="panel-dato-valor">{{ reserva.espectador ?? '—' }}</dd>
+    <dd class="panel-dato-nota">{{ reserva.espectador ? 'quien la reservó' : 'sin el nombre de cuentas' }}</dd>
+  </div>
+</dl>
+
+<h2 class="panel-subtitulo">Historial</h2>
+<div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Historial de la reserva">
+  <table class="tabla-admin">
+    <thead>
+      <tr>
+        <th scope="col">Cuándo</th>
+        <th scope="col">Estado</th>
+        <th scope="col">Quién</th>
+        <th scope="col">Por qué</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for linea in historial %}
+        <tr>
+          <td>{{ linea.fecha }}</td>
+          <td>
+            <span class="tabla-admin-principal">{{ linea.estado_etiqueta|capitalize }}</span>
+            {% if linea.anterior %}<span class="tabla-admin-secundario">antes: {{ linea.anterior }}</span>{% endif %}
+          </td>
+          <td>{{ linea.quien }}</td>
+          <td>{{ linea.motivo ?? '—' }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
