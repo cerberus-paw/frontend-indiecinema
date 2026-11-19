@@ -34,6 +34,8 @@
     servidores, desarrollo, costo, dias, resultado, gana} o null (sólo el administrador);
     comision, costo_funcion, servidores_mes y desarrollo_mes: las referencias de config.ini}.
   - costo_cargado: el aviso de «Guardar» el costo, {tipo, texto}, o null.
+  - combinadas: las recomendaciones que cruzan varias variables (EF-22.3), lista de {regla, sala,
+    accion, porque (lista de textos con los datos que la justifican)}.
 #}
 {% extends administrador ? 'administracion.html.twig' : 'organizador.html.twig' %}
 
@@ -215,6 +217,28 @@
     {% endif %}
 
     <h2 class="reporte-titulo">Recomendaciones</h2>
+
+    {# Las que cruzan varias variables van primero, con su porqué: cada dato que la justifica, así
+       se puede contestar «¿cómo llegaste a eso?» (EF-22.3; las reglas, en docs/recomendaciones.md
+       del back). #}
+    {% if combinadas is not empty %}
+      <section class="reporte-seccion" aria-labelledby="reporte-combinadas">
+        <h3 id="reporte-combinadas" class="reporte-subtitulo">Lo que más conviene</h3>
+        <ul class="reporte-sugerencias">
+          {% for recomendacion in combinadas %}
+            <li class="reporte-sugerencia reporte-combinada">
+              <p class="reporte-sugerencia-texto"><strong>{{ recomendacion.sala }}:</strong> {{ recomendacion.accion }}</p>
+              <p class="reporte-porque-titulo">Por qué</p>
+              <ul class="reporte-porque">
+                {% for dato in recomendacion.porque %}
+                  <li>{{ dato }}</li>
+                {% endfor %}
+              </ul>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
 
     <section class="reporte-seccion" aria-labelledby="reporte-dias-flojos">
       <h3 id="reporte-dias-flojos" class="reporte-subtitulo">Días para una promoción</h3>

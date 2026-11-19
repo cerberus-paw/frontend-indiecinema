@@ -6555,6 +6555,28 @@ svg.enlace-denunciar-icono {
   color: var(--color-texto-secundario);
 }
 
+/* La que cruza varias variables (EF-22.3): el borde del éxito, para que se distinga de las que
+   miran un solo dato, y el porqué en una lista corta */
+.reporte-combinada {
+  border-left-color: var(--color-exito);
+}
+
+.reporte-porque-titulo {
+  margin: var(--espacio-2) 0 0;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-texto-secundario);
+}
+
+.reporte-porque {
+  margin: var(--espacio-1) 0 0;
+  padding-left: var(--espacio-5);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
 /* Con la sala, un campo más en la fila */
 .reporte-filtros-con-sala {
   grid-template-columns: repeat(2, minmax(150px, 200px)) minmax(160px, 240px) auto;
