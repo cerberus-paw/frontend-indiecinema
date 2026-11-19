@@ -199,7 +199,7 @@
           <input type="hidden" name="hasta" value="{{ periodo.hasta }}">
           <label class="reporte-filtro">
             <span class="reporte-filtro-etiqueta">Sala</span>
-            <select name="sala" class="campo-control control-select" required>
+            <select name="sala" class="campo-control control-select">
               {% for sala in ganancias.salas %}
                 <option value="{{ sala.id }}">{{ sala.nombre }}</option>
               {% endfor %}
