@@ -36,6 +36,11 @@
   - costo_cargado: el aviso de «Guardar» el costo, {tipo, texto}, o null.
   - combinadas: las recomendaciones que cruzan varias variables (EF-22.3), lista de {regla, sala,
     accion, porque (lista de textos con los datos que la justifican)}.
+  - moderacion: sólo para el administrador (EF-22.4), o null: {avisos, salas: lista de {nombre,
+    denuncias: {abierta, desestimada, resuelta}, total_denuncias, suspension (la causa escrita, o
+    null), ausentes, negativas, bajo_umbral, espectadores}, solicitudes: {pendientes, aprobadas,
+    rechazadas}, otras_denuncias: {abierta, desestimada, resuelta}, total_otras_denuncias,
+    otras_suspendidas}.
 #}
 {% extends administrador ? 'administracion.html.twig' : 'organizador.html.twig' %}
 
@@ -213,6 +218,66 @@
           </label>
           {% include 'parciales/boton.html.twig' with { texto: 'Guardar el costo', tipo: 'submit', variante: 'secundario' } only %}
         </form>
+      </section>
+    {% endif %}
+
+    {# La moderación y la conducta del período, para el administrador (EF-22.4): el profe marcó el
+       18/11 que en los reportes generales no aparecían. #}
+    {% if moderacion %}
+      <section class="reporte-seccion" id="moderacion" aria-labelledby="reporte-moderacion">
+        <h2 id="reporte-moderacion" class="reporte-titulo">Moderación y conducta</h2>
+        {% for aviso in moderacion.avisos %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: aviso } only %}
+        {% endfor %}
+        <dl class="panel-resumen">
+          <div class="panel-dato">
+            <dt>Solicitudes de sala</dt>
+            <dd class="panel-dato-valor">{{ moderacion.solicitudes.pendientes }}</dd>
+            <dd class="panel-dato-nota">sin resolver; {{ moderacion.solicitudes.aprobadas }} aprobadas y {{ moderacion.solicitudes.rechazadas }} rechazadas</dd>
+          </div>
+          <div class="panel-dato">
+            <dt>Otras denuncias</dt>
+            <dd class="panel-dato-valor">{{ moderacion.total_otras_denuncias }}</dd>
+            <dd class="panel-dato-nota">de obras y calificaciones; {{ moderacion.otras_denuncias.abierta }} abiertas</dd>
+          </div>
+          <div class="panel-dato">
+            <dt>Salas suspendidas</dt>
+            <dd class="panel-dato-valor">{{ moderacion.salas|filter(s => s.suspension)|length + moderacion.otras_suspendidas }}</dd>
+            <dd class="panel-dato-nota">hoy, también sin funciones en el período</dd>
+          </div>
+        </dl>
+        {% if moderacion.salas is not empty %}
+          <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-moderacion">
+            <table class="tabla-admin">
+              <thead>
+                <tr>
+                  <th scope="col">Sala</th>
+                  <th scope="col">Denuncias</th>
+                  <th scope="col">Ausencias</th>
+                  <th scope="col">Conducta negativa</th>
+                  <th scope="col">Bajo el umbral</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for sala in moderacion.salas %}
+                  <tr>
+                    <td>
+                      <span class="tabla-admin-principal">{{ sala.nombre }}</span>
+                      {% if sala.suspension %}<span class="estado-cuenta estado-cuenta-suspendida">Suspendida</span> <span class="tabla-admin-secundario">{{ sala.suspension }}</span>{% endif %}
+                    </td>
+                    <td>
+                      {{ sala.total_denuncias }}
+                      {% if sala.total_denuncias > 0 %}<span class="tabla-admin-secundario">{{ sala.denuncias.abierta }} abiertas, {{ sala.denuncias.desestimada }} desestimadas y {{ sala.denuncias.resuelta }} resueltas</span>{% endif %}
+                    </td>
+                    <td>{{ sala.ausentes }}</td>
+                    <td>{{ sala.negativas }}</td>
+                    <td>{{ sala.bajo_umbral }} <span class="tabla-admin-secundario">de {{ sala.espectadores }} {{ sala.espectadores == 1 ? 'espectador' : 'espectadores' }}</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
       </section>
     {% endif %}
 
