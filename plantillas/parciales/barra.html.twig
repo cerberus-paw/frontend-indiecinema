@@ -1,0 +1,11 @@
+{#
+  Una barra horizontal de 0 a 100 para los gráficos de los reportes (EF-22.2). Es SVG con
+  atributos, no un ancho en style="": la CSP no deja estilos en línea. Es decorativa: el valor va
+  escrito al lado, así que el lector de pantalla no la lee.
+
+  Parámetros recibidos:
+  - valor: (int) de 0 a 100.
+  - clase: (string, opcional) una clase más para el relleno, para otro color.
+#}
+{% set valor = min(100, max(0, valor)) %}
+<svg class="reporte-barra" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="reporte-barra-fondo" width="100" height="8" rx="2"/><rect class="reporte-barra-valor{{ clase is defined ? ' ' ~ clase : '' }}" width="{{ valor }}" height="8" rx="2"/></svg>

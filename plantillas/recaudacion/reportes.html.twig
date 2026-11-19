@@ -5,6 +5,11 @@
   filtro en fila y las tablas. Primero las sugerencias, que es lo que se usa para decidir; los
   totales por función y el CSV están en la otra pestaña (reportes_funciones.html.twig).
 
+  Desde EF-22.2 las recomendaciones van separadas por tema, en pestañas que son enlaces (andan sin
+  JavaScript y conservan el período), con las tarjetas y gráficos arriba: el profe marcó el 18/11
+  que con todo una cosa abajo de la otra «la gente lee la primer parte y no lee más». Los gráficos
+  son SVG con atributos: la CSP no deja estilos en línea.
+
   Variables:
   - periodo: desde y hasta (AAAA-MM-DD, para el filtro; vacío si no se eligió: ese lado no tiene
     límite) y texto («del 1 de agosto al 29 de octubre de 2026», o null si es todo o no sirve).
@@ -34,6 +39,12 @@
     servidores, desarrollo, costo, dias, resultado, gana} o null (sólo el administrador);
     comision, costo_funcion, servidores_mes y desarrollo_mes: las referencias de config.ini}.
   - costo_cargado: el aviso de «Guardar» el costo, {tipo, texto}, o null.
+  - tema: el tema que se muestra (EF-22.2): resumen, plata, promociones, programacion o salas; y
+    temas: clave => nombre, para las pestañas.
+  - funciones_por_mes: lista de {mes (abreviado), funciones}, para el gráfico de la tarjeta.
+  - ocupacion_por_dia: lista de {dia, ocupacion (entero), funciones}, de lunes a domingo.
+  - En resumen, salas y precios van además los valores para las barras: ocupacion_valor,
+    asistencia_valor y promedio_valor (en porcentaje del máximo), gorra_valor y pagas_valor.
   - combinadas: las recomendaciones que cruzan varias variables (EF-22.3), lista de {regla, sala,
     accion, porque (lista de textos con los datos que la justifican)}.
   - moderacion: sólo para el administrador (EF-22.4), o null: {avisos, salas: lista de {nombre,
@@ -99,179 +110,317 @@
       } only %}
     {% endif %}
   {% else %}
+    {# Las tarjetas, cada una con su gráfico chico (EF-22.2): las funciones de cada mes, y la
+       ocupación, la asistencia y el promedio como barras. El número sigue escrito: el gráfico es
+       un apoyo y no se lee con lector de pantalla. #}
     {% if resumen %}
       <dl class="panel-resumen">
         <div class="panel-dato">
           <dt>Funciones</dt>
           <dd class="panel-dato-valor">{{ resumen.funciones }}</dd>
           <dd class="panel-dato-nota">finalizadas en el período</dd>
+          {% if funciones_por_mes|length > 1 %}
+            {% set maximo = max(funciones_por_mes|map(m => m.funciones)) %}
+            <dd class="reporte-mini" aria-hidden="true">
+              <svg class="reporte-columnas" viewBox="0 0 {{ funciones_por_mes|length * 10 }} 30" preserveAspectRatio="none" focusable="false">
+                {% for mes in funciones_por_mes %}
+                  {% set alto = maximo > 0 ? (mes.funciones / maximo * 26)|round(1) : 0 %}
+                  <rect class="reporte-columna" x="{{ loop.index0 * 10 + 1 }}" y="{{ 30 - alto }}" width="8" height="{{ alto }}"><title>{{ mes.mes }}: {{ mes.funciones }}</title></rect>
+                {% endfor %}
+              </svg>
+              <span class="reporte-mini-meses">{{ (funciones_por_mes|first).mes }} a {{ (funciones_por_mes|last).mes }}</span>
+            </dd>
+          {% endif %}
         </div>
-        <div class="panel-dato">
-          <dt>Ocupación</dt>
-          <dd class="panel-dato-valor">{{ resumen.ocupacion }}</dd>
-          <dd class="panel-dato-nota">de los lugares, vendidos</dd>
-        </div>
-        <div class="panel-dato">
-          <dt>Asistencia</dt>
-          <dd class="panel-dato-valor">{{ resumen.asistencia ?? '—' }}</dd>
-          <dd class="panel-dato-nota">de los que reservaron, fueron</dd>
-        </div>
-        <div class="panel-dato">
-          <dt>Calificación</dt>
-          <dd class="panel-dato-valor">{{ resumen.promedio ?? '—' }}</dd>
-          <dd class="panel-dato-nota">{{ resumen.promedio ? 'promedio, de 1 a 5' : 'nadie calificó todavía' }}</dd>
-        </div>
+        {% for dato in [
+          { titulo: 'Ocupación', valor: resumen.ocupacion, nota: 'de los lugares, vendidos', barra: resumen.ocupacion_valor },
+          { titulo: 'Asistencia', valor: resumen.asistencia ?? '—', nota: 'de los que reservaron, fueron', barra: resumen.asistencia_valor },
+          { titulo: 'Calificación', valor: resumen.promedio ?? '—', nota: resumen.promedio ? 'promedio, de 1 a 5' : 'nadie calificó todavía', barra: resumen.promedio_valor }
+        ] %}
+          <div class="panel-dato">
+            <dt>{{ dato.titulo }}</dt>
+            <dd class="panel-dato-valor">{{ dato.valor }}</dd>
+            <dd class="panel-dato-nota">{{ dato.nota }}</dd>
+            {% if dato.barra is not null %}
+              <dd class="reporte-mini" aria-hidden="true">{% include 'parciales/barra.html.twig' with { valor: dato.barra } only %}</dd>
+            {% endif %}
+          </div>
+        {% endfor %}
       </dl>
     {% endif %}
 
-    {# ¿Gana o pierde plata? (EF-22.1): lo primero que preguntó el profe el 18/11 al ver los
-       montos. Verde si gana y rojo si pierde, con el signo y la palabra además del color. #}
-    {% if ganancias and ganancias.salas is not empty %}
-      <section class="reporte-seccion" id="ganancias" aria-labelledby="reporte-ganancias">
-        <h2 id="reporte-ganancias" class="reporte-titulo">¿Gana o pierde plata?</h2>
-        {% if costo_cargado %}
-          {% include 'parciales/mensaje.html.twig' with { tipo: costo_cargado.tipo, mensaje: costo_cargado.texto } only %}
+    {# Los temas, como pestañas que son enlaces, con el período elegido. #}
+    {% set consulta = 'desde=' ~ periodo.desde|url_encode ~ '&hasta=' ~ periodo.hasta|url_encode %}
+    <nav class="reporte-pestanas reporte-temas" aria-label="Temas del reporte">
+      {% for clave, nombre in temas %}
+        {% if clave != 'plata' or (ganancias and ganancias.salas is not empty) %}
+          <a href="/recaudacion/reportes?{{ consulta }}&amp;tema={{ clave }}" class="reporte-pestana{% if tema == clave %} activa{% endif %}"{% if tema == clave %} aria-current="page"{% endif %}>{{ nombre }}</a>
         {% endif %}
+      {% endfor %}
+    </nav>
 
-        {% if ganancias.plataforma %}
-          {% set p = ganancias.plataforma %}
-          <dl class="panel-resumen reporte-plataforma">
-            <div class="panel-dato">
-              <dt>Plataforma</dt>
-              <dd class="panel-dato-valor reporte-resultado {{ p.gana ? 'reporte-gana' : 'reporte-pierde' }}">{{ p.resultado }}</dd>
-              <dd class="panel-dato-nota">{{ p.gana ? 'gana' : 'pierde' }} en {{ p.dias }} {{ p.dias == 1 ? 'día' : 'días' }}</dd>
-            </div>
-            <div class="panel-dato">
-              <dt>Su parte</dt>
-              <dd class="panel-dato-valor">{{ p.ingresos }}</dd>
-              <dd class="panel-dato-nota">de lo que cobraron las salas</dd>
-            </div>
-            <div class="panel-dato">
-              <dt>Lo que le cuesta</dt>
-              <dd class="panel-dato-valor">{{ p.costo }}</dd>
-              <dd class="panel-dato-nota">servidores {{ p.servidores }} y desarrollo {{ p.desarrollo }}</dd>
-            </div>
-          </dl>
-        {% endif %}
+    {% if tema == 'resumen' %}
+      {# Las que cruzan varias variables van primero, con su porqué: cada dato que la justifica, así
+         se puede contestar «¿cómo llegaste a eso?» (EF-22.3; las reglas, en docs/recomendaciones.md
+         del back). #}
+      {% if combinadas is empty %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Ninguna recomendación junta varios datos en este período. Mirá cada tema por separado.' } only %}
+      {% else %}
+        <section class="reporte-seccion" aria-labelledby="reporte-combinadas">
+          <h2 id="reporte-combinadas" class="reporte-titulo">Lo que más conviene</h2>
+          <ul class="reporte-sugerencias">
+            {% for recomendacion in combinadas %}
+              <li class="reporte-sugerencia reporte-combinada">
+                <p class="reporte-sugerencia-texto"><strong>{{ recomendacion.sala }}:</strong> {{ recomendacion.accion }}</p>
+                <p class="reporte-porque-titulo">Por qué</p>
+                <ul class="reporte-porque">
+                  {% for dato in recomendacion.porque %}
+                    <li>{{ dato }}</li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
 
-        <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-ganancias">
-          <table class="tabla-admin reporte-ganancias">
-            <thead>
-              <tr>
-                <th scope="col">Sala</th>
-                <th scope="col">Cobrado</th>
-                <th scope="col">Mercado Pago</th>
-                <th scope="col">Dueños</th>
-                <th scope="col">Plataforma</th>
-                <th scope="col">Sala</th>
-                <th scope="col">Costo</th>
-                <th scope="col">Resultado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for sala in ganancias.salas %}
-                <tr>
-                  <td>
-                    <span class="tabla-admin-principal">{{ sala.nombre }}</span>
-                    <span class="tabla-admin-secundario">{{ sala.funciones }} {{ sala.funciones == 1 ? 'función' : 'funciones' }}{% if sala.estimadas > 0 %}, {{ sala.estimadas }} sin repartir todavía{% endif %}</span>
-                  </td>
-                  <td>{{ sala.cobrado }}</td>
-                  <td>− {{ sala.comision }}</td>
-                  <td>{{ sala.duenos }}</td>
-                  <td>{{ sala.plataforma }}</td>
-                  <td>{{ sala.sala }}</td>
-                  <td>
-                    − {{ sala.costo }}
-                    <span class="tabla-admin-secundario">{{ sala.costo_funcion }} por función{% if not sala.costo_propio %}, de referencia{% endif %}</span>
-                  </td>
-                  <td>
-                    <span class="reporte-resultado {{ sala.gana ? 'reporte-gana' : 'reporte-pierde' }}">{{ sala.resultado }}</span>
-                    <span class="tabla-admin-secundario">{{ sala.gana ? 'gana' : 'pierde' }}</span>
-                  </td>
-                </tr>
+      {# La ocupación por día de la semana y por sala, como barras (EF-22.2): el día flojo y la sala
+         que menos llena se ven de un vistazo. #}
+      {% if not sin_ventas and ocupacion_por_dia is not empty %}
+        <div class="reporte-graficos">
+          <section class="reporte-seccion" aria-labelledby="reporte-por-dia">
+            <h3 id="reporte-por-dia" class="reporte-subtitulo">Ocupación por día</h3>
+            <ul class="reporte-barras">
+              {% for dia in ocupacion_por_dia %}
+                <li class="reporte-barras-fila">
+                  <span class="reporte-barras-etiqueta">{{ dia.dia }}</span>
+                  {% include 'parciales/barra.html.twig' with { valor: dia.ocupacion } only %}
+                  <span class="reporte-barras-texto">{{ dia.ocupacion }} %</span>
+                </li>
               {% endfor %}
-            </tbody>
-          </table>
+            </ul>
+          </section>
+          {% if salas is not empty %}
+            <section class="reporte-seccion" aria-labelledby="reporte-por-sala">
+              <h3 id="reporte-por-sala" class="reporte-subtitulo">Ocupación por sala</h3>
+              <ul class="reporte-barras">
+                {% for sala in salas %}
+                  <li class="reporte-barras-fila">
+                    <span class="reporte-barras-etiqueta">{{ sala.nombre }}</span>
+                    {% include 'parciales/barra.html.twig' with { valor: sala.ocupacion_valor } only %}
+                    <span class="reporte-barras-texto">{{ sala.ocupacion }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            </section>
+          {% endif %}
         </div>
-        <p class="reporte-explicacion">
-          A la sala le queda su parte menos lo que le cuesta abrir cada función. Mercado Pago se queda el {{ ganancias.comision }} de lo cobrado antes de repartir. Las funciones a la gorra cuentan su costo sin plata: la gorra va directo a la sala.
-          {% if ganancias.plataforma %}La plataforma paga {{ ganancias.servidores_mes }} por mes de servidores y {{ ganancias.desarrollo_mes }} de desarrollo.{% endif %}
-        </p>
+      {% endif %}
+    {% elseif tema == 'plata' %}
+      {# ¿Gana o pierde plata? (EF-22.1): lo primero que preguntó el profe el 18/11 al ver los
+         montos. Verde si gana y rojo si pierde, con el signo y la palabra además del color. #}
+      {% if ganancias and ganancias.salas is not empty %}
+        <section class="reporte-seccion" id="ganancias" aria-labelledby="reporte-ganancias">
+          <h2 id="reporte-ganancias" class="reporte-titulo">¿Gana o pierde plata?</h2>
+          {% if costo_cargado %}
+            {% include 'parciales/mensaje.html.twig' with { tipo: costo_cargado.tipo, mensaje: costo_cargado.texto } only %}
+          {% endif %}
 
-        {# El costo de cada sala lo sabe su organizador: alquiler, luz, la persona en la puerta. Sin
-           cargarlo, vale el de referencia. #}
-        <form class="panel-filtros reporte-costo" action="/recaudacion/reportes/costos" method="post" aria-label="Cargar el costo por función de una sala">
-          <input type="hidden" name="_csrf" value="{{ csrf }}">
-          <input type="hidden" name="desde" value="{{ periodo.desde }}">
-          <input type="hidden" name="hasta" value="{{ periodo.hasta }}">
-          <label class="reporte-filtro">
-            <span class="reporte-filtro-etiqueta">Sala</span>
-            <select name="sala" class="campo-control control-select">
-              {% for sala in ganancias.salas %}
-                <option value="{{ sala.id }}">{{ sala.nombre }}</option>
-              {% endfor %}
-            </select>
-          </label>
-          <label class="reporte-filtro">
-            <span class="reporte-filtro-etiqueta">Costo por función, en pesos</span>
-            <input type="text" name="costo" inputmode="decimal" required maxlength="16" placeholder="{{ ganancias.costo_funcion }}" class="campo-control">
-          </label>
-          {% include 'parciales/boton.html.twig' with { texto: 'Guardar el costo', tipo: 'submit', variante: 'secundario' } only %}
-        </form>
-      </section>
-    {% endif %}
+          {% if ganancias.plataforma %}
+            {% set p = ganancias.plataforma %}
+            <dl class="panel-resumen reporte-plataforma">
+              <div class="panel-dato">
+                <dt>Plataforma</dt>
+                <dd class="panel-dato-valor reporte-resultado {{ p.gana ? 'reporte-gana' : 'reporte-pierde' }}">{{ p.resultado }}</dd>
+                <dd class="panel-dato-nota">{{ p.gana ? 'gana' : 'pierde' }} en {{ p.dias }} {{ p.dias == 1 ? 'día' : 'días' }}</dd>
+              </div>
+              <div class="panel-dato">
+                <dt>Su parte</dt>
+                <dd class="panel-dato-valor">{{ p.ingresos }}</dd>
+                <dd class="panel-dato-nota">de lo que cobraron las salas</dd>
+              </div>
+              <div class="panel-dato">
+                <dt>Lo que le cuesta</dt>
+                <dd class="panel-dato-valor">{{ p.costo }}</dd>
+                <dd class="panel-dato-nota">servidores {{ p.servidores }} y desarrollo {{ p.desarrollo }}</dd>
+              </div>
+            </dl>
+          {% endif %}
 
-    {# La moderación y la conducta del período, para el administrador (EF-22.4): el profe marcó el
-       18/11 que en los reportes generales no aparecían. #}
-    {% if moderacion %}
-      <section class="reporte-seccion" id="moderacion" aria-labelledby="reporte-moderacion">
-        <h2 id="reporte-moderacion" class="reporte-titulo">Moderación y conducta</h2>
-        {% for aviso in moderacion.avisos %}
-          {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: aviso } only %}
-        {% endfor %}
-        <dl class="panel-resumen">
-          <div class="panel-dato">
-            <dt>Solicitudes de sala</dt>
-            <dd class="panel-dato-valor">{{ moderacion.solicitudes.pendientes }}</dd>
-            <dd class="panel-dato-nota">sin resolver; {{ moderacion.solicitudes.aprobadas }} aprobadas y {{ moderacion.solicitudes.rechazadas }} rechazadas</dd>
-          </div>
-          <div class="panel-dato">
-            <dt>Otras denuncias</dt>
-            <dd class="panel-dato-valor">{{ moderacion.total_otras_denuncias }}</dd>
-            <dd class="panel-dato-nota">de obras y calificaciones; {{ moderacion.otras_denuncias.abierta }} abiertas</dd>
-          </div>
-          <div class="panel-dato">
-            <dt>Salas suspendidas</dt>
-            <dd class="panel-dato-valor">{{ moderacion.salas|filter(s => s.suspension)|length + moderacion.otras_suspendidas }}</dd>
-            <dd class="panel-dato-nota">hoy, también sin funciones en el período</dd>
-          </div>
-        </dl>
-        {% if moderacion.salas is not empty %}
-          <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-moderacion">
-            <table class="tabla-admin">
+          <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-ganancias">
+            <table class="tabla-admin reporte-ganancias">
               <thead>
                 <tr>
                   <th scope="col">Sala</th>
-                  <th scope="col">Denuncias</th>
-                  <th scope="col">Ausencias</th>
-                  <th scope="col">Conducta negativa</th>
-                  <th scope="col">Bajo el umbral</th>
+                  <th scope="col">Cobrado</th>
+                  <th scope="col">Mercado Pago</th>
+                  <th scope="col">Dueños</th>
+                  <th scope="col">Plataforma</th>
+                  <th scope="col">Sala</th>
+                  <th scope="col">Costo</th>
+                  <th scope="col">Resultado</th>
                 </tr>
               </thead>
               <tbody>
-                {% for sala in moderacion.salas %}
+                {% for sala in ganancias.salas %}
                   <tr>
                     <td>
                       <span class="tabla-admin-principal">{{ sala.nombre }}</span>
-                      {% if sala.suspension %}<span class="estado-cuenta estado-cuenta-suspendida">Suspendida</span> <span class="tabla-admin-secundario">{{ sala.suspension }}</span>{% endif %}
+                      <span class="tabla-admin-secundario">{{ sala.funciones }} {{ sala.funciones == 1 ? 'función' : 'funciones' }}{% if sala.estimadas > 0 %}, {{ sala.estimadas }} sin repartir todavía{% endif %}</span>
+                    </td>
+                    <td>{{ sala.cobrado }}</td>
+                    <td>− {{ sala.comision }}</td>
+                    <td>{{ sala.duenos }}</td>
+                    <td>{{ sala.plataforma }}</td>
+                    <td>{{ sala.sala }}</td>
+                    <td>
+                      − {{ sala.costo }}
+                      <span class="tabla-admin-secundario">{{ sala.costo_funcion }} por función{% if not sala.costo_propio %}, de referencia{% endif %}</span>
                     </td>
                     <td>
-                      {{ sala.total_denuncias }}
-                      {% if sala.total_denuncias > 0 %}<span class="tabla-admin-secundario">{{ sala.denuncias.abierta }} abiertas, {{ sala.denuncias.desestimada }} desestimadas y {{ sala.denuncias.resuelta }} resueltas</span>{% endif %}
+                      <span class="reporte-resultado {{ sala.gana ? 'reporte-gana' : 'reporte-pierde' }}">{{ sala.resultado }}</span>
+                      <span class="tabla-admin-secundario">{{ sala.gana ? 'gana' : 'pierde' }}</span>
                     </td>
-                    <td>{{ sala.ausentes }}</td>
-                    <td>{{ sala.negativas }}</td>
-                    <td>{{ sala.bajo_umbral }} <span class="tabla-admin-secundario">de {{ sala.espectadores }} {{ sala.espectadores == 1 ? 'espectador' : 'espectadores' }}</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <p class="reporte-explicacion">
+            A la sala le queda su parte menos lo que le cuesta abrir cada función. Mercado Pago se queda el {{ ganancias.comision }} de lo cobrado antes de repartir. Las funciones a la gorra cuentan su costo sin plata: la gorra va directo a la sala.
+            {% if ganancias.plataforma %}La plataforma paga {{ ganancias.servidores_mes }} por mes de servidores y {{ ganancias.desarrollo_mes }} de desarrollo.{% endif %}
+          </p>
+
+          {# El costo de cada sala lo sabe su organizador: alquiler, luz, la persona en la puerta. Sin
+             cargarlo, vale el de referencia. #}
+          <form class="panel-filtros reporte-costo" action="/recaudacion/reportes/costos" method="post" aria-label="Cargar el costo por función de una sala">
+            <input type="hidden" name="_csrf" value="{{ csrf }}">
+            <input type="hidden" name="desde" value="{{ periodo.desde }}">
+            <input type="hidden" name="hasta" value="{{ periodo.hasta }}">
+            <label class="reporte-filtro">
+              <span class="reporte-filtro-etiqueta">Sala</span>
+              <select name="sala" class="campo-control control-select">
+                {% for sala in ganancias.salas %}
+                  <option value="{{ sala.id }}">{{ sala.nombre }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="reporte-filtro">
+              <span class="reporte-filtro-etiqueta">Costo por función, en pesos</span>
+              <input type="text" name="costo" inputmode="decimal" required maxlength="16" placeholder="{{ ganancias.costo_funcion }}" class="campo-control">
+            </label>
+            {% include 'parciales/boton.html.twig' with { texto: 'Guardar el costo', tipo: 'submit', variante: 'secundario' } only %}
+          </form>
+        </section>
+      {% endif %}
+      {% if not ganancias or ganancias.salas is empty %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'No se pudo calcular lo que ganó cada sala.' } only %}
+      {% endif %}
+    {% elseif tema == 'promociones' %}
+      <h2 class="sr-only">Promociones</h2>
+      <section class="reporte-seccion" aria-labelledby="reporte-dias-flojos">
+        <h3 id="reporte-dias-flojos" class="reporte-subtitulo">Días para una promoción</h3>
+        {% if sin_ventas %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
+        {% elseif dias_flojos is empty %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Ningún día quedó flojo: no hace falta una promoción.' } only %}
+        {% else %}
+          <ul class="reporte-sugerencias">
+            {% for dia in dias_flojos %}
+              <li class="reporte-sugerencia">
+                <p class="reporte-sugerencia-texto">
+                  <strong>{{ dia.sala }}, los {{ dia.dia }}:</strong> vendió el {{ dia.ocupacion }} de los lugares{% if dia.resto %}, contra el {{ dia.resto }} del resto de la semana{% endif %}.
+                </p>
+                <p class="reporte-sugerencia-nota">Probá una promoción los {{ dia.dia }}. Sale de {{ dia.funciones }} funciones.</p>
+                {# Qué dar ese día: lo que el público de la sala votó y no vio. Cruza las dos cosas en una
+                   sola decisión, que es lo que sólo puede hacer un cine con votación (EF-09.5). #}
+                {% if dia.para_dar %}
+                  <p class="reporte-sugerencia-nota">Para ese día: <strong>{{ dia.para_dar.titulo }}</strong>, que el público de esta sala votó y no vio ({{ dia.para_dar.votos }} {{ dia.para_dar.votos == 1 ? 'voto' : 'votos' }} en {{ dia.para_dar.votaciones }} {{ dia.para_dar.votaciones == 1 ? 'votación' : 'votaciones' }}, el {{ dia.para_dar.porcentaje }}).</p>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </section>
+
+      {# Qué promoción conviene, no sólo cuándo: si a la gorra llena mucho más, el precio es lo que
+         frena al público. Sin las dos clases de funciones en una sala no se puede comparar, así que
+         la sección no aparece si ninguna sala las tiene (EF-09.5). #}
+      {% if precios is not empty %}
+        <section class="reporte-seccion" aria-labelledby="reporte-precios">
+          <h3 id="reporte-precios" class="reporte-subtitulo">A la gorra o con precio</h3>
+          <ul class="reporte-sugerencias">
+            {% for precio in precios %}
+              <li class="reporte-sugerencia">
+                {% if precio.sensible %}
+                  <p class="reporte-sugerencia-texto">
+                    <strong>{{ precio.sala }}:</strong> a la gorra llenó el {{ precio.gorra }} de los lugares; con precio, el {{ precio.pagas }}.
+                  </p>
+                  <p class="reporte-sugerencia-nota">Su público es sensible al precio: un descuento puede traerlo. Sale de {{ precio.funciones_gorra }} funciones a la gorra y {{ precio.funciones_pagas }} con precio.</p>
+                {% else %}
+                  <p class="reporte-sugerencia-texto">
+                    <strong>{{ precio.sala }}:</strong> con precio llenó el {{ precio.pagas }} de los lugares, igual o más que a la gorra ({{ precio.gorra }}).
+                  </p>
+                  <p class="reporte-sugerencia-nota">El precio no le quita público: se pueden cobrar las funciones que hoy son a la gorra. Sale de {{ precio.funciones_gorra }} funciones a la gorra y {{ precio.funciones_pagas }} con precio.</p>
+                {% endif %}
+                <ul class="reporte-barras reporte-barras-chicas" aria-hidden="true">
+                  <li class="reporte-barras-fila"><span class="reporte-barras-etiqueta">A la gorra</span>{% include 'parciales/barra.html.twig' with { valor: precio.gorra_valor, clase: 'reporte-barra-gorra' } only %}<span class="reporte-barras-texto">{{ precio.gorra }}</span></li>
+                  <li class="reporte-barras-fila"><span class="reporte-barras-etiqueta">Con precio</span>{% include 'parciales/barra.html.twig' with { valor: precio.pagas_valor } only %}<span class="reporte-barras-texto">{{ precio.pagas }}</span></li>
+                </ul>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      {# Personas y no un porcentaje: una promoción apunta a gente, y éstas ya mostraron interés (EF-09.5) #}
+      <section class="reporte-seccion" aria-labelledby="reporte-sin-reserva">
+        <h3 id="reporte-sin-reserva" class="reporte-subtitulo">Votaron y no reservaron</h3>
+        {% if sin_ventas %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
+        {% elseif sin_reserva is empty %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Casi todos los que votaron reservaron: no hace falta ir a buscarlos.' } only %}
+        {% else %}
+          <ul class="reporte-sugerencias">
+            {% for sala in sin_reserva %}
+              <li class="reporte-sugerencia">
+                <p class="reporte-sugerencia-texto">
+                  <strong>{{ sala.sala }}:</strong> {{ sala.sin_reserva }} de las {{ sala.votantes }} personas que votaron no reservaron ninguna función.
+                </p>
+                <p class="reporte-sugerencia-nota">Ya mostraron interés: una promoción para quienes votaron puede traerlas.</p>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </section>
+    {% elseif tema == 'programacion' %}
+      <h2 class="sr-only">Programación</h2>
+      <section class="reporte-seccion" aria-labelledby="reporte-titulos">
+        <h3 id="reporte-titulos" class="reporte-subtitulo">Títulos para repetir</h3>
+        {% if sin_ventas %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
+        {% elseif titulos is empty %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Ningún título llegó a las tres cosas en el período.' } only %}
+        {% else %}
+          <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-titulos">
+            <table class="tabla-admin">
+              <thead>
+                <tr>
+                  <th scope="col">Título</th>
+                  <th scope="col">Funciones</th>
+                  <th scope="col">Ocupación</th>
+                  <th scope="col">Asistencia</th>
+                  <th scope="col">Promedio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for titulo in titulos %}
+                  <tr>
+                    <td><span class="tabla-admin-principal">{{ titulo.titulo }}</span></td>
+                    <td>{{ titulo.funciones }}</td>
+                    <td>{{ titulo.ocupacion }}</td>
+                    <td>{{ titulo.asistencia }}</td>
+                    <td>{{ titulo.promedio }}</td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -279,205 +428,136 @@
           </div>
         {% endif %}
       </section>
-    {% endif %}
 
-    <h2 class="reporte-titulo">Recomendaciones</h2>
+      {# Distinta de «para repetir», que mira si gustó: ésta dice que faltaron lugares (EF-09.5) #}
+      {% if not sin_ventas and agotadas is not empty %}
+        <section class="reporte-seccion" aria-labelledby="reporte-agotadas">
+          <h3 id="reporte-agotadas" class="reporte-subtitulo">Sumá una función</h3>
+          <ul class="reporte-sugerencias">
+            {% for obra in agotadas %}
+              <li class="reporte-sugerencia">
+                <p class="reporte-sugerencia-texto">
+                  <strong>{{ obra.titulo }}</strong>, en {{ obra.sala }}: se agotó en {{ obra.agotadas }} de sus {{ obra.funciones }} {{ obra.funciones == 1 ? 'función' : 'funciones' }} ({{ obra.ocupacion }} de los lugares vendidos).
+                </p>
+                <p class="reporte-sugerencia-nota">La demanda llegó al cupo: sumá otra función.</p>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
 
-    {# Las que cruzan varias variables van primero, con su porqué: cada dato que la justifica, así
-       se puede contestar «¿cómo llegaste a eso?» (EF-22.3; las reglas, en docs/recomendaciones.md
-       del back). #}
-    {% if combinadas is not empty %}
-      <section class="reporte-seccion" aria-labelledby="reporte-combinadas">
-        <h3 id="reporte-combinadas" class="reporte-subtitulo">Lo que más conviene</h3>
-        <ul class="reporte-sugerencias">
-          {% for recomendacion in combinadas %}
-            <li class="reporte-sugerencia reporte-combinada">
-              <p class="reporte-sugerencia-texto"><strong>{{ recomendacion.sala }}:</strong> {{ recomendacion.accion }}</p>
-              <p class="reporte-porque-titulo">Por qué</p>
-              <ul class="reporte-porque">
-                {% for dato in recomendacion.porque %}
-                  <li>{{ dato }}</li>
+      <section class="reporte-seccion" aria-labelledby="reporte-pedidos">
+        <h3 id="reporte-pedidos" class="reporte-subtitulo">Lo que el público pidió y no vio</h3>
+        {% if pedidos is empty %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Ninguna obra quedó afuera con tantos votos.' } only %}
+        {% else %}
+          <ul class="reporte-sugerencias">
+            {% for pedido in pedidos %}
+              <li class="reporte-sugerencia">
+                <p class="reporte-sugerencia-texto">
+                  <strong>{{ pedido.titulo }}:</strong> {{ pedido.votos }} {{ pedido.votos == 1 ? 'voto' : 'votos' }} en {{ pedido.votaciones }} {{ pedido.votaciones == 1 ? 'votación' : 'votaciones' }} que perdió, el {{ pedido.porcentaje }} de los votos.
+                </p>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </section>
+    {% elseif tema == 'salas' %}
+      <h2 class="sr-only">Salas</h2>
+      <section class="reporte-seccion" aria-labelledby="reporte-salas">
+        <h3 id="reporte-salas" class="reporte-subtitulo">Salas que más rinden</h3>
+        {% if sin_ventas %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
+        {% elseif salas is not empty %}
+          <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-salas">
+            <table class="tabla-admin">
+              <thead>
+                <tr>
+                  <th scope="col">Sala</th>
+                  <th scope="col">Funciones</th>
+                  <th scope="col">Ocupación</th>
+                  <th scope="col">Asistencia</th>
+                  <th scope="col">Promedio</th>
+                  <th scope="col">Votaron y reservaron</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for sala in salas %}
+                  <tr>
+                    <td><span class="tabla-admin-principal">{{ sala.nombre }}</span></td>
+                    <td>{{ sala.funciones }}</td>
+                    <td>{{ sala.ocupacion }}</td>
+                    <td>{{ sala.asistencia ?? '—' }}</td>
+                    <td>{{ sala.promedio ?? '—' }}</td>
+                    <td>{{ sala.conversion ?? '—' }}</td>
+                  </tr>
                 {% endfor %}
-              </ul>
-            </li>
-          {% endfor %}
-        </ul>
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
       </section>
+
+      {# La moderación y la conducta del período, para el administrador (EF-22.4): el profe marcó el
+         18/11 que en los reportes generales no aparecían. #}
+      {% if moderacion %}
+        <section class="reporte-seccion" id="moderacion" aria-labelledby="reporte-moderacion">
+          <h3 id="reporte-moderacion" class="reporte-subtitulo">Moderación y conducta</h3>
+          {% for aviso in moderacion.avisos %}
+            {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: aviso } only %}
+          {% endfor %}
+          <dl class="panel-resumen">
+            <div class="panel-dato">
+              <dt>Solicitudes de sala</dt>
+              <dd class="panel-dato-valor">{{ moderacion.solicitudes.pendientes }}</dd>
+              <dd class="panel-dato-nota">sin resolver; {{ moderacion.solicitudes.aprobadas }} aprobadas y {{ moderacion.solicitudes.rechazadas }} rechazadas</dd>
+            </div>
+            <div class="panel-dato">
+              <dt>Otras denuncias</dt>
+              <dd class="panel-dato-valor">{{ moderacion.total_otras_denuncias }}</dd>
+              <dd class="panel-dato-nota">de obras y calificaciones; {{ moderacion.otras_denuncias.abierta }} abiertas</dd>
+            </div>
+            <div class="panel-dato">
+              <dt>Salas suspendidas</dt>
+              <dd class="panel-dato-valor">{{ moderacion.salas|filter(s => s.suspension)|length + moderacion.otras_suspendidas }}</dd>
+              <dd class="panel-dato-nota">hoy, también sin funciones en el período</dd>
+            </div>
+          </dl>
+          {% if moderacion.salas is not empty %}
+            <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-moderacion">
+              <table class="tabla-admin">
+                <thead>
+                  <tr>
+                    <th scope="col">Sala</th>
+                    <th scope="col">Denuncias</th>
+                    <th scope="col">Ausencias</th>
+                    <th scope="col">Conducta negativa</th>
+                    <th scope="col">Bajo el umbral</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for sala in moderacion.salas %}
+                    <tr>
+                      <td>
+                        <span class="tabla-admin-principal">{{ sala.nombre }}</span>
+                        {% if sala.suspension %}<span class="estado-cuenta estado-cuenta-suspendida">Suspendida</span> <span class="tabla-admin-secundario">{{ sala.suspension }}</span>{% endif %}
+                      </td>
+                      <td>
+                        {{ sala.total_denuncias }}
+                        {% if sala.total_denuncias > 0 %}<span class="tabla-admin-secundario">{{ sala.denuncias.abierta }} abiertas, {{ sala.denuncias.desestimada }} desestimadas y {{ sala.denuncias.resuelta }} resueltas</span>{% endif %}
+                      </td>
+                      <td>{{ sala.ausentes }}</td>
+                      <td>{{ sala.negativas }}</td>
+                      <td>{{ sala.bajo_umbral }} <span class="tabla-admin-secundario">de {{ sala.espectadores }} {{ sala.espectadores == 1 ? 'espectador' : 'espectadores' }}</span></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </section>
+      {% endif %}
     {% endif %}
-
-    <section class="reporte-seccion" aria-labelledby="reporte-dias-flojos">
-      <h3 id="reporte-dias-flojos" class="reporte-subtitulo">Días para una promoción</h3>
-      {% if sin_ventas %}
-        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
-      {% elseif dias_flojos is empty %}
-        {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Ningún día quedó flojo: no hace falta una promoción.' } only %}
-      {% else %}
-        <ul class="reporte-sugerencias">
-          {% for dia in dias_flojos %}
-            <li class="reporte-sugerencia">
-              <p class="reporte-sugerencia-texto">
-                <strong>{{ dia.sala }}, los {{ dia.dia }}:</strong> vendió el {{ dia.ocupacion }} de los lugares{% if dia.resto %}, contra el {{ dia.resto }} del resto de la semana{% endif %}.
-              </p>
-              <p class="reporte-sugerencia-nota">Probá una promoción los {{ dia.dia }}. Sale de {{ dia.funciones }} funciones.</p>
-              {# Qué dar ese día: lo que el público de la sala votó y no vio. Cruza las dos cosas en una
-                 sola decisión, que es lo que sólo puede hacer un cine con votación (EF-09.5). #}
-              {% if dia.para_dar %}
-                <p class="reporte-sugerencia-nota">Para ese día: <strong>{{ dia.para_dar.titulo }}</strong>, que el público de esta sala votó y no vio ({{ dia.para_dar.votos }} {{ dia.para_dar.votos == 1 ? 'voto' : 'votos' }} en {{ dia.para_dar.votaciones }} {{ dia.para_dar.votaciones == 1 ? 'votación' : 'votaciones' }}, el {{ dia.para_dar.porcentaje }}).</p>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </section>
-
-    {# Qué promoción conviene, no sólo cuándo: si a la gorra llena mucho más, el precio es lo que
-       frena al público. Sin las dos clases de funciones en una sala no se puede comparar, así que
-       la sección no aparece si ninguna sala las tiene (EF-09.5). #}
-    {% if precios is not empty %}
-      <section class="reporte-seccion" aria-labelledby="reporte-precios">
-        <h3 id="reporte-precios" class="reporte-subtitulo">A la gorra o con precio</h3>
-        <ul class="reporte-sugerencias">
-          {% for precio in precios %}
-            <li class="reporte-sugerencia">
-              {% if precio.sensible %}
-                <p class="reporte-sugerencia-texto">
-                  <strong>{{ precio.sala }}:</strong> a la gorra llenó el {{ precio.gorra }} de los lugares; con precio, el {{ precio.pagas }}.
-                </p>
-                <p class="reporte-sugerencia-nota">Su público es sensible al precio: un descuento puede traerlo. Sale de {{ precio.funciones_gorra }} funciones a la gorra y {{ precio.funciones_pagas }} con precio.</p>
-              {% else %}
-                <p class="reporte-sugerencia-texto">
-                  <strong>{{ precio.sala }}:</strong> con precio llenó el {{ precio.pagas }} de los lugares, igual o más que a la gorra ({{ precio.gorra }}).
-                </p>
-                <p class="reporte-sugerencia-nota">El precio no le quita público: se pueden cobrar las funciones que hoy son a la gorra. Sale de {{ precio.funciones_gorra }} funciones a la gorra y {{ precio.funciones_pagas }} con precio.</p>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      </section>
-    {% endif %}
-
-    {# Personas y no un porcentaje: una promoción apunta a gente, y éstas ya mostraron interés (EF-09.5) #}
-    <section class="reporte-seccion" aria-labelledby="reporte-sin-reserva">
-      <h3 id="reporte-sin-reserva" class="reporte-subtitulo">Votaron y no reservaron</h3>
-      {% if sin_ventas %}
-        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
-      {% elseif sin_reserva is empty %}
-        {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Casi todos los que votaron reservaron: no hace falta ir a buscarlos.' } only %}
-      {% else %}
-        <ul class="reporte-sugerencias">
-          {% for sala in sin_reserva %}
-            <li class="reporte-sugerencia">
-              <p class="reporte-sugerencia-texto">
-                <strong>{{ sala.sala }}:</strong> {{ sala.sin_reserva }} de las {{ sala.votantes }} personas que votaron no reservaron ninguna función.
-              </p>
-              <p class="reporte-sugerencia-nota">Ya mostraron interés: una promoción para quienes votaron puede traerlas.</p>
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </section>
-
-    <section class="reporte-seccion" aria-labelledby="reporte-titulos">
-      <h3 id="reporte-titulos" class="reporte-subtitulo">Títulos para repetir</h3>
-      {% if sin_ventas %}
-        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
-      {% elseif titulos is empty %}
-        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Ningún título llegó a las tres cosas en el período.' } only %}
-      {% else %}
-        <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-titulos">
-          <table class="tabla-admin">
-            <thead>
-              <tr>
-                <th scope="col">Título</th>
-                <th scope="col">Funciones</th>
-                <th scope="col">Ocupación</th>
-                <th scope="col">Asistencia</th>
-                <th scope="col">Promedio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for titulo in titulos %}
-                <tr>
-                  <td><span class="tabla-admin-principal">{{ titulo.titulo }}</span></td>
-                  <td>{{ titulo.funciones }}</td>
-                  <td>{{ titulo.ocupacion }}</td>
-                  <td>{{ titulo.asistencia }}</td>
-                  <td>{{ titulo.promedio }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% endif %}
-    </section>
-
-    {# Distinta de «para repetir», que mira si gustó: ésta dice que faltaron lugares (EF-09.5) #}
-    {% if not sin_ventas and agotadas is not empty %}
-      <section class="reporte-seccion" aria-labelledby="reporte-agotadas">
-        <h3 id="reporte-agotadas" class="reporte-subtitulo">Sumá una función</h3>
-        <ul class="reporte-sugerencias">
-          {% for obra in agotadas %}
-            <li class="reporte-sugerencia">
-              <p class="reporte-sugerencia-texto">
-                <strong>{{ obra.titulo }}</strong>, en {{ obra.sala }}: se agotó en {{ obra.agotadas }} de sus {{ obra.funciones }} {{ obra.funciones == 1 ? 'función' : 'funciones' }} ({{ obra.ocupacion }} de los lugares vendidos).
-              </p>
-              <p class="reporte-sugerencia-nota">La demanda llegó al cupo: sumá otra función.</p>
-            </li>
-          {% endfor %}
-        </ul>
-      </section>
-    {% endif %}
-
-    <section class="reporte-seccion" aria-labelledby="reporte-pedidos">
-      <h3 id="reporte-pedidos" class="reporte-subtitulo">Lo que el público pidió y no vio</h3>
-      {% if pedidos is empty %}
-        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Ninguna obra quedó afuera con tantos votos.' } only %}
-      {% else %}
-        <ul class="reporte-sugerencias">
-          {% for pedido in pedidos %}
-            <li class="reporte-sugerencia">
-              <p class="reporte-sugerencia-texto">
-                <strong>{{ pedido.titulo }}:</strong> {{ pedido.votos }} {{ pedido.votos == 1 ? 'voto' : 'votos' }} en {{ pedido.votaciones }} {{ pedido.votaciones == 1 ? 'votación' : 'votaciones' }} que perdió, el {{ pedido.porcentaje }} de los votos.
-              </p>
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </section>
-
-    <section class="reporte-seccion" aria-labelledby="reporte-salas">
-      <h3 id="reporte-salas" class="reporte-subtitulo">Salas que más rinden</h3>
-      {% if sin_ventas %}
-        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
-      {% elseif salas is not empty %}
-        <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-salas">
-          <table class="tabla-admin">
-            <thead>
-              <tr>
-                <th scope="col">Sala</th>
-                <th scope="col">Funciones</th>
-                <th scope="col">Ocupación</th>
-                <th scope="col">Asistencia</th>
-                <th scope="col">Promedio</th>
-                <th scope="col">Votaron y reservaron</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for sala in salas %}
-                <tr>
-                  <td><span class="tabla-admin-principal">{{ sala.nombre }}</span></td>
-                  <td>{{ sala.funciones }}</td>
-                  <td>{{ sala.ocupacion }}</td>
-                  <td>{{ sala.asistencia ?? '—' }}</td>
-                  <td>{{ sala.promedio ?? '—' }}</td>
-                  <td>{{ sala.conversion ?? '—' }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% endif %}
-    </section>
   {% endif %}
 {% endif %}
 {% if not administrador %}</div>{% endif %}
