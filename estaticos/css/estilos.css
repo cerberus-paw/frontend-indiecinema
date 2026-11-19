@@ -6607,6 +6607,39 @@ svg.enlace-denunciar-icono {
   text-align: left;
 }
 
+/* Si la sala o la plataforma gana o pierde plata (EF-22.1): verde o rojo, con el signo y la
+   palabra al lado para quien no distingue los colores */
+.reporte-resultado {
+  display: block;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reporte-gana {
+  color: var(--color-exito);
+}
+
+.reporte-pierde {
+  color: var(--color-error);
+}
+
+/* Los montos de la tabla no se parten en dos renglones */
+.reporte-ganancias td {
+  white-space: nowrap;
+}
+
+.reporte-ganancias .tabla-admin-secundario {
+  white-space: normal;
+}
+
+/* El costo de una sala: la sala, el monto y el botón en una fila, como el filtro del período */
+.reporte-costo {
+  grid-template-columns: minmax(160px, 260px) minmax(150px, 220px) auto;
+  justify-content: start;
+  align-items: end;
+  margin-top: var(--espacio-4);
+}
+
 /* Un título sin explicación debajo, pegado a su tabla: un poco de aire */
 .reporte-subtitulo + .tabla-admin-contenedor {
   margin-top: var(--espacio-3);
@@ -6614,6 +6647,7 @@ svg.enlace-denunciar-icono {
 
 @media (max-width: 600px) {
   .reporte-filtros,
+  .reporte-costo,
   .reporte-filtros-con-sala {
     grid-template-columns: minmax(0, 1fr);
   }

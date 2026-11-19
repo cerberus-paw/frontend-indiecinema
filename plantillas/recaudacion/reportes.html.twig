@@ -27,6 +27,13 @@
   - pedidos: lista de {titulo, votaciones, votos, porcentaje}.
   - salas: lista de {nombre, funciones, ocupacion, asistencia, promedio, conversion}, de la que
     más rinde a la que menos.
+  - ganancias: si cada sala gana o pierde plata (EF-22.1), o null si no se pudo calcular:
+    {salas: lista de {id, nombre, funciones, cobrado, comision, duenos, plataforma, sala, costo,
+    costo_funcion, costo_funcion_valor (para el campo), costo_propio, resultado (con signo), gana,
+    estimadas, sin_datos}, de la que más pierde a la que más gana; plataforma: {ingresos,
+    servidores, desarrollo, costo, dias, resultado, gana} o null (sólo el administrador);
+    comision, costo_funcion, servidores_mes y desarrollo_mes: las referencias de config.ini}.
+  - costo_cargado: el aviso de «Guardar» el costo, {tipo, texto}, o null.
 #}
 {% extends administrador ? 'administracion.html.twig' : 'organizador.html.twig' %}
 
@@ -108,6 +115,103 @@
           <dd class="panel-dato-nota">{{ resumen.promedio ? 'promedio, de 1 a 5' : 'nadie calificó todavía' }}</dd>
         </div>
       </dl>
+    {% endif %}
+
+    {# ¿Gana o pierde plata? (EF-22.1): lo primero que preguntó el profe el 18/11 al ver los
+       montos. Verde si gana y rojo si pierde, con el signo y la palabra además del color. #}
+    {% if ganancias and ganancias.salas is not empty %}
+      <section class="reporte-seccion" id="ganancias" aria-labelledby="reporte-ganancias">
+        <h2 id="reporte-ganancias" class="reporte-titulo">¿Gana o pierde plata?</h2>
+        {% if costo_cargado %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: costo_cargado.tipo, mensaje: costo_cargado.texto } only %}
+        {% endif %}
+
+        {% if ganancias.plataforma %}
+          {% set p = ganancias.plataforma %}
+          <dl class="panel-resumen reporte-plataforma">
+            <div class="panel-dato">
+              <dt>Plataforma</dt>
+              <dd class="panel-dato-valor reporte-resultado {{ p.gana ? 'reporte-gana' : 'reporte-pierde' }}">{{ p.resultado }}</dd>
+              <dd class="panel-dato-nota">{{ p.gana ? 'gana' : 'pierde' }} en {{ p.dias }} {{ p.dias == 1 ? 'día' : 'días' }}</dd>
+            </div>
+            <div class="panel-dato">
+              <dt>Su parte</dt>
+              <dd class="panel-dato-valor">{{ p.ingresos }}</dd>
+              <dd class="panel-dato-nota">de lo que cobraron las salas</dd>
+            </div>
+            <div class="panel-dato">
+              <dt>Lo que le cuesta</dt>
+              <dd class="panel-dato-valor">{{ p.costo }}</dd>
+              <dd class="panel-dato-nota">servidores {{ p.servidores }} y desarrollo {{ p.desarrollo }}</dd>
+            </div>
+          </dl>
+        {% endif %}
+
+        <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-ganancias">
+          <table class="tabla-admin reporte-ganancias">
+            <thead>
+              <tr>
+                <th scope="col">Sala</th>
+                <th scope="col">Cobrado</th>
+                <th scope="col">Mercado Pago</th>
+                <th scope="col">Dueños</th>
+                <th scope="col">Plataforma</th>
+                <th scope="col">Sala</th>
+                <th scope="col">Costo</th>
+                <th scope="col">Resultado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sala in ganancias.salas %}
+                <tr>
+                  <td>
+                    <span class="tabla-admin-principal">{{ sala.nombre }}</span>
+                    <span class="tabla-admin-secundario">{{ sala.funciones }} {{ sala.funciones == 1 ? 'función' : 'funciones' }}{% if sala.estimadas > 0 %}, {{ sala.estimadas }} sin repartir todavía{% endif %}</span>
+                  </td>
+                  <td>{{ sala.cobrado }}</td>
+                  <td>− {{ sala.comision }}</td>
+                  <td>{{ sala.duenos }}</td>
+                  <td>{{ sala.plataforma }}</td>
+                  <td>{{ sala.sala }}</td>
+                  <td>
+                    − {{ sala.costo }}
+                    <span class="tabla-admin-secundario">{{ sala.costo_funcion }} por función{% if not sala.costo_propio %}, de referencia{% endif %}</span>
+                  </td>
+                  <td>
+                    <span class="reporte-resultado {{ sala.gana ? 'reporte-gana' : 'reporte-pierde' }}">{{ sala.resultado }}</span>
+                    <span class="tabla-admin-secundario">{{ sala.gana ? 'gana' : 'pierde' }}</span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="reporte-explicacion">
+          A la sala le queda su parte menos lo que le cuesta abrir cada función. Mercado Pago se queda el {{ ganancias.comision }} de lo cobrado antes de repartir. Las funciones a la gorra cuentan su costo sin plata: la gorra va directo a la sala.
+          {% if ganancias.plataforma %}La plataforma paga {{ ganancias.servidores_mes }} por mes de servidores y {{ ganancias.desarrollo_mes }} de desarrollo.{% endif %}
+        </p>
+
+        {# El costo de cada sala lo sabe su organizador: alquiler, luz, la persona en la puerta. Sin
+           cargarlo, vale el de referencia. #}
+        <form class="panel-filtros reporte-costo" action="/recaudacion/reportes/costos" method="post" aria-label="Cargar el costo por función de una sala">
+          <input type="hidden" name="_csrf" value="{{ csrf }}">
+          <input type="hidden" name="desde" value="{{ periodo.desde }}">
+          <input type="hidden" name="hasta" value="{{ periodo.hasta }}">
+          <label class="reporte-filtro">
+            <span class="reporte-filtro-etiqueta">Sala</span>
+            <select name="sala" class="campo-control control-select">
+              {% for sala in ganancias.salas %}
+                <option value="{{ sala.id }}">{{ sala.nombre }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label class="reporte-filtro">
+            <span class="reporte-filtro-etiqueta">Costo por función, en pesos</span>
+            <input type="text" name="costo" inputmode="decimal" required maxlength="16" placeholder="{{ ganancias.costo_funcion }}" class="campo-control">
+          </label>
+          {% include 'parciales/boton.html.twig' with { texto: 'Guardar el costo', tipo: 'submit', variante: 'secundario' } only %}
+        </form>
+      </section>
     {% endif %}
 
     <h2 class="reporte-titulo">Recomendaciones</h2>
