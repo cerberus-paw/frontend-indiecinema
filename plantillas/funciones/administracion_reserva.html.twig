@@ -8,7 +8,7 @@
   Variables:
   - reserva: lo mismo que una fila de administracion_reservas (codigo, cantidad, total, estado,
     estado_etiqueta, creada, reembolso, anulable, funcion), más espectador (nombre o null si
-    cuentas no respondió), pago (el id del pago de Mercado Pago o null) y cupon (o null).
+    cuentas no lo dio), pago (el id del pago de Mercado Pago o null) y cupon (o null).
   - historial: lista de {fecha (ya escrita), estado, estado_etiqueta, anterior (etiqueta o null en
     la creación y la devolución), quien («El sistema», «Organizador · Ana Pérez»…), motivo o null}.
 #}
@@ -52,7 +52,7 @@
   <div class="panel-dato">
     <dt>Espectador</dt>
     <dd class="panel-dato-valor">{{ reserva.espectador ?? '—' }}</dd>
-    <dd class="panel-dato-nota">{{ reserva.espectador ? 'quien la reservó' : 'cuentas no respondió el nombre' }}</dd>
+    <dd class="panel-dato-nota">{{ reserva.espectador ? 'quien la reservó' : 'sin el nombre de cuentas' }}</dd>
   </div>
 </dl>
 
