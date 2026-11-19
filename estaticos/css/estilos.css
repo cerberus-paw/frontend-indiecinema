@@ -6657,6 +6657,21 @@ svg.enlace-denunciar-icono {
   grid-template-columns: 6rem minmax(0, 1fr) 3rem;
 }
 
+/* En el celular, el nombre y el valor en un renglón y la barra debajo, de todo el ancho: al lado
+   del nombre quedaba demasiado corta para comparar */
+@media (max-width: 600px) {
+  .reporte-barras-fila,
+  .reporte-barras-chicas .reporte-barras-fila {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: var(--espacio-1);
+  }
+
+  .reporte-barras-fila .reporte-barra {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
 /* Por día y por sala, uno al lado del otro en la computadora */
 .reporte-graficos {
   display: grid;
