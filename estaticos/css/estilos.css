@@ -6039,17 +6039,55 @@ svg.enlace-denunciar-icono {
   table-layout: fixed;
 }
 
-/* En partes del ancho: la conducta, el rol y el estado mantienen la tabla alineada entre páginas */
+/* En partes del ancho: la conducta, el rol, el estado y las acciones mantienen la tabla alineada
+   entre páginas */
 .tabla-admin-columna-conducta {
-  width: 18%;
+  width: 14%;
 }
 
 .tabla-admin-columna-rol {
-  width: 26%;
+  width: 20%;
 }
 
 .tabla-admin-columna-estado {
   width: 16%;
+}
+
+.tabla-admin-columna-acciones {
+  width: 16%;
+}
+
+/* Desde cuándo y por qué está suspendida, debajo de la píldora (EF-14.3) */
+.tabla-admin-motivo {
+  display: block;
+  margin-top: var(--espacio-1);
+  overflow-wrap: anywhere;
+}
+
+/* «Suspender» se abre en la celda con el motivo y el botón, uno abajo del otro: la columna es
+   angosta y el botón no tiene que salirse de la tabla */
+.tabla-admin-suspender[open] {
+  display: grid;
+  gap: var(--espacio-2);
+}
+
+.tabla-admin-suspender > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.tabla-admin-suspender > summary::-webkit-details-marker {
+  display: none;
+}
+
+.tabla-admin-suspender .campo-control {
+  width: 100%;
+  min-width: 0;
+  resize: vertical;
+}
+
+.tabla-admin-suspender .boton {
+  white-space: normal;
 }
 
 .tabla-admin-conducta {
