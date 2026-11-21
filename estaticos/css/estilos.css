@@ -1116,6 +1116,19 @@ button.menu-item {
   color: #fca5a5;
 }
 
+/* El enlace al panel de quien lo tiene (F-02.23): destacado con el color del panel, el mismo de
+   su barra lateral, porque es a lo que más entra el organizador, el moderador o el administrador */
+.menu-item-panel {
+  background-color: var(--color-panel-suave);
+  color: var(--color-panel);
+  font-weight: 600;
+}
+
+.menu-item-panel:hover {
+  background-color: var(--color-panel-suave);
+  color: var(--color-texto);
+}
+
 /* Icono descriptivo dentro del menú */
 .menu-icono {
   /* Tamaño de icono */
@@ -6301,14 +6314,34 @@ svg.enlace-denunciar-icono {
   background: linear-gradient(to right, var(--color-superficie) 259px, var(--color-borde) 259px 260px, transparent 260px);
 }
 
-/* Barra lateral: el logo, las secciones y, al pie, la sesión */
+/* El color de cada panel (F-02.23), el mismo de la insignia de su rol: los tres paneles se veían
+   iguales y no se sabía en cuál se estaba. Lo usan la barra y el enlace al panel del menú de la
+   cuenta. */
+.panel-rol-organizador {
+  --color-panel: var(--color-primario);
+  --color-panel-suave: var(--color-primario-suave);
+}
+
+.panel-rol-moderador {
+  --color-panel: #a5b4fc;
+  --color-panel-suave: var(--color-moderador-suave);
+}
+
+.panel-rol-administrador {
+  --color-panel: #fb7185;
+  --color-panel-suave: var(--color-acento-suave);
+}
+
+/* Barra lateral: el logo y el nombre del panel, las secciones y, al pie, la sesión. Arriba, una
+   franja con el color del panel */
 .panel-menu {
   display: flex;
   flex-direction: column;
-  gap: var(--espacio-6);
-  padding: var(--espacio-6) var(--espacio-4);
+  gap: var(--espacio-5);
+  padding: var(--espacio-5) var(--espacio-4);
   background-color: var(--color-superficie);
   border-right: 1px solid var(--color-borde);
+  border-top: 3px solid var(--color-panel, var(--color-borde));
   /* Del alto de la pantalla y quieta al desplazar el contenido, así salir siempre está a mano */
   position: sticky;
   top: 0;
@@ -6316,16 +6349,42 @@ svg.enlace-denunciar-icono {
   overflow-y: auto;
 }
 
+/* El logo y, debajo, el nombre del panel */
+.panel-cabeza {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  padding: 0 var(--espacio-2) var(--espacio-4);
+  border-bottom: 1px solid var(--color-borde);
+}
+
 .panel-marca {
   align-self: flex-start;
-  padding-left: var(--espacio-2);
 }
 
 .panel-marca img {
   display: block;
+  width: 120px;
+  height: auto;
 }
 
-/* Quién está en sesión y, debajo, el botón para salir, abajo de todo */
+/* «Panel del organizador», como una insignia con el color del panel */
+.panel-nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: var(--espacio-1) var(--espacio-3);
+  border-radius: var(--radio-completo);
+  background-color: var(--color-panel-suave);
+  color: var(--color-panel);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Quién está en sesión y, debajo, volver al sitio y salir, abajo de todo */
 .panel-sesion {
   margin-top: auto;
   display: flex;
@@ -6361,23 +6420,22 @@ svg.enlace-denunciar-icono {
   white-space: nowrap;
 }
 
+.panel-sesion-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.panel-sitio,
 .panel-salir {
   width: 100%;
+  gap: var(--espacio-2);
 }
 
 /* El contenido, en todo el ancho que deja la barra, como el wireframe */
 .panel-contenido {
   min-width: 0;
   padding: var(--espacio-8) var(--espacio-10) var(--espacio-12);
-}
-
-/* «ADMINISTRACIÓN», sobre las secciones */
-.panel-menu-titulo {
-  margin: 0 0 var(--espacio-3);
-  font-size: var(--texto-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-texto-apagado);
 }
 
 /* Las secciones, una debajo de otra */
@@ -6387,16 +6445,42 @@ svg.enlace-denunciar-icono {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--espacio-1);
+  gap: 2px;
 }
 
-/* Cada sección */
-.panel-menu-enlace {
+/* Entre grupo y grupo, aire: cada uno se lee como un bloque */
+.panel-menu-secciones > .panel-menu-lista {
+  gap: var(--espacio-4);
+}
+
+/* El nombre del grupo («SALAS», «FUNCIONES»), que no es un enlace, sobre sus secciones */
+.panel-menu-subtitulo {
   display: block;
+  padding: 0 var(--espacio-3) var(--espacio-1);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+/* Cada sección: el ícono y el nombre */
+.panel-menu-enlace {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
   padding: var(--espacio-2) var(--espacio-3);
   border-radius: var(--radio-md);
   color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
   text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.panel-menu-icono {
+  width: 18px;
+  height: 18px;
+  color: var(--color-texto-apagado);
 }
 
 .panel-menu-enlace:hover {
@@ -6404,26 +6488,18 @@ svg.enlace-denunciar-icono {
   color: var(--color-texto);
 }
 
-/* La sección actual, llena como en el wireframe: con los colores invertidos, como la página
-   actual del paginado */
+/* La sección actual, teñida con el color del panel y una raya a la izquierda. Antes iba llena de
+   blanco, que encandilaba al lado del fondo oscuro */
 .panel-menu-enlace.activo {
-  background-color: var(--color-texto);
-  color: var(--color-texto-inverso);
-  font-weight: 600;
-}
-
-/* Un grupo de secciones dentro de la lista, como «Funciones» en el panel del organizador: el
-   nombre del grupo, que no es un enlace, y sus secciones debajo con sangría */
-.panel-menu-subtitulo {
-  display: block;
-  padding: var(--espacio-2) var(--espacio-3) var(--espacio-1);
-  font-size: var(--texto-sm);
-  font-weight: 600;
+  background-color: var(--color-panel-suave);
+  box-shadow: inset 3px 0 0 var(--color-panel);
   color: var(--color-texto);
+  font-weight: 600;
 }
 
-.panel-menu-grupo .panel-menu-lista {
-  padding-left: var(--espacio-3);
+.panel-menu-enlace.activo .panel-menu-icono,
+.panel-menu-enlace:hover .panel-menu-icono {
+  color: var(--color-panel);
 }
 
 /* Título y bajada del contenido */
@@ -6839,29 +6915,40 @@ svg.enlace-denunciar-icono {
     background: none;
   }
 
-  /* Arriba: el logo y la sesión en un renglón y las secciones debajo */
+  /* Arriba: el logo, el nombre del panel y la sesión en un renglón y las secciones debajo */
   .panel-menu {
     position: static;
     height: auto;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--espacio-4);
+    gap: var(--espacio-3);
+    padding: var(--espacio-3) var(--espacio-4);
     border-right: none;
     border-bottom: 1px solid var(--color-borde);
   }
 
-  /* El logo y la sesión en el primer renglón; cada grupo de secciones, en uno propio debajo */
-  .panel-marca {
+  /* El logo y el nombre del panel, uno al lado del otro */
+  .panel-cabeza {
     grid-row: 1;
     grid-column: 1;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .panel-marca img {
+    width: 93px;
   }
 
   .panel-menu nav {
     grid-column: 1 / -1;
   }
 
-  /* En el renglón del logo queda sólo el botón para salir: el nombre no entra */
+  /* En el renglón del logo queda sólo el botón para salir: el nombre no entra, y para volver al
+     sitio está el logo */
   .panel-sesion {
     grid-row: 1;
     grid-column: 2;
@@ -6871,7 +6958,8 @@ svg.enlace-denunciar-icono {
     align-items: flex-end;
   }
 
-  .panel-sesion-usuario {
+  .panel-sesion-usuario,
+  .panel-sitio {
     display: none;
   }
 
@@ -6886,9 +6974,11 @@ svg.enlace-denunciar-icono {
   /* Las secciones en una sola fila que se desliza de costado. Partidas en varios renglones el
      menú ocupaba unos 420 px y el contenido empezaba recién en la segunda pantalla, y los nombres
      de los grupos caían a veces solos y a veces junto a sus secciones (F-02) */
-  .panel-menu-lista {
+  .panel-menu-lista,
+  .panel-menu-secciones > .panel-menu-lista {
     flex-direction: row;
     flex-wrap: nowrap;
+    gap: var(--espacio-1);
     overflow-x: auto;
     scrollbar-width: thin;
     /* Que se vea que la fila sigue: la última sección asoma cortada contra el borde */
@@ -6898,6 +6988,11 @@ svg.enlace-denunciar-icono {
 
   .panel-menu-enlace {
     white-space: nowrap;
+  }
+
+  /* En la fila, la sección actual se marca abajo, como una pestaña */
+  .panel-menu-enlace.activo {
+    box-shadow: inset 0 -2px 0 var(--color-panel);
   }
 
   /* Los grupos se disuelven en la fila: sus secciones («Mis funciones», «Reportes»…) se entienden
