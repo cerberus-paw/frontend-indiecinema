@@ -1,0 +1,20 @@
+{#
+  Pestañas que filtran una lista por estado (F-02.25), con cuántas hay en cada una. Son enlaces
+  (?ver=): funcionan sin JavaScript, se pueden compartir y el botón «Atrás» vuelve a la anterior.
+  Usan las pestañas de la bandeja de moderación (.pestanas), que ya llevan la cantidad.
+
+  La usan «Mis funciones» y «Mis reservas».
+
+  Parámetros recibidos:
+  - pestanas: lista de { clave, texto, cantidad, url }.
+  - activa: (string) la clave de la pestaña actual.
+  - nombre: (string) qué se filtra, para los lectores de pantalla, como «Funciones por estado».
+#}
+<nav class="pestanas pestanas-estado" aria-label="{{ nombre }}">
+  {% for pestana in pestanas %}
+    {% set es_actual = pestana.clave == activa %}
+    <a href="{{ pestana.url }}" class="pestana{% if es_actual %} activa{% endif %}"{% if es_actual %} aria-current="page"{% endif %}>
+      {{ pestana.texto }} <span class="bandeja-cuenta">{{ pestana.cantidad }}</span>
+    </a>
+  {% endfor %}
+</nav>
