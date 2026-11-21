@@ -1,83 +1,48 @@
 {#
-  Barra lateral de las pantallas del organizador, como el wireframe de la E2 (panel-organizador):
-  el logo, las secciones que ya tienen pantalla y, al pie, quién está en sesión y el botón para
-  salir. Reemplaza al encabezado del sitio, así que el cierre de sesión tiene que estar acá. Las
-  secciones del wireframe que todavía no tienen pantalla (Resumen…) no van,
-  para no llevar a una página que no existe. «Recaudación» del wireframe son los reportes (EF-09)
-  y las liquidaciones (EF-08.3).
+  Barra lateral de las pantallas del organizador, como el wireframe de la E2 (panel-organizador),
+  armada con parciales/panel_menu.html.twig. Las secciones van agrupadas por lo que se maneja:
+  las salas, las obras, las funciones, la plata y los espectadores. «Mis obras» y «Cargar obra»
+  estaban fuera del panel, en el sitio público, y sólo se llegaba desde el menú de la cuenta
+  (F-02.23): ahora son del panel, como el resto. «Recaudación» del wireframe son los reportes
+  (EF-09) y las liquidaciones (EF-08.3). El logo lleva a la portada: el organizador también usa la
+  cartelera y las salas. «Publicar una sala» pasa por la solicitud, como la primera: es una página
+  del sitio, fuera del panel, así que nunca queda marcada.
 
   Parámetros recibidos:
-  - activa: (string) la sección actual: 'salas', 'funciones', 'programar', 'bloqueados',
-    'reportes' o 'liquidaciones'.
+  - activa: (string) la sección actual: 'salas', 'obras', 'obra_nueva', 'funciones', 'programar',
+    'pedidos', 'reportes', 'liquidaciones' o 'bloqueados'.
   - usuario: el usuario en sesión.
   - csrf: el token del formulario para salir.
 #}
-<aside class="panel-menu" aria-label="Panel del organizador">
-  {# El logo lleva a la portada pública: el organizador también usa la cartelera y las salas #}
-  <a href="/" class="panel-marca" aria-label="IndieCinema: portada">
-    <img src="/estaticos/img/logo-horizontal-dark.svg" alt="IndieCinema" width="140" height="60">
-  </a>
-
-  <nav aria-label="Secciones del panel">
-    <p class="panel-menu-titulo">Panel del organizador</p>
-    <ul class="panel-menu-lista">
-      <li>
-        <a href="/organizador/salas" class="panel-menu-enlace{% if activa == 'salas' %} activo{% endif %}"{% if activa == 'salas' %} aria-current="page"{% endif %}>Mis salas</a>
-      </li>
-      {# «Funciones», con lo que tiene pantalla: el listado y el alta #}
-      <li class="panel-menu-grupo">
-        <span class="panel-menu-subtitulo" id="menu-organizador-funciones">Funciones</span>
-        <ul class="panel-menu-lista" aria-labelledby="menu-organizador-funciones">
-          <li>
-            <a href="/organizador/funciones" class="panel-menu-enlace{% if activa == 'funciones' %} activo{% endif %}"{% if activa == 'funciones' %} aria-current="page"{% endif %}>Mis funciones</a>
-          </li>
-          <li>
-            <a href="/organizador/funciones/nueva" class="panel-menu-enlace{% if activa == 'programar' %} activo{% endif %}"{% if activa == 'programar' %} aria-current="page"{% endif %}>Programar función</a>
-          </li>
-        </ul>
-      </li>
-      {# «Recaudación» del wireframe, que son las dos pantallas que tiene el organizador ahí #}
-      <li class="panel-menu-grupo">
-        <span class="panel-menu-subtitulo" id="menu-organizador-recaudacion">Recaudación</span>
-        <ul class="panel-menu-lista" aria-labelledby="menu-organizador-recaudacion">
-          {# Lo que pasó en las salas y las recomendaciones (EF-09) #}
-          <li>
-            <a href="/recaudacion/reportes" class="panel-menu-enlace{% if activa == 'reportes' %} activo{% endif %}"{% if activa == 'reportes' %} aria-current="page"{% endif %}>Reportes</a>
-          </li>
-          {# Lo que le toca por sus salas y por sus obras, mes por mes (EF-08.3) #}
-          <li>
-            <a href="/recaudacion/liquidaciones" class="panel-menu-enlace{% if activa == 'liquidaciones' %} activo{% endif %}"{% if activa == 'liquidaciones' %} aria-current="page"{% endif %}>Mis liquidaciones</a>
-          </li>
-        </ul>
-      </li>
-      {# Bloqueo de espectadores por sala (EF-12.1) #}
-      <li>
-        <a href="/organizador/bloqueados" class="panel-menu-enlace{% if activa == 'bloqueados' %} activo{% endif %}"{% if activa == 'bloqueados' %} aria-current="page"{% endif %}>Usuarios bloqueados</a>
-      </li>
-      {# Pedidos activos de espectadores para programar (EF-11.3) #}
-      <li>
-        <a href="/organizador/pedidos" class="panel-menu-enlace{% if activa == 'pedidos' %} activo{% endif %}"{% if activa == 'pedidos' %} aria-current="page"{% endif %}>Pedidos para programar</a>
-      </li>
-      {# Otra sala pasa por la solicitud, como la primera: es una página del sitio, fuera del panel #}
-      <li>
-        <a href="/solicitar-sala" class="panel-menu-enlace">Publicar una sala</a>
-      </li>
-    </ul>
-  </nav>
-
-  {% if usuario %}
-    <div class="panel-sesion">
-      <div class="panel-sesion-usuario">
-        <span class="usuario-avatar" aria-hidden="true">{{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}</span>
-        <div class="panel-sesion-datos">
-          <span class="panel-sesion-nombre">{{ usuario.nombre }}</span>
-          <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
-        </div>
-      </div>
-      <form action="/cuenta/salir" method="POST">
-        <input type="hidden" name="_csrf" value="{{ csrf }}">
-        <button type="submit" class="boton boton-secundario boton-chico panel-salir">Cerrar sesión</button>
-      </form>
-    </div>
-  {% endif %}
-</aside>
+{% include 'parciales/panel_menu.html.twig' with {
+  rol: 'organizador',
+  nombre: 'Panel del organizador',
+  icono: 'butaca',
+  inicio: '/',
+  sitio: true,
+  grupos: [
+    { titulo: 'Salas', secciones: [
+      { clave: 'salas', texto: 'Mis salas', url: '/organizador/salas', icono: 'butaca' },
+      { clave: null, texto: 'Publicar una sala', url: '/solicitar-sala', icono: 'mas' },
+    ] },
+    { titulo: 'Obras', secciones: [
+      { clave: 'obras', texto: 'Mis obras', url: '/organizador/obras', icono: 'pelicula' },
+      { clave: 'obra_nueva', texto: 'Cargar obra', url: '/organizador/obras/nueva', icono: 'mas' },
+    ] },
+    { titulo: 'Funciones', secciones: [
+      { clave: 'funciones', texto: 'Mis funciones', url: '/organizador/funciones', icono: 'calendario' },
+      { clave: 'programar', texto: 'Programar función', url: '/organizador/funciones/nueva', icono: 'mas' },
+      { clave: 'pedidos', texto: 'Pedidos para programar', url: '/organizador/pedidos', icono: 'sobre' },
+    ] },
+    { titulo: 'Recaudación', secciones: [
+      { clave: 'reportes', texto: 'Reportes', url: '/recaudacion/reportes', icono: 'grafico' },
+      { clave: 'liquidaciones', texto: 'Mis liquidaciones', url: '/recaudacion/liquidaciones', icono: 'moneda' },
+    ] },
+    { titulo: 'Espectadores', secciones: [
+      { clave: 'bloqueados', texto: 'Usuarios bloqueados', url: '/organizador/bloqueados', icono: 'prohibido' },
+    ] },
+  ],
+  activa: activa,
+  usuario: usuario,
+  csrf: csrf,
+} only %}

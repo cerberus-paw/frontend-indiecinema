@@ -1,0 +1,81 @@
+{#
+  Barra lateral de los paneles (F-02.23): el logo, el nombre del panel, las secciones agrupadas y,
+  al pie, quién está en sesión y el botón para salir. Reemplaza al encabezado del sitio, así que el
+  cierre de sesión tiene que estar acá.
+
+  Los tres paneles (organizador, moderación y administración) se veían iguales: cada uno lleva
+  ahora su nombre arriba y su color (el de la insignia del rol), que tiñe la sección actual. Así se
+  sabe en cuál se está sin leer la lista. Las secciones van en grupos con título y cada una con su
+  ícono, en vez de una lista larga y plana.
+
+  Lo arman menu_organizador.html.twig y menu_administracion.html.twig con sus secciones.
+
+  Parámetros recibidos:
+  - rol: (string) 'organizador', 'moderador' o 'administrador': el color del panel.
+  - nombre: (string) el nombre del panel, como «Panel del organizador».
+  - icono: (string) el ícono del nombre (parciales/icono.html.twig).
+  - inicio: (string) adonde lleva el logo.
+  - grupos: lista de { titulo, secciones: [{ clave, texto, url, icono }] }.
+  - activa: (string) la clave de la sección actual.
+  - sitio: (bool) si va «Volver al sitio»: el administrador no usa el sitio público.
+  - usuario: el usuario en sesión.
+  - csrf: el token del formulario para salir.
+#}
+<aside class="panel-menu panel-rol-{{ rol }}" aria-label="{{ nombre }}">
+  <div class="panel-cabeza">
+    <a href="{{ inicio }}" class="panel-marca" aria-label="IndieCinema: {{ inicio == '/' ? 'portada' : 'inicio del panel' }}">
+      <img src="/estaticos/img/logo-horizontal-dark.svg" alt="IndieCinema" width="140" height="60">
+    </a>
+    <p class="panel-nombre">
+      {% include 'parciales/icono.html.twig' with { nombre: icono, clase: 'panel-nombre-icono' } only %}
+      {{ nombre }}
+    </p>
+  </div>
+
+  <nav class="panel-menu-secciones" aria-label="Secciones del panel">
+    <ul class="panel-menu-lista">
+      {% for grupo in grupos %}
+        {% set id_grupo = 'panel-grupo-' ~ loop.index %}
+        <li class="panel-menu-grupo">
+          <span class="panel-menu-subtitulo" id="{{ id_grupo }}">{{ grupo.titulo }}</span>
+          <ul class="panel-menu-lista" aria-labelledby="{{ id_grupo }}">
+            {% for seccion in grupo.secciones %}
+              {% set es_actual = seccion.clave and activa == seccion.clave %}
+              <li>
+                <a href="{{ seccion.url }}" class="panel-menu-enlace{% if es_actual %} activo{% endif %}"{% if es_actual %} aria-current="page"{% endif %}>
+                  {%- include 'parciales/icono.html.twig' with { nombre: seccion.icono, clase: 'panel-menu-icono' } only -%}
+                  <span>{{ seccion.texto }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+  {% if usuario %}
+    <div class="panel-sesion">
+      <div class="panel-sesion-usuario">
+        <span class="usuario-avatar" aria-hidden="true">{{ usuario.nombre ? usuario.nombre|slice(0, 1)|upper : 'U' }}</span>
+        <div class="panel-sesion-datos">
+          <span class="panel-sesion-nombre">{{ usuario.nombre }}</span>
+          <span class="usuario-rol rol-{{ usuario.rol.value }}">{{ usuario.rol.value }}</span>
+        </div>
+      </div>
+      <div class="panel-sesion-acciones">
+        {% if sitio %}
+          <a href="/" class="boton boton-secundario boton-chico panel-sitio">
+            {% include 'parciales/icono.html.twig' with { nombre: 'casa' } only %} Volver al sitio
+          </a>
+        {% endif %}
+        <form action="/cuenta/salir" method="POST">
+          <input type="hidden" name="_csrf" value="{{ csrf }}">
+          <button type="submit" class="boton boton-secundario boton-chico panel-salir">
+            {% include 'parciales/icono.html.twig' with { nombre: 'salir' } only %} Cerrar sesión
+          </button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+</aside>

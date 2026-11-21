@@ -9,7 +9,8 @@
   Variables:
   - nombre: (string) 'ubicacion' | 'calendario' | 'reloj' | 'check' | 'advertencia' | 'entrada' |
     'claqueta' | 'pelicula' | 'butaca' | 'documento' | 'lupa' | 'personas' | 'persona' | 'mas' |
-    'grafico' | 'sobre' | 'bandera' | 'salir'.
+    'grafico' | 'sobre' | 'bandera' | 'salir' | 'moneda' | 'porcentaje' | 'tienda' | 'prohibido' |
+    'escudo' | 'engranaje' | 'casa'.
   - clase: (string, opcional) clase extra para ubicarlo.
 #}
 <svg class="icono icono-{{ nombre }}{% if clase is defined %} {{ clase }}{% endif %}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -54,5 +55,26 @@
     <path d="M5.5 21V4.5"/><path d="M5.5 4.5h11l-2 4 2 4h-11"/>
   {%- elseif nombre == 'salir' -%}
     <path d="M14 4.5H6.5A1.5 1.5 0 0 0 5 6v12a1.5 1.5 0 0 0 1.5 1.5H14"/><path d="M10 12h10M16.5 8.5L20 12l-3.5 3.5"/>
+  {%- elseif nombre == 'moneda' -%}
+    {# Una moneda con el signo: lo que se liquida #}
+    <circle cx="12" cy="12" r="8.5"/><path d="M14.75 9.25c-.5-1-1.5-1.5-2.75-1.5-1.5 0-2.75.75-2.75 2s1.25 1.75 2.75 2.25 2.75 1 2.75 2.25-1.25 2-2.75 2c-1.25 0-2.25-.5-2.75-1.5M12 6v1.75M12 16.25V18"/>
+  {%- elseif nombre == 'porcentaje' -%}
+    {# El reparto: qué parte de lo cobrado va a cada uno #}
+    <path d="M18.5 5.5l-13 13"/><circle cx="7.5" cy="7.5" r="2.25"/><circle cx="16.5" cy="16.5" r="2.25"/>
+  {%- elseif nombre == 'tienda' -%}
+    {# Un local con su toldo: los comercios asociados #}
+    <path d="M4 9.5l1.5-5h13l1.5 5"/><path d="M4 9.5a2.65 2.65 0 0 0 5.33 0 2.65 2.65 0 0 0 5.34 0 2.65 2.65 0 0 0 5.33 0"/><path d="M5.5 12v8h13v-8M10 20v-4.5h4V20"/>
+  {%- elseif nombre == 'prohibido' -%}
+    {# Un círculo tachado: quien no puede reservar en la sala #}
+    <circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>
+  {%- elseif nombre == 'escudo' -%}
+    {# Un escudo: la moderación #}
+    <path d="M12 3.5l7 2.75v5c0 4.5-3 7.75-7 9.25-4-1.5-7-4.75-7-9.25v-5z"/><path d="M9 12l2 2 4-4"/>
+  {%- elseif nombre == 'engranaje' -%}
+    {# Un engranaje: la administración de la plataforma #}
+    <circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.25M12 18.25v2.25M3.5 12h2.25M18.25 12h2.25M6 6l1.6 1.6M16.4 16.4L18 18M6 18l1.6-1.6M16.4 7.6L18 6"/><circle cx="12" cy="12" r="6.25"/>
+  {%- elseif nombre == 'casa' -%}
+    {# Una casa: volver al sitio público #}
+    <path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5v10h12v-10"/><path d="M10 19.5v-5h4v5"/>
   {%- endif -%}
 </svg>
