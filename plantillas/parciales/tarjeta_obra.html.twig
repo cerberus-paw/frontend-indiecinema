@@ -41,7 +41,7 @@
     <div class="tarjeta-funcion-meta">
       {% if obra.director is defined and obra.director %}
         <p class="tarjeta-funcion-dato meta-director">
-          {% include 'parciales/icono.html.twig' with { nombre: 'claqueta', clase: 'meta-icono' } only %}
+          {% include 'parciales/icono.html.twig' with { nombre: 'persona', clase: 'meta-icono' } only %}
           <span class="meta-texto">{{ obra.director }}</span>
         </p>
       {% endif %}

@@ -231,17 +231,17 @@
             <dl class="panel-resumen reporte-plataforma">
               <div class="panel-dato">
                 <dt>Plataforma</dt>
-                <dd class="panel-dato-valor reporte-resultado {{ p.gana ? 'reporte-gana' : 'reporte-pierde' }}">{{ p.resultado }}</dd>
+                <dd class="panel-dato-valor panel-dato-monto reporte-resultado {{ p.gana ? 'reporte-gana' : 'reporte-pierde' }}">{{ p.resultado }}</dd>
                 <dd class="panel-dato-nota">{{ p.gana ? 'gana' : 'pierde' }} en {{ p.dias }} {{ p.dias == 1 ? 'día' : 'días' }}</dd>
               </div>
               <div class="panel-dato">
                 <dt>Su parte</dt>
-                <dd class="panel-dato-valor">{{ p.ingresos }}</dd>
+                <dd class="panel-dato-valor panel-dato-monto">{{ p.ingresos }}</dd>
                 <dd class="panel-dato-nota">de lo que cobraron las salas</dd>
               </div>
               <div class="panel-dato">
                 <dt>Lo que le cuesta</dt>
-                <dd class="panel-dato-valor">{{ p.costo }}</dd>
+                <dd class="panel-dato-valor panel-dato-monto">{{ p.costo }}</dd>
                 <dd class="panel-dato-nota">servidores {{ p.servidores }} y desarrollo {{ p.desarrollo }}</dd>
               </div>
             </dl>

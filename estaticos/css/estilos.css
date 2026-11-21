@@ -3415,8 +3415,13 @@ svg.enlace-denunciar-icono {
   gap: var(--espacio-2);
 }
 
-.filtros-grupo-precio .filtros-grupo-titulo {
+.filtros-grupo-precio .filtros-grupo-titulo,
+.filtros-precio-ayuda {
   grid-column: 1 / -1;
+}
+
+.filtros-precio-ayuda {
+  margin: 0;
 }
 
 /* Los campos del filtro no llevan el margen inferior de un formulario largo */
@@ -6240,6 +6245,8 @@ svg.enlace-denunciar-icono {
 }
 
 .panel-dato {
+  /* El valor se achica con el ancho de la tarjeta (cqi), no con el de la pantalla */
+  container-type: inline-size;
   padding: var(--espacio-4) var(--espacio-5);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
@@ -6272,6 +6279,13 @@ svg.enlace-denunciar-icono {
   color: var(--color-texto-brillante);
 }
 
+/* «$ 2.516.407,64» no entraba en una tarjeta de cuatro y el signo quedaba solo arriba: un monto va
+   en una línea y achica la letra hasta lo que entra. Sólo los montos: un número corto no se achica */
+.panel-dato-monto {
+  font-size: clamp(var(--texto-lg), 13cqi, var(--texto-3xl));
+  white-space: nowrap;
+}
+
 .panel-dato-nota {
   font-size: var(--texto-sm);
   color: var(--color-texto-secundario);
@@ -6284,8 +6298,10 @@ svg.enlace-denunciar-icono {
   }
 }
 
+/* En el celular, de a dos: de a una, las cuatro tarjetas de «Mis reservas» ocupaban la pantalla
+   entera antes de la lista. Los montos sí van de a uno: no entran en media pantalla */
 @media (max-width: 480px) {
-  .panel-resumen {
+  .panel-resumen:has(.panel-dato-monto) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -8635,11 +8651,21 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .mi-cuenta-menu-enlace {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
   padding: var(--espacio-2) var(--espacio-3);
   border-radius: var(--radio-md);
   color: var(--color-texto-secundario);
   text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.mi-cuenta-menu-icono {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--color-texto-apagado);
 }
 
 .mi-cuenta-menu-enlace:hover {
@@ -8647,11 +8673,18 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto);
 }
 
-/* La sección actual, llena como en el wireframe, igual que en el panel del administrador */
+/* La sección actual, teñida y con la raya a la izquierda, como en los paneles. Antes iba llena de
+   blanco y encandilaba al lado del fondo oscuro */
 .mi-cuenta-menu-enlace.activo {
-  background-color: var(--color-texto);
-  color: var(--color-texto-inverso);
+  background-color: var(--color-primario-suave);
+  box-shadow: inset 3px 0 0 var(--color-primario);
+  color: var(--color-texto);
   font-weight: 600;
+}
+
+.mi-cuenta-menu-enlace.activo .mi-cuenta-menu-icono,
+.mi-cuenta-menu-enlace:hover .mi-cuenta-menu-icono {
+  color: var(--color-primario);
 }
 
 /* «Mis datos», en su recuadro como el wireframe */
@@ -10589,4 +10622,74 @@ a.tabla-admin-principal:focus-visible {
 .seguido-formulario {
   margin: 0;
   flex-shrink: 0;
+}
+
+/* Una tabla que en el celular pasa a una tarjeta por fila (F-02.24): con siete columnas, la de
+   «Mis reservas» se cortaba a la derecha y lo que importa (la fecha, el estado, el comprobante)
+   quedaba afuera. El encabezado se oculta a la vista, pero sigue para los lectores de pantalla; cada
+   dato lleva su nombre de data-columna. */
+@media (max-width: 640px) {
+  .tabla-apilable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .tabla-apilable,
+  .tabla-apilable tbody {
+    display: block;
+  }
+
+  /* Sin el mínimo de la tabla: las tarjetas entran en la pantalla. Con las dos clases, para ganarle
+     a .tabla-admin:not(.tabla-admin-usuarios) */
+  .tabla-admin.tabla-apilable {
+    width: auto;
+    min-width: 0;
+  }
+
+  .tabla-apilable tr:last-child {
+    border-bottom: none;
+  }
+
+  .tabla-apilable tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--espacio-2) var(--espacio-4);
+    padding: var(--espacio-4);
+    border-bottom: 1px solid var(--color-borde);
+  }
+
+  .tabla-apilable td {
+    display: block;
+    padding: 0;
+    border: none;
+  }
+
+  .tabla-apilable td[data-columna]::before {
+    content: attr(data-columna);
+    display: block;
+    margin-bottom: var(--espacio-1);
+    font-size: var(--texto-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-texto-apagado);
+  }
+
+  .tabla-apilable .tabla-apilable-titulo,
+  .tabla-apilable .tabla-apilable-acciones {
+    grid-column: 1 / -1;
+  }
+
+  .tabla-apilable-titulo .tabla-admin-principal {
+    font-size: var(--texto-md);
+  }
+
+  /* El contenedor ya no necesita desplazarse de costado */
+  .tabla-admin-contenedor:has(> .tabla-apilable) {
+    overflow-x: visible;
+  }
 }

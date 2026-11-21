@@ -145,7 +145,7 @@
               tipo: 'number',
               valor: filtros.precio_min ?? '',
               valor_minimo: 0,
-              placeholder: '0 (incluye a la gorra)'
+              placeholder: '0'
             } only %}
             {% include 'parciales/campo.html.twig' with {
               nombre: 'precio_max',
@@ -155,6 +155,8 @@
               valor_minimo: 0,
               placeholder: 'Sin tope'
             } only %}
+            {# Iba en el ejemplo del primer campo, que en la columna de filtros quedaba cortado #}
+            <p class="campo-ayuda filtros-precio-ayuda">Las funciones a la gorra cuentan como $&nbsp;0.</p>
           </fieldset>
           {# Con JavaScript los filtros se aplican solos; sin él, hace falta mandar el formulario. #}
           <noscript>

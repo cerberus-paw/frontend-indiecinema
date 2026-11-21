@@ -50,12 +50,12 @@
   <dl class="panel-resumen">
     <div class="panel-dato">
       <dt>Liquidado</dt>
-      <dd class="panel-dato-valor">{{ total }}</dd>
+      <dd class="panel-dato-valor panel-dato-monto">{{ total }}</dd>
       <dd class="panel-dato-nota">en {{ meses|length }} {{ meses|length == 1 ? 'mes' : 'meses' }}</dd>
     </div>
     <div class="panel-dato">
       <dt>Por transferir</dt>
-      <dd class="panel-dato-valor">{{ pendiente }}</dd>
+      <dd class="panel-dato-valor panel-dato-monto">{{ pendiente }}</dd>
       <dd class="panel-dato-nota">lo que todavía no te pagaron</dd>
     </div>
   </dl>
