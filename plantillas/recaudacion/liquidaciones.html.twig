@@ -64,7 +64,7 @@
     <h2 id="titulo-meses" class="reporte-subtitulo">Mes por mes</h2>
 
     <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="titulo-meses">
-      <table class="tabla-admin reporte-tabla">
+      <table class="tabla-admin tabla-apilable reporte-tabla">
         <thead>
           <tr>
             <th scope="col">Mes</th>
@@ -75,9 +75,9 @@
         <tbody>
           {% for fila in meses %}
             <tr>
-              <td><a href="{{ fila.url }}" class="tabla-admin-principal"{% if fila.actual %} aria-current="true"{% endif %}>{{ fila.nombre }}</a></td>
-              <td>{{ fila.monto }}</td>
-              <td>
+              <td class="tabla-apilable-titulo"><a href="{{ fila.url }}" class="tabla-admin-principal"{% if fila.actual %} aria-current="true"{% endif %}>{{ fila.nombre }}</a></td>
+              <td data-columna="Te toca">{{ fila.monto }}</td>
+              <td data-columna="Estado">
                 <span class="tabla-admin-principal">{{ fila.transferida ? 'Transferida' : 'Pendiente' }}</span>
                 {% if fila.transferida_en %}
                   <span class="tabla-admin-secundario">el {{ fila.transferida_en }}{% if fila.nota %} · {{ fila.nota }}{% endif %}</span>
@@ -101,7 +101,7 @@
         } only %}
       {% else %}
         <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="titulo-detalle">
-          <table class="tabla-admin reporte-tabla">
+          <table class="tabla-admin reporte-tabla tabla-apilable">
             <thead>
               <tr>
                 <th scope="col">Función</th>
@@ -113,13 +113,13 @@
             <tbody>
               {% for linea in detalle %}
                 <tr>
-                  <td>
+                  <td class="tabla-apilable-titulo">
                     <span class="tabla-admin-principal">{{ linea.titulos ?? 'Función sin datos guardados' }}</span>
                     <span class="tabla-admin-secundario">{% if linea.fecha %}{{ linea.fecha }}{% endif %}{% if linea.sala %} · {{ linea.sala }}{% endif %}</span>
                   </td>
-                  <td>{{ linea.cobrado }}</td>
-                  <td>{{ linea.rol }}</td>
-                  <td>{{ linea.monto }}</td>
+                  <td data-columna="Se cobró">{{ linea.cobrado }}</td>
+                  <td data-columna="Por">{{ linea.rol }}</td>
+                  <td data-columna="Te toca">{{ linea.monto }}</td>
                 </tr>
               {% endfor %}
             </tbody>

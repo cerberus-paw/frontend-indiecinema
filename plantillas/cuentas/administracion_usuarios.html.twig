@@ -130,7 +130,7 @@
 
   {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
   <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Usuarios">
-    <table class="tabla-admin tabla-admin-usuarios">
+    <table class="tabla-admin tabla-apilable tabla-admin-usuarios">
       <thead>
         <tr>
           <th scope="col">Usuario</th>
@@ -144,7 +144,7 @@
         {% for usuario in usuarios %}
           {% set conducta = usuario.conducta|default(null) %}
           <tr data-usuario="{{ usuario.id }}">
-            <td>
+            <td class="tabla-apilable-titulo">
               <div class="tabla-admin-usuario">
                 <span class="tabla-admin-avatar" aria-hidden="true">{{ usuario.nombre|slice(0, 1)|upper }}</span>
                 <div>
@@ -153,7 +153,7 @@
                 </div>
               </div>
             </td>
-            <td>
+            <td data-columna="Conducta">
               {% if conducta is not null %}
                 <span class="tabla-admin-conducta{% if conducta.bajo_umbral %} conducta-bajo-umbral{% endif %}">{{ conducta.puntaje }} pts</span>
                 {% if conducta.negativas > 0 or conducta.ausencias > 0 %}
@@ -165,7 +165,7 @@
                 <span class="tabla-admin-secundario">—</span>
               {% endif %}
             </td>
-            <td>
+            <td data-columna="Rol">
               {% if usuario.rol in ['espectador', 'organizador', 'moderador'] %}
                 <input type="hidden" name="antes[{{ usuario.id }}]" value="{{ usuario.rol }}">
                 <select name="roles[{{ usuario.id }}]" class="campo-control control-select" aria-label="Rol de {{ usuario.nombre }}">
@@ -179,13 +179,13 @@
                 </select>
               {% endif %}
             </td>
-            <td>
+            <td data-columna="Estado">
               <span class="estado-cuenta estado-cuenta-{{ usuario.estado }}">{{ usuario.estado }}</span>
               {% if usuario.suspension %}
                 <span class="tabla-admin-secundario tabla-admin-motivo">Desde el {{ usuario.suspension.desde }}{% if usuario.suspension.motivo %}: {{ usuario.suspension.motivo }}{% endif %}</span>
               {% endif %}
             </td>
-            <td>
+            <td class="tabla-apilable-acciones">
               {% if usuario.accion == 'suspender' %}
                 <details class="tabla-admin-suspender">
                   <summary class="boton boton-fantasma">Suspender</summary>

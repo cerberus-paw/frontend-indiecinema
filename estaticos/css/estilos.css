@@ -10684,6 +10684,26 @@ a.tabla-admin-principal:focus-visible {
     grid-column: 1 / -1;
   }
 
+  /* Sin acciones, la celda tiene sólo «—»: en la tabla mantiene la columna, en la tarjeta sobra */
+  .tabla-apilable .tabla-apilable-acciones:has(> .tabla-admin-secundario:only-child) {
+    display: none;
+  }
+
+  /* Las pestañas por estado en una sola fila, que se desplaza si no entra: de a dos renglones, la
+     última quedaba sola abajo y no se leía como pestaña */
+  .pestanas-estado {
+    flex-wrap: nowrap;
+    gap: var(--espacio-4);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  /* Sin el -1px que la monta sobre el borde: con el desplazamiento, la raya de la actual se cortaba */
+  .pestanas-estado .pestana {
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+
   .tabla-apilable-titulo .tabla-admin-principal {
     font-size: var(--texto-md);
   }

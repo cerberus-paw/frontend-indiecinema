@@ -14,6 +14,15 @@
 
 {% block contenido %}
 <div class="contenedor">
+  {# Las migas, como en «Cartelera» y «Películas»: era el único listado público sin ellas #}
+  <nav class="navegacion-migas" aria-label="Migas de pan">
+    <ol class="lista-migas">
+      <li class="item-miga"><a href="/" class="enlace-miga">Inicio</a></li>
+      <li class="separador-miga" aria-hidden="true">/</li>
+      <li class="item-miga miga-activa" aria-current="page">Salas indie</li>
+    </ol>
+  </nav>
+
   <header class="encabezado-formulario-solicitud">
     <div class="solicitud-texto-cabecera">
       <h1 class="solicitud-titulo">Salas indie</h1>

@@ -70,7 +70,7 @@
 {% else %}
   <p class="sr-only" role="status">{{ paginado.total }} {{ paginado.total == 1 ? 'reserva' : 'reservas' }}</p>
   <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Reservas">
-    <table class="tabla-admin">
+    <table class="tabla-admin tabla-apilable">
       <thead>
         <tr>
           <th scope="col">Código</th>
@@ -86,8 +86,8 @@
         {% for reserva in reservas %}
           <tr data-reserva="{{ reserva.id }}">
             {# El código lleva al detalle, con el historial de la reserva (EF-18.6) #}
-            <td><a href="/funcion/administracion/reservas/{{ reserva.id }}" class="tabla-admin-principal panel-reservas-codigo" aria-label="Ver la reserva {{ reserva.codigo }} y su historial">{{ reserva.codigo }}</a></td>
-            <td>
+            <td class="tabla-apilable-titulo"><a href="/funcion/administracion/reservas/{{ reserva.id }}" class="tabla-admin-principal panel-reservas-codigo" aria-label="Ver la reserva {{ reserva.codigo }} y su historial">{{ reserva.codigo }}</a></td>
+            <td data-columna="Función">
               {% if reserva.funcion %}
                 <a href="{{ reserva.funcion.url }}" class="tabla-admin-principal">{{ reserva.funcion.titulo }}</a>
                 <span class="tabla-admin-secundario">{{ reserva.funcion.fecha ?? 'Sin fecha' }}</span>
@@ -95,10 +95,10 @@
                 <span class="tabla-admin-secundario">No se pudo cargar la función</span>
               {% endif %}
             </td>
-            <td>{{ reserva.cantidad }}</td>
-            <td>{{ reserva.total }}</td>
-            <td>{{ reserva.creada }}</td>
-            <td>
+            <td data-columna="Lugares">{{ reserva.cantidad }}</td>
+            <td data-columna="Total">{{ reserva.total }}</td>
+            <td data-columna="Reservada">{{ reserva.creada }}</td>
+            <td data-columna="Estado">
               <span class="estado-cuenta {{ clases_estado[reserva.estado] }}">{{ reserva.estado_etiqueta }}</span>
               {# Qué pasó con la plata (EF-06.4). «Pendiente» es el único que hay que atender: la
                  reserva se canceló, se había pagado y Mercado Pago no devolvió el pago. El
@@ -107,7 +107,7 @@
                 <span class="tabla-admin-secundario" data-reembolso>{{ reserva.reembolso == 'pendiente' ? 'Reembolso pendiente' : 'Reembolsada' }}</span>
               {% endif %}
             </td>
-            <td>
+            <td class="tabla-apilable-acciones">
               {% if reserva.anulable %}
                 <form action="/funcion/administracion/reservas/{{ reserva.id }}/anular" method="POST" class="formulario-accion-tabla" data-accion-de-reserva data-hecho="—">
                   <input type="hidden" name="_csrf" value="{{ csrf }}">
