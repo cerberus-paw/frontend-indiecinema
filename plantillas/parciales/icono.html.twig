@@ -10,7 +10,7 @@
   - nombre: (string) 'ubicacion' | 'calendario' | 'reloj' | 'check' | 'advertencia' | 'entrada' |
     'claqueta' | 'pelicula' | 'butaca' | 'documento' | 'lupa' | 'personas' | 'persona' | 'mas' |
     'grafico' | 'sobre' | 'bandera' | 'salir' | 'moneda' | 'porcentaje' | 'tienda' | 'prohibido' |
-    'escudo' | 'engranaje' | 'casa'.
+    'escudo' | 'engranaje' | 'casa' | 'candado'.
   - clase: (string, opcional) clase extra para ubicarlo.
 #}
 <svg class="icono icono-{{ nombre }}{% if clase is defined %} {{ clase }}{% endif %}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -76,5 +76,8 @@
   {%- elseif nombre == 'casa' -%}
     {# Una casa: volver al sitio público #}
     <path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5v10h12v-10"/><path d="M10 19.5v-5h4v5"/>
+  {%- elseif nombre == 'candado' -%}
+    {# Un candado: la contraseña #}
+    <rect x="5" y="10.5" width="14" height="10" rx="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/>
   {%- endif -%}
 </svg>

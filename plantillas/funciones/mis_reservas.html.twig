@@ -96,8 +96,11 @@
     } only %}
   {% else %}
     <p class="sr-only" role="status">{{ paginado.total }} {{ paginado.total == 1 ? 'reserva' : 'reservas' }}</p>
+    {# En el celular, cada reserva es una tarjeta (tabla-apilable): la tabla se cortaba a la derecha
+       y no se veían la fecha, el estado ni el comprobante. data-columna es el nombre que lleva cada
+       dato en la tarjeta. #}
     <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Mis reservas">
-      <table class="tabla-admin">
+      <table class="tabla-admin tabla-apilable">
         <thead>
           <tr>
             <th scope="col">Función</th>
@@ -113,17 +116,17 @@
           {% for reserva in reservas %}
             <tr data-reserva="{{ reserva.id }}">
               {% if reserva.funcion %}
-                <td><a href="{{ reserva.funcion.url }}" class="tabla-admin-principal">{{ reserva.funcion.titulo }}</a></td>
-                <td>{{ reserva.funcion.sala }} <span class="tabla-admin-secundario">{{ reserva.funcion.localidad }}</span></td>
-                <td class="mis-reservas-fecha">{{ reserva.funcion.fecha ?? 'A confirmar' }}</td>
+                <td class="tabla-apilable-titulo"><a href="{{ reserva.funcion.url }}" class="tabla-admin-principal">{{ reserva.funcion.titulo }}</a></td>
+                <td data-columna="Sala">{{ reserva.funcion.sala }} <span class="tabla-admin-secundario">{{ reserva.funcion.localidad }}</span></td>
+                <td class="mis-reservas-fecha" data-columna="Fecha">{{ reserva.funcion.fecha ?? 'A confirmar' }}</td>
               {% elseif sin_programacion|default(false) %}
-                <td colspan="3"><span class="tabla-admin-secundario">—</span></td>
+                <td colspan="3" class="tabla-apilable-titulo"><span class="tabla-admin-secundario">—</span></td>
               {% else %}
-                <td colspan="3"><span class="tabla-admin-secundario">Ya no está en la cartelera</span></td>
+                <td colspan="3" class="tabla-apilable-titulo"><span class="tabla-admin-secundario">Ya no está en la cartelera</span></td>
               {% endif %}
-              <td>{{ reserva.cantidad }}</td>
-              <td><span class="panel-reservas-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</span></td>
-              <td>
+              <td data-columna="Lugares">{{ reserva.cantidad }}</td>
+              <td data-columna="Código"><span class="panel-reservas-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</span></td>
+              <td data-columna="Estado">
                 <span class="estado-cuenta {{ clases_estado[reserva.estado] ?? '' }}">{{ reserva.estado_etiqueta }}</span>
                 {# Por qué se canceló y si volvió la plata (EF-06.3): un «Cancelada» solo no dice si
                    el espectador tiene algo que esperar. Las dos van en su renglón, abajo de la
@@ -135,7 +138,7 @@
                   <span class="tabla-admin-secundario">Reembolsada el {{ reserva.reembolsada_en }}</span>
                 {% endif %}
               </td>
-              <td>
+              <td class="tabla-apilable-acciones">
                 <div class="mis-reservas-acciones">
                   {# El historial de calificaciones de la propuesta (EF-04.5): lo que puso, al lado de
                      la reserva con la que fue. #}

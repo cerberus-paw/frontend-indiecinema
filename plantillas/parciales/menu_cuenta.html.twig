@@ -7,25 +7,31 @@
   Parámetros recibidos:
   - activa: (string) la sección actual: 'datos', 'editar_datos', 'contrasena' o 'reservas'.
   - usuario: el usuario en sesión.
+
+  Cada sección lleva su ícono y la actual va teñida, como en los paneles (F-02.24): antes iba llena
+  de blanco, la única barra del sitio que seguía así.
 #}
 {% set secciones = [
-  { clave: 'datos', texto: 'Mis datos', url: '/cuenta/' },
-  { clave: 'editar_datos', texto: 'Editar datos', url: '/cuenta/datos' },
-  { clave: 'contrasena', texto: 'Contraseña', url: '/cuenta/contrasena' },
-  { clave: 'reservas', texto: 'Mis reservas', url: '/funcion/reservas' },
-  { clave: 'puntos', texto: 'Mis puntos', url: '/recaudacion/puntos' },
+  { clave: 'datos', texto: 'Mis datos', url: '/cuenta/', icono: 'persona' },
+  { clave: 'editar_datos', texto: 'Editar datos', url: '/cuenta/datos', icono: 'documento' },
+  { clave: 'contrasena', texto: 'Contraseña', url: '/cuenta/contrasena', icono: 'candado' },
+  { clave: 'reservas', texto: 'Mis reservas', url: '/funcion/reservas', icono: 'entrada' },
+  { clave: 'puntos', texto: 'Mis puntos', url: '/recaudacion/puntos', icono: 'moneda' },
 ] %}
 {# El moderador alcanza el rol de organizador, pero lo suyo es la moderación (IC-662) #}
 {% if usuario and usuario.alcanza('moderador') and not usuario.alcanza('administrador') %}
-  {% set secciones = secciones|merge([{ clave: 'moderacion', texto: 'Panel de moderación', url: '/moderacion/solicitudes' }]) %}
+  {% set secciones = secciones|merge([{ clave: 'moderacion', texto: 'Panel de moderación', url: '/moderacion/solicitudes', icono: 'escudo' }]) %}
 {% elseif usuario and usuario.alcanza('organizador') and not usuario.alcanza('administrador') %}
-  {% set secciones = secciones|merge([{ clave: 'organizador', texto: 'Panel del organizador', url: '/organizador/salas' }]) %}
+  {% set secciones = secciones|merge([{ clave: 'organizador', texto: 'Panel del organizador', url: '/organizador/salas', icono: 'butaca' }]) %}
 {% endif %}
 <nav class="mi-cuenta-menu" aria-label="Mi cuenta">
   <ul class="mi-cuenta-menu-lista">
     {% for seccion in secciones %}
       <li>
-        <a href="{{ seccion.url }}" class="mi-cuenta-menu-enlace{% if activa == seccion.clave %} activo{% endif %}"{% if activa == seccion.clave %} aria-current="page"{% endif %}>{{ seccion.texto }}</a>
+        <a href="{{ seccion.url }}" class="mi-cuenta-menu-enlace{% if activa == seccion.clave %} activo{% endif %}"{% if activa == seccion.clave %} aria-current="page"{% endif %}>
+          {%- include 'parciales/icono.html.twig' with { nombre: seccion.icono, clase: 'mi-cuenta-menu-icono' } only -%}
+          <span>{{ seccion.texto }}</span>
+        </a>
       </li>
     {% endfor %}
   </ul>
