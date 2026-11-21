@@ -4,8 +4,8 @@
   cartelera», la tabla con la función, la sala, la fecha, los lugares, el estado y las acciones de
   cada una, y el paginado numerado. Incluye las tarjetas de puntaje de conducta y actividad del
   espectador (EF-13.3). Queda afuera lo que todavía no tiene datos: la tarjeta del usuario arriba de
-  la barra (funciones no tiene la fecha de alta), los beneficios, las pestañas, los filtros y el
-  pago.
+  la barra (funciones no tiene la fecha de alta), los beneficios, los filtros y el pago. Las
+  pestañas por estado llegaron con F-02.25.
 
   Variables:
   - resumen_conducta: (opcional) {puntaje, puntaje_inicial, umbral, bajo_umbral,
@@ -25,7 +25,10 @@
   - calificada: (bool) si se acaba de guardar una calificación, para el aviso.
   - sin_programacion: (bool) programación no respondió: ninguna fila tiene los datos de su función.
   - paginado: numero, total_paginas, total, anterior y siguiente (URL o null) y paginas: lista de
-    {numero, url, actual}.
+    {numero, url, actual}. Las URL llevan la pestaña.
+  - pestanas: las pestañas por estado (F-02.25), { clave, texto, cantidad, url }: todas, vigentes,
+    pasadas y canceladas. reservas y paginado son de la pestaña elegida.
+  - ver: (string) la clave de la pestaña elegida.
 #}
 {% extends 'cuenta.html.twig' %}
 
@@ -89,10 +92,21 @@
     } only %}
   {% endif %}
 
-  {% if reservas is empty %}
+  {# La de «Todas» es la cantidad total: sin ninguna reserva, no hay nada que filtrar #}
+  {% set total_reservas = (pestanas|default([]))|filter(p => p.clave == 'todas')|map(p => p.cantidad)|first|default(reservas|length) %}
+  {% if total_reservas > 0 and pestanas|default([]) is not empty %}
+    {% include 'parciales/pestanas_estado.html.twig' with { pestanas: pestanas, activa: ver|default('todas'), nombre: 'Reservas por estado' } only %}
+  {% endif %}
+
+  {% if total_reservas == 0 %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'info',
       mensaje: 'Todavía no reservaste lugares. En la cartelera están las próximas funciones.'
+    } only %}
+  {% elseif reservas is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'No tenés reservas en esta pestaña.'
     } only %}
   {% else %}
     <p class="sr-only" role="status">{{ paginado.total }} {{ paginado.total == 1 ? 'reserva' : 'reservas' }}</p>

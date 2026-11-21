@@ -24,6 +24,11 @@
   - cancelacion_fallida: (bool) no se pudo cancelar: el subsistema funciones no respondió, así que
     no se podían cancelar sus reservas, y la función quedó como estaba (F-01.7).
   - votacion_cerrada: (bool) aviso de que se acaba de cerrar la votación de títulos de una función (IC-150 / E3-12.4).
+  - pestanas: las pestañas por estado (F-02.25), { clave, texto, cantidad, url }: todas, próximas,
+    pasadas y canceladas. funciones trae sólo las de la pestaña elegida.
+  - ver: (string) la clave de la pestaña elegida.
+  - total: (int) cuántas funciones tiene en todas las pestañas: con 0, va la invitación a programar
+    la primera; si sólo la pestaña está vacía, un aviso.
 #}
 {% extends 'organizador.html.twig' %}
 
@@ -115,7 +120,12 @@
     } only %}
   {% endif %}
 
-  {% if funciones is empty %}
+  {% set total_funciones = total|default(funciones|length) %}
+  {% if total_funciones > 0 and pestanas|default([]) is not empty %}
+    {% include 'parciales/pestanas_estado.html.twig' with { pestanas: pestanas, activa: ver|default('todas'), nombre: 'Funciones por estado' } only %}
+  {% endif %}
+
+  {% if total_funciones == 0 %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'info',
       mensaje: 'Todavía no tenés ninguna función en tus salas.'
@@ -127,6 +137,11 @@
         variante: 'primario'
       } only %}
     </div>
+  {% elseif funciones is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'No tenés funciones en esta pestaña.'
+    } only %}
   {% else %}
     {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
     <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Mis funciones">
