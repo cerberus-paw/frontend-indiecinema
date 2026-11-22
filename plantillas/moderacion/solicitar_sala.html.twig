@@ -11,7 +11,9 @@
   y el formulario trae la sala, para corregirla y volver a mandarla (la foto ya no es obligatoria).
   Si se la devolvieron porque falta un documento (EF-22.10), el motivo, la fecha límite y un
   formulario sólo con esos documentos (el PDF y el vencimiento, obligatorios): mandarlos completa la
-  misma solicitud, que vuelve a revisión.
+  misma solicitud, que vuelve a revisión. Si se le pasó el plazo, queda vencida: se ve el motivo y
+  el formulario vacío, porque el pedido nuevo empieza de cero; si era un cambio de dirección, se
+  pide de nuevo desde «Mis salas».
 
   Con cambio, es el pedido de cambio de dirección de una sala publicada (EF-07.6, en
   /solicitar-sala?sala={id}): el formulario viene con los datos de la sala, la foto es opcional y
@@ -133,6 +135,25 @@
           </ul>
         </div>
       {% endif %}
+    </section>
+  {% endif %}
+
+  {# EF-22.10: la vencida está cerrada; el formulario de abajo empieza de cero #}
+  {% if solicitud and solicitud.estado == 'vencida' and not cambio %}
+    {% set de_un_cambio = solicitud.cambio is defined and solicitud.cambio %}
+    <section class="progreso-solicitud" aria-label="Estado de la solicitud">
+      <div class="progreso-solicitud-aviso" role="status">
+        <span aria-hidden="true">⚠</span>
+        <div>
+          <p class="progreso-solicitud-aviso-titulo">Venció {{ de_un_cambio ? 'el pedido de cambio de dirección de' : 'la solicitud de' }} «{{ solicitud.sala }}» ({{ solicitud.resuelta }})</p>
+          <p class="progreso-solicitud-aviso-texto">«{{ solicitud.motivo|nl2br }}»</p>
+          {% if de_un_cambio %}
+            <p class="progreso-solicitud-aviso-texto">La sala sigue publicada con la dirección de antes. Para pedir el cambio otra vez, entrá a <a href="/organizador/salas">Mis salas</a>.</p>
+          {% else %}
+            <p class="progreso-solicitud-aviso-texto">Podés mandar una solicitud nueva: empieza de cero, con los requisitos de hoy.</p>
+          {% endif %}
+        </div>
+      </div>
     </section>
   {% endif %}
 
