@@ -12,10 +12,12 @@
     resuelta}.
   - grupos: lista de {tipo, tipo_etiqueta, id, titulo, cantidad, gravedad, gravedad_etiqueta,
     para_suspender, desde, elegida}: gravedad es la de su denuncia abierta más grave (alta, media o
-    baja); para_suspender, si es una sala o una función con una alta abierta (opcional).
+    baja); para_suspender, si es una sala o una función con una alta abierta (opcional);
+    contador, en salas y funciones, {cantidad, aviso, cartelera}: las denuncias medias resueltas
+    de su sala en el período y los dos límites de las reglas (opcional, null sin sala).
   - elegida: {tipo, tipo_etiqueta, id, titulo, denunciado, denuncias, propia, acciones,
-    para_suspender (opcional)}, o null. Si está para suspender, valores.accion ya viene en
-    «suspender».
+    para_suspender y contador (opcionales, como en grupos)}, o null. Si está para suspender,
+    valores.accion ya viene en «suspender».
     denunciado: los datos de lo denunciado según el tipo, con url (la ficha) y sancionado (si ya
     se hizo lo que resuelve sus denuncias: se cierran sin repetirlo); null si ya no existe (se dio
     de baja); false si su subsistema no respondió. denuncias: lista de {categoria, gravedad,
@@ -88,6 +90,7 @@
               {% if grupo.para_suspender ?? false %}<span class="estado-cuenta estado-cuenta-suspendida">Para suspender</span>{% endif %}
               {% if grupo.gravedad is defined %}<span class="estado-cuenta gravedad-{{ grupo.gravedad }}"><span class="sr-only">Gravedad </span>{{ grupo.gravedad_etiqueta }}</span>{% endif %}
               <span class="bandeja-item-datos">{{ grupo.cantidad }} {{ grupo.cantidad == 1 ? 'denuncia' : 'denuncias' }}</span>
+              {% if grupo.contador ?? null %}<span class="bandeja-item-datos bandeja-contador">Sala: {{ grupo.contador.cantidad }} de {{ grupo.contador.aviso }} para aviso · {{ grupo.contador.cantidad }} de {{ grupo.contador.cartelera }} para cartelera</span>{% endif %}
               <span class="bandeja-item-datos">{% include 'parciales/icono.html.twig' with { nombre: 'calendario' } only %} Desde el {{ grupo.desde }}</span>
             </a>
           </li>
@@ -103,6 +106,12 @@
           <span class="estado-cuenta">{{ elegida.tipo_etiqueta }}</span>
           {% if elegida.para_suspender ?? false %}<span class="estado-cuenta estado-cuenta-suspendida">Para suspender</span>{% endif %}
         </header>
+        {% if elegida.contador ?? null %}
+          <p class="bandeja-nota bandeja-nota-suelta bandeja-contador">
+            Denuncias medias resueltas de la sala en el período: {{ elegida.contador.cantidad }} de {{ elegida.contador.aviso }} para aviso · {{ elegida.contador.cantidad }} de {{ elegida.contador.cartelera }} para cartelera.
+            Tomarlas suma a la cuenta; al llegar a un límite, la sala recibe el aviso o baja en la cartelera.
+          </p>
+        {% endif %}
 
         <div class="bandeja-columnas">
           <div>
