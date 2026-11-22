@@ -2,12 +2,14 @@
   La pestaña «Denuncias» de la bandeja de moderación, en /moderacion/denuncias (EF-07.8): lo
   denunciado con denuncias abiertas a la izquierda, primero lo más grave (EF-22.11), después lo que
   tiene más denuncias y después lo que lleva más tiempo, y la elegida a la derecha, con lo denunciado y cada denuncia con quién la hizo. Se resuelven todas juntas con un
-  motivo: desestimándolas o actuando sobre lo denunciado.
+  motivo: desestimándolas, tomándolas (en salas y funciones: son válidas y cuentan para las reglas,
+  sin sancionar todavía) o actuando sobre lo denunciado.
 
   Variables:
   - historial: si la vista es la del historial («Ver historial»).
   - cerradas: en el historial, lista de {tipo_etiqueta, titulo, categoria, gravedad,
-    gravedad_etiqueta, desestimada, accion, motivo, resuelta}.
+    gravedad_etiqueta, desestimada, tomada (opcional: válidas sin sancionar), accion, motivo,
+    resuelta}.
   - grupos: lista de {tipo, tipo_etiqueta, id, titulo, cantidad, gravedad, gravedad_etiqueta,
     para_suspender, desde, elegida}: gravedad es la de su denuncia abierta más grave (alta, media o
     baja); para_suspender, si es una sala o una función con una alta abierta (opcional).
@@ -61,7 +63,7 @@
         <li class="bandeja-item">
           <span class="bandeja-item-fila">
             <span class="bandeja-item-sala">{{ cerrada.titulo }}</span>
-            <span class="estado-cuenta {{ cerrada.desestimada ? 'estado-cuenta-activa' : 'estado-cuenta-suspendida' }}">{{ cerrada.accion }}</span>
+            <span class="estado-cuenta {{ cerrada.desestimada ? 'estado-cuenta-activa' : ((cerrada.tomada ?? false) ? 'estado-cuenta-revision' : 'estado-cuenta-suspendida') }}">{{ cerrada.accion }}</span>
           </span>
           {% if cerrada.gravedad is defined %}<span class="estado-cuenta gravedad-{{ cerrada.gravedad }}"><span class="sr-only">Gravedad </span>{{ cerrada.gravedad_etiqueta }}</span>{% endif %}
           <span class="bandeja-item-datos">{{ cerrada.tipo_etiqueta }} · {{ cerrada.categoria }} · {{ cerrada.resuelta }}</span>
