@@ -9,6 +9,9 @@
   Con una pendiente, o en revisión manual (EF-07.6, con su motivo), se ve su estado en lugar del
   formulario. Si la rechazaron, el motivo va arriba
   y el formulario trae la sala, para corregirla y volver a mandarla (la foto ya no es obligatoria).
+  Si se la devolvieron porque falta un documento (EF-22.10), el motivo, la fecha límite y un
+  formulario sólo con esos documentos (el PDF y el vencimiento, obligatorios): mandarlos completa la
+  misma solicitud, que vuelve a revisión.
 
   Con cambio, es el pedido de cambio de dirección de una sala publicada (EF-07.6, en
   /solicitar-sala?sala={id}): el formulario viene con los datos de la sala, la foto es opcional y
@@ -22,8 +25,12 @@
   - valores: lo que mandó, para volver a mostrarlo (las casillas, como verdadero o falso).
   - errores: campo => qué está mal.
   - corrigiendo: si la última la rechazaron y el formulario es para corregirla.
-  - solicitud: la última que mandó, {estado (pendiente, en_revision_manual, aprobada o rechazada),
-    sala, imagen, enviada, resuelta, motivo, revision_motivo, documentos}, o null. revision_motivo
+  - solicitud: la última que mandó, {estado (pendiente, en_revision_manual, devuelta, aprobada,
+    rechazada o vencida), sala, imagen, enviada, resuelta, motivo, revision_motivo, devolucion,
+    cambio, documentos}, o null. devolucion (EF-22.10): mientras está devuelta, {motivo, fecha,
+    vence (el último día, dd/mm/aaaa), falta ('el seguro y la habilitación'), campos (los campos de
+    archivo que tiene que mandar: seguro, habilitacion_pdf)}, o null. cambio: si es un pedido de
+    cambio de dirección. revision_motivo
     (EF-07.6): por qué la pasaron a revisión manual, o null. documentos (EF-07.4): lista de {nombre,
     vence (dd/mm/aaaa), url}; vacía en las que se mandaron antes de que se pidieran.
   - cambio: {sala_id, nombre} en el pedido de cambio de dirección, o null (opcional).
@@ -69,20 +76,34 @@
   </header>
 
   {% set abierta = solicitud and solicitud.estado in ['pendiente', 'en_revision_manual'] %}
-  {% if solicitud and (abierta or solicitud.estado == 'rechazada') %}
+  {# EF-22.10: con is defined, por si el back todavía no la manda #}
+  {% set devolucion = solicitud and solicitud.estado == 'devuelta' and solicitud.devolucion is defined ? solicitud.devolucion : null %}
+  {% if solicitud and (abierta or devolucion or solicitud.estado == 'rechazada') %}
     {% set rechazada = solicitud.estado == 'rechazada' %}
     {% set en_revision_manual = solicitud.estado == 'en_revision_manual' %}
+    {% set de_un_cambio = solicitud.cambio is defined and solicitud.cambio %}
     <section class="progreso-solicitud" aria-label="Estado de la solicitud">
       <div class="progreso-solicitud-fila">
         <ol class="lista-pasos-progreso">
           <li class="paso-progreso paso-completado"><span class="paso-check" aria-hidden="true">✓</span> Enviada el {{ solicitud.enviada }}</li>
           <li class="paso-progreso{% if not rechazada %} paso-activo{% endif %}"{% if not rechazada %} aria-current="step"{% endif %}>
-            {% if rechazada %}<span class="paso-check" aria-hidden="true">✓</span> Revisada{% else %}<span class="paso-reloj" aria-hidden="true">⏱</span> {{ en_revision_manual ? 'En revisión manual' : 'En revisión' }}{% endif %}
+            {% if rechazada %}<span class="paso-check" aria-hidden="true">✓</span> Revisada{% elseif devolucion %}<span class="paso-reloj" aria-hidden="true">⏱</span> Esperando tu documentación{% else %}<span class="paso-reloj" aria-hidden="true">⏱</span> {{ en_revision_manual ? 'En revisión manual' : 'En revisión' }}{% endif %}
           </li>
           <li class="paso-progreso">Aprobada</li>
         </ol>
-        <span class="badge-alerta-negra">{{ rechazada ? 'Requiere corrección' : (en_revision_manual ? 'En revisión manual' : 'En revisión') }}</span>
+        <span class="badge-alerta-negra">{{ rechazada ? 'Requiere corrección' : (devolucion ? 'Falta documentación' : (en_revision_manual ? 'En revisión manual' : 'En revisión')) }}</span>
       </div>
+      {% if devolucion %}
+        <div class="progreso-solicitud-aviso" role="status">
+          <span aria-hidden="true">⚠</span>
+          <div>
+            <p class="progreso-solicitud-aviso-titulo">El equipo te devolvió {% if de_un_cambio %}el cambio de dirección de {% endif %}«{{ solicitud.sala }}» para que vuelvas a subir {{ devolucion.falta }} ({{ devolucion.fecha }})</p>
+            {# nl2br escapa antes de agregar los <br> #}
+            <p class="progreso-solicitud-aviso-texto">«{{ devolucion.motivo|nl2br }}»</p>
+            <p class="progreso-solicitud-aviso-texto"><strong>Tenés hasta el {{ devolucion.vence }}</strong> para completarla. Si se pasa la fecha, se cierra y hay que pedir {{ de_un_cambio ? 'el cambio' : 'la sala' }} de nuevo.</p>
+          </div>
+        </div>
+      {% endif %}
       {% if en_revision_manual and solicitud.revision_motivo is defined and solicitud.revision_motivo %}
         <div class="progreso-solicitud-aviso" role="status">
           <span aria-hidden="true">ℹ</span>
@@ -124,6 +145,50 @@
       motivo de su decisión, y hasta entonces no hace falta mandar otra.
     </p>
     <p><a href="/cartelera" class="enlace-destacado">Volver a la cartelera</a></p>
+  {% elseif devolucion %}
+    {# EF-22.10: sólo los documentos que le pidieron, con los errores de siempre (E4-10.5) #}
+    {% include 'parciales/resumen_de_errores.html.twig' with {
+      errores: errores ?? {},
+      error_general: error_general ?? null,
+      titulo: 'No se pudo mandar la documentación'
+    } only %}
+    <form action="/solicitar-sala" method="post" enctype="multipart/form-data" data-validar-en-linea>
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      <fieldset class="seccion-formulario seccion-lateral">
+        <legend class="seccion-leyenda">
+          <span class="seccion-titulo">Documentación que falta</span>
+          <span class="seccion-subtitulo">El resto de la solicitud queda como la mandaste.</span>
+        </legend>
+        <div class="seccion-campos">
+          {% for documento in [
+            { archivo: 'seguro', fecha: 'vence_seguro', etiqueta: 'Seguro del espacio', vence: 'Vencimiento del seguro' },
+            { archivo: 'habilitacion_pdf', fecha: 'vence_habilitacion', etiqueta: 'Habilitación del espacio', vence: 'Vencimiento de la habilitación' }
+          ]|filter(d => d.archivo in devolucion.campos) %}
+            {% include 'parciales/campo.html.twig' with reglas[documento.archivo]|merge({
+              nombre: documento.archivo,
+              zona_de_archivo: 'Arrastrá el PDF acá, o elegilo:',
+              etiqueta: documento.etiqueta,
+              tipo: 'file',
+              requerido: true,
+              ayuda: 'En PDF, hasta 5 MB.',
+              errores: errores
+            }) only %}
+            {% include 'parciales/campo.html.twig' with reglas[documento.fecha]|merge({
+              nombre: documento.fecha,
+              etiqueta: documento.vence,
+              tipo: 'date',
+              valor: valores[documento.fecha] ?? '',
+              ayuda: 'La que dice el papel. Antes de esa fecha te vamos a pedir uno nuevo.',
+              errores: errores
+            }) only %}
+          {% endfor %}
+        </div>
+      </fieldset>
+      <div class="solicitud-acciones-inferior">
+        {% include 'parciales/boton.html.twig' with { texto: 'Mandar la documentación', tipo: 'submit', variante: 'primario' } only %}
+        <a href="/" class="boton boton-secundario">Cancelar</a>
+      </div>
+    </form>
   {% else %}
     {# Si el envío volvió con errores: «Revisá N campos» con un link a cada uno (E4-10.5) #}
     {% include 'parciales/resumen_de_errores.html.twig' with {
