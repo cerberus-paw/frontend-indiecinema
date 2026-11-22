@@ -1,9 +1,10 @@
 {#
   La pestaña «Denuncias» de la bandeja de moderación, en /moderacion/denuncias (EF-07.8): lo
   denunciado con denuncias abiertas a la izquierda, primero lo más grave (EF-22.11), después lo que
-  tiene más denuncias y después lo que lleva más tiempo, y la elegida a la derecha, con lo denunciado y cada denuncia con quién la hizo. Se resuelven todas juntas con un
-  motivo: desestimándolas, tomándolas (en salas y funciones: son válidas y cuentan para las reglas,
-  sin sancionar todavía) o actuando sobre lo denunciado.
+  tiene más denuncias y después lo que lleva más tiempo, y la elegida a la derecha, con lo
+  denunciado y cada denuncia con quién la hizo. Se resuelven todas juntas con un motivo:
+  desestimándolas, tomándolas (en salas y funciones: son válidas y cuentan para las reglas, sin
+  sancionar todavía) o actuando sobre lo denunciado.
 
   Variables:
   - historial: si la vista es la del historial («Ver historial»).
@@ -20,10 +21,10 @@
     valores.accion ya viene en «suspender».
     denunciado: los datos de lo denunciado según el tipo, con url (la ficha) y sancionado (si ya
     se hizo lo que resuelve sus denuncias: se cierran sin repetirlo); null si ya no existe (se dio
-    de baja); false si su subsistema no respondió. denuncias: lista de {categoria, gravedad,
-    gravedad_etiqueta, detalle (o null), cuando, quien ({nombre, correo}, null si ya no existe o
-    false si cuentas no respondió)}. propia: es del moderador en sesión o denunció él, que no las resuelve. acciones:
-    lista de {valor, etiqueta}.
+    de baja); false si su subsistema no respondió. denuncias: lista de {id, categoria, gravedad,
+    gravedad_etiqueta, detalle (o null), foto (si mandó una, opcional), cuando, quien ({nombre,
+    correo}, null si ya no existe o false si cuentas no respondió)}. propia: es del moderador en
+    sesión o denunció él, que no las resuelve. acciones: lista de {valor, etiqueta}.
   - valores: lo que mandó si hubo errores, {accion, motivo}.
   - errores: campo => qué está mal.
   - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
@@ -163,6 +164,11 @@
                 <li class="bandeja-item">
                   <span class="bandeja-item-fila"><strong>{{ denuncia.categoria }}</strong> {% if denuncia.gravedad is defined %}<span class="estado-cuenta gravedad-{{ denuncia.gravedad }}"><span class="sr-only">Gravedad </span>{{ denuncia.gravedad_etiqueta }}</span>{% endif %}</span>
                   {% if denuncia.detalle %}<span class="bandeja-item-datos">{{ denuncia.detalle|nl2br }}</span>{% endif %}
+                  {% if denuncia.foto ?? false %}
+                    <a href="{{ prefijo }}/denuncias/{{ denuncia.id }}/foto" class="bandeja-item-datos">
+                      <img src="{{ prefijo }}/denuncias/{{ denuncia.id }}/foto" alt="La foto que mandó con la denuncia" class="bandeja-foto">
+                    </a>
+                  {% endif %}
                   <span class="bandeja-item-datos">
                     {{ denuncia.cuando }} ·
                     {% if denuncia.quien is same as(false) %}
