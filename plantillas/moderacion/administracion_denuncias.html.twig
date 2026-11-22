@@ -31,6 +31,9 @@
     programación no la tiene), motivo, desde, propia}; false si programación no respondió. propia:
     la sala es del moderador en sesión, que no levanta la suspensión.
   - levantar: el levantamiento que volvió con error, {sala, motivo, error}, o null.
+  - castigadas: las salas bajadas en la cartelera por las reglas (EF-22.11), lista de {sala_id,
+    nombre (o null si programación no la tiene), conteo}; false si programación no respondió.
+    De solo lectura: se levantan solas. Opcional.
   - mensaje_exito: el aviso de lo que se acaba de hacer (opcional).
 #}
 {% extends 'administracion.html.twig' %}
@@ -255,5 +258,29 @@
       </ul>
     {% endif %}
   </section>
+
+  {% if castigadas is defined %}
+  <section class="bandeja-seccion" aria-labelledby="titulo-castigadas">
+    <h2 id="titulo-castigadas" class="panel-subtitulo">Bajadas en la cartelera</h2>
+    {% if castigadas is same as(false) %}
+      <p class="bandeja-nota bandeja-nota-suelta">No pudimos consultar las salas. Probá de nuevo en un rato.</p>
+    {% elseif castigadas is empty %}
+      <p class="bandeja-nota bandeja-nota-suelta">Ninguna sala está bajada en la cartelera.</p>
+    {% else %}
+      <p class="bandeja-nota bandeja-nota-suelta">Sus funciones van al final de la cartelera. Vuelven solas cuando las denuncias salen del período.</p>
+      <ul class="bandeja-items">
+        {% for castigada in castigadas %}
+          <li class="bandeja-item">
+            <span class="bandeja-item-fila">
+              <span class="bandeja-item-sala">{{ castigada.nombre ?? 'Una sala que programación ya no tiene' }}</span>
+              <span class="estado-cuenta estado-cuenta-revision">Bajada</span>
+            </span>
+            <span class="bandeja-item-datos">{{ castigada.conteo }} {{ castigada.conteo == 1 ? 'denuncia media resuelta' : 'denuncias medias resueltas' }} en el período</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+  {% endif %}
 {% endif %}
 {% endblock %}
