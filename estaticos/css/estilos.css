@@ -7157,6 +7157,11 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto-secundario);
 }
 
+/* EF-22.10: las devueltas, debajo de las que esperan una resolución */
+.bandeja-esperando {
+  border-top: 1px solid var(--color-borde);
+}
+
 /* «No hay solicitudes» y «se muestran las más viejas» */
 .bandeja-nota {
   margin: 0;
