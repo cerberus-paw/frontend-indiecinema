@@ -49,8 +49,8 @@
     accion, porque (lista de textos con los datos que la justifican)}.
   - moderacion: sólo para el administrador (EF-22.4), o null: {avisos, salas: lista de {nombre,
     denuncias: {abierta, desestimada, resuelta}, total_denuncias, suspension (la causa escrita, o
-    null), ausentes, negativas, bajo_umbral, espectadores}, solicitudes: {pendientes, aprobadas,
-    rechazadas}, otras_denuncias: {abierta, desestimada, resuelta}, total_otras_denuncias,
+    null), ausentes, negativas, bajo_umbral, espectadores}, solicitudes: {pendientes (con las
+    devueltas, EF-22.10), aprobadas, rechazadas, vencidas}, otras_denuncias: {abierta, desestimada, resuelta}, total_otras_denuncias,
     otras_suspendidas}.
 #}
 {% extends administrador ? 'administracion.html.twig' : 'organizador.html.twig' %}
@@ -510,7 +510,12 @@
             <div class="panel-dato">
               <dt>Solicitudes de sala</dt>
               <dd class="panel-dato-valor">{{ moderacion.solicitudes.pendientes }}</dd>
-              <dd class="panel-dato-nota">sin resolver; {{ moderacion.solicitudes.aprobadas }} aprobadas y {{ moderacion.solicitudes.rechazadas }} rechazadas</dd>
+              {# EF-22.10: con is defined, por si el back todavía no las manda #}
+              {% if moderacion.solicitudes.vencidas is defined %}
+                <dd class="panel-dato-nota">sin resolver; {{ moderacion.solicitudes.aprobadas }} aprobadas, {{ moderacion.solicitudes.rechazadas }} rechazadas y {{ moderacion.solicitudes.vencidas }} vencidas</dd>
+              {% else %}
+                <dd class="panel-dato-nota">sin resolver; {{ moderacion.solicitudes.aprobadas }} aprobadas y {{ moderacion.solicitudes.rechazadas }} rechazadas</dd>
+              {% endif %}
             </div>
             <div class="panel-dato">
               <dt>Otras denuncias</dt>
