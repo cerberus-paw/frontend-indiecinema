@@ -6833,31 +6833,6 @@ svg.enlace-denunciar-icono {
   text-align: left;
 }
 
-/* Si la sala o la plataforma gana o pierde plata (EF-22.1): verde o rojo, con el signo y la
-   palabra al lado para quien no distingue los colores */
-.reporte-resultado {
-  display: block;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.reporte-gana {
-  color: var(--color-exito);
-}
-
-.reporte-pierde {
-  color: var(--color-error);
-}
-
-/* Los montos de la tabla no se parten en dos renglones */
-.reporte-ganancias td {
-  white-space: nowrap;
-}
-
-.reporte-ganancias .tabla-admin-secundario {
-  white-space: normal;
-}
-
 /* El embudo (EF-22.13): una fila por paso, con la barra centrada para que se vea el embudo. Cada
    paso un poco más oscuro que el anterior; el número y la plata, escritos al lado. */
 .reporte-embudo {
@@ -6937,6 +6912,31 @@ svg.enlace-denunciar-icono {
   .reporte-embudo-nombre {
     grid-column: 1 / -1;
   }
+}
+
+/* Si la sala o la plataforma gana o pierde plata (EF-22.1): verde o rojo, con el signo y la
+   palabra al lado para quien no distingue los colores */
+.reporte-resultado {
+  display: block;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reporte-gana {
+  color: var(--color-exito);
+}
+
+.reporte-pierde {
+  color: var(--color-error);
+}
+
+/* Los montos de la tabla no se parten en dos renglones */
+.reporte-ganancias td {
+  white-space: nowrap;
+}
+
+.reporte-ganancias .tabla-admin-secundario {
+  white-space: normal;
 }
 
 /* El costo de una sala: la sala, el monto y el botón en una fila, como el filtro del período */
