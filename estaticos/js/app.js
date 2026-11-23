@@ -1,4 +1,4 @@
-/* global AccionesDeReserva, AcuerdoFecha, BotonImprimir, BuscadorDeCartelera, Carrusel, Compartir,
+/* global AccionesDeReserva, AcuerdoFecha, AutocompletarTitulo, BotonImprimir, BuscadorDeCartelera, Carrusel, Compartir,
    ConfirmarEnvio, EnviarAlElegir, FormularioDeReserva, GestorFranjas, LugaresLibres, MenuUsuario,
    ModoFuncion, ParametrosDeSala, ResumenDeErrores, Seguir, ValidacionEnLinea, VotacionTitulos, ZonaDeArchivo */
 
@@ -115,6 +115,10 @@ class App {
     // El acuerdo de fecha en la ficha de la función (E3-13 / IC-155 / IC-158).
     if (document.querySelector('[data-seccion-acuerdo-fecha]')) {
       PAW.cargarScript('AcuerdoFecha', `${App.COMPONENTES}/acuerdo-fecha.js`, () => new AcuerdoFecha('[data-seccion-acuerdo-fecha]'));
+    }
+    // Autocompletado de títulos en el formulario para pedir una obra (EF-22.6 / IC-679).
+    for (const bloque of document.querySelectorAll('[data-autocompletar-titulos]')) {
+      PAW.cargarScript('AutocompletarTitulo', `${App.COMPONENTES}/autocompletar-titulo.js`, () => new AutocompletarTitulo(bloque));
     }
   }
 }

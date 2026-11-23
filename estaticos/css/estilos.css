@@ -10903,3 +10903,51 @@ a.tabla-admin-principal:focus-visible {
     overflow-x: visible;
   }
 }
+
+/* Autocompletado de títulos al pedir una película o cortometraje (EF-22.6 / IC-679) */
+.autocompletado-titulos {
+  position: relative;
+}
+
+.autocompletado-sugerencias {
+  list-style: none;
+  margin: var(--espacio-1) 0 0;
+  padding: var(--espacio-1);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.autocompletado-boton {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+  padding: var(--espacio-2) var(--espacio-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--radio-sm);
+  color: var(--color-texto);
+  text-align: left;
+  cursor: pointer;
+}
+
+.autocompletado-boton:hover,
+.autocompletado-boton:focus-visible {
+  background-color: var(--color-superficie);
+}
+
+.autocompletado-detalle {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+.autocompletado-aviso {
+  margin: var(--espacio-2) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-primario);
+}

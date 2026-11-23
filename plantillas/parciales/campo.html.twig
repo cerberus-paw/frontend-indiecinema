@@ -229,6 +229,7 @@
         {# Los textos con los que el backend rechaza este campo, para que el navegador diga lo mismo #}
         {% for regla, texto in mensajes|default({}) %}data-error-{{ regla|replace({'_': '-'}) }}="{{ texto }}"
         {% endfor %}
+        {% if lista is defined and lista %}list="{{ lista }}"{% endif %}
         {% if mensaje_error %}aria-invalid="true" aria-describedby="{{ id_error }}"{% elseif ayuda is defined %}aria-describedby="{{ id_ayuda }}"{% endif %}
       {# Cierre del elemento input #}
       >

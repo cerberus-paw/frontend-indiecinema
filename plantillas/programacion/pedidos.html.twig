@@ -103,7 +103,7 @@
         <li class="ranking-pedido-item{% if pedido.es_activo %} activo{% endif %}" data-pedido="{{ pedido.id }}">
           <span class="ranking-pedido-puesto" aria-hidden="true">{{ puesto }}</span>
           <div class="ranking-pedido-datos">
-            <h3 class="pedido-titulo">{{ pedido.titulo }} <span class="pedido-anio">({{ pedido.anio }})</span></h3>
+            <h3 class="pedido-titulo">{{ pedido.titulo }}{% if pedido.anio %} <span class="pedido-anio">({{ pedido.anio }})</span>{% endif %}</h3>
             <p class="pedido-meta">Dirección: {{ pedido.director }}</p>
           </div>
           <div class="ranking-pedido-avance">
@@ -182,7 +182,7 @@
       <ul class="lista-pedidos-tomados">
         {% for tomado in tomados %}
           <li>
-            <a href="/obras/{{ tomado.obra_id }}" class="enlace-destacado">{{ tomado.titulo }} ({{ tomado.anio }})</a>
+            <a href="/obras/{{ tomado.obra_id }}" class="enlace-destacado">{{ tomado.titulo }}{% if tomado.anio %} ({{ tomado.anio }}){% endif %}</a>
             — Dirección: {{ tomado.director }}
             {% if tomado.obra_titulo %} · En el catálogo como «{{ tomado.obra_titulo }}»{% endif %}
           </li>
