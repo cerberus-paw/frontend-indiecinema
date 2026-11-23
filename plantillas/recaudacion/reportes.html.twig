@@ -58,6 +58,9 @@
     asistencia_valor y promedio_valor (en porcentaje del máximo), gorra_valor y pagas_valor.
   - combinadas: las recomendaciones que cruzan varias variables (EF-22.3), lista de {regla, sala,
     accion, porque (lista de textos con los datos que la justifican), programar}.
+  - generos: qué géneros llenan en cada sala (EF-22.18), lista de {sala, generos: lista de
+    {genero, funciones, ocupacion (escrita), ocupacion_valor, votos (escrito, o null sin votación),
+    promedio (o null)}}, del que más llena al que menos.
   - programar (en combinadas, dias_flojos, precios, agotadas, titulos y pedidos): el enlace al alta
     de función ya cargada con lo que sugiere (EF-22.17), o null si la sala no es de quien mira.
   - moderacion: sólo para el administrador (EF-22.4), o null: {avisos, salas: lista de {nombre,
@@ -595,6 +598,34 @@
               </li>
             {% endfor %}
           </ul>
+        </section>
+      {% endif %}
+
+      {# Qué tipo de película llena cada sala (EF-22.18): el profe, el 18/11, «porcentaje de sala más
+         tipo de película». Con el porcentaje de los votos al lado, que es lo que su público pide. #}
+      {% if not sin_ventas and generos is not empty %}
+        <section class="reporte-seccion" aria-labelledby="reporte-generos">
+          <h3 id="reporte-generos" class="reporte-subtitulo">Qué géneros llenan</h3>
+          <div class="reporte-graficos">
+            {% for sala in generos %}
+              <section class="reporte-seccion" aria-labelledby="reporte-generos-{{ loop.index }}">
+                <h4 id="reporte-generos-{{ loop.index }}" class="reporte-subtitulo reporte-subtitulo-chico">{{ sala.sala }}</h4>
+                <ul class="reporte-barras">
+                  {% for genero in sala.generos %}
+                    <li class="reporte-barras-fila">
+                      <span class="reporte-barras-etiqueta">
+                        {{ genero.genero }}
+                        <span class="reporte-barras-detalle">{{ genero.funciones }} funciones{% if genero.votos %} · {{ genero.votos }} de los votos{% endif %}{% if genero.promedio %} · {{ genero.promedio }} de promedio{% endif %}</span>
+                      </span>
+                      {% include 'parciales/barra.html.twig' with { valor: genero.ocupacion_valor } only %}
+                      <span class="reporte-barras-texto">{{ genero.ocupacion }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </section>
+            {% endfor %}
+          </div>
+          <p class="reporte-explicacion">Ocupación de las funciones que dieron alguna obra de cada género; una obra con dos géneros cuenta en los dos. Sólo los géneros con {{ umbrales.genero_funciones }} funciones o más.</p>
         </section>
       {% endif %}
 
