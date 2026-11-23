@@ -6849,6 +6849,16 @@ svg.enlace-denunciar-icono {
   color: var(--color-error);
 }
 
+/* La sala que no necesita promoción (EF-22.14): con el borde gris, porque no hay nada que hacer, y
+   lo que ganó dentro de la frase */
+.reporte-sin-promocion {
+  border-left-color: var(--color-texto-secundario);
+}
+
+.reporte-sin-promocion .reporte-resultado {
+  display: inline;
+}
+
 /* Los montos de la tabla no se parten en dos renglones */
 .reporte-ganancias td {
   white-space: nowrap;
