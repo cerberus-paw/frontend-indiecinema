@@ -295,7 +295,11 @@
             {% endif %}
             {% include 'parciales/campo.html.twig' with campo_cantidad only %}
             {% if funcion.precio starts with '$' %}
-              {% include 'parciales/campo_cupon.html.twig' only %}
+              {% if funcion.tiene_beneficio_conducta ?? true %}
+                {% include 'parciales/campo_cupon.html.twig' only %}
+              {% else %}
+                <p class="campo-ayuda">Por tu historial de conducta necesitás al menos {{ funcion.umbral_beneficio_conducta|default(80) }} puntos para usar cupones de descuento.</p>
+              {% endif %}
             {% endif %}
             {% include 'parciales/boton.html.twig' with {
               texto: 'Reservar mis lugares',

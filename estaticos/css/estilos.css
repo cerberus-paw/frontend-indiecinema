@@ -10714,6 +10714,13 @@ a.tabla-admin-principal:focus-visible {
   }
 }
 
+/* Explicación de beneficios y restricciones por puntaje en «Mis reservas» (EF-22.7 / IC-680) */
+.panel-conducta-detalle {
+  margin: calc(var(--espacio-4) * -1) 0 var(--espacio-6);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
 /* Autocompletado de títulos al pedir una película o cortometraje (EF-22.6 / IC-679) */
 .autocompletado-titulos {
   position: relative;
