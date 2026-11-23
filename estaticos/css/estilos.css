@@ -6930,6 +6930,12 @@ svg.enlace-denunciar-icono {
   color: var(--color-error);
 }
 
+/* El botón que abre el alta de la función ya cargada (EF-22.17): debajo del porqué, separado del
+   texto para que se lea como la acción que cierra la recomendación */
+.reporte-programar {
+  margin: var(--espacio-3) 0 0;
+}
+
 /* La sala que no necesita promoción (EF-22.14): con el borde gris, porque no hay nada que hacer, y
    lo que ganó dentro de la frase */
 .reporte-sin-promocion {
