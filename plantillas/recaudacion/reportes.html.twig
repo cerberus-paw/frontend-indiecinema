@@ -57,7 +57,9 @@
   - En resumen, salas y precios van además los valores para las barras: ocupacion_valor,
     asistencia_valor y promedio_valor (en porcentaje del máximo), gorra_valor y pagas_valor.
   - combinadas: las recomendaciones que cruzan varias variables (EF-22.3), lista de {regla, sala,
-    accion, porque (lista de textos con los datos que la justifican)}.
+    accion, porque (lista de textos con los datos que la justifican), programar}.
+  - programar (en combinadas, dias_flojos, precios, agotadas, titulos y pedidos): el enlace al alta
+    de función ya cargada con lo que sugiere (EF-22.17), o null si la sala no es de quien mira.
   - moderacion: sólo para el administrador (EF-22.4), o null: {avisos, salas: lista de {nombre,
     denuncias: {abierta, desestimada, resuelta}, total_denuncias, suspension (la causa escrita, o
     null), ausentes, negativas, bajo_umbral, espectadores}, solicitudes: {pendientes (con las
@@ -189,6 +191,7 @@
                     <li>{{ dato }}</li>
                   {% endfor %}
                 </ul>
+                {% if recomendacion.programar %}<p class="reporte-programar"><a href="{{ recomendacion.programar }}" class="boton boton-secundario">Programarla</a></p>{% endif %}
               </li>
             {% endfor %}
           </ul>
@@ -481,6 +484,7 @@
                 {% if dia.para_dar %}
                   <p class="reporte-sugerencia-nota">Para ese día: <strong>{{ dia.para_dar.titulo }}</strong>, que el público de esta sala votó y no vio ({{ dia.para_dar.votos }} {{ dia.para_dar.votos == 1 ? 'voto' : 'votos' }} en {{ dia.para_dar.votaciones }} {{ dia.para_dar.votaciones == 1 ? 'votación' : 'votaciones' }}, el {{ dia.para_dar.porcentaje }}).</p>
                 {% endif %}
+                {% if dia.programar %}<p class="reporte-programar"><a href="{{ dia.programar }}" class="boton boton-secundario">Programarla con {{ umbrales.descuento }} de descuento</a></p>{% endif %}
               </li>
             {% endfor %}
           </ul>
@@ -511,6 +515,7 @@
                   <li class="reporte-barras-fila"><span class="reporte-barras-etiqueta">A la gorra</span>{% include 'parciales/barra.html.twig' with { valor: precio.gorra_valor, clase: 'reporte-barra-gorra' } only %}<span class="reporte-barras-texto">{{ precio.gorra }}</span></li>
                   <li class="reporte-barras-fila"><span class="reporte-barras-etiqueta">Con precio</span>{% include 'parciales/barra.html.twig' with { valor: precio.pagas_valor } only %}<span class="reporte-barras-texto">{{ precio.pagas }}</span></li>
                 </ul>
+                {% if precio.programar %}<p class="reporte-programar"><a href="{{ precio.programar }}" class="boton boton-secundario">{{ precio.sensible ? 'Programar una a la gorra' : 'Programar una con precio' }}</a></p>{% endif %}
               </li>
             {% endfor %}
           </ul>
@@ -555,6 +560,7 @@
                   <th scope="col">Ocupación</th>
                   <th scope="col">Asistencia</th>
                   <th scope="col">Promedio</th>
+                  {% if titulos|filter(t => t.programar)|length > 0 %}<th scope="col"><span class="sr-only">Programar</span></th>{% endif %}
                 </tr>
               </thead>
               <tbody>
@@ -565,6 +571,7 @@
                     <td>{{ titulo.ocupacion }}</td>
                     <td>{{ titulo.asistencia }}</td>
                     <td>{{ titulo.promedio }}</td>
+                    {% if titulos|filter(t => t.programar)|length > 0 %}<td>{% if titulo.programar %}<a href="{{ titulo.programar }}" class="boton boton-secundario boton-chico">Programarla</a>{% endif %}</td>{% endif %}
                   </tr>
                 {% endfor %}
               </tbody>
@@ -584,6 +591,7 @@
                   <strong>{{ obra.titulo }}</strong>, en {{ obra.sala }}: se agotó en {{ obra.agotadas }} de sus {{ obra.funciones }} {{ obra.funciones == 1 ? 'función' : 'funciones' }} ({{ obra.ocupacion }} de los lugares vendidos).
                 </p>
                 <p class="reporte-sugerencia-nota">La demanda llegó al cupo: sumá otra función.</p>
+                {% if obra.programar %}<p class="reporte-programar"><a href="{{ obra.programar }}" class="boton boton-secundario">Programarla</a></p>{% endif %}
               </li>
             {% endfor %}
           </ul>
@@ -601,6 +609,7 @@
                 <p class="reporte-sugerencia-texto">
                   <strong>{{ pedido.titulo }}:</strong> {{ pedido.votos }} {{ pedido.votos == 1 ? 'voto' : 'votos' }} en {{ pedido.votaciones }} {{ pedido.votaciones == 1 ? 'votación' : 'votaciones' }} que perdió, el {{ pedido.porcentaje }} de los votos.
                 </p>
+                {% if pedido.programar %}<p class="reporte-programar"><a href="{{ pedido.programar }}" class="boton boton-secundario">Programarla</a></p>{% endif %}
               </li>
             {% endfor %}
           </ul>
