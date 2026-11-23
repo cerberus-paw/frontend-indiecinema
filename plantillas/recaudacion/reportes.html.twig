@@ -613,15 +613,15 @@
                 <ul class="reporte-barras">
                   {% for genero in sala.generos %}
                     <li class="reporte-barras-fila">
-                      <span class="reporte-barras-etiqueta">{{ genero.genero }}</span>
+                      <span class="reporte-barras-etiqueta">
+                        {{ genero.genero }}
+                        <span class="reporte-barras-detalle">{{ genero.funciones }} funciones{% if genero.votos %} · {{ genero.votos }} de los votos{% endif %}{% if genero.promedio %} · {{ genero.promedio }} de promedio{% endif %}</span>
+                      </span>
                       {% include 'parciales/barra.html.twig' with { valor: genero.ocupacion_valor } only %}
                       <span class="reporte-barras-texto">{{ genero.ocupacion }}</span>
                     </li>
                   {% endfor %}
                 </ul>
-                <p class="reporte-explicacion">
-                  {% for genero in sala.generos %}{{ genero.genero }}: {{ genero.funciones }} funciones{% if genero.votos %}, {{ genero.votos }} de los votos{% endif %}{% if genero.promedio %}, {{ genero.promedio }} de promedio{% endif %}{{ loop.last ? '.' : '; ' }}{% endfor %}
-                </p>
               </section>
             {% endfor %}
           </div>

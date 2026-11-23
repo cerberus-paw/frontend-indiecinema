@@ -6618,6 +6618,18 @@ svg.enlace-denunciar-icono {
   font-size: var(--texto-base);
 }
 
+.reporte-subtitulo + .reporte-graficos {
+  margin-top: var(--espacio-4);
+}
+
+/* Debajo del género, de dónde sale: cuántas funciones, qué parte de los votos y el promedio */
+.reporte-barras-detalle {
+  display: block;
+  white-space: normal;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
 /* De dónde sale la sugerencia: los umbrales, para que se entienda por qué aparece */
 .reporte-explicacion {
   margin: var(--espacio-1) 0 var(--espacio-4);
