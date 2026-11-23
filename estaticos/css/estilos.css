@@ -6612,6 +6612,12 @@ svg.enlace-denunciar-icono {
   font-size: var(--texto-lg);
 }
 
+/* El nombre de la sala sobre sus géneros (EF-22.18): un escalón debajo del subtítulo de la sección */
+.reporte-subtitulo-chico {
+  margin-bottom: var(--espacio-2);
+  font-size: var(--texto-base);
+}
+
 /* De dónde sale la sugerencia: los umbrales, para que se entienda por qué aparece */
 .reporte-explicacion {
   margin: var(--espacio-1) 0 var(--espacio-4);
