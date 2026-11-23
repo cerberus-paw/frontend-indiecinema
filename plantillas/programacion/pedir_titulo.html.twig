@@ -1,13 +1,16 @@
 {#
-  Pedir un título ausente en el catálogo de IndieCinema, en /pedidos/nuevo (EF-11.1 / IC-576).
-  Si ya existe un pedido parecido (mismo título sin distinguir tildes ni mayúsculas y mismo año),
-  muestra «Ya lo pidieron» para que el espectador se sume en vez de duplicar el pedido.
+  Pedir un título ausente en el catálogo de IndieCinema, en /pedidos/nuevo (EF-11.1 / IC-576, EF-22.6 / IC-679).
+  Compara sin mayúsculas, tildes ni signos o espacios de más contra los pedidos abiertos/activos y
+  las obras aprobadas del catálogo: si ya existe en el catálogo enlaza a su ficha; si ya lo
+  pidieron ofrece sumarse en vez de crear otro pedido. El año es opcional y sólo orientativo.
 
   Variables:
   - reglas: campo => reglas de validación para HTML5 y validación en línea.
   - valores: {titulo, anio, director}.
   - errores: campo => mensaje de error.
-  - parecidos: lista de pedidos parecidos encontrados al enviar.
+  - parecidos: lista de pedidos abiertos/activos parecidos encontrados al enviar.
+  - obras_catalogo: lista de obras aprobadas del catálogo con el mismo título normalizado.
+  - sugerencias: sugerencias iniciales para el autocompletado de títulos existentes.
   - pedido_actual: último pedido creado o actualizado, o null.
   - error_general: mensaje general de error, o null.
   - mensaje_exito: mensaje de confirmación tras crear, sumarse o quitar adhesión, o null.
@@ -63,17 +66,36 @@
     titulo: 'No se pudo enviar el pedido'
   } only %}
 
+  {% if obras_catalogo|default([]) is not empty %}
+    <section class="seccion-formulario" aria-labelledby="ya-en-catalogo-titulo">
+      <h2 id="ya-en-catalogo-titulo" class="seccion-titulo">Ya está en el catálogo</h2>
+      <p class="seccion-subtitulo">
+        Esta película ya forma parte del catálogo de IndieCinema, así que no hace falta pedirla.
+      </p>
+      <ul class="lista-pedidos-parecidos">
+        {% for obra in obras_catalogo %}
+          <li class="item-pedido-parecido">
+            <p>
+              <strong>{{ obra.titulo }}</strong> ({{ obra.anio }}) · Dirección: {{ obra.director }}
+            </p>
+            <p><a href="{{ obra.url }}" class="enlace-destacado">Ver en el catálogo</a></p>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
   {% if parecidos is not empty %}
     <section class="seccion-formulario" aria-labelledby="ya-lo-pidieron-titulo">
       <h2 id="ya-lo-pidieron-titulo" class="seccion-titulo">Ya lo pidieron</h2>
       <p class="seccion-subtitulo">
-        Encontramos un pedido parecido. Podés sumarte para que alcance antes el umbral de activación.
+        Encontramos un pedido con el mismo título. Sumate al existente para no duplicarlo y llegar antes al umbral de activación.
       </p>
       <ul class="lista-pedidos-parecidos">
         {% for parecido in parecidos %}
           <li class="item-pedido-parecido">
             <p>
-              <strong>{{ parecido.titulo }}</strong> ({{ parecido.anio }}) · Dirección: {{ parecido.director }}
+              <strong>{{ parecido.titulo }}</strong>{% if parecido.anio %} ({{ parecido.anio }}){% endif %} · Dirección: {{ parecido.director }}
               · {{ parecido.adhesiones }} {{ parecido.adhesiones == 1 ? 'adhesión' : 'adhesiones' }}
               · Estado: {{ parecido.estado_etiqueta }}
             </p>
@@ -110,7 +132,7 @@
 
   {% if pedido_actual %}
     <section class="seccion-formulario" aria-labelledby="pedido-actual-titulo">
-      <h2 id="pedido-actual-titulo" class="seccion-titulo">{{ pedido_actual.titulo }} ({{ pedido_actual.anio }})</h2>
+      <h2 id="pedido-actual-titulo" class="seccion-titulo">{{ pedido_actual.titulo }}{% if pedido_actual.anio %} ({{ pedido_actual.anio }}){% endif %}</h2>
       <p>
         Dirección: {{ pedido_actual.director }}
         · {{ pedido_actual.adhesiones }} {{ pedido_actual.adhesiones == 1 ? 'adhesión' : 'adhesiones' }}
@@ -148,24 +170,36 @@
     <fieldset class="seccion-formulario seccion-lateral">
       <legend class="seccion-leyenda">
         <span class="seccion-titulo">Datos de la película</span>
-        <span class="seccion-subtitulo">Indicá el título, el año de estreno y quién la dirigió.</span>
+        <span class="seccion-subtitulo">Indicá el título, quién la dirigió y, si lo sabés, el año de estreno.</span>
       </legend>
       <div class="seccion-campos">
-        {% include 'parciales/campo.html.twig' with reglas.titulo|merge({
-          nombre: 'titulo',
-          etiqueta: 'Título',
-          valor: valores.titulo ?? '',
-          placeholder: 'La ciénaga',
-          errores: errores
-        }) only %}
+        <div class="autocompletado-titulos" data-autocompletar-titulos="/pedidos/nuevo">
+          {% include 'parciales/campo.html.twig' with reglas.titulo|merge({
+            nombre: 'titulo',
+            etiqueta: 'Título',
+            valor: valores.titulo ?? '',
+            placeholder: 'La ciénaga',
+            lista: 'sugerencias-titulos',
+            autocompletar: 'off',
+            ayuda: 'Mientras escribís te mostramos pedidos y obras del catálogo con título parecido.',
+            errores: errores
+          }) only %}
+          <datalist id="sugerencias-titulos">
+            {% for s in sugerencias|default([]) %}
+              <option value="{{ s.titulo }}">{{ s.tipo == 'obra' ? 'En el catálogo' : 'Ya pedido' }}{% if s.anio %} · {{ s.anio }}{% endif %}</option>
+            {% endfor %}
+          </datalist>
+          <p class="autocompletado-aviso" data-autocompletado-aviso hidden role="status"></p>
+        </div>
 
         <div class="fila-campos-doble">
           {% include 'parciales/campo.html.twig' with reglas.anio|merge({
             nombre: 'anio',
-            etiqueta: 'Año de estreno',
+            etiqueta: 'Año de estreno (opcional)',
             tipo: 'number',
             valor: valores.anio ?? '',
             placeholder: '2001',
+            ayuda: 'Opcional, sólo como dato. No crea otro pedido si el título ya existe.',
             errores: errores
           }) only %}
           {% include 'parciales/campo.html.twig' with reglas.director|merge({
