@@ -45,8 +45,13 @@
     comision), nombre, monto, porcentaje (escrito), largo e inicio (en porcentaje de la vuelta)},
     vacía si no se cobró nada}.
   - costo_cargado: el aviso de «Guardar» el costo, {tipo, texto}, o null.
-  - tema: el tema que se muestra (EF-22.2): resumen, plata, promociones, programacion o salas; y
-    temas: clave => nombre, para las pestañas.
+  - tema: el tema que se muestra (EF-22.2): resumen, plata, embudo, promociones, programacion o
+    salas; y temas: clave => nombre, para las pestañas.
+  - embudo: sólo en su pestaña (EF-22.13), o null: {avisos, total, salas (lista, las que tuvieron
+    votación), sin_votacion (nombres de las salas sin votación)}. total y cada sala son {nombre,
+    votaron, pasos: lista de {clave, nombre, personas, del_total (entero, de 0 a 100: el ancho de la
+    barra), conversion (del paso anterior, escrita, o null en el primero), monto}, sin_votar,
+    sin_votar_monto, perdida: {desde, hasta, verbo, conversion, personas, monto, que_hacer} o null}.
   - funciones_por_mes: lista de {mes (abreviado), funciones}, para el gráfico de la tarjeta.
   - ocupacion_por_dia: lista de {dia, ocupacion (entero), funciones}, de lunes a domingo.
   - En resumen, salas y precios van además los valores para las barras: ocupacion_valor,
@@ -352,6 +357,90 @@
       {% endif %}
       {% if not ganancias or ganancias.salas is empty %}
         {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'No se pudo calcular lo que ganó cada sala.' } only %}
+      {% endif %}
+    {% elseif tema == 'embudo' %}
+      {# El embudo de conversión (EF-22.13): de los que votaron un título, cuántos reservaron,
+         pagaron, fueron y calificaron, y la plata de cada paso. El profe se lo pidió a otro grupo
+         el 18/11 («¿cuántos de esos se convirtieron en plata?»); a nosotros nos sirve más, porque
+         el voto es lo que no tiene un cine común. Termina en qué hacer donde más se pierde. #}
+      {% if embudo %}
+        {% for aviso in embudo.avisos %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: aviso } only %}
+        {% endfor %}
+      {% endif %}
+      {% if not embudo or embudo.avisos is not empty %}
+      {% elseif embudo.total.votaron == 0 %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Nadie votó títulos en el período: sin votación no hay embudo.' } only %}
+      {% else %}
+        {% set total = embudo.total %}
+        {% set notas = { votaron: 'si cada uno compraba una entrada', reservaron: 'lo que quisieron comprar', pagaron: 'pagado', fueron: 'pagado por los que fueron', calificaron: 'pagado por los que calificaron' } %}
+        <section class="reporte-seccion" aria-labelledby="reporte-embudo">
+          <h2 id="reporte-embudo" class="reporte-titulo">De votar a calificar</h2>
+          <ol class="reporte-embudo">
+            {% for paso in total.pasos %}
+              <li class="reporte-embudo-paso">
+                <span class="reporte-embudo-nombre">{{ paso.nombre }}</span>
+                <svg class="reporte-embudo-barra" viewBox="0 0 100 10" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+                  <rect class="reporte-embudo-fondo" x="0" y="0" width="100" height="10"></rect>
+                  <rect class="reporte-embudo-relleno reporte-embudo-{{ paso.clave }}" x="{{ (100 - paso.del_total) / 2 }}" y="0" width="{{ paso.del_total }}" height="10"></rect>
+                </svg>
+                <span class="reporte-embudo-personas">
+                  <strong>{{ paso.personas }}</strong> {{ paso.personas == 1 ? 'persona' : 'personas' }}
+                  {% if paso.conversion %}<span class="reporte-embudo-conversion">{{ paso.conversion }} del paso anterior</span>{% endif %}
+                </span>
+                <span class="reporte-embudo-monto">{{ paso.monto }} <span class="reporte-embudo-nota">{{ notas[paso.clave] }}</span></span>
+              </li>
+            {% endfor %}
+          </ol>
+
+          {% if total.perdida %}
+            <div class="reporte-sugerencia reporte-combinada">
+              <p class="reporte-sugerencia-texto"><strong>Donde más se pierde:</strong> de los que {{ total.perdida.desde }}, {{ total.perdida.verbo }} el {{ total.perdida.conversion }}. Se quedaron en el camino {{ total.perdida.personas }} {{ total.perdida.personas == 1 ? 'persona' : 'personas' }} y {{ total.perdida.monto }}.</p>
+              <p class="reporte-sugerencia-nota">{{ total.perdida.que_hacer }}</p>
+            </div>
+          {% endif %}
+          <p class="reporte-explicacion">
+            Cuenta personas por función: quien votó en dos funciones cuenta dos veces. A la gorra, pagar es confirmar la reserva.
+            {% if total.sin_votar > 0 %}Además, {{ total.sin_votar }} {{ total.sin_votar == 1 ? 'persona pagó una función sin votarla' : 'personas pagaron una función sin votarla' }} ({{ total.sin_votar_monto }}): el embudo no las cuenta.{% endif %}
+          </p>
+        </section>
+
+        {% if embudo.salas|length > 1 or embudo.sin_votacion is not empty %}
+          <section class="reporte-seccion" aria-labelledby="reporte-embudo-salas">
+            <h3 id="reporte-embudo-salas" class="reporte-subtitulo">Por sala</h3>
+            <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-embudo-salas">
+              <table class="tabla-admin reporte-embudo-tabla">
+                <thead>
+                  <tr>
+                    <th scope="col">Sala</th>
+                    {% for paso in total.pasos %}<th scope="col">{{ paso.nombre }}</th>{% endfor %}
+                    <th scope="col">Pagado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for sala in embudo.salas %}
+                    <tr>
+                      <td>
+                        <span class="tabla-admin-principal">{{ sala.nombre }}</span>
+                        {% if sala.perdida %}<span class="tabla-admin-secundario">se pierde más entre {{ sala.perdida.desde }} y {{ sala.perdida.hasta }}</span>{% endif %}
+                      </td>
+                      {% for paso in sala.pasos %}
+                        <td>
+                          {{ paso.personas }}
+                          {% if paso.conversion %}<span class="tabla-admin-secundario">{{ paso.conversion }}</span>{% endif %}
+                        </td>
+                      {% endfor %}
+                      <td>{{ sala.pasos[2].monto }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% if embudo.sin_votacion is not empty %}
+              <p class="reporte-explicacion">Sin votación de títulos en el período: {{ embudo.sin_votacion|join(', ', ' y ') }}.</p>
+            {% endif %}
+          </section>
+        {% endif %}
       {% endif %}
     {% elseif tema == 'promociones' %}
       <h2 class="sr-only">Promociones</h2>
