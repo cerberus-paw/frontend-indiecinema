@@ -93,7 +93,11 @@
         ayuda: 'Máximo ' ~ (reglas.cantidad.maximo_por_persona ?? reglas.cantidad.maximo) ~ ' lugares por persona.'
       } only %}
       {% if funcion.precio starts with '$' %}
-        {% include 'parciales/campo_cupon.html.twig' with { valor: valores.cupon ?? '', errores: errores } only %}
+        {% if tiene_beneficio_conducta ?? true %}
+          {% include 'parciales/campo_cupon.html.twig' with { valor: valores.cupon ?? '', errores: errores } only %}
+        {% else %}
+          <p class="campo-ayuda">Por tu historial de conducta necesitás al menos {{ umbral_beneficio_conducta|default(80) }} puntos para usar cupones de descuento.</p>
+        {% endif %}
       {% endif %}
 
       <div class="pie-formulario-acciones">

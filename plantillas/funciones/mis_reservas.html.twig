@@ -58,7 +58,7 @@
       <div class="panel-dato{% if conducta.bajo_umbral %} panel-dato-alerta{% endif %}">
         <dt>Puntaje de conducta</dt>
         <dd class="panel-dato-valor">{{ conducta.puntaje }}</dd>
-        <dd class="panel-dato-nota">de {{ conducta.puntaje_inicial }} · {% if conducta.bajo_umbral %}bajo umbral (hasta {{ conducta.tope_bajo_umbral }} reservas a la vez){% else %}sin restricciones{% endif %}</dd>
+        <dd class="panel-dato-nota">de {{ conducta.puntaje_inicial }} · {% if conducta.bajo_umbral %}bajo umbral (hasta {{ conducta.tope_bajo_umbral }} reservas a la vez){% elseif conducta.tiene_beneficio|default(false) %}buena conducta (preventas y cupones de descuento habilitados){% else %}sin tope de reservas (beneficios desde {{ conducta.umbral_beneficio|default(80) }} pts){% endif %}</dd>
       </div>
       <div class="panel-dato">
         <dt>Asistencias</dt>
@@ -76,6 +76,16 @@
         <dd class="panel-dato-nota">{{ conducta.conducta_positivas }} pos · {{ conducta.conducta_negativas }} neg ({{ conducta.negativas_vigentes }} vig.) · {{ conducta.calificaciones_funciones }} {{ conducta.calificaciones_funciones == 1 ? 'función calificada' : 'funciones calificadas' }}</dd>
       </div>
     </dl>
+    <p class="panel-conducta-detalle">
+      {% set umbral_beneficio = conducta.umbral_beneficio|default(80) %}
+      {% if conducta.tiene_beneficio|default(false) %}
+        Con {{ conducta.puntaje }} puntos (al menos {{ umbral_beneficio }}), tenés habilitados los beneficios por buena conducta: acceso anticipado a funciones en preventa y uso de cupones de descuento al reservar.
+      {% elseif conducta.bajo_umbral %}
+        Con {{ conducta.puntaje }} puntos podés tener hasta {{ conducta.tope_bajo_umbral }} {{ conducta.tope_bajo_umbral == 1 ? 'reserva activa' : 'reservas activas' }} a la vez y necesitás al menos {{ umbral_beneficio }} puntos para acceder a preventas anticipadas y usar cupones de descuento.
+      {% else %}
+        Con {{ conducta.puntaje }} puntos reservás sin tope de funciones simultáneas; al llegar a {{ umbral_beneficio }} puntos se habilitan también las preventas anticipadas y el uso de cupones de descuento.
+      {% endif %}
+    </p>
   {% endif %}
 
   {% if calificada|default(false) %}
