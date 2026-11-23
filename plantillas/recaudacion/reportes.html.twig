@@ -45,7 +45,7 @@
     comision), nombre, monto, porcentaje (escrito), largo e inicio (en porcentaje de la vuelta)},
     vacía si no se cobró nada}.
   - costo_cargado: el aviso de «Guardar» el costo, {tipo, texto}, o null.
-  - tema: el tema que se muestra (EF-22.2): resumen, plata, conversion, promociones, programacion o
+  - tema: el tema que se muestra (EF-22.2): resumen, plata, conversion, promociones, programacion, publico o
     salas; y temas: clave => nombre, para las pestañas.
   - conversion: sólo en su pestaña (EF-22.13 y EF-22.16), o null: {avisos, total, salas (lista, las que tuvieron
     votación), sin_votacion (nombres de las salas sin votación)}. total y cada sala son {nombre,
@@ -58,6 +58,9 @@
     asistencia_valor y promedio_valor (en porcentaje del máximo), gorra_valor y pagas_valor.
   - combinadas: las recomendaciones que cruzan varias variables (EF-22.3), lista de {regla, sala,
     accion, porque (lista de textos con los datos que la justifican), programar}.
+  - ranking: sólo en la pestaña publico (EF-22.19), o null: {avisos, salas: lista de {sala,
+    participaron, espectadores: lista de {posicion, nombre, fue, voto, califico, pagado (escrito),
+    puntaje}}, puntos: {ir, votar, calificar}}.
   - generos: qué géneros llenan en cada sala (EF-22.18), lista de {sala, generos: lista de
     {genero, funciones, ocupacion (escrita), ocupacion_valor, votos (escrito, o null sin votación),
     promedio (o null)}}, del que más llena al que menos.
@@ -646,6 +649,60 @@
           </ul>
         {% endif %}
       </section>
+    {% elseif tema == 'publico' %}
+      {# El ranking de espectadores de cada sala (EF-22.19): quiénes más participan, con el puntaje
+         explicado. Está en los reportes, que ven sólo el organizador (de sus salas) y el
+         administrador: ningún espectador ve el de los demás. #}
+      <h2 class="sr-only">Público</h2>
+      {% if ranking %}
+        {% for aviso in ranking.avisos %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'advertencia', mensaje: aviso } only %}
+        {% endfor %}
+      {% endif %}
+      {% if not ranking or ranking.salas|filter(s => s.espectadores is not empty) is empty %}
+        {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Nadie fue, votó ni calificó en el período.' } only %}
+      {% else %}
+        {% for sala in ranking.salas|filter(s => s.espectadores is not empty) %}
+          <section class="reporte-seccion" aria-labelledby="reporte-ranking-{{ loop.index }}">
+            <h3 id="reporte-ranking-{{ loop.index }}" class="reporte-subtitulo">Los que más participan en {{ sala.sala }}</h3>
+            <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-ranking-{{ loop.index }}">
+              <table class="tabla-admin reporte-ranking">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Espectador</th>
+                    <th scope="col">Fue</th>
+                    <th scope="col">Votó</th>
+                    <th scope="col">Calificó</th>
+                    <th scope="col">Pagó</th>
+                    <th scope="col">Puntaje</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for espectador in sala.espectadores %}
+                    <tr>
+                      <td>{{ espectador.posicion }}</td>
+                      <td><span class="tabla-admin-principal">{{ espectador.nombre }}</span></td>
+                      <td>{{ espectador.fue }}</td>
+                      <td>{{ espectador.voto }}</td>
+                      <td>{{ espectador.califico }}</td>
+                      <td>{{ espectador.pagado }}</td>
+                      <td><strong>{{ espectador.puntaje }}</strong></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% if sala.participaron > sala.espectadores|length %}
+              <p class="reporte-explicacion">Los primeros {{ sala.espectadores|length }} de {{ sala.participaron }} espectadores que participaron.</p>
+            {% endif %}
+          </section>
+        {% endfor %}
+        <p class="reporte-explicacion">
+          Puntaje: {{ ranking.puntos.ir }} por cada función a la que fue, {{ ranking.puntos.votar }} por cada votación de títulos en la que votó y {{ ranking.puntos.calificar }} por cada función que calificó. Ir vale más porque es lo que llena la sala. Ante un empate, primero el que pagó más.
+          Sólo lo ven el organizador de la sala y la administración.
+        </p>
+      {% endif %}
     {% elseif tema == 'salas' %}
       <h2 class="sr-only">Salas</h2>
       <section class="reporte-seccion" aria-labelledby="reporte-salas">
