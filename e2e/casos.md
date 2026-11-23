@@ -22,6 +22,13 @@ aunque lo demás haya salido bien (`testSinSesion` en `ayudas.js`).
 | I-3 | Sin sesión, entra a «Mis reservas» escribiendo la dirección | «Tenés que ingresar para ver esta página», con el botón «Ingresar», y no ve reservas |
 | I-4 | Sin sesión, abre la ficha de una función | Ve «Ingresá con tu cuenta para reservar» y no el formulario |
 
+## Cuentas (registro, verificación y recuperación)
+
+| Caso | Qué hace | Qué tiene que ver |
+| --- | --- | --- |
+| CU-1 | Con una cuenta nueva única, se registra, abre el enlace de verificación desde Mailpit, ingresa, cierra sesión, recupera la contraseña con el enlace de Mailpit e ingresa con la clave nueva | «¡Cuenta creada!», «Correo verificado», menú del usuario al ingresar, «Revisá tu correo», «Contraseña actualizada» y menú del usuario con la nueva contraseña |
+| CU-2 | En el registro manda una contraseña de 6 caracteres, después los términos sin marcar, y por último un correo ya registrado | En cada envío sigue en el registro con el resumen de errores y el mensaje específico correspondiente |
+
 ## Reservar
 
 | Caso | Qué hace | Qué tiene que ver |
