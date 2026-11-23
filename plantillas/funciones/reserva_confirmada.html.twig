@@ -11,7 +11,8 @@
   - reserva: id, codigo (8 caracteres; se muestra en dos grupos de 4 para dictarlo), cantidad,
     total (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio'),
     cancelable (si todavía se puede cancelar: confirmada o pendiente, y antes de que empiece la
-    función), y en una pendiente que todavía está a tiempo, enlace_de_pago (a Mercado Pago) y vence
+    función; la confirmada, hasta las horas que pide la política, EF-22.9), cancelable_hasta (el
+    límite de una confirmada, ya escrito, o null) y motivo_no_cancelable (por qué ya no, o null), y en una pendiente que todavía está a tiempo, enlace_de_pago (a Mercado Pago) y vence
     (la hora, ya escrita); si no, null. En una cancelada (EF-06.3), motivo (por qué, ya redactado
     para el espectador) y reembolsada_en (cuándo le volvió la plata, ya escrito); las dos en null
     si no hay nada que decir.
@@ -138,6 +139,12 @@
         } only %}
       {% endif %}
     </div>
+    {# EF-22.9: hasta cuándo se cancela y, pasado el límite, por qué no está el botón #}
+    {% if reserva.cancelable_hasta|default(null) %}
+      <p class="campo-ayuda">Podés cancelarla hasta el {{ reserva.cancelable_hasta }}.</p>
+    {% elseif reserva.motivo_no_cancelable|default(null) and reserva.estado == 'confirmada' %}
+      <p class="campo-ayuda">{{ reserva.motivo_no_cancelable }}</p>
+    {% endif %}
   </article>
 
   {% if reserva.estado == 'confirmada' %}

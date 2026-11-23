@@ -14,7 +14,8 @@
   - reservas: lista de {id, codigo (8 caracteres; se muestra en dos grupos de 4), cantidad, total
     (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio' |
     'ausente'),
-    estado_etiqueta, cancelable, calificable (si puede calificar la función: asistió, terminó y
+    estado_etiqueta, cancelable, cancelable_hasta y motivo_no_cancelable (EF-22.9: hasta cuándo se
+    cancela una confirmada y, pasado ese límite, por qué ya no), calificable (si puede calificar la función: asistió, terminó y
     todavía no la calificó; EF-04.2), calificacion ({puntaje, comentario} si la calificó con esta
     reserva, o null; EF-04.5), enlace_de_pago (a Mercado Pago, sólo en una pendiente que todavía
     está a tiempo; si no, null), motivo (por qué se canceló, ya redactado para el espectador:
@@ -211,6 +212,12 @@
                       tamano: 'chico',
                       aria_label: 'Cancelar la reserva ' ~ reserva.codigo
                     } only %}
+                    {% if reserva.cancelable_hasta|default(null) %}
+                      <span class="tabla-admin-secundario">Se cancela hasta el {{ reserva.cancelable_hasta }}</span>
+                    {% endif %}
+                  {# EF-22.9: sin el botón, el porqué (falta menos de lo que pide la política) #}
+                  {% elseif reserva.motivo_no_cancelable|default(null) and reserva.estado == 'confirmada' %}
+                    <span class="tabla-admin-secundario">{{ reserva.motivo_no_cancelable }}</span>
                   {% endif %}
                 </div>
               </td>

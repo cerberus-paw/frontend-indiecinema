@@ -50,6 +50,8 @@
         de conducta (EF-13.2).
       - limite_conducta_alcanzado: (bool, opcional) true si además alcanzó su tope de reservas
         simultáneas por conducta y no puede iniciar otra hasta liberar una.
+      - politica_cancelacion: (string|null, opcional) hasta cuándo se puede cancelar, escrita por
+        funciones (EF-22.9); se muestra antes del botón de reservar.
   - guardada: (bool) aviso de éxito al volver de editarla. El controlador ya controló que sea su
     organizador: la ficha es pública y el aviso no es para cualquiera.
   - funcion.votacion_cierra: (string|null) hasta cuándo se vota, «15 nov 20:00» (EF-03.1); funcion.votacion_vencida:
@@ -300,6 +302,10 @@
               {% else %}
                 <p class="campo-ayuda">Por tu historial de conducta necesitás al menos {{ funcion.umbral_beneficio_conducta|default(80) }} puntos para usar cupones de descuento.</p>
               {% endif %}
+            {% endif %}
+            {# EF-22.9: la política se lee antes de reservar, no recién al querer cancelar #}
+            {% if funcion.politica_cancelacion|default(null) %}
+              <p class="campo-ayuda">{{ funcion.politica_cancelacion }}</p>
             {% endif %}
             {% include 'parciales/boton.html.twig' with {
               texto: 'Reservar mis lugares',
