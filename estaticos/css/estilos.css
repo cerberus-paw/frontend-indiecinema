@@ -6833,9 +6833,9 @@ svg.enlace-denunciar-icono {
   text-align: left;
 }
 
-/* El embudo (EF-22.13): una fila por paso, con la barra centrada para que se vea el embudo. Cada
+/* La conversión (EF-22.13, EF-22.16): una fila por paso, con la barra centrada para que se vea cómo se achica. Cada
    paso un poco más oscuro que el anterior; el número y la plata, escritos al lado. */
-.reporte-embudo {
+.reporte-conversion {
   display: grid;
   gap: var(--espacio-2);
   margin: 0 0 var(--espacio-4);
@@ -6843,73 +6843,73 @@ svg.enlace-denunciar-icono {
   list-style: none;
 }
 
-.reporte-embudo-paso {
+.reporte-conversion-paso {
   display: grid;
   grid-template-columns: 7rem minmax(8rem, 1fr) 11rem 13rem;
   align-items: center;
   gap: var(--espacio-3);
 }
 
-.reporte-embudo-nombre {
+.reporte-conversion-nombre {
   font-weight: 700;
 }
 
-.reporte-embudo-barra {
+.reporte-conversion-barra {
   width: 100%;
   height: 28px;
 }
 
-.reporte-embudo-fondo {
+.reporte-conversion-fondo {
   fill: transparent;
 }
 
-.reporte-embudo-relleno {
+.reporte-conversion-relleno {
   fill: var(--color-primario);
 }
 
-.reporte-embudo-reservaron { fill-opacity: 0.85; }
-.reporte-embudo-pagaron { fill-opacity: 0.7; }
-.reporte-embudo-fueron { fill-opacity: 0.55; }
-.reporte-embudo-calificaron { fill-opacity: 0.4; }
+.reporte-conversion-reservaron { fill-opacity: 0.85; }
+.reporte-conversion-pagaron { fill-opacity: 0.7; }
+.reporte-conversion-fueron { fill-opacity: 0.55; }
+.reporte-conversion-calificaron { fill-opacity: 0.4; }
 
-.reporte-embudo-personas,
-.reporte-embudo-monto {
+.reporte-conversion-personas,
+.reporte-conversion-monto {
   font-size: var(--texto-sm);
 }
 
-.reporte-embudo-conversion,
-.reporte-embudo-nota {
+.reporte-conversion-tasa,
+.reporte-conversion-nota {
   display: block;
   font-size: var(--texto-xs);
   color: var(--color-texto-secundario);
 }
 
-.reporte-embudo-monto {
+.reporte-conversion-monto {
   font-weight: 700;
   white-space: nowrap;
 }
 
-.reporte-embudo-nota {
+.reporte-conversion-nota {
   font-weight: 400;
   white-space: normal;
 }
 
-.reporte-embudo ~ .reporte-explicacion {
+.reporte-conversion ~ .reporte-explicacion {
   margin-top: var(--espacio-3);
 }
 
 /* En el celular, el nombre y los números arriba y la barra debajo, de todo el ancho */
 @media (max-width: 720px) {
-  .reporte-embudo-paso {
+  .reporte-conversion-paso {
     grid-template-columns: 1fr 1fr;
   }
 
-  .reporte-embudo-barra {
+  .reporte-conversion-barra {
     grid-column: 1 / -1;
     grid-row: 3;
   }
 
-  .reporte-embudo-nombre {
+  .reporte-conversion-nombre {
     grid-column: 1 / -1;
   }
 }
