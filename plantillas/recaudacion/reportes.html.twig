@@ -27,6 +27,9 @@
   - precios: lista de {sala, funciones_gorra, gorra, funciones_pagas, pagas, sensible}: sensible
     si a la gorra llena bastante más (un descuento sirve); si no, con precio llena igual (EF-09.5).
   - sin_reserva: lista de {sala, votantes, sin_reserva}: los que votaron y no reservaron (EF-09.5).
+  - sin_promocion: las salas que ganan holgado y por eso no tienen promociones ni descuentos
+    (EF-22.14), lista de {sala, resultado (con signo), costo, sobre_costo}; umbrales.promocion_ganancia
+    es desde cuánto sobre el costo.
   - agotadas: lista de {titulo, sala, funciones, agotadas, ocupacion} (EF-09.5).
   - titulos: lista de {titulo, funciones, ocupacion, asistencia, promedio}.
   - pedidos: lista de {titulo, votaciones, votos, porcentaje}.
@@ -318,12 +321,30 @@
       {% endif %}
     {% elseif tema == 'promociones' %}
       <h2 class="sr-only">Promociones</h2>
+      {# Antes que las promociones, las salas que no las necesitan (EF-22.14): el profe marcó el 18/11
+         que a la que vende muy por encima no hace falta darle una. Con el número que lo justifica,
+         para que no parezca que el reporte se olvidó de ella. #}
+      {% if sin_promocion is not empty %}
+        <section class="reporte-seccion" aria-labelledby="reporte-sin-promocion">
+          <h3 id="reporte-sin-promocion" class="reporte-subtitulo">No necesitan promoción</h3>
+          <ul class="reporte-sugerencias">
+            {% for sala in sin_promocion %}
+              <li class="reporte-sugerencia reporte-sin-promocion">
+                <p class="reporte-sugerencia-texto">
+                  <strong>{{ sala.sala }}:</strong> ganó <span class="reporte-resultado reporte-gana">{{ sala.resultado }}</span> sobre {{ sala.costo }} de costo, un {{ sala.sobre_costo }} más de lo que le costó abrir.
+                </p>
+                <p class="reporte-sugerencia-nota">Gana holgado: un descuento le resignaría plata. Desde el {{ umbrales.promocion_ganancia }} sobre el costo, el reporte no le sugiere promociones.</p>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
       <section class="reporte-seccion" aria-labelledby="reporte-dias-flojos">
         <h3 id="reporte-dias-flojos" class="reporte-subtitulo">Días para una promoción</h3>
         {% if sin_ventas %}
           {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
         {% elseif dias_flojos is empty %}
-          {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Ningún día quedó flojo: no hace falta una promoción.' } only %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: sin_promocion is empty ? 'Ningún día quedó flojo: no hace falta una promoción.' : 'Ningún día quedó flojo en las salas que necesitan una promoción.' } only %}
         {% else %}
           <ul class="reporte-sugerencias">
             {% for dia in dias_flojos %}
@@ -379,7 +400,7 @@
         {% if sin_ventas %}
           {% include 'parciales/mensaje.html.twig' with { tipo: 'info', mensaje: 'Sin las ventas de funciones no se puede calcular.' } only %}
         {% elseif sin_reserva is empty %}
-          {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: 'Casi todos los que votaron reservaron: no hace falta ir a buscarlos.' } only %}
+          {% include 'parciales/mensaje.html.twig' with { tipo: 'exito', mensaje: sin_promocion is empty ? 'Casi todos los que votaron reservaron: no hace falta ir a buscarlos.' : 'En las salas que necesitan una promoción, casi todos los que votaron reservaron.' } only %}
         {% else %}
           <ul class="reporte-sugerencias">
             {% for sala in sin_reserva %}
