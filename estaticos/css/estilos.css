@@ -6231,6 +6231,18 @@ svg.enlace-denunciar-icono {
   color: var(--color-error);
 }
 
+/* La gravedad de una denuncia (EF-22.11): la alta, como la baja de una cuenta; la media, como lo
+   que espera revisión; la baja, la píldora de contorno */
+.estado-cuenta.gravedad-alta {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.estado-cuenta.gravedad-media {
+  border-color: var(--color-advertencia);
+  color: var(--color-advertencia);
+}
+
 /* Tarjetas de números arriba de la tabla, como el wireframe: del ancho de cuatro por fila, aunque
    haya dos */
 .panel-resumen {
@@ -7328,6 +7340,11 @@ a.tabla-admin-principal:focus-visible {
 .bandeja-item-datos {
   font-size: var(--texto-xs);
   color: var(--color-texto-secundario);
+}
+
+/* EF-22.10: las devueltas, debajo de las que esperan una resolución */
+.bandeja-esperando {
+  border-top: 1px solid var(--color-borde);
 }
 
 /* «No hay solicitudes» y «se muestran las más viejas» */

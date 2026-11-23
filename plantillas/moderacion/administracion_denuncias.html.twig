@@ -1,21 +1,30 @@
 {#
   La pestaña «Denuncias» de la bandeja de moderación, en /moderacion/denuncias (EF-07.8): lo
-  denunciado con denuncias abiertas a la izquierda, primero lo que lleva más tiempo, y la elegida a
-  la derecha, con lo denunciado y cada denuncia con quién la hizo. Se resuelven todas juntas con un
-  motivo: desestimándolas o actuando sobre lo denunciado.
+  denunciado con denuncias abiertas a la izquierda, primero lo más grave (EF-22.11), después lo que
+  tiene más denuncias y después lo que lleva más tiempo, y la elegida a la derecha, con lo
+  denunciado y cada denuncia con quién la hizo. Se resuelven todas juntas con un motivo:
+  desestimándolas, tomándolas (en salas y funciones: son válidas y cuentan para las reglas, sin
+  sancionar todavía) o actuando sobre lo denunciado.
 
   Variables:
   - historial: si la vista es la del historial («Ver historial»).
-  - cerradas: en el historial, lista de {tipo_etiqueta, titulo, categoria, desestimada, accion,
-    motivo, resuelta}.
-  - grupos: lista de {tipo, tipo_etiqueta, id, titulo, cantidad, desde, elegida}.
-  - elegida: {tipo, tipo_etiqueta, id, titulo, denunciado, denuncias, propia, acciones}, o null.
+  - cerradas: en el historial, lista de {tipo_etiqueta, titulo, categoria, gravedad,
+    gravedad_etiqueta, desestimada, tomada (opcional: válidas sin sancionar), accion, motivo,
+    resuelta}.
+  - grupos: lista de {tipo, tipo_etiqueta, id, titulo, cantidad, gravedad, gravedad_etiqueta,
+    para_suspender, desde, elegida}: gravedad es la de su denuncia abierta más grave (alta, media o
+    baja); para_suspender, si es una sala o una función con una alta abierta (opcional);
+    contador, en salas y funciones, {cantidad, aviso, cartelera}: las denuncias medias resueltas
+    de su sala en el período y los dos límites de las reglas (opcional, null sin sala).
+  - elegida: {tipo, tipo_etiqueta, id, titulo, denunciado, denuncias, propia, acciones,
+    para_suspender y contador (opcionales, como en grupos)}, o null. Si está para suspender,
+    valores.accion ya viene en «suspender».
     denunciado: los datos de lo denunciado según el tipo, con url (la ficha) y sancionado (si ya
     se hizo lo que resuelve sus denuncias: se cierran sin repetirlo); null si ya no existe (se dio
-    de baja); false si su subsistema no respondió. denuncias: lista de {categoria, detalle (o
-    null), cuando, quien ({nombre, correo}, null si ya no existe o false si cuentas no
-    respondió)}. propia: es del moderador en sesión o denunció él, que no las resuelve. acciones:
-    lista de {valor, etiqueta}.
+    de baja); false si su subsistema no respondió. denuncias: lista de {id, categoria, gravedad,
+    gravedad_etiqueta, detalle (o null), foto (si mandó una, opcional), cuando, quien ({nombre,
+    correo}, null si ya no existe o false si cuentas no respondió)}. propia: es del moderador en
+    sesión o denunció él, que no las resuelve. acciones: lista de {valor, etiqueta}.
   - valores: lo que mandó si hubo errores, {accion, motivo}.
   - errores: campo => qué está mal.
   - maximo_motivo: el largo máximo del motivo, el mismo que controla el backend.
@@ -23,6 +32,9 @@
     programación no la tiene), motivo, desde, propia}; false si programación no respondió. propia:
     la sala es del moderador en sesión, que no levanta la suspensión.
   - levantar: el levantamiento que volvió con error, {sala, motivo, error}, o null.
+  - castigadas: las salas bajadas en la cartelera por las reglas (EF-22.11), lista de {sala_id,
+    nombre (o null si programación no la tiene), conteo}; false si programación no respondió.
+    De solo lectura: se levantan solas. Opcional.
   - mensaje_exito: el aviso de lo que se acaba de hacer (opcional).
 #}
 {% extends 'administracion.html.twig' %}
@@ -57,8 +69,9 @@
         <li class="bandeja-item">
           <span class="bandeja-item-fila">
             <span class="bandeja-item-sala">{{ cerrada.titulo }}</span>
-            <span class="estado-cuenta {{ cerrada.desestimada ? 'estado-cuenta-activa' : 'estado-cuenta-suspendida' }}">{{ cerrada.accion }}</span>
+            <span class="estado-cuenta {{ cerrada.desestimada ? 'estado-cuenta-activa' : ((cerrada.tomada ?? false) ? 'estado-cuenta-revision' : 'estado-cuenta-suspendida') }}">{{ cerrada.accion }}</span>
           </span>
+          {% if cerrada.gravedad is defined %}<span class="estado-cuenta gravedad-{{ cerrada.gravedad }}"><span class="sr-only">Gravedad </span>{{ cerrada.gravedad_etiqueta }}</span>{% endif %}
           <span class="bandeja-item-datos">{{ cerrada.tipo_etiqueta }} · {{ cerrada.categoria }} · {{ cerrada.resuelta }}</span>
           <span class="bandeja-item-datos">{{ cerrada.motivo }}</span>
         </li>
@@ -78,7 +91,10 @@
                 <span class="bandeja-item-sala">{{ grupo.titulo }}</span>
                 <span class="estado-cuenta">{{ grupo.tipo_etiqueta }}</span>
               </span>
+              {% if grupo.para_suspender ?? false %}<span class="estado-cuenta estado-cuenta-suspendida">Para suspender</span>{% endif %}
+              {% if grupo.gravedad is defined %}<span class="estado-cuenta gravedad-{{ grupo.gravedad }}"><span class="sr-only">Gravedad </span>{{ grupo.gravedad_etiqueta }}</span>{% endif %}
               <span class="bandeja-item-datos">{{ grupo.cantidad }} {{ grupo.cantidad == 1 ? 'denuncia' : 'denuncias' }}</span>
+              {% if grupo.contador ?? null %}<span class="bandeja-item-datos bandeja-contador">Sala: {{ grupo.contador.cantidad }} de {{ grupo.contador.aviso }} para aviso · {{ grupo.contador.cantidad }} de {{ grupo.contador.cartelera }} para cartelera</span>{% endif %}
               <span class="bandeja-item-datos">{% include 'parciales/icono.html.twig' with { nombre: 'calendario' } only %} Desde el {{ grupo.desde }}</span>
             </a>
           </li>
@@ -92,7 +108,14 @@
         <header class="bandeja-detalle-cabecera">
           <h2 id="titulo-denunciado" class="bandeja-detalle-titulo">{{ elegida.titulo }}</h2>
           <span class="estado-cuenta">{{ elegida.tipo_etiqueta }}</span>
+          {% if elegida.para_suspender ?? false %}<span class="estado-cuenta estado-cuenta-suspendida">Para suspender</span>{% endif %}
         </header>
+        {% if elegida.contador ?? null %}
+          <p class="bandeja-nota bandeja-nota-suelta bandeja-contador">
+            Denuncias medias resueltas de la sala en el período: {{ elegida.contador.cantidad }} de {{ elegida.contador.aviso }} para aviso · {{ elegida.contador.cantidad }} de {{ elegida.contador.cartelera }} para cartelera.
+            Tomarlas suma a la cuenta; al llegar a un límite, la sala recibe el aviso o baja en la cartelera.
+          </p>
+        {% endif %}
 
         <div class="bandeja-columnas">
           <div>
@@ -139,8 +162,13 @@
             <ul class="bandeja-items">
               {% for denuncia in elegida.denuncias %}
                 <li class="bandeja-item">
-                  <span class="bandeja-item-fila"><strong>{{ denuncia.categoria }}</strong></span>
+                  <span class="bandeja-item-fila"><strong>{{ denuncia.categoria }}</strong> {% if denuncia.gravedad is defined %}<span class="estado-cuenta gravedad-{{ denuncia.gravedad }}"><span class="sr-only">Gravedad </span>{{ denuncia.gravedad_etiqueta }}</span>{% endif %}</span>
                   {% if denuncia.detalle %}<span class="bandeja-item-datos">{{ denuncia.detalle|nl2br }}</span>{% endif %}
+                  {% if denuncia.foto ?? false %}
+                    <a href="{{ prefijo }}/denuncias/{{ denuncia.id }}/foto" class="bandeja-item-datos">
+                      <img src="{{ prefijo }}/denuncias/{{ denuncia.id }}/foto" alt="La foto que mandó con la denuncia" class="bandeja-foto">
+                    </a>
+                  {% endif %}
                   <span class="bandeja-item-datos">
                     {{ denuncia.cuando }} ·
                     {% if denuncia.quien is same as(false) %}
@@ -236,5 +264,29 @@
       </ul>
     {% endif %}
   </section>
+
+  {% if castigadas is defined %}
+  <section class="bandeja-seccion" aria-labelledby="titulo-castigadas">
+    <h2 id="titulo-castigadas" class="panel-subtitulo">Bajadas en la cartelera</h2>
+    {% if castigadas is same as(false) %}
+      <p class="bandeja-nota bandeja-nota-suelta">No pudimos consultar las salas. Probá de nuevo en un rato.</p>
+    {% elseif castigadas is empty %}
+      <p class="bandeja-nota bandeja-nota-suelta">Ninguna sala está bajada en la cartelera.</p>
+    {% else %}
+      <p class="bandeja-nota bandeja-nota-suelta">Sus funciones van al final de la cartelera. Vuelven solas cuando las denuncias salen del período.</p>
+      <ul class="bandeja-items">
+        {% for castigada in castigadas %}
+          <li class="bandeja-item">
+            <span class="bandeja-item-fila">
+              <span class="bandeja-item-sala">{{ castigada.nombre ?? 'Una sala que programación ya no tiene' }}</span>
+              <span class="estado-cuenta estado-cuenta-revision">Bajada</span>
+            </span>
+            <span class="bandeja-item-datos">{{ castigada.conteo }} {{ castigada.conteo == 1 ? 'denuncia media resuelta' : 'denuncias medias resueltas' }} en el período</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+  {% endif %}
 {% endif %}
 {% endblock %}
