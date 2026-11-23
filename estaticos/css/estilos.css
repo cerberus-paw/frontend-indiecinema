@@ -6858,6 +6858,88 @@ svg.enlace-denunciar-icono {
   white-space: normal;
 }
 
+/* La torta del reparto (EF-22.15): el anillo a la izquierda y la leyenda con los montos al lado; en
+   el celular, uno abajo del otro. Cada parte tiene su color en el anillo (stroke) y en la marca de
+   la leyenda (fondo). */
+.reporte-torta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-5);
+  margin: 0 0 var(--espacio-5);
+  padding: var(--espacio-4) var(--espacio-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie);
+}
+
+.reporte-torta-grafico {
+  flex: 0 0 auto;
+  width: 160px;
+  height: 160px;
+}
+
+.reporte-torta-leyenda {
+  flex: 0 1 26rem;
+  min-width: 0;
+}
+
+.reporte-torta-titulo {
+  margin: 0 0 var(--espacio-2);
+  font-weight: 700;
+}
+
+.reporte-torta-lista {
+  display: grid;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reporte-torta-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--espacio-2) var(--espacio-3);
+  font-size: var(--texto-sm);
+}
+
+.reporte-torta-marca {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.reporte-torta-monto {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reporte-torta-porcentaje {
+  min-width: 4.5em;
+  text-align: right;
+  color: var(--color-texto-secundario);
+  white-space: nowrap;
+}
+
+.reporte-torta-sala { stroke: var(--color-primario); background-color: var(--color-primario); }
+.reporte-torta-duenos { stroke: var(--color-exito); background-color: var(--color-exito); }
+.reporte-torta-plataforma { stroke: #a5b4fc; background-color: #a5b4fc; }
+.reporte-torta-comision { stroke: var(--color-texto-apagado); background-color: var(--color-texto-apagado); }
+
+@media (max-width: 480px) {
+  .reporte-torta-item {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .reporte-torta-porcentaje {
+    grid-column: 2 / -1;
+    min-width: 0;
+    text-align: left;
+  }
+}
+
 /* El costo de una sala: la sala, el monto y el botón en una fila, como el filtro del período */
 .reporte-costo {
   grid-template-columns: minmax(160px, 260px) minmax(150px, 220px) auto;

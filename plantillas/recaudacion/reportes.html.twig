@@ -37,7 +37,10 @@
     costo_funcion, costo_funcion_valor (para el campo), costo_propio, resultado (con signo), gana,
     estimadas, sin_datos}, de la que más pierde a la que más gana; plataforma: {ingresos,
     servidores, desarrollo, costo, dias, resultado, gana} o null (sólo el administrador);
-    comision, costo_funcion, servidores_mes y desarrollo_mes: las referencias de config.ini}.
+    comision, costo_funcion, servidores_mes y desarrollo_mes: las referencias de config.ini;
+    reparto: las porciones de la torta (EF-22.15), lista de {clave (sala, duenos, plataforma o
+    comision), nombre, monto, porcentaje (escrito), largo e inicio (en porcentaje de la vuelta)},
+    vacía si no se cobró nada}.
   - costo_cargado: el aviso de «Guardar» el costo, {tipo, texto}, o null.
   - tema: el tema que se muestra (EF-22.2): resumen, plata, promociones, programacion o salas; y
     temas: clave => nombre, para las pestañas.
@@ -245,6 +248,37 @@
                 <dd class="panel-dato-nota">servidores {{ p.servidores }} y desarrollo {{ p.desarrollo }}</dd>
               </div>
             </dl>
+          {% endif %}
+
+          {# Cómo se repartió lo cobrado, en una torta (EF-22.15): el profe pidió el 18/11 gráficos
+             «por ejemplo, de torta». Es un anillo de círculos con stroke-dasharray, que se arma con
+             atributos porque la CSP no deja style="". Cada porción empieza arriba (el desfase 25) y
+             sigue en el sentido del reloj. La leyenda tiene los montos y los porcentajes escritos:
+             el color no es la única pista. #}
+          {% if ganancias.reparto is not empty %}
+            <figure class="reporte-torta">
+              <svg class="reporte-torta-grafico" viewBox="0 0 42 42" focusable="false" aria-hidden="true">
+                {% for porcion in ganancias.reparto %}
+                  {% if porcion.largo > 0 %}
+                    <circle class="reporte-torta-porcion reporte-torta-{{ porcion.clave }}" cx="21" cy="21" r="15.91549" fill="none" stroke-width="8"
+                      stroke-dasharray="{{ porcion.largo }} {{ (100 - porcion.largo)|round(2) }}" stroke-dashoffset="{{ (25 - porcion.inicio)|round(2) }}"><title>{{ porcion.nombre }}: {{ porcion.porcentaje }}</title></circle>
+                  {% endif %}
+                {% endfor %}
+              </svg>
+              <figcaption class="reporte-torta-leyenda">
+                <p class="reporte-torta-titulo">Cómo se repartió lo cobrado</p>
+                <ul class="reporte-torta-lista">
+                  {% for porcion in ganancias.reparto %}
+                    <li class="reporte-torta-item">
+                      <span class="reporte-torta-marca reporte-torta-{{ porcion.clave }}" aria-hidden="true"></span>
+                      <span class="reporte-torta-nombre">{{ porcion.nombre }}</span>
+                      <span class="reporte-torta-monto">{{ porcion.monto }}</span>
+                      <span class="reporte-torta-porcentaje">{{ porcion.porcentaje }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </figcaption>
+            </figure>
           {% endif %}
 
           <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-labelledby="reporte-ganancias">
