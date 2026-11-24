@@ -1,11 +1,12 @@
 {#
   Armado de las pantallas del organizador, como el wireframe de la E2 (panel-organizador): el panel
-  compartido (panel.html.twig) con la barra del organizador. Lo usan sus salas, sus funciones y las
-  reservas de una función; el moderador ve el mismo, porque alcanza el rol de organizador.
+  compartido (panel.html.twig) con la barra del organizador. Lo usan sus salas, sus obras, sus
+  funciones y las reservas de una función; el moderador ve el mismo, porque alcanza el rol de
+  organizador.
 
   Bloques de la pantalla:
-  - seccion: la sección actual, 'salas', 'funciones', 'programar', 'bloqueados', 'reportes' o
-    'liquidaciones', para resaltarla en la barra.
+  - seccion: la sección actual, 'salas', 'obras', 'obra_nueva', 'funciones', 'programar',
+    'pedidos', 'reportes', 'liquidaciones' o 'bloqueados', para resaltarla en la barra.
   - panel: el contenido.
 #}
 {% extends 'panel.html.twig' %}

@@ -5,7 +5,8 @@
   "scripts": {
     "css": "stylelint \"estaticos/css/**/*.css\"",
     "js": "eslint estaticos/js",
-    "e2e": "playwright test -c e2e"
+    "e2e": "playwright test -c e2e",
+    "e2e:cuentas": "playwright test -c e2e/grabar-cuentas.config.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

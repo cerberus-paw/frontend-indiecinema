@@ -4,8 +4,8 @@
   cartelera», la tabla con la función, la sala, la fecha, los lugares, el estado y las acciones de
   cada una, y el paginado numerado. Incluye las tarjetas de puntaje de conducta y actividad del
   espectador (EF-13.3). Queda afuera lo que todavía no tiene datos: la tarjeta del usuario arriba de
-  la barra (funciones no tiene la fecha de alta), los beneficios, las pestañas, los filtros y el
-  pago.
+  la barra (funciones no tiene la fecha de alta), los beneficios, los filtros y el pago. Las
+  pestañas por estado llegaron con F-02.25.
 
   Variables:
   - resumen_conducta: (opcional) {puntaje, puntaje_inicial, umbral, bajo_umbral,
@@ -14,7 +14,8 @@
   - reservas: lista de {id, codigo (8 caracteres; se muestra en dos grupos de 4), cantidad, total
     (ya escrito), estado ('pendiente_pago' | 'confirmada' | 'cancelada' | 'asistio' |
     'ausente'),
-    estado_etiqueta, cancelable, calificable (si puede calificar la función: asistió, terminó y
+    estado_etiqueta, cancelable, cancelable_hasta y motivo_no_cancelable (EF-22.9: hasta cuándo se
+    cancela una confirmada y, pasado ese límite, por qué ya no), calificable (si puede calificar la función: asistió, terminó y
     todavía no la calificó; EF-04.2), calificacion ({puntaje, comentario} si la calificó con esta
     reserva, o null; EF-04.5), enlace_de_pago (a Mercado Pago, sólo en una pendiente que todavía
     está a tiempo; si no, null), motivo (por qué se canceló, ya redactado para el espectador:
@@ -25,7 +26,10 @@
   - calificada: (bool) si se acaba de guardar una calificación, para el aviso.
   - sin_programacion: (bool) programación no respondió: ninguna fila tiene los datos de su función.
   - paginado: numero, total_paginas, total, anterior y siguiente (URL o null) y paginas: lista de
-    {numero, url, actual}.
+    {numero, url, actual}. Las URL llevan la pestaña.
+  - pestanas: las pestañas por estado (F-02.25), { clave, texto, cantidad, url }: todas, vigentes,
+    pasadas y canceladas. reservas y paginado son de la pestaña elegida.
+  - ver: (string) la clave de la pestaña elegida.
 #}
 {% extends 'cuenta.html.twig' %}
 
@@ -55,7 +59,7 @@
       <div class="panel-dato{% if conducta.bajo_umbral %} panel-dato-alerta{% endif %}">
         <dt>Puntaje de conducta</dt>
         <dd class="panel-dato-valor">{{ conducta.puntaje }}</dd>
-        <dd class="panel-dato-nota">de {{ conducta.puntaje_inicial }} · {% if conducta.bajo_umbral %}bajo umbral (hasta {{ conducta.tope_bajo_umbral }} reservas a la vez){% else %}sin restricciones{% endif %}</dd>
+        <dd class="panel-dato-nota">de {{ conducta.puntaje_inicial }} · {% if conducta.bajo_umbral %}bajo umbral (hasta {{ conducta.tope_bajo_umbral }} reservas a la vez){% elseif conducta.tiene_beneficio|default(false) %}buena conducta (preventas y cupones de descuento habilitados){% else %}sin tope de reservas (beneficios desde {{ conducta.umbral_beneficio|default(80) }} pts){% endif %}</dd>
       </div>
       <div class="panel-dato">
         <dt>Asistencias</dt>
@@ -73,6 +77,16 @@
         <dd class="panel-dato-nota">{{ conducta.conducta_positivas }} pos · {{ conducta.conducta_negativas }} neg ({{ conducta.negativas_vigentes }} vig.) · {{ conducta.calificaciones_funciones }} {{ conducta.calificaciones_funciones == 1 ? 'función calificada' : 'funciones calificadas' }}</dd>
       </div>
     </dl>
+    <p class="panel-conducta-detalle">
+      {% set umbral_beneficio = conducta.umbral_beneficio|default(80) %}
+      {% if conducta.tiene_beneficio|default(false) %}
+        Con {{ conducta.puntaje }} puntos (al menos {{ umbral_beneficio }}), tenés habilitados los beneficios por buena conducta: acceso anticipado a funciones en preventa y uso de cupones de descuento al reservar.
+      {% elseif conducta.bajo_umbral %}
+        Con {{ conducta.puntaje }} puntos podés tener hasta {{ conducta.tope_bajo_umbral }} {{ conducta.tope_bajo_umbral == 1 ? 'reserva activa' : 'reservas activas' }} a la vez y necesitás al menos {{ umbral_beneficio }} puntos para acceder a preventas anticipadas y usar cupones de descuento.
+      {% else %}
+        Con {{ conducta.puntaje }} puntos reservás sin tope de funciones simultáneas; al llegar a {{ umbral_beneficio }} puntos se habilitan también las preventas anticipadas y el uso de cupones de descuento.
+      {% endif %}
+    </p>
   {% endif %}
 
   {% if calificada|default(false) %}
@@ -89,15 +103,29 @@
     } only %}
   {% endif %}
 
-  {% if reservas is empty %}
+  {# La de «Todas» es la cantidad total: sin ninguna reserva, no hay nada que filtrar #}
+  {% set total_reservas = (pestanas|default([]))|filter(p => p.clave == 'todas')|map(p => p.cantidad)|first|default(reservas|length) %}
+  {% if total_reservas > 0 and pestanas|default([]) is not empty %}
+    {% include 'parciales/pestanas_estado.html.twig' with { pestanas: pestanas, activa: ver|default('todas'), nombre: 'Reservas por estado' } only %}
+  {% endif %}
+
+  {% if total_reservas == 0 %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'info',
       mensaje: 'Todavía no reservaste lugares. En la cartelera están las próximas funciones.'
     } only %}
+  {% elseif reservas is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'No tenés reservas en esta pestaña.'
+    } only %}
   {% else %}
     <p class="sr-only" role="status">{{ paginado.total }} {{ paginado.total == 1 ? 'reserva' : 'reservas' }}</p>
+    {# En el celular, cada reserva es una tarjeta (tabla-apilable): la tabla se cortaba a la derecha
+       y no se veían la fecha, el estado ni el comprobante. data-columna es el nombre que lleva cada
+       dato en la tarjeta. #}
     <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Mis reservas">
-      <table class="tabla-admin">
+      <table class="tabla-admin tabla-apilable">
         <thead>
           <tr>
             <th scope="col">Función</th>
@@ -113,17 +141,17 @@
           {% for reserva in reservas %}
             <tr data-reserva="{{ reserva.id }}">
               {% if reserva.funcion %}
-                <td><a href="{{ reserva.funcion.url }}" class="tabla-admin-principal">{{ reserva.funcion.titulo }}</a></td>
-                <td>{{ reserva.funcion.sala }} <span class="tabla-admin-secundario">{{ reserva.funcion.localidad }}</span></td>
-                <td class="mis-reservas-fecha">{{ reserva.funcion.fecha ?? 'A confirmar' }}</td>
+                <td class="tabla-apilable-titulo"><a href="{{ reserva.funcion.url }}" class="tabla-admin-principal">{{ reserva.funcion.titulo }}</a></td>
+                <td data-columna="Sala">{{ reserva.funcion.sala }} <span class="tabla-admin-secundario">{{ reserva.funcion.localidad }}</span></td>
+                <td class="mis-reservas-fecha" data-columna="Fecha">{{ reserva.funcion.fecha ?? 'A confirmar' }}</td>
               {% elseif sin_programacion|default(false) %}
-                <td colspan="3"><span class="tabla-admin-secundario">—</span></td>
+                <td colspan="3" class="tabla-apilable-titulo"><span class="tabla-admin-secundario">—</span></td>
               {% else %}
-                <td colspan="3"><span class="tabla-admin-secundario">Ya no está en la cartelera</span></td>
+                <td colspan="3" class="tabla-apilable-titulo"><span class="tabla-admin-secundario">Ya no está en la cartelera</span></td>
               {% endif %}
-              <td>{{ reserva.cantidad }}</td>
-              <td><span class="panel-reservas-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</span></td>
-              <td>
+              <td data-columna="Lugares">{{ reserva.cantidad }}</td>
+              <td data-columna="Código"><span class="panel-reservas-codigo">{{ reserva.codigo|slice(0, 4) }}-{{ reserva.codigo|slice(4) }}</span></td>
+              <td data-columna="Estado">
                 <span class="estado-cuenta {{ clases_estado[reserva.estado] ?? '' }}">{{ reserva.estado_etiqueta }}</span>
                 {# Por qué se canceló y si volvió la plata (EF-06.3): un «Cancelada» solo no dice si
                    el espectador tiene algo que esperar. Las dos van en su renglón, abajo de la
@@ -135,7 +163,7 @@
                   <span class="tabla-admin-secundario">Reembolsada el {{ reserva.reembolsada_en }}</span>
                 {% endif %}
               </td>
-              <td>
+              <td class="tabla-apilable-acciones">
                 <div class="mis-reservas-acciones">
                   {# El historial de calificaciones de la propuesta (EF-04.5): lo que puso, al lado de
                      la reserva con la que fue. #}
@@ -158,12 +186,15 @@
                       aria_label: 'Pagar la reserva ' ~ reserva.codigo ~ ' con Mercado Pago'
                     } only %}
                   {% endif %}
+                  {# Una cancelada ya no es un comprobante para entrar: la misma página dice por
+                     qué se canceló y si volvió la plata (F-02.26) #}
+                  {% set es_cancelada = reserva.estado == 'cancelada' %}
                   {% include 'parciales/boton.html.twig' with {
-                    texto: 'Ver comprobante',
+                    texto: es_cancelada ? 'Ver detalle' : 'Ver comprobante',
                     url: '/funcion/reservas/' ~ reserva.id,
                     variante: 'secundario',
                     tamano: 'chico',
-                    aria_label: 'Ver el comprobante de la reserva ' ~ reserva.codigo
+                    aria_label: (es_cancelada ? 'Ver el detalle de la reserva cancelada ' : 'Ver el comprobante de la reserva ') ~ reserva.codigo
                   } only %}
                   {% if reserva.calificable|default(false) %}
                     {% include 'parciales/boton.html.twig' with {
@@ -181,6 +212,12 @@
                       tamano: 'chico',
                       aria_label: 'Cancelar la reserva ' ~ reserva.codigo
                     } only %}
+                    {% if reserva.cancelable_hasta|default(null) %}
+                      <span class="tabla-admin-secundario">Se cancela hasta el {{ reserva.cancelable_hasta }}</span>
+                    {% endif %}
+                  {# EF-22.9: sin el botón, el porqué (falta menos de lo que pide la política) #}
+                  {% elseif reserva.motivo_no_cancelable|default(null) and reserva.estado == 'confirmada' %}
+                    <span class="tabla-admin-secundario">{{ reserva.motivo_no_cancelable }}</span>
                   {% endif %}
                 </div>
               </td>

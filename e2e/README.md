@@ -45,3 +45,19 @@ E2E_URL=http://localhost:8080 E2E_CORREO=eva@indiecinema.test E2E_CLAVE=espectad
   `programacion/herramientas/funciones-e2e.php` del back, gratuitas y a un año:
   `0000000e-0000-4000-8000-000000000001` para la corrida del back y `…000000000002` para la del
   front.
+
+## Grabaciones de cuentas con Mailpit (`e2e:cuentas`)
+
+Las pruebas de [`pruebas/cuentas.spec.js`](pruebas/cuentas.spec.js) (`CU-1` y `CU-2`) usan la API
+de Mailpit para leer los enlaces de verificación y recuperación. Cuando corre `npm run e2e` sin
+buzón accesible (`E2E_BUZON_URL`), ambas pruebas se saltean para no bloquear el CD ni consumir
+intentos de registro.
+
+Para correr ambas pruebas contra desarrollo grabando video `.webm` de cada flujo:
+
+```
+ssh -N -L 18025:127.0.0.1:8025 ubuntu@3.132.211.163
+E2E_URL=https://indiecinema-dev.duckdns.org E2E_BUZON_URL=http://127.0.0.1:18025 npm run e2e:cuentas
+```
+
+Los videos `.webm` se guardan en `e2e/resultados/` (ignorado por Git).

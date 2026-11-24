@@ -5,16 +5,19 @@
   contraseña (/cuenta/datos y /cuenta/contrasena).
 
   «Mi solicitud de sala» (EF-07.6) muestra en qué quedó la última solicitud de sala, con el enlace
-  a /solicitar-sala para verla o, si la rechazaron, corregirla y reenviarla.
+  a /solicitar-sala para verla o, si la rechazaron, corregirla y reenviarla. Si se la devolvieron
+  (EF-22.10), hasta cuándo tiene y el enlace para completar la documentación; si venció, el enlace
+  para pedir la sala de nuevo.
 
   Variables:
   - cuenta: {nombre, correo, roles (lista de 'espectador', 'organizador', 'moderador' o
     'administrador', de menor a mayor), desde ('marzo de 2025'), correo_verificado (bool)}.
   - verificacion_reenviada: (bool, opcional) true si volvió del POST tras reenviar el enlace.
   - error_verificacion: (string|null, opcional) error al reenviar el enlace.
-  - solicitud_de_sala (opcional): {estado (pendiente, en_revision_manual, aprobada o rechazada),
-    sala, motivo (o null), fecha (dd/mm/aaaa)}. No viene si nunca mandó una o si moderación no
-    respondió.
+  - solicitud_de_sala (opcional): {estado (pendiente, en_revision_manual, devuelta, aprobada,
+    rechazada o vencida), sala, motivo (o null), fecha (dd/mm/aaaa), vence (dd/mm/aaaa, sólo en
+    una devuelta: el último día para completarla)}. No viene si nunca mandó una o si moderación
+    no respondió.
   - seguidos (opcional): {salas: lista de {id, nombre, localidad}, organizadores: lista de {id,
     nombre}, salas_sin_datos: si programación no respondió} (EF-15.4).
 #}
@@ -87,12 +90,19 @@
       </div>
       <div>
         <dt>Estado</dt>
-        <dd>{{ {
-          pendiente: 'Enviada el ',
-          en_revision_manual: 'En revisión manual desde el ',
-          aprobada: 'Aprobada el ',
-          rechazada: 'Rechazada el '
-        }[solicitud.estado] ?? '' }}{{ solicitud.fecha }}</dd>
+        {# EF-22.10: con is defined, por si el back todavía no la manda #}
+        {% if solicitud.estado == 'devuelta' and solicitud.vence is defined %}
+          <dd>Devuelta para completar hasta el {{ solicitud.vence }}</dd>
+        {% else %}
+          <dd>{{ {
+            pendiente: 'Enviada el ',
+            en_revision_manual: 'En revisión manual desde el ',
+            devuelta: 'Devuelta el ',
+            aprobada: 'Aprobada el ',
+            rechazada: 'Rechazada el ',
+            vencida: 'Venció el '
+          }[solicitud.estado] ?? '' }}{{ solicitud.fecha }}</dd>
+        {% endif %}
       </div>
       {% if solicitud.motivo %}
         <div>
@@ -102,7 +112,11 @@
         </div>
       {% endif %}
     </dl>
-    <p><a href="/solicitar-sala" class="enlace-destacado">{{ solicitud.estado == 'rechazada' ? 'Corregirla y reenviarla' : 'Ver la solicitud' }}</a></p>
+    <p><a href="/solicitar-sala" class="enlace-destacado">{{ {
+      rechazada: 'Corregirla y reenviarla',
+      devuelta: 'Completar la documentación',
+      vencida: 'Pedir la sala de nuevo'
+    }[solicitud.estado] ?? 'Ver la solicitud' }}</a></p>
   {% endif %}
 
   {# «Lo que seguís» (EF-15.4): las salas, con enlace a su ficha, y los organizadores. Se deja de

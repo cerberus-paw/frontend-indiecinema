@@ -2,9 +2,9 @@
   «Usuarios y roles» del administrador, en /cuenta/administracion/usuarios, como el wireframe de la
   E2 (administracion-usuarios-parametros): la barra lateral de administración, las tarjetas de
   números, el buscador con los filtros de rol, estado y año de alta, la tabla y el paginado
-  numerado, junto con la columna de conducta desde funciones (EF-13.3). Queda afuera lo que
-  todavía no existe: las tarjetas de funciones y recaudación, la columna de funciones, «Acciones»
-  (ver, suspender, dar de baja), exportar, invitar y los parámetros. Los filtros son un formulario
+  numerado, junto con la columna de conducta desde funciones (EF-13.3) y «Acciones» con suspender y
+  reactivar (EF-14.3). Queda afuera lo que todavía no existe: las tarjetas de funciones y
+  recaudación, la columna de funciones, ver y dar de baja, exportar, invitar y los parámetros. Los filtros son un formulario
   GET, así viajan en la URL. Como en el wireframe, no hay «Buscar»: el texto se busca con Enter y
   los desplegables se aplican al elegir (componentes/enviar-al-elegir.js). Sin JavaScript,
   «Buscar» vuelve, en el <noscript>.
@@ -17,15 +17,22 @@
   moderador (EF-07.3); al administrador no se lo cambia desde la web: su desplegable está
   deshabilitado y no se manda.
 
+  «Suspender» se abre en la fila (un <details>, sin JavaScript) con el campo del motivo; «Reactivar»
+  es un botón. Los dos mandan su propio formulario, que va después de la tabla, porque un
+  formulario no puede ir dentro de otro: los controles de la fila lo nombran con form="…". Al
+  propio administrador y a los otros administradores no se los suspende: su celda queda vacía.
+
   Variables:
   - resumen: {usuarios, nuevos (este mes), organizadores (con la cuenta activa)}, sobre todas las
     cuentas.
   - usuarios: lista de {id, nombre, correo, rol (el mayor), estado (pendiente, activa o suspendida),
-    conducta ({puntaje, bajo_umbral, negativas, ausencias}|null)}.
+    conducta ({puntaje, bajo_umbral, negativas, ausencias}|null), accion ('suspender', 'reactivar' o
+    null) y suspension ({motivo, desde}|null, la última de una cuenta suspendida)}.
+  - maximo_motivo: el largo máximo del motivo de la suspensión.
   - filtros: los filtros aplicados (q, rol, estado, alta); falta el que no se aplicó.
   - anios_de_alta: los años en que se creó alguna cuenta, del más nuevo al más viejo.
   - avisos: lista de textos, uno por cada filtro inválido que se dejó afuera.
-  - mensaje_exito: el aviso del cambio de rol que se acaba de hacer, o null.
+  - mensaje_exito: el aviso del cambio de rol o de estado que se acaba de hacer, o null.
   - paginado: numero, total_paginas, total_usuarios, las URL anterior y siguiente (null si no hay)
     y paginas: lista de {numero, url, actual}, con null donde se saltean páginas.
 #}
@@ -38,7 +45,7 @@
 {% block panel %}
 <header class="panel-cabecera">
   <h1 class="panel-titulo">Usuarios y roles</h1>
-  <p class="panel-bajada">Buscá cuentas y asigná roles.</p>
+  <p class="panel-bajada">Buscá cuentas, asigná roles y suspendé a quien no respeta las normas.</p>
 </header>
 
 <dl class="panel-resumen">
@@ -123,20 +130,21 @@
 
   {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
   <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Usuarios">
-    <table class="tabla-admin tabla-admin-usuarios">
+    <table class="tabla-admin tabla-apilable tabla-admin-usuarios">
       <thead>
         <tr>
           <th scope="col">Usuario</th>
           <th scope="col" class="tabla-admin-columna-conducta">Conducta</th>
           <th scope="col" class="tabla-admin-columna-rol">Rol</th>
           <th scope="col" class="tabla-admin-columna-estado">Estado</th>
+          <th scope="col" class="tabla-admin-columna-acciones">Acciones</th>
         </tr>
       </thead>
       <tbody>
         {% for usuario in usuarios %}
           {% set conducta = usuario.conducta|default(null) %}
           <tr data-usuario="{{ usuario.id }}">
-            <td>
+            <td class="tabla-apilable-titulo">
               <div class="tabla-admin-usuario">
                 <span class="tabla-admin-avatar" aria-hidden="true">{{ usuario.nombre|slice(0, 1)|upper }}</span>
                 <div>
@@ -145,7 +153,7 @@
                 </div>
               </div>
             </td>
-            <td>
+            <td data-columna="Conducta">
               {% if conducta is not null %}
                 <span class="tabla-admin-conducta{% if conducta.bajo_umbral %} conducta-bajo-umbral{% endif %}">{{ conducta.puntaje }} pts</span>
                 {% if conducta.negativas > 0 or conducta.ausencias > 0 %}
@@ -157,7 +165,7 @@
                 <span class="tabla-admin-secundario">—</span>
               {% endif %}
             </td>
-            <td>
+            <td data-columna="Rol">
               {% if usuario.rol in ['espectador', 'organizador', 'moderador'] %}
                 <input type="hidden" name="antes[{{ usuario.id }}]" value="{{ usuario.rol }}">
                 <select name="roles[{{ usuario.id }}]" class="campo-control control-select" aria-label="Rol de {{ usuario.nombre }}">
@@ -171,7 +179,24 @@
                 </select>
               {% endif %}
             </td>
-            <td><span class="estado-cuenta estado-cuenta-{{ usuario.estado }}">{{ usuario.estado }}</span></td>
+            <td data-columna="Estado">
+              <span class="estado-cuenta estado-cuenta-{{ usuario.estado }}">{{ usuario.estado }}</span>
+              {% if usuario.suspension %}
+                <span class="tabla-admin-secundario tabla-admin-motivo">Desde el {{ usuario.suspension.desde }}{% if usuario.suspension.motivo %}: {{ usuario.suspension.motivo }}{% endif %}</span>
+              {% endif %}
+            </td>
+            <td class="tabla-apilable-acciones">
+              {% if usuario.accion == 'suspender' %}
+                <details class="tabla-admin-suspender">
+                  <summary class="boton boton-fantasma">Suspender</summary>
+                  <label for="motivo-{{ usuario.id }}" class="campo-etiqueta">Motivo</label>
+                  <textarea id="motivo-{{ usuario.id }}" name="motivo" form="estado-{{ usuario.id }}" rows="3" maxlength="{{ maximo_motivo }}" required class="campo-control"></textarea>
+                  <button type="submit" form="estado-{{ usuario.id }}" name="accion" value="suspender" class="boton boton-peligro">Suspender la cuenta</button>
+                </details>
+              {% elseif usuario.accion == 'reactivar' %}
+                <button type="submit" form="estado-{{ usuario.id }}" name="accion" value="reactivar" class="boton boton-secundario">Reactivar</button>
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>
@@ -187,6 +212,16 @@
     <p class="tabla-admin-cambios-nota">Hay roles sin guardar. El rol nuevo se ve la próxima vez que el usuario ingrese.</p>
   </div>
   </form>
+
+  {# Los formularios de suspender y reactivar, uno por fila: sus campos están en la tabla. #}
+  {% for usuario in usuarios|filter(u => u.accion is not null) %}
+    <form id="estado-{{ usuario.id }}" action="/cuenta/administracion/usuarios/{{ usuario.id }}/estado" method="POST" hidden>
+      <input type="hidden" name="_csrf" value="{{ csrf }}">
+      {% for nombre, valor in filtros %}
+        <input type="hidden" name="{{ nombre }}" value="{{ valor }}">
+      {% endfor %}
+    </form>
+  {% endfor %}
 
   {% if paginado.total_paginas > 1 %}
     <nav class="paginado-numerado" aria-label="Páginas de usuarios">

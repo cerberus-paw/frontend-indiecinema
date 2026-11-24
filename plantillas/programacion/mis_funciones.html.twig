@@ -24,6 +24,11 @@
   - cancelacion_fallida: (bool) no se pudo cancelar: el subsistema funciones no respondió, así que
     no se podían cancelar sus reservas, y la función quedó como estaba (F-01.7).
   - votacion_cerrada: (bool) aviso de que se acaba de cerrar la votación de títulos de una función (IC-150 / E3-12.4).
+  - pestanas: las pestañas por estado (F-02.25), { clave, texto, cantidad, url }: todas, próximas,
+    pasadas y canceladas. funciones trae sólo las de la pestaña elegida.
+  - ver: (string) la clave de la pestaña elegida.
+  - total: (int) cuántas funciones tiene en todas las pestañas: con 0, va la invitación a programar
+    la primera; si sólo la pestaña está vacía, un aviso.
 #}
 {% extends 'organizador.html.twig' %}
 
@@ -115,7 +120,12 @@
     } only %}
   {% endif %}
 
-  {% if funciones is empty %}
+  {% set total_funciones = total|default(funciones|length) %}
+  {% if total_funciones > 0 and pestanas|default([]) is not empty %}
+    {% include 'parciales/pestanas_estado.html.twig' with { pestanas: pestanas, activa: ver|default('todas'), nombre: 'Funciones por estado' } only %}
+  {% endif %}
+
+  {% if total_funciones == 0 %}
     {% include 'parciales/mensaje.html.twig' with {
       tipo: 'info',
       mensaje: 'Todavía no tenés ninguna función en tus salas.'
@@ -127,10 +137,15 @@
         variante: 'primario'
       } only %}
     </div>
+  {% elseif funciones is empty %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      mensaje: 'No tenés funciones en esta pestaña.'
+    } only %}
   {% else %}
     {# La tabla se desplaza dentro de su caja en pantallas angostas: la página no se corre de costado. #}
     <div class="tabla-admin-contenedor" tabindex="0" role="region" aria-label="Mis funciones">
-      <table class="tabla-admin">
+      <table class="tabla-admin tabla-apilable">
         <thead>
           <tr>
             <th scope="col">Función</th>
@@ -144,7 +159,7 @@
         <tbody>
           {% for funcion in funciones %}
             <tr data-funcion="{{ funcion.id }}">
-              <td>
+              <td class="tabla-apilable-titulo">
                 {# Sólo lleva a la ficha la función de una sala habilitada: hasta que la habiliten, no hay ficha que mostrar. #}
                 {% if funcion.sala_habilitada %}
                   <a href="/cartelera/{{ funcion.id }}" class="tabla-admin-principal">{{ funcion.titulo }}</a>
@@ -156,7 +171,7 @@
                   <span class="tabla-admin-secundario">títulos candidatos</span>
                 {% endif %}
               </td>
-              <td>
+              <td data-columna="Sala">
                 {% if funcion.sala_habilitada %}
                   <a href="/salas/{{ funcion.sala_id }}" class="tabla-admin-principal">{{ funcion.sala }}</a>
                 {% else %}
@@ -164,8 +179,8 @@
                   <span class="tabla-admin-secundario">esperando habilitación</span>
                 {% endif %}
               </td>
-              <td class="tabla-admin-celda-corta">{{ funcion.fecha ?? 'Sin fecha todavía' }}</td>
-              <td>
+              <td data-columna="Fecha" class="tabla-admin-celda-corta">{{ funcion.fecha ?? 'Sin fecha todavía' }}</td>
+              <td data-columna="Estado">
                 {% if funcion.estado_valor == 'programada' %}
                   <span class="estado-cuenta estado-cuenta-activa">{{ funcion.estado }}</span>
                 {% elseif funcion.estado_valor == 'cancelada' %}
@@ -180,11 +195,11 @@
                   <span class="estado-cuenta">{{ funcion.estado }}</span>
                 {% endif %}
               </td>
-              <td class="tabla-admin-celda-corta">
+              <td data-columna="Entrada" class="tabla-admin-celda-corta">
                 <span class="tabla-admin-principal">{{ funcion.precio }}</span>
                 <span class="tabla-admin-secundario">{{ funcion.cupo }} lugares</span>
               </td>
-              <td class="tabla-admin-acciones">
+              <td class="tabla-apilable-acciones tabla-admin-acciones">
                 {# Las reservas se ven desde que la función queda programada, también después de cancelarla o de que se dio #}
                 {% set con_reservas = funcion.estado_valor in ['programada', 'cancelada', 'finalizada'] %}
                 {% if con_reservas or funcion.editable|default(false) or funcion.cancelable|default(false) or funcion.cerrable|default(false) or funcion.estado_valor == 'en_acuerdo_fecha' %}

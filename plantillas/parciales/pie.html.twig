@@ -38,9 +38,7 @@
     <div class="pie-columna">
       <h2 class="pie-subtitulo">Administración</h2>
       <ul class="pie-enlaces">
-        <li><a href="/cuenta/administracion/usuarios">Usuarios y roles</a></li>
-        <li><a href="/recaudacion/reportes">Reportes</a></li>
-        <li><a href="/moderacion/solicitudes">Solicitudes de sala</a></li>
+        <li><a href="/cuenta/administracion/usuarios">Panel de administración</a></li>
       </ul>
     </div>
     {% else %}
@@ -72,20 +70,11 @@
           {% if not usr.alcanza('organizador') %}
             <li><a href="/solicitar-sala">Abrir una sala</a></li>
           {% endif %}
+          {# Un solo enlace al panel, como en el menú de la cuenta: sus secciones están en su barra (F-02.23) #}
           {% if es_organizador %}
-            <li><a href="/organizador/salas">Mis salas</a></li>
-            <li><a href="/organizador/obras">Mis obras</a></li>
-            <li><a href="/organizador/obras/nueva">Cargar obra</a></li>
-            <li><a href="/organizador/funciones">Mis funciones</a></li>
-            <li><a href="/organizador/funciones/nueva">Programar una función</a></li>
-            <li><a href="/recaudacion/reportes">Reportes</a></li>
-            <li><a href="/solicitar-sala">Publicar una sala</a></li>
-          {% endif %}
-          {% if usr.alcanza('moderador') %}
-            <li><a href="/moderacion/solicitudes">Solicitudes de sala</a></li>
-            <li><a href="/moderacion/documentos">Documentos</a></li>
-            <li><a href="/moderacion/obras">Obras</a></li>
-            <li><a href="/moderacion/denuncias">Denuncias</a></li>
+            <li><a href="/organizador/salas">Panel del organizador</a></li>
+          {% elseif usr.alcanza('moderador') %}
+            <li><a href="/moderacion/solicitudes">Panel de moderación</a></li>
           {% endif %}
         {% else %}
           <li><a href="/cuenta/ingresar">Ingresar</a></li>

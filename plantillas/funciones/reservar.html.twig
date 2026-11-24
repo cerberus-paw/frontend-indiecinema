@@ -11,6 +11,7 @@
   - con_pago: (bool, opcional) si la reserva se paga con Mercado Pago.
   - motivo: (string|null) por qué ya no se puede reservar; entonces no hay formulario.
   - aviso_conducta: (string|null, opcional) advertencia por historial de conducta (EF-13.2).
+  - politica_cancelacion: (string, opcional) hasta cuándo se puede cancelar (EF-22.9).
   - reglas.cantidad: minimo y maximo, los mismos que controla el servidor.
   - valores.cantidad: lo que mandó, para volver a mostrarlo.
   - errores: (map) el error de cada campo.
@@ -93,7 +94,16 @@
         ayuda: 'Máximo ' ~ (reglas.cantidad.maximo_por_persona ?? reglas.cantidad.maximo) ~ ' lugares por persona.'
       } only %}
       {% if funcion.precio starts with '$' %}
-        {% include 'parciales/campo_cupon.html.twig' with { valor: valores.cupon ?? '', errores: errores } only %}
+        {% if tiene_beneficio_conducta ?? true %}
+          {% include 'parciales/campo_cupon.html.twig' with { valor: valores.cupon ?? '', errores: errores } only %}
+        {% else %}
+          <p class="campo-ayuda">Por tu historial de conducta necesitás al menos {{ umbral_beneficio_conducta|default(80) }} puntos para usar cupones de descuento.</p>
+        {% endif %}
+      {% endif %}
+
+      {# EF-22.9: la política se lee antes de reservar, no recién al querer cancelar #}
+      {% if politica_cancelacion|default(null) %}
+        <p class="campo-ayuda">{{ politica_cancelacion }}</p>
       {% endif %}
 
       <div class="pie-formulario-acciones">

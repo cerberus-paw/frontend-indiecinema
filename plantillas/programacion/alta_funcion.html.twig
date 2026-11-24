@@ -17,6 +17,7 @@
   - errores: (map, opcional) Diccionario de mensajes de error de validación por campo.
   - error_general: (string, opcional) Mensaje de error general si falló la validación.
   - mensaje_exito: (string, opcional) Mensaje tras guardar exitosamente la función.
+  - precargada: (bool, opcional) Si el alta llegó cargada desde una recomendación de los reportes (EF-22.17).
 #}
 {% extends 'organizador.html.twig' %}
 
@@ -60,6 +61,16 @@
     error_general: error_general ?? null,
     titulo: es_edicion ?? false ? 'No se pudo guardar la función' : 'No se pudo programar la función'
   } only %}
+
+  {# Desde una recomendación de los reportes (EF-22.17): el formulario viene cargado y alcanza con
+     revisar y confirmar. Se dice, para que no parezca que se completó solo. #}
+  {% if precargada ?? false %}
+    {% include 'parciales/mensaje.html.twig' with {
+      tipo: 'info',
+      titulo: 'Lo cargamos con la recomendación del reporte',
+      mensaje: 'Revisá la sala, la obra, el día, la hora y el precio, cambiá lo que quieras y confirmá.'
+    } only %}
+  {% endif %}
 
   {# Alerta de confirmación exitosa #}
   {% if mensaje_exito is defined and mensaje_exito %}

@@ -14,11 +14,14 @@
   - error_baja: (?string) error si la baja fue rechazada (ej. por funciones futuras).
   - csrf: token de protección contra ataques CSRF.
 #}
-{% extends 'base.html.twig' %}
+{# Pantalla del panel del organizador, con su barra (F-02.23): antes era del sitio público #}
+{% extends 'organizador.html.twig' %}
 
 {% block titulo %}Mis obras{% endblock %}
 
-{% block contenido %}
+{% block seccion %}obras{% endblock %}
+
+{% block panel %}
 <div class="contenedor">
   <nav class="navegacion-migas" aria-label="Migas de pan">
     <ol class="lista-migas">

@@ -13,7 +13,10 @@
   <div class="tarjeta-funcion-afiche">
     <a href="/obras/{{ obra.id }}" class="tarjeta-funcion-afiche-enlace" tabindex="-1" aria-hidden="true">
       {% if obra.afiche ?? false %}
-        <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="tarjeta-funcion-imagen" loading="lazy">
+        {# Entero sobre su copia desenfocada, como en la cartelera (F-02.26): recortado, al afiche
+           vertical se le iba el título en el recuadro apaisado #}
+        <img src="{{ obra.afiche }}" alt="" class="tarjeta-funcion-imagen-fondo" loading="lazy">
+        <img src="{{ obra.afiche }}" alt="Afiche de {{ obra.titulo }}" class="tarjeta-funcion-imagen tarjeta-funcion-imagen-entera" loading="lazy">
       {% else %}
         <div class="tarjeta-funcion-afiche-placeholder">
           {% include 'parciales/icono.html.twig' with { nombre: 'pelicula', clase: 'afiche-placeholder-icono' } only %}
@@ -41,7 +44,7 @@
     <div class="tarjeta-funcion-meta">
       {% if obra.director is defined and obra.director %}
         <p class="tarjeta-funcion-dato meta-director">
-          {% include 'parciales/icono.html.twig' with { nombre: 'claqueta', clase: 'meta-icono' } only %}
+          {% include 'parciales/icono.html.twig' with { nombre: 'persona', clase: 'meta-icono' } only %}
           <span class="meta-texto">{{ obra.director }}</span>
         </p>
       {% endif %}

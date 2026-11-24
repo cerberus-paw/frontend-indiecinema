@@ -1116,6 +1116,19 @@ button.menu-item {
   color: #fca5a5;
 }
 
+/* El enlace al panel de quien lo tiene (F-02.23): destacado con el color del panel, el mismo de
+   su barra lateral, porque es a lo que más entra el organizador, el moderador o el administrador */
+.menu-item-panel {
+  background-color: var(--color-panel-suave);
+  color: var(--color-panel);
+  font-weight: 600;
+}
+
+.menu-item-panel:hover {
+  background-color: var(--color-panel-suave);
+  color: var(--color-texto);
+}
+
 /* Icono descriptivo dentro del menú */
 .menu-icono {
   /* Tamaño de icono */
@@ -3402,8 +3415,13 @@ svg.enlace-denunciar-icono {
   gap: var(--espacio-2);
 }
 
-.filtros-grupo-precio .filtros-grupo-titulo {
+.filtros-grupo-precio .filtros-grupo-titulo,
+.filtros-precio-ayuda {
   grid-column: 1 / -1;
+}
+
+.filtros-precio-ayuda {
+  margin: 0;
 }
 
 /* Los campos del filtro no llevan el margen inferior de un formulario largo */
@@ -6039,17 +6057,55 @@ svg.enlace-denunciar-icono {
   table-layout: fixed;
 }
 
-/* En partes del ancho: la conducta, el rol y el estado mantienen la tabla alineada entre páginas */
+/* En partes del ancho: la conducta, el rol, el estado y las acciones mantienen la tabla alineada
+   entre páginas */
 .tabla-admin-columna-conducta {
-  width: 18%;
+  width: 14%;
 }
 
 .tabla-admin-columna-rol {
-  width: 26%;
+  width: 20%;
 }
 
 .tabla-admin-columna-estado {
   width: 16%;
+}
+
+.tabla-admin-columna-acciones {
+  width: 16%;
+}
+
+/* Desde cuándo y por qué está suspendida, debajo de la píldora (EF-14.3) */
+.tabla-admin-motivo {
+  display: block;
+  margin-top: var(--espacio-1);
+  overflow-wrap: anywhere;
+}
+
+/* «Suspender» se abre en la celda con el motivo y el botón, uno abajo del otro: la columna es
+   angosta y el botón no tiene que salirse de la tabla */
+.tabla-admin-suspender[open] {
+  display: grid;
+  gap: var(--espacio-2);
+}
+
+.tabla-admin-suspender > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.tabla-admin-suspender > summary::-webkit-details-marker {
+  display: none;
+}
+
+.tabla-admin-suspender .campo-control {
+  width: 100%;
+  min-width: 0;
+  resize: vertical;
+}
+
+.tabla-admin-suspender .boton {
+  white-space: normal;
 }
 
 .tabla-admin-conducta {
@@ -6175,6 +6231,18 @@ svg.enlace-denunciar-icono {
   color: var(--color-error);
 }
 
+/* La gravedad de una denuncia (EF-22.11): la alta, como la baja de una cuenta; la media, como lo
+   que espera revisión; la baja, la píldora de contorno */
+.estado-cuenta.gravedad-alta {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.estado-cuenta.gravedad-media {
+  border-color: var(--color-advertencia);
+  color: var(--color-advertencia);
+}
+
 /* Tarjetas de números arriba de la tabla, como el wireframe: del ancho de cuatro por fila, aunque
    haya dos */
 .panel-resumen {
@@ -6189,6 +6257,8 @@ svg.enlace-denunciar-icono {
 }
 
 .panel-dato {
+  /* El valor se achica con el ancho de la tarjeta (cqi), no con el de la pantalla */
+  container-type: inline-size;
   padding: var(--espacio-4) var(--espacio-5);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-md);
@@ -6221,6 +6291,13 @@ svg.enlace-denunciar-icono {
   color: var(--color-texto-brillante);
 }
 
+/* «$ 2.516.407,64» no entraba en una tarjeta de cuatro y el signo quedaba solo arriba: un monto va
+   en una línea y achica la letra hasta lo que entra. Sólo los montos: un número corto no se achica */
+.panel-dato-monto {
+  font-size: clamp(var(--texto-lg), 13cqi, var(--texto-3xl));
+  white-space: nowrap;
+}
+
 .panel-dato-nota {
   font-size: var(--texto-sm);
   color: var(--color-texto-secundario);
@@ -6233,8 +6310,10 @@ svg.enlace-denunciar-icono {
   }
 }
 
+/* En el celular, de a dos: de a una, las cuatro tarjetas de «Mis reservas» ocupaban la pantalla
+   entera antes de la lista. Los montos sí van de a uno: no entran en media pantalla */
 @media (max-width: 480px) {
-  .panel-resumen {
+  .panel-resumen:has(.panel-dato-monto) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -6263,14 +6342,34 @@ svg.enlace-denunciar-icono {
   background: linear-gradient(to right, var(--color-superficie) 259px, var(--color-borde) 259px 260px, transparent 260px);
 }
 
-/* Barra lateral: el logo, las secciones y, al pie, la sesión */
+/* El color de cada panel (F-02.23), el mismo de la insignia de su rol: los tres paneles se veían
+   iguales y no se sabía en cuál se estaba. Lo usan la barra y el enlace al panel del menú de la
+   cuenta. */
+.panel-rol-organizador {
+  --color-panel: var(--color-primario);
+  --color-panel-suave: var(--color-primario-suave);
+}
+
+.panel-rol-moderador {
+  --color-panel: #a5b4fc;
+  --color-panel-suave: var(--color-moderador-suave);
+}
+
+.panel-rol-administrador {
+  --color-panel: #fb7185;
+  --color-panel-suave: var(--color-acento-suave);
+}
+
+/* Barra lateral: el logo y el nombre del panel, las secciones y, al pie, la sesión. Arriba, una
+   franja con el color del panel */
 .panel-menu {
   display: flex;
   flex-direction: column;
-  gap: var(--espacio-6);
-  padding: var(--espacio-6) var(--espacio-4);
+  gap: var(--espacio-5);
+  padding: var(--espacio-5) var(--espacio-4);
   background-color: var(--color-superficie);
   border-right: 1px solid var(--color-borde);
+  border-top: 3px solid var(--color-panel, var(--color-borde));
   /* Del alto de la pantalla y quieta al desplazar el contenido, así salir siempre está a mano */
   position: sticky;
   top: 0;
@@ -6278,16 +6377,42 @@ svg.enlace-denunciar-icono {
   overflow-y: auto;
 }
 
+/* El logo y, debajo, el nombre del panel */
+.panel-cabeza {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+  padding: 0 var(--espacio-2) var(--espacio-4);
+  border-bottom: 1px solid var(--color-borde);
+}
+
 .panel-marca {
   align-self: flex-start;
-  padding-left: var(--espacio-2);
 }
 
 .panel-marca img {
   display: block;
+  width: 120px;
+  height: auto;
 }
 
-/* Quién está en sesión y, debajo, el botón para salir, abajo de todo */
+/* «Panel del organizador», como una insignia con el color del panel */
+.panel-nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: var(--espacio-1) var(--espacio-3);
+  border-radius: var(--radio-completo);
+  background-color: var(--color-panel-suave);
+  color: var(--color-panel);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Quién está en sesión y, debajo, volver al sitio y salir, abajo de todo */
 .panel-sesion {
   margin-top: auto;
   display: flex;
@@ -6323,23 +6448,22 @@ svg.enlace-denunciar-icono {
   white-space: nowrap;
 }
 
+.panel-sesion-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.panel-sitio,
 .panel-salir {
   width: 100%;
+  gap: var(--espacio-2);
 }
 
 /* El contenido, en todo el ancho que deja la barra, como el wireframe */
 .panel-contenido {
   min-width: 0;
   padding: var(--espacio-8) var(--espacio-10) var(--espacio-12);
-}
-
-/* «ADMINISTRACIÓN», sobre las secciones */
-.panel-menu-titulo {
-  margin: 0 0 var(--espacio-3);
-  font-size: var(--texto-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-texto-apagado);
 }
 
 /* Las secciones, una debajo de otra */
@@ -6349,16 +6473,42 @@ svg.enlace-denunciar-icono {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--espacio-1);
+  gap: 2px;
 }
 
-/* Cada sección */
-.panel-menu-enlace {
+/* Entre grupo y grupo, aire: cada uno se lee como un bloque */
+.panel-menu-secciones > .panel-menu-lista {
+  gap: var(--espacio-4);
+}
+
+/* El nombre del grupo («SALAS», «FUNCIONES»), que no es un enlace, sobre sus secciones */
+.panel-menu-subtitulo {
   display: block;
+  padding: 0 var(--espacio-3) var(--espacio-1);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-apagado);
+}
+
+/* Cada sección: el ícono y el nombre */
+.panel-menu-enlace {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
   padding: var(--espacio-2) var(--espacio-3);
   border-radius: var(--radio-md);
   color: var(--color-texto-secundario);
+  font-size: var(--texto-sm);
   text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.panel-menu-icono {
+  width: 18px;
+  height: 18px;
+  color: var(--color-texto-apagado);
 }
 
 .panel-menu-enlace:hover {
@@ -6366,26 +6516,18 @@ svg.enlace-denunciar-icono {
   color: var(--color-texto);
 }
 
-/* La sección actual, llena como en el wireframe: con los colores invertidos, como la página
-   actual del paginado */
+/* La sección actual, teñida con el color del panel y una raya a la izquierda. Antes iba llena de
+   blanco, que encandilaba al lado del fondo oscuro */
 .panel-menu-enlace.activo {
-  background-color: var(--color-texto);
-  color: var(--color-texto-inverso);
-  font-weight: 600;
-}
-
-/* Un grupo de secciones dentro de la lista, como «Funciones» en el panel del organizador: el
-   nombre del grupo, que no es un enlace, y sus secciones debajo con sangría */
-.panel-menu-subtitulo {
-  display: block;
-  padding: var(--espacio-2) var(--espacio-3) var(--espacio-1);
-  font-size: var(--texto-sm);
-  font-weight: 600;
+  background-color: var(--color-panel-suave);
+  box-shadow: inset 3px 0 0 var(--color-panel);
   color: var(--color-texto);
+  font-weight: 600;
 }
 
-.panel-menu-grupo .panel-menu-lista {
-  padding-left: var(--espacio-3);
+.panel-menu-enlace.activo .panel-menu-icono,
+.panel-menu-enlace:hover .panel-menu-icono {
+  color: var(--color-panel);
 }
 
 /* Título y bajada del contenido */
@@ -6482,6 +6624,24 @@ svg.enlace-denunciar-icono {
   font-size: var(--texto-lg);
 }
 
+/* El nombre de la sala sobre sus géneros (EF-22.18): un escalón debajo del subtítulo de la sección */
+.reporte-subtitulo-chico {
+  margin-bottom: var(--espacio-2);
+  font-size: var(--texto-base);
+}
+
+.reporte-subtitulo + .reporte-graficos {
+  margin-top: var(--espacio-4);
+}
+
+/* Debajo del género, de dónde sale: cuántas funciones, qué parte de los votos y el promedio */
+.reporte-barras-detalle {
+  display: block;
+  white-space: normal;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
 /* De dónde sale la sugerencia: los umbrales, para que se entienda por qué aparece */
 .reporte-explicacion {
   margin: var(--espacio-1) 0 var(--espacio-4);
@@ -6515,6 +6675,140 @@ svg.enlace-denunciar-icono {
   margin: var(--espacio-1) 0 0;
   font-size: var(--texto-sm);
   color: var(--color-texto-secundario);
+}
+
+/* La que cruza varias variables (EF-22.3): el borde del éxito, para que se distinga de las que
+   miran un solo dato, y el porqué en una lista corta */
+.reporte-combinada {
+  border-left-color: var(--color-exito);
+}
+
+.reporte-porque-titulo {
+  margin: var(--espacio-2) 0 0;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-texto-secundario);
+}
+
+.reporte-porque {
+  margin: var(--espacio-1) 0 0;
+  padding-left: var(--espacio-5);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* Los gráficos de los reportes (EF-22.2): barras y columnas en SVG con atributos, porque la CSP
+   no deja estilos en línea; acá sólo van los colores y el tamaño */
+.reporte-barra {
+  display: block;
+  width: 100%;
+  height: 0.5rem;
+}
+
+.reporte-barra-fondo {
+  fill: var(--color-superficie-elevada);
+}
+
+.reporte-barra-valor {
+  fill: var(--color-primario);
+}
+
+.reporte-barra-gorra {
+  fill: var(--color-exito);
+}
+
+/* El gráfico chico de cada tarjeta, debajo de la nota */
+.reporte-mini {
+  margin: var(--espacio-3) 0 0;
+}
+
+.reporte-columnas {
+  display: block;
+  width: 100%;
+  height: 2.5rem;
+}
+
+.reporte-columna {
+  fill: var(--color-primario);
+}
+
+.reporte-mini-meses {
+  display: block;
+  margin-top: var(--espacio-1);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+/* Barras con su nombre a la izquierda y el valor a la derecha */
+.reporte-barras {
+  display: grid;
+  gap: var(--espacio-2);
+  margin: var(--espacio-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reporte-barras-fila {
+  display: grid;
+  grid-template-columns: minmax(6rem, 12rem) minmax(0, 1fr) 3.5rem;
+  align-items: center;
+  gap: var(--espacio-3);
+}
+
+.reporte-barras-etiqueta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--texto-sm);
+}
+
+.reporte-barras-texto {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Dentro de una tarjeta de recomendación, más chicas */
+.reporte-barras-chicas {
+  max-width: 32rem;
+}
+
+.reporte-barras-chicas .reporte-barras-fila {
+  grid-template-columns: 6rem minmax(0, 1fr) 3rem;
+}
+
+/* En el celular, el nombre y el valor en un renglón y la barra debajo, de todo el ancho: al lado
+   del nombre quedaba demasiado corta para comparar */
+@media (max-width: 600px) {
+  .reporte-barras-fila,
+  .reporte-barras-chicas .reporte-barras-fila {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: var(--espacio-1);
+  }
+
+  .reporte-barras-fila .reporte-barra {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+/* Por día y por sala, uno al lado del otro en la computadora */
+.reporte-graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--espacio-6);
+}
+
+/* Los temas, debajo de las tarjetas, con aire antes del contenido */
+.reporte-temas {
+  margin-top: var(--espacio-6);
+  overflow-x: auto;
+}
+
+.reporte-temas .reporte-pestana {
+  white-space: nowrap;
 }
 
 /* Con la sala, un campo más en la fila */
@@ -6569,6 +6863,218 @@ svg.enlace-denunciar-icono {
   text-align: left;
 }
 
+/* La conversión (EF-22.13, EF-22.16): una fila por paso, con la barra centrada para que se vea cómo se achica. Cada
+   paso un poco más oscuro que el anterior; el número y la plata, escritos al lado. */
+.reporte-conversion {
+  display: grid;
+  gap: var(--espacio-2);
+  margin: 0 0 var(--espacio-4);
+  padding: 0;
+  list-style: none;
+}
+
+.reporte-conversion-paso {
+  display: grid;
+  grid-template-columns: 7rem minmax(8rem, 1fr) 11rem 13rem;
+  align-items: center;
+  gap: var(--espacio-3);
+}
+
+.reporte-conversion-nombre {
+  font-weight: 700;
+}
+
+.reporte-conversion-barra {
+  width: 100%;
+  height: 28px;
+}
+
+.reporte-conversion-fondo {
+  fill: transparent;
+}
+
+.reporte-conversion-relleno {
+  fill: var(--color-primario);
+}
+
+.reporte-conversion-reservaron { fill-opacity: 0.85; }
+.reporte-conversion-pagaron { fill-opacity: 0.7; }
+.reporte-conversion-fueron { fill-opacity: 0.55; }
+.reporte-conversion-calificaron { fill-opacity: 0.4; }
+
+.reporte-conversion-personas,
+.reporte-conversion-monto {
+  font-size: var(--texto-sm);
+}
+
+.reporte-conversion-tasa,
+.reporte-conversion-nota {
+  display: block;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+.reporte-conversion-monto {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reporte-conversion-nota {
+  font-weight: 400;
+  white-space: normal;
+}
+
+.reporte-conversion ~ .reporte-explicacion {
+  margin-top: var(--espacio-3);
+}
+
+/* En el celular, el nombre y los números arriba y la barra debajo, de todo el ancho */
+@media (max-width: 720px) {
+  .reporte-conversion-paso {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .reporte-conversion-barra {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .reporte-conversion-nombre {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Si la sala o la plataforma gana o pierde plata (EF-22.1): verde o rojo, con el signo y la
+   palabra al lado para quien no distingue los colores */
+.reporte-resultado {
+  display: block;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reporte-gana {
+  color: var(--color-exito);
+}
+
+.reporte-pierde {
+  color: var(--color-error);
+}
+
+/* El botón que abre el alta de la función ya cargada (EF-22.17): debajo del porqué, separado del
+   texto para que se lea como la acción que cierra la recomendación */
+.reporte-programar {
+  margin: var(--espacio-3) 0 0;
+}
+
+/* La sala que no necesita promoción (EF-22.14): con el borde gris, porque no hay nada que hacer, y
+   lo que ganó dentro de la frase */
+.reporte-sin-promocion {
+  border-left-color: var(--color-texto-secundario);
+}
+
+.reporte-sin-promocion .reporte-resultado {
+  display: inline;
+}
+
+/* Los montos de la tabla no se parten en dos renglones */
+.reporte-ganancias td {
+  white-space: nowrap;
+}
+
+.reporte-ganancias .tabla-admin-secundario {
+  white-space: normal;
+}
+
+/* La torta del reparto (EF-22.15): el anillo a la izquierda y la leyenda con los montos al lado; en
+   el celular, uno abajo del otro. Cada parte tiene su color en el anillo (stroke) y en la marca de
+   la leyenda (fondo). */
+.reporte-torta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-5);
+  margin: 0 0 var(--espacio-5);
+  padding: var(--espacio-4) var(--espacio-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background-color: var(--color-superficie);
+}
+
+.reporte-torta-grafico {
+  flex: 0 0 auto;
+  width: 160px;
+  height: 160px;
+}
+
+.reporte-torta-leyenda {
+  flex: 0 1 26rem;
+  min-width: 0;
+}
+
+.reporte-torta-titulo {
+  margin: 0 0 var(--espacio-2);
+  font-weight: 700;
+}
+
+.reporte-torta-lista {
+  display: grid;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reporte-torta-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--espacio-2) var(--espacio-3);
+  font-size: var(--texto-sm);
+}
+
+.reporte-torta-marca {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.reporte-torta-monto {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reporte-torta-porcentaje {
+  min-width: 4.5em;
+  text-align: right;
+  color: var(--color-texto-secundario);
+  white-space: nowrap;
+}
+
+.reporte-torta-sala { stroke: var(--color-primario); background-color: var(--color-primario); }
+.reporte-torta-duenos { stroke: var(--color-exito); background-color: var(--color-exito); }
+.reporte-torta-plataforma { stroke: #a5b4fc; background-color: #a5b4fc; }
+.reporte-torta-comision { stroke: var(--color-texto-apagado); background-color: var(--color-texto-apagado); }
+
+@media (max-width: 480px) {
+  .reporte-torta-item {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .reporte-torta-porcentaje {
+    grid-column: 2 / -1;
+    min-width: 0;
+    text-align: left;
+  }
+}
+
+/* El costo de una sala: la sala, el monto y el botón en una fila, como el filtro del período */
+.reporte-costo {
+  grid-template-columns: minmax(160px, 260px) minmax(150px, 220px) auto;
+  justify-content: start;
+  align-items: end;
+  margin-top: var(--espacio-4);
+}
+
 /* Un título sin explicación debajo, pegado a su tabla: un poco de aire */
 .reporte-subtitulo + .tabla-admin-contenedor {
   margin-top: var(--espacio-3);
@@ -6576,6 +7082,7 @@ svg.enlace-denunciar-icono {
 
 @media (max-width: 600px) {
   .reporte-filtros,
+  .reporte-costo,
   .reporte-filtros-con-sala {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -6633,29 +7140,40 @@ svg.enlace-denunciar-icono {
     background: none;
   }
 
-  /* Arriba: el logo y la sesión en un renglón y las secciones debajo */
+  /* Arriba: el logo, el nombre del panel y la sesión en un renglón y las secciones debajo */
   .panel-menu {
     position: static;
     height: auto;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--espacio-4);
+    gap: var(--espacio-3);
+    padding: var(--espacio-3) var(--espacio-4);
     border-right: none;
     border-bottom: 1px solid var(--color-borde);
   }
 
-  /* El logo y la sesión en el primer renglón; cada grupo de secciones, en uno propio debajo */
-  .panel-marca {
+  /* El logo y el nombre del panel, uno al lado del otro */
+  .panel-cabeza {
     grid-row: 1;
     grid-column: 1;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .panel-marca img {
+    width: 93px;
   }
 
   .panel-menu nav {
     grid-column: 1 / -1;
   }
 
-  /* En el renglón del logo queda sólo el botón para salir: el nombre no entra */
+  /* En el renglón del logo queda sólo el botón para salir: el nombre no entra, y para volver al
+     sitio está el logo */
   .panel-sesion {
     grid-row: 1;
     grid-column: 2;
@@ -6665,7 +7183,8 @@ svg.enlace-denunciar-icono {
     align-items: flex-end;
   }
 
-  .panel-sesion-usuario {
+  .panel-sesion-usuario,
+  .panel-sitio {
     display: none;
   }
 
@@ -6680,9 +7199,11 @@ svg.enlace-denunciar-icono {
   /* Las secciones en una sola fila que se desliza de costado. Partidas en varios renglones el
      menú ocupaba unos 420 px y el contenido empezaba recién en la segunda pantalla, y los nombres
      de los grupos caían a veces solos y a veces junto a sus secciones (F-02) */
-  .panel-menu-lista {
+  .panel-menu-lista,
+  .panel-menu-secciones > .panel-menu-lista {
     flex-direction: row;
     flex-wrap: nowrap;
+    gap: var(--espacio-1);
     overflow-x: auto;
     scrollbar-width: thin;
     /* Que se vea que la fila sigue: la última sección asoma cortada contra el borde */
@@ -6692,6 +7213,11 @@ svg.enlace-denunciar-icono {
 
   .panel-menu-enlace {
     white-space: nowrap;
+  }
+
+  /* En la fila, la sección actual se marca abajo, como una pestaña */
+  .panel-menu-enlace.activo {
+    box-shadow: inset 0 -2px 0 var(--color-panel);
   }
 
   /* Los grupos se disuelven en la fila: sus secciones («Mis funciones», «Reportes»…) se entienden
@@ -6838,6 +7364,11 @@ a.tabla-admin-principal:focus-visible {
 .bandeja-item-datos {
   font-size: var(--texto-xs);
   color: var(--color-texto-secundario);
+}
+
+/* EF-22.10: las devueltas, debajo de las que esperan una resolución */
+.bandeja-esperando {
+  border-top: 1px solid var(--color-borde);
 }
 
 /* «No hay solicitudes» y «se muestran las más viejas» */
@@ -8334,11 +8865,21 @@ a.tabla-admin-principal:focus-visible {
 }
 
 .mi-cuenta-menu-enlace {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
   padding: var(--espacio-2) var(--espacio-3);
   border-radius: var(--radio-md);
   color: var(--color-texto-secundario);
   text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.mi-cuenta-menu-icono {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--color-texto-apagado);
 }
 
 .mi-cuenta-menu-enlace:hover {
@@ -8346,11 +8887,18 @@ a.tabla-admin-principal:focus-visible {
   color: var(--color-texto);
 }
 
-/* La sección actual, llena como en el wireframe, igual que en el panel del administrador */
+/* La sección actual, teñida y con la raya a la izquierda, como en los paneles. Antes iba llena de
+   blanco y encandilaba al lado del fondo oscuro */
 .mi-cuenta-menu-enlace.activo {
-  background-color: var(--color-texto);
-  color: var(--color-texto-inverso);
+  background-color: var(--color-primario-suave);
+  box-shadow: inset 3px 0 0 var(--color-primario);
+  color: var(--color-texto);
   font-weight: 600;
+}
+
+.mi-cuenta-menu-enlace.activo .mi-cuenta-menu-icono,
+.mi-cuenta-menu-enlace:hover .mi-cuenta-menu-icono {
+  color: var(--color-primario);
 }
 
 /* «Mis datos», en su recuadro como el wireframe */
@@ -10288,4 +10836,149 @@ a.tabla-admin-principal:focus-visible {
 .seguido-formulario {
   margin: 0;
   flex-shrink: 0;
+}
+
+/* Una tabla que en el celular pasa a una tarjeta por fila (F-02.24): con siete columnas, la de
+   «Mis reservas» se cortaba a la derecha y lo que importa (la fecha, el estado, el comprobante)
+   quedaba afuera. El encabezado se oculta a la vista, pero sigue para los lectores de pantalla; cada
+   dato lleva su nombre de data-columna. */
+@media (max-width: 640px) {
+  .tabla-apilable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .tabla-apilable,
+  .tabla-apilable tbody {
+    display: block;
+  }
+
+  /* Sin el mínimo de la tabla: las tarjetas entran en la pantalla. Con las dos clases, para ganarle
+     a .tabla-admin:not(.tabla-admin-usuarios) */
+  .tabla-admin.tabla-apilable {
+    width: auto;
+    min-width: 0;
+  }
+
+  .tabla-apilable tr:last-child {
+    border-bottom: none;
+  }
+
+  .tabla-apilable tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--espacio-2) var(--espacio-4);
+    padding: var(--espacio-4);
+    border-bottom: 1px solid var(--color-borde);
+  }
+
+  .tabla-apilable td {
+    display: block;
+    padding: 0;
+    border: none;
+  }
+
+  .tabla-apilable td[data-columna]::before {
+    content: attr(data-columna);
+    display: block;
+    margin-bottom: var(--espacio-1);
+    font-size: var(--texto-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-texto-apagado);
+  }
+
+  .tabla-apilable .tabla-apilable-titulo,
+  .tabla-apilable .tabla-apilable-acciones {
+    grid-column: 1 / -1;
+  }
+
+  /* Sin acciones, la celda tiene sólo «—»: en la tabla mantiene la columna, en la tarjeta sobra */
+  .tabla-apilable .tabla-apilable-acciones:has(> .tabla-admin-secundario:only-child) {
+    display: none;
+  }
+
+  /* Las pestañas por estado en una sola fila, que se desplaza si no entra: de a dos renglones, la
+     última quedaba sola abajo y no se leía como pestaña */
+  .pestanas-estado {
+    flex-wrap: nowrap;
+    gap: var(--espacio-4);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  /* Sin el -1px que la monta sobre el borde: con el desplazamiento, la raya de la actual se cortaba */
+  .pestanas-estado .pestana {
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+
+  .tabla-apilable-titulo .tabla-admin-principal {
+    font-size: var(--texto-md);
+  }
+
+  /* El contenedor ya no necesita desplazarse de costado */
+  .tabla-admin-contenedor:has(> .tabla-apilable) {
+    overflow-x: visible;
+  }
+}
+
+/* Explicación de beneficios y restricciones por puntaje en «Mis reservas» (EF-22.7 / IC-680) */
+.panel-conducta-detalle {
+  margin: calc(var(--espacio-4) * -1) 0 var(--espacio-6);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-secundario);
+}
+
+/* Autocompletado de títulos al pedir una película o cortometraje (EF-22.6 / IC-679) */
+.autocompletado-titulos {
+  position: relative;
+}
+
+.autocompletado-sugerencias {
+  list-style: none;
+  margin: var(--espacio-1) 0 0;
+  padding: var(--espacio-1);
+  background-color: var(--color-superficie-elevada);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+.autocompletado-boton {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+  padding: var(--espacio-2) var(--espacio-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--radio-sm);
+  color: var(--color-texto);
+  text-align: left;
+  cursor: pointer;
+}
+
+.autocompletado-boton:hover,
+.autocompletado-boton:focus-visible {
+  background-color: var(--color-superficie);
+}
+
+.autocompletado-detalle {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-secundario);
+}
+
+.autocompletado-aviso {
+  margin: var(--espacio-2) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--color-primario);
 }

@@ -80,7 +80,7 @@
       {% for pedido in pedidos %}
         <li class="pedido-organizador" data-pedido="{{ pedido.id }}">
           <div class="pedido-organizador-datos">
-            <h3 class="pedido-titulo">{{ pedido.titulo }} <span class="pedido-anio">({{ pedido.anio }})</span></h3>
+            <h3 class="pedido-titulo">{{ pedido.titulo }}{% if pedido.anio %} <span class="pedido-anio">({{ pedido.anio }})</span>{% endif %}</h3>
             <p class="pedido-meta">
               Dirección: {{ pedido.director }}
               · <strong>{{ pedido.adhesiones }} {{ pedido.adhesiones == 1 ? 'adhesión' : 'adhesiones' }}</strong>

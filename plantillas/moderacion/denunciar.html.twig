@@ -7,10 +7,14 @@
   Variables:
   - denunciado: {tipo (sala, funcion, obra o calificacion), tipo_etiqueta, id, titulo, url (la
     ficha del sitio donde se ve)}.
-  - categorias: lista de {valor, etiqueta}: las del tipo.
+  - categorias: lista de {valor, etiqueta}: los motivos del tipo (los del lugar, sólo en salas y
+    funciones). La gravedad la da el motivo: no se ve ni se elige (EF-22.11).
   - valores: lo que mandó si hubo errores, {categoria, detalle}.
   - errores: campo => qué está mal.
   - maximo_detalle: el largo máximo del detalle, el mismo que controla el backend.
+  - foto: en salas y funciones, la regla del campo de la foto opcional ({requerido, aceptar,
+    mensajes}, como la de la foto de la sala); null en obras y comentarios, que no la llevan
+    (EF-22.11). Opcional.
   - enviada: si la acaba de mandar; en ese caso, la confirmación sin formulario.
   - repetida: si ya tiene una abierta sobre esto; en ese caso no hay formulario.
 #}
@@ -49,7 +53,8 @@
     <p><a href="{{ denunciado.url }}" class="boton boton-secundario">Volver a «{{ denunciado.titulo }}»</a></p>
   {% else %}
     {% include 'parciales/resumen_de_errores.html.twig' with { errores: errores } only %}
-    <form action="{{ prefijo }}/denuncias/nueva?tipo={{ denunciado.tipo|url_encode }}&amp;id={{ denunciado.id|url_encode }}" method="post" class="formulario-denuncia">
+    {% set con_foto = foto ?? null %}
+    <form action="{{ prefijo }}/denuncias/nueva?tipo={{ denunciado.tipo|url_encode }}&amp;id={{ denunciado.id|url_encode }}" method="post" class="formulario-denuncia"{% if con_foto %} enctype="multipart/form-data"{% endif %}>
       <input type="hidden" name="_csrf" value="{{ csrf }}">
       <fieldset id="categoria" class="bandeja-caja{% if errores.categoria is defined %} con-error{% endif %}">
         <legend class="bandeja-caja-titulo">¿De qué se trata? <span aria-hidden="true">*</span></legend>
@@ -74,6 +79,17 @@
         ayuda: 'Opcional, salvo en «Otro». Lo lee sólo la moderación.',
         errores: errores
       } only %}
+
+      {% if con_foto %}
+        {% include 'parciales/campo.html.twig' with con_foto|merge({
+          nombre: 'foto',
+          etiqueta: 'Foto',
+          tipo: 'file',
+          zona_de_archivo: 'Arrastrá la foto acá, o elegila:',
+          ayuda: 'Opcional: lo que viste (la butaca rota, la salida tapada). JPG, PNG o WebP, hasta 5 MB. La ve sólo la moderación.',
+          errores: errores
+        }) only %}
+      {% endif %}
 
       <div class="formulario-acciones">
         <button type="submit" class="boton boton-primario">Enviar la denuncia</button>
