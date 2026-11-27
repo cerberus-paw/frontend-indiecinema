@@ -14,8 +14,9 @@
   - total: todo lo liquidado, ya escrito («$ 24.500»).
   - pendiente: lo que todavía no se transfirió.
   - mes: (string|null) el nombre del mes que se detalla abajo; null si no hay ninguna liquidación.
-  - detalle: lista de {fecha, sala, titulos, cobrado, rol, monto} de ese mes, de la función más
-    vieja a la más nueva. La fecha, la sala y los títulos pueden venir en null en los repartos
+  - detalle: lista de {fecha, sala, titulos, cobrado, comision, rol, monto} de ese mes, de la
+    función más vieja a la más nueva. comision es lo que se quedó Mercado Pago de la función (F-03.6):
+    se lee con is defined, porque el front se puede mergear antes que el back que la manda. La fecha, la sala y los títulos pueden venir en null en los repartos
     anteriores a la migración que los guarda.
 #}
 {% extends 'organizador.html.twig' %}
@@ -38,7 +39,7 @@
 </nav>
 <header class="panel-cabecera">
   <h1 class="panel-titulo">Mis liquidaciones</h1>
-  <p class="panel-bajada">Lo que te toca de lo que se cobró en tus funciones, mes por mes: como organizador de la sala y como dueño de las obras que se proyectaron. Las transferencias las hace la administración fuera del sitio y las marca acá.</p>
+  <p class="panel-bajada">Lo que te toca de lo que se cobró en tus funciones, mes por mes: como organizador de la sala y como dueño de las obras que se proyectaron. Lo que se reparte es lo cobrado menos la comisión de Mercado Pago. Las transferencias las hace la administración fuera del sitio y las marca acá.</p>
 </header>
 
 {% if meses is empty %}
@@ -106,6 +107,9 @@
               <tr>
                 <th scope="col">Función</th>
                 <th scope="col">Se cobró</th>
+                {% if detalle[0].comision is defined %}
+                  <th scope="col">Comisión de Mercado Pago</th>
+                {% endif %}
                 <th scope="col">Por</th>
                 <th scope="col">Te toca</th>
               </tr>
@@ -118,6 +122,9 @@
                     <span class="tabla-admin-secundario">{% if linea.fecha %}{{ linea.fecha }}{% endif %}{% if linea.sala %} · {{ linea.sala }}{% endif %}</span>
                   </td>
                   <td data-columna="Se cobró">{{ linea.cobrado }}</td>
+                  {% if linea.comision is defined %}
+                    <td data-columna="Comisión de Mercado Pago">{{ linea.comision }}</td>
+                  {% endif %}
                   <td data-columna="Por">{{ linea.rol }}</td>
                   <td data-columna="Te toca">{{ linea.monto }}</td>
                 </tr>
