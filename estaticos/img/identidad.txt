@@ -22,6 +22,12 @@ Archivos
   logo-horizontal(-dark).*    -> isotipo horizontal (header del sitio)
   logo-stacked(-dark).*       -> isotipo apilado (portada, redes, merch)
 
+  En los .svg, «indie» y «CINEMA» están en trazos, sacados de Fira Sans
+  Compressed Light y ExtraBold: no dependen de que quien mira tenga la
+  fuente. Como texto, sin ella el navegador usaba otra más ancha y se
+  veía «CINEM» (F-03.5). Para cambiar el texto, volver a escribirlo con
+  la fuente y pasarlo a trazos.
+
   Los .svg son la fuente editable; los .png están exportados en alta
   resolución con fondo transparente (versión clara) u fondo tinta
   sólido (versión oscura). logo-horizontal-dark.svg no lleva fondo: el sitio
