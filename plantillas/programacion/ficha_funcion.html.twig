@@ -64,7 +64,8 @@
 
   - En acuerdo de fecha (E3-13), funcion trae además: sin_franjas, minimo_asistentes, franjas
     (id, fecha, fecha_corta, hora_inicio, hora_fin y votos), franja_ganadora (la que lidera),
-    confirmable, acuerdo_sin_minimo, fecha_limite (ya escrita), votacion_abierta y votos_emitidos
+    confirmable, acuerdo_sin_minimo, fecha_limite (ya escrita), se_cancela_el (ya escrita, o null:
+    hasta cuándo el organizador que cerró sin mínimo puede proponer otras franjas), votacion_abierta y votos_emitidos
     (los de la votación de títulos). franjas_del_usuario son las franjas que marcó quien mira.
 
   dia, horario y duracion_total se leen con ??, por si el back todavía no las manda.
@@ -651,6 +652,11 @@
                      de confirmación de siempre (E3-13.F5), no a un cuadro del navegador. #}
                   <h3 id="ficha-panel-organizador-titulo" class="ficha-panel-titulo">No se alcanzó el quórum de asistentes requerido</h3>
                   <p class="ficha-panel-texto">Ninguna franja llegó a {{ minimo }} {{ minimo == 1 ? 'compromiso' : 'compromisos' }}. Podés proponer otras franjas o cancelar la función.</p>
+                  {# F-03.4: pasado el plazo, la tarea la cancela sola. Con is defined, porque el
+                     front se puede mergear antes que el back que lo manda. #}
+                  {% if funcion.se_cancela_el is defined and funcion.se_cancela_el %}
+                    <p class="ficha-panel-texto">Si no proponés otras franjas antes del {{ funcion.se_cancela_el }}, la función se cancela.</p>
+                  {% endif %}
                   <div class="ficha-panel-acciones">
                     <a href="{{ accion_reproponer_franjas|default('/organizador/funciones/' ~ funcion.id ~ '/proponer-franjas') }}" class="boton boton-primario">Proponer nuevas franjas horarias</a>
                     <a href="/organizador/funciones/{{ funcion.id }}/cancelar" class="boton boton-peligro">Cancelar función</a>
